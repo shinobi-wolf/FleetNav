@@ -78,11 +78,13 @@ def get_agent_color(agent_id):
 class LMDEnv(gym.Env):
     metadata = {'render_modes': ['human', 'print', 'rgb_array', 'quiet'], "render_fps": 30} # Adjusted FPS
 
-    def __init__(self, config): # Default render_mode is None
+    def __init__(self, config, render_mode=None): # Default render_mode is None
         super(LMDEnv, self).__init__()
 
         '''GUI CONFIGURATION'''
-        self.render_mode = config['simulation']['render_mode']
+        self.render_mode = render_mode
+        if not render_mode:
+            self.render_mode = config['simulation']['render_mode']
         self.screen = None
         self.clock = None
         self.font = None
@@ -142,19 +144,22 @@ class LMDEnv(gym.Env):
         self.traffic_delay_factor = config['traffic']['delay_factor']  # Factor to adjust traffic delay
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
-        self.action_space = spaces.MultiDiscrete([config["fleet"]['ugv']["num_primitives"]]*self.num_ugvs)
+        # self.action_space = spaces.MultiDiscrete([config["fleet"]['ugv']["num_primitives"]]*self.num_ugvs)
         
-        ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
-        max_moves = self.max_row * self.max_col+1
-        steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
+        # # SARSA
+        # ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
+        # max_moves = self.max_row * self.max_col+1
+        # steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
+        # nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
+        # self.observation_space = spaces.Dict({
+        #     'ugv_status': ugv_status_space,
+        #     'steps2dest': steps2dest_space,
+        #     'nb_traffic': nb_traffic_space,
+        # })
 
-        nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
-        
-        self.observation_space = spaces.Dict({
-            'ugv_status': ugv_status_space,
-            'steps2dest': steps2dest_space,
-            'nb_traffic': nb_traffic_space,
-        })
+        # DQN
+        self.action_space = spaces.Discrete(config["fleet"]['ugv']["num_primitives"])
+        self.observation_space = spaces.MultiDiscrete(np.array([self.max_row * self.max_col + 1]*5 + [3]*4))
         
         # Initialize rendering if mode is 'human'
         if self.render_mode == "human":
@@ -689,40 +694,58 @@ class LMDEnv(gym.Env):
         return traffic_levels
     
     def _get_observation(self):
+        # '''SARSA'''
+        # steps2dest = []
+        # nb_traffic = []
+        # ugv_status = []
+
+        # for ugv_id, ugv in enumerate(self.ugv_states):
+        #     ugv_pos = ugv.position
+        #     task_pos = ugv.active_task
+
+        #     # Steps to destination in each direction
+        #     steps2dest_ = []
+        #     for dr, dc in [(-1, 0), (0, 1), (1, 0), (0, -1), (0,0)]:
+        #         r,c = ugv_pos[0] + dr, ugv_pos[1] + dc
+        #         # if r > 0 and r <= self.max_row and c > 0 and c <= self.max_col:
+        #         if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
+        #             steps2dest_.append(self.all_shortest_path_lengths[(r,c)][task_pos])
+        #         else:
+        #             steps2dest_.append(self.max_row * self.max_col+1)
+        #     steps2dest.append(steps2dest_)
+
+        #     # Neighbor Traffic
+        #     nb_traffic.append(self._get_nb_traffic(ugv_pos))
+
+        #     ugv_status.append(ugv.status)
+
+        # steps2dest_flat = np.array(steps2dest, dtype=np.int32).flatten()
+        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        # ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
+        # obs_dict = {
+        #     'steps2dest': steps2dest_flat,
+        #     'nb_traffic': nb_traffic_flat,
+        #     'ugv_status': ugv_status_flat,
+        # }
+
+        # return obs_dict
+
+        '''DQN'''
+        ugv = self.ugv_states[0]  # Assuming single UGV for DQN
+        ugv_pos = ugv.position
+        task_pos = ugv.active_task
+
         steps2dest = []
-        nb_traffic = []
-        ugv_status = []
+        for dr, dc in [(-1, 0), (0, 1), (1, 0), (0, -1), (0,0)]:
+            r,c = ugv_pos[0] + dr, ugv_pos[1] + dc
+            if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
+                steps2dest.append(self.all_shortest_path_lengths[(r,c)][task_pos])
+            else:
+                steps2dest.append(self.max_row * self.max_col+1)
 
-        for ugv_id, ugv in enumerate(self.ugv_states):
-            ugv_pos = ugv.position
-            task_pos = ugv.active_task
+        nb_traffic = self._get_nb_traffic(ugv_pos)
 
-            # Steps to destination in each direction
-            steps2dest_ = []
-            for dr, dc in [(-1, 0), (0, 1), (1, 0), (0, -1), (0,0)]:
-                r,c = ugv_pos[0] + dr, ugv_pos[1] + dc
-                # if r > 0 and r <= self.max_row and c > 0 and c <= self.max_col:
-                if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
-                    steps2dest_.append(self.all_shortest_path_lengths[(r,c)][task_pos])
-                else:
-                    steps2dest_.append(self.max_row * self.max_col+1)
-            steps2dest.append(steps2dest_)
-
-            # Neighbor Traffic
-            nb_traffic.append(self._get_nb_traffic(ugv_pos))
-
-            ugv_status.append(ugv.status)
-
-        steps2dest_flat = np.array(steps2dest, dtype=np.int32).flatten()
-        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
-        ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
-        obs_dict = {
-            'steps2dest': steps2dest_flat,
-            'nb_traffic': nb_traffic_flat,
-            'ugv_status': ugv_status_flat,
-        }
-
-        return obs_dict
+        return np.array(steps2dest + nb_traffic, dtype=np.int32)
     
     def analyzer(self):
         """Analyzes the current state and returns an info dictionary."""
@@ -750,6 +773,7 @@ class LMDEnv(gym.Env):
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
+        action = [action]
         self.ugv_handler(action)
         self.time_elapsed = min([ugv.local_time for ugv in self.ugv_states])
         truncated = self.task_handler() # Handle task completion and updates

@@ -33,8 +33,8 @@ simulation:
   max_time: 50000
   bms: false
   traffic: true
-  algo: "sarsa"
-  render_mode: "quiet"
+  algo: sarsa
+  render_mode: quiet
   train: true
 
 training:
