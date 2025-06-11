@@ -76,7 +76,7 @@ def get_agent_color(agent_id):
 
 
 class LMDEnv(gym.Env):
-    metadata = {'render_modes': ['human', 'print', 'rgb_array', 'quiet'], "render_fps": 30} # Adjusted FPS
+    metadata = {'render_modes': ['human', 'print', 'rgb_array', 'quiet'], "render_fps": 1} # Adjusted FPS
 
     def __init__(self, config, render_mode=None): # Default render_mode is None
         super(LMDEnv, self).__init__()
@@ -381,7 +381,7 @@ class LMDEnv(gym.Env):
             print("==========================")
             
             # Wait until the Return key is pressed before ending render
-            if self.num_tasks_completed < 0:
+            if self.num_tasks_completed < 10000:
                 self.clock.tick(self.metadata["render_fps"])
             else:
                 waiting = True

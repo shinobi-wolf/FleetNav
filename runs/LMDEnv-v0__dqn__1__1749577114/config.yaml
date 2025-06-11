@@ -21,7 +21,7 @@ simulation:
   algo: dqn
   bms: false
   max_time: 50000
-  render_mode: print
+  render_mode: human
   traffic: true
   train: false
 task:
@@ -49,6 +49,6 @@ training:
     epsilon_start: 1.0
     epsilon_end: 0.01
     epsilon_decay_steps: 10000
-    pred_epsilon: 0.5
+    pred_epsilon: 0.1
     gamma: 0.99
     train_freq: 4
