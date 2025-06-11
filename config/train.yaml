@@ -33,7 +33,7 @@ simulation:
   max_time: 50000
   bms: false
   traffic: true
-  algo: sarsa
+  algo: dqn
   render_mode: quiet
   train: true
 
@@ -44,3 +44,5 @@ training:
     alpha: 0.1
     epsilon: 0.2
     epsilon_decay: 0.99
+  dqn:
+    obs_shape: 9

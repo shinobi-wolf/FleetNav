@@ -135,6 +135,7 @@ class LMDEnv(gym.Env):
         self.bms = config['simulation']['bms']
         self.max_time = config['simulation']['max_time']
         self.traffic_b = config['simulation']['traffic']
+        self.algo = config['simulation']['algo']
 
         # Traffic vars
         self.traffic_std_dev = config['traffic']['std_dev']  # Standard deviation for Gaussian distribution
@@ -144,23 +145,18 @@ class LMDEnv(gym.Env):
         self.traffic_delay_factor = config['traffic']['delay_factor']  # Factor to adjust traffic delay
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
-        # self.action_space = spaces.MultiDiscrete([config["fleet"]['ugv']["num_primitives"]]*self.num_ugvs)
+        self.action_space = spaces.MultiDiscrete([config["fleet"]['ugv']["num_primitives"]]*self.num_ugvs)
         
-        # # SARSA
-        # ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
-        # max_moves = self.max_row * self.max_col+1
-        # steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
-        # nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
-        # self.observation_space = spaces.Dict({
-        #     'ugv_status': ugv_status_space,
-        #     'steps2dest': steps2dest_space,
-        #     'nb_traffic': nb_traffic_space,
-        # })
+        ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
+        max_moves = self.max_row * self.max_col+1
+        steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
+        nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
+        self.observation_space = spaces.Dict({
+            'ugv_status': ugv_status_space,
+            'steps2dest': steps2dest_space,
+            'nb_traffic': nb_traffic_space,
+        })
 
-        # DQN
-        self.action_space = spaces.Discrete(config["fleet"]['ugv']["num_primitives"])
-        self.observation_space = spaces.MultiDiscrete(np.array([self.max_row * self.max_col + 1]*5 + [3]*4))
-        
         # Initialize rendering if mode is 'human'
         if self.render_mode == "human":
             self._initialize_render()
@@ -412,137 +408,7 @@ class LMDEnv(gym.Env):
             print("Traffic Information:")
             print(f"  Red Roads: {self.red_roads}")
             print(f"  Yellow Roads: {self.yellow_roads}")
-            print(f"  Traffic Centroids: {self.traffic_centeroids}")
-
-        elif self.render_mode == "rgb_array":
-            # Return screen surface as numpy array
-            if self.screen is None:
-                 # Need to render one frame to get the surface if not initialized
-                 if self.render_mode != "human": # Avoid re-initializing if already in human mode
-                     self._initialize_render()
-                     if self.screen is None: # Check init failure
-                          raise RuntimeError("RGB array requested but Pygame screen initialization failed.")
-                     # Perform a minimal render to get the surface state
-                     self.screen.fill(WHITE)
-                     # Potentially draw static elements like walls/warehouse here if needed for the array
-                     # This part might need full render logic if static elements are complex
-                     # For now, just return the blank state or call the full render logic once
-                     self._render_frame_logic() # Call the core drawing logic
-                 else:
-                     # If called in human mode but screen somehow None, re-init
-                     self._initialize_render()
-                     if self.screen is None: # Check init failure
-                          raise RuntimeError("RGB array requested but Pygame screen initialization failed.")
-
-
-            if self.screen: # Check if screen was successfully created
-                # Ensure the current frame is drawn before capturing
-                self._render_frame_logic() # Call the core drawing logic
-                return pygame.surfarray.array3d(pygame.display.get_surface()).transpose(1, 0, 2) # Transpose for correct HxWxC format
-            else:
-                # Return a placeholder array or raise an error if screen init failed
-                # Placeholder: black screen of expected size
-                if self.screen_width and self.screen_height:
-                    return np.zeros((self.screen_height, self.screen_width, 3), dtype=np.uint8)
-                else:
-                    # Cannot determine size, return empty or raise error
-                    raise RuntimeError("RGB array requested but screen dimensions are unknown.")
-        # else: # No rendering
-        #     pass
-
-    def _render_frame_logic(self):
-        """Contains the core drawing logic, callable by render() and rgb_array mode."""
-        # This duplicates the drawing section from render() for use in rgb_array mode
-        # Ideally, refactor render() to call this method.
-        # --- Drawing ---
-        self.screen.fill(WHITE) # Clear screen
-        maze_area_height = self.max_row * self.cell_size_px
-        wall_thickness = 4 # Thinner walls
-
-        # --- Draw Maze Area (Grid and Walls) using self.G ---
-        for r in range(1, self.max_row + 1):
-            for c in range(1, self.max_col + 1):
-                current_node = (r, c)
-                # Skip if node somehow doesn't exist in the graph (should not happen for grid)
-                if current_node not in self.G:
-                    continue
-
-                px_top_left, py_top_left = self._cell_to_pygame(r, c)
-
-                # Check North Wall: Draw wall if no edge exists between current node and North neighbor (r-1, c)
-                north_neighbor = (r - 1, c)
-                if not self.G.has_edge(current_node, north_neighbor):
-                    pygame.draw.line(self.screen, BLACK, (px_top_left, py_top_left), (px_top_left + self.cell_size_px, py_top_left), wall_thickness)
-                else: # Optional: Draw grid line if no wall
-                    pygame.draw.line(self.screen, GRAY, (px_top_left, py_top_left), (px_top_left + self.cell_size_px, py_top_left), 1)
-
-
-                # Check West Wall: Draw wall if no edge exists between current node and West neighbor (r, c-1)
-                west_neighbor = (r, c - 1)
-                if not self.G.has_edge(current_node, west_neighbor):
-                    pygame.draw.line(self.screen, BLACK, (px_top_left, py_top_left), (px_top_left, py_top_left + self.cell_size_px), wall_thickness)
-                else: # Optional: Draw grid line if no wall
-                    pygame.draw.line(self.screen, GRAY, (px_top_left, py_top_left), (px_top_left, py_top_left + self.cell_size_px), 1)
-
-
-        # Draw outer boundary walls (South and East edges explicitly)
-        pygame.draw.line(self.screen, BLACK, (0, maze_area_height), (self.screen_width, maze_area_height), wall_thickness) # Bottom boundary
-        pygame.draw.line(self.screen, BLACK, (self.screen_width, 0), (self.screen_width, maze_area_height), wall_thickness) # Right boundary
-
-        # --- Draw Traffic Roads ---
-        road_thickness = max(1, int(self.cell_size_px * 0.15))
-        for u, v in self.red_roads:
-            u_px_c, u_py_c = self._cell_to_pygame_center(u[0], u[1])
-            v_px_c, v_py_c = self._cell_to_pygame_center(v[0], v[1])
-            pygame.draw.line(self.screen, RED, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
-        for u, v in self.yellow_roads:
-            u_px_c, u_py_c = self._cell_to_pygame_center(u[0], u[1])
-            v_px_c, v_py_c = self._cell_to_pygame_center(v[0], v[1])
-            pygame.draw.line(self.screen, YELLOW, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
-        # --- Draw Warehouse ---
-        wh_r, wh_c = self.warehouse_pos
-        wh_px_c, wh_py_c = self._cell_to_pygame_center(wh_r, wh_c)
-        warehouse_radius = int(self.cell_size_px * 0.4)
-        pygame.draw.circle(self.screen, BLUE, (wh_px_c, wh_py_c), warehouse_radius)
-        # --- Draw Base Stations ---
-        # bs_radius = int(self.cell_size_px * 0.3)
-        # for bs_r, bs_c in self.base_stations:
-        #     bs_px_c, bs_py_c = self._cell_to_pygame_center(bs_r, bs_c)
-        #     pygame.draw.circle(self.screen, DARK_GREEN, (bs_px_c, bs_py_c), bs_radius)
-        #     pygame.draw.circle(self.screen, BLACK, (bs_px_c, bs_py_c), bs_radius, 1)
-        # --- Draw Tasks ---
-        task_radius = int(self.cell_size_px * 0.25)
-        task_r, task_c = self.task_list[0]
-        task_px_c, task_py_c = self._cell_to_pygame_center(task_r, task_c)
-        pygame.draw.circle(self.screen, MAGENTA, (task_px_c, task_py_c), task_radius)
-        # --- Draw UGVs and Battery ---
-        ugv_r, ugv_c = self.ugv.position
-        ugv_px_c, ugv_py_c = self._cell_to_pygame_center(ugv_r, ugv_c)
-        agent_color = 0
-        if self.truck_image:
-            img_rect = self.truck_image.get_rect(center=(ugv_px_c, ugv_py_c))
-            self.screen.blit(self.truck_image, img_rect)
-        else:
-            ugv_size = int(self.cell_size_px * 0.7)
-            ugv_rect = pygame.Rect(0, 0, ugv_size, ugv_size); ugv_rect.center = (ugv_px_c, ugv_py_c)
-            pygame.draw.rect(self.screen, agent_color, ugv_rect)
-            pygame.draw.rect(self.screen, BLACK, ugv_rect, 1)
-        battery_width = int(self.cell_size_px * 0.8)
-        battery_height = max(3, int(self.cell_size_px * 0.1))
-        battery_x = ugv_px_c - battery_width // 2
-        battery_y = ugv_py_c + (self.truck_image.get_height() // 2 if self.truck_image else self.cell_size_px // 2) + 2
-        filled_width = int(self.ugv.current_range_percent * battery_width)
-        pygame.draw.rect(self.screen, GRAY, (battery_x, battery_y, battery_width, battery_height))
-        pygame.draw.rect(self.screen, GREEN, (battery_x, battery_y, filled_width, battery_height))
-        pygame.draw.rect(self.screen, BLACK, (battery_x, battery_y, battery_width, battery_height), 1)
-        # --- Draw Info Text ---
-        if self.font:
-            info_y_start = maze_area_height + 5
-            info_line_height = 20
-            texts = [f"Time: {self.time_elapsed:.2f}s", f"Timestep: {self.current_timestep}", f"Tasks Done: {self.num_tasks_completed}", f"Total Dist: {self.ev_distance_traveled:.1f}m", f"Total Energy: {self.total_energy_consumed:.1f}"]
-            for i, text in enumerate(texts):
-                text_surface = self.font.render(text, True, BLACK)
-                self.screen.blit(text_surface, (5, info_y_start + i * info_line_height))
+            print(f"  Traffic Centroids: {self.traffic_centeroids}")        
 
     def _cell_to_pygame_center(self, row, col):
         """Converts maze (row, col) to pygame pixel coordinates (center of cell)."""
@@ -694,58 +560,40 @@ class LMDEnv(gym.Env):
         return traffic_levels
     
     def _get_observation(self):
-        # '''SARSA'''
-        # steps2dest = []
-        # nb_traffic = []
-        # ugv_status = []
-
-        # for ugv_id, ugv in enumerate(self.ugv_states):
-        #     ugv_pos = ugv.position
-        #     task_pos = ugv.active_task
-
-        #     # Steps to destination in each direction
-        #     steps2dest_ = []
-        #     for dr, dc in [(-1, 0), (0, 1), (1, 0), (0, -1), (0,0)]:
-        #         r,c = ugv_pos[0] + dr, ugv_pos[1] + dc
-        #         # if r > 0 and r <= self.max_row and c > 0 and c <= self.max_col:
-        #         if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
-        #             steps2dest_.append(self.all_shortest_path_lengths[(r,c)][task_pos])
-        #         else:
-        #             steps2dest_.append(self.max_row * self.max_col+1)
-        #     steps2dest.append(steps2dest_)
-
-        #     # Neighbor Traffic
-        #     nb_traffic.append(self._get_nb_traffic(ugv_pos))
-
-        #     ugv_status.append(ugv.status)
-
-        # steps2dest_flat = np.array(steps2dest, dtype=np.int32).flatten()
-        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
-        # ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
-        # obs_dict = {
-        #     'steps2dest': steps2dest_flat,
-        #     'nb_traffic': nb_traffic_flat,
-        #     'ugv_status': ugv_status_flat,
-        # }
-
-        # return obs_dict
-
-        '''DQN'''
-        ugv = self.ugv_states[0]  # Assuming single UGV for DQN
-        ugv_pos = ugv.position
-        task_pos = ugv.active_task
-
         steps2dest = []
-        for dr, dc in [(-1, 0), (0, 1), (1, 0), (0, -1), (0,0)]:
-            r,c = ugv_pos[0] + dr, ugv_pos[1] + dc
-            if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
-                steps2dest.append(self.all_shortest_path_lengths[(r,c)][task_pos])
-            else:
-                steps2dest.append(self.max_row * self.max_col+1)
+        nb_traffic = []
+        ugv_status = []
 
-        nb_traffic = self._get_nb_traffic(ugv_pos)
+        for ugv_id, ugv in enumerate(self.ugv_states):
+            ugv_pos = ugv.position
+            task_pos = ugv.active_task
 
-        return np.array(steps2dest + nb_traffic, dtype=np.int32)
+            # Steps to destination in each direction
+            steps2dest_ = []
+            for dr, dc in [(-1, 0), (0, 1), (1, 0), (0, -1), (0,0)]:
+                r,c = ugv_pos[0] + dr, ugv_pos[1] + dc
+                # if r > 0 and r <= self.max_row and c > 0 and c <= self.max_col:
+                if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
+                    steps2dest_.append(self.all_shortest_path_lengths[(r,c)][task_pos])
+                else:
+                    steps2dest_.append(self.max_row * self.max_col+1)
+            steps2dest.append(steps2dest_)
+
+            # Neighbor Traffic
+            nb_traffic.append(self._get_nb_traffic(ugv_pos))
+
+            ugv_status.append(ugv.status)
+
+        steps2dest_flat = np.array(steps2dest, dtype=np.int32).flatten()
+        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
+        obs_dict = {
+            'steps2dest': steps2dest_flat,
+            'nb_traffic': nb_traffic_flat,
+            'ugv_status': ugv_status_flat,
+        }
+
+        return obs_dict
     
     def analyzer(self):
         """Analyzes the current state and returns an info dictionary."""
@@ -773,7 +621,6 @@ class LMDEnv(gym.Env):
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
-        action = [action]
         self.ugv_handler(action)
         self.time_elapsed = min([ugv.local_time for ugv in self.ugv_states])
         truncated = self.task_handler() # Handle task completion and updates

@@ -70,6 +70,7 @@ class SARSAAgent(Agent):
         Run SARSA learning over multiple episodes. Each episode starts with an env.reset()
         and runs until done or a max number of steps is reached.
         """
+        policy_path = policy_path + 'policy.pkl'
         training_config = training_config['sarsa']
         num_episodes = training_config.get('num_episodes')
         gamma = training_config.get('gamma')

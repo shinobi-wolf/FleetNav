@@ -24,6 +24,6 @@ def lmd_trainer(config, policy_dir):
     
     agent = get_agent(config, env)[0]
 
-    agent.learn(config['training'], policy_path=f"{policy_dir}/policy.pkl",
+    agent.learn(config['training'], policy_path=f"{policy_dir}",
                    log_path=os.path.join(policy_dir, "train_log.txt"),)
     env.close()
