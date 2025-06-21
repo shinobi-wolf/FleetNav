@@ -76,7 +76,7 @@ def get_agent_color(agent_id):
 
 
 class LMDEnv(gym.Env):
-    metadata = {'render_modes': ['human', 'print', 'rgb_array', 'quiet'], "render_fps": 1} # Adjusted FPS
+    metadata = {'render_modes': ['human', 'print', 'rgb_array', 'quiet'], "render_fps": 30} # Adjusted FPS
 
     def __init__(self, config, render_mode=None): # Default render_mode is None
         super(LMDEnv, self).__init__()
@@ -85,6 +85,11 @@ class LMDEnv(gym.Env):
         self.render_mode = render_mode
         if not render_mode:
             self.render_mode = config['simulation']['render_mode']
+        if self.render_mode == 'human':
+            self.metadata['render_fps'] = config['simulation'].get('render_fps', 30) # Default to 30 FPS if not specified
+            self.manual_control = config['debug']['manual_control']
+            self.ff = config['debug']['fast_forward'] # Fast forward mode
+
         self.screen = None
         self.clock = None
         self.font = None
@@ -216,27 +221,31 @@ class LMDEnv(gym.Env):
         return int(px), int(py)
     
     def render(self):
-        if self.render_mode == "human":
+        if self.render_mode == "human" or self.render_mode == "rgb_array":
             self.sleep_flag = True
             if self.screen is None:
                 self._initialize_render() # Initialize if not already done
                 if self.screen is None: # Check if initialization failed
-                    return # Cannot render
+                    return None # Cannot render, return None
 
-            # --- Event Handling ---
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.close() # Proper cleanup
-                    # Optionally signal the main loop to terminate
-                    # This might require modifying the main loop logic
-                    # For now, just close pygame and let the loop continue/error out
-                    return
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        self.terminated = True
+            # For rgb_array mode, we need a separate surface to render on
+            if self.render_mode == "rgb_array":
+                surface = pygame.Surface((self.screen_width, self.screen_height-200))
+                render_surface = surface
+            else:  # For human mode, render directly to screen
+                render_surface = self.screen
+
+                # --- Event Handling (only for human mode) ---
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.close() # Proper cleanup
+                        return None
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            self.terminated = True
 
             # --- Drawing ---
-            self.screen.fill(WHITE) # Clear screen
+            render_surface.fill(WHITE) # Clear surface
 
             # --- Draw Maze Area (Grid and Walls) ---
             maze_area_height = self.max_row * self.cell_size_px
@@ -256,22 +265,22 @@ class LMDEnv(gym.Env):
                     north_neighbor = (r - 1, c)
                     if not self.G.has_edge(current_node, north_neighbor):
                         # Draw the North wall of cell (r, c)
-                        pygame.draw.line(self.screen, BLACK, (px_top_left, py_top_left), (px_top_left + self.cell_size_px, py_top_left), wall_thickness)
+                        pygame.draw.line(render_surface, BLACK, (px_top_left, py_top_left), (px_top_left + self.cell_size_px, py_top_left), self.wall_thickness)
                     else:
-                        pygame.draw.line(self.screen, GRAY, (px_top_left, py_top_left), (px_top_left + self.cell_size_px, py_top_left), 3)
+                        pygame.draw.line(render_surface, GRAY, (px_top_left, py_top_left), (px_top_left + self.cell_size_px, py_top_left), self.wall_thickness)
 
                     # Check West Wall: Draw wall if no edge exists between current node and West neighbor (r, c-1)
                     west_neighbor = (r, c - 1)
                     if not self.G.has_edge(current_node, west_neighbor):
                         # Draw the West wall of cell (r, c)
-                        pygame.draw.line(self.screen, BLACK, (px_top_left, py_top_left), (px_top_left, py_top_left + self.cell_size_px), wall_thickness)
+                        pygame.draw.line(render_surface, BLACK, (px_top_left, py_top_left), (px_top_left, py_top_left + self.cell_size_px), self.wall_thickness)
                     else:
-                        pygame.draw.line(self.screen, GRAY, (px_top_left, py_top_left), (px_top_left, py_top_left + self.cell_size_px), 3)
+                        pygame.draw.line(render_surface, GRAY, (px_top_left, py_top_left), (px_top_left, py_top_left + self.cell_size_px), self.wall_thickness)
 
             # Draw outer boundary walls (South and East edges explicitly)
             # This ensures the bottom border of the last row and the right border of the last column are drawn.
-            pygame.draw.line(self.screen, BLACK, (0, maze_area_height), (self.screen_width, maze_area_height), wall_thickness) # Bottom boundary
-            pygame.draw.line(self.screen, BLACK, (self.screen_width, 0), (self.screen_width, maze_area_height), wall_thickness) # Right boundary
+            pygame.draw.line(render_surface, BLACK, (0, maze_area_height), (self.screen_width, maze_area_height), self.wall_thickness) # Bottom boundary
+            pygame.draw.line(render_surface, BLACK, (self.screen_width, 0), (self.screen_width, maze_area_height), self.wall_thickness) # Right boundary
 
 
             # --- Draw Traffic Roads ---
@@ -279,32 +288,25 @@ class LMDEnv(gym.Env):
             for u, v in self.red_roads:
                 u_px_c, u_py_c = self._cell_to_pygame_center(u[0], u[1])
                 v_px_c, v_py_c = self._cell_to_pygame_center(v[0], v[1])
-                pygame.draw.line(self.screen, RED, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
+                pygame.draw.line(render_surface, RED, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
             for u, v in self.yellow_roads:
                 u_px_c, u_py_c = self._cell_to_pygame_center(u[0], u[1])
                 v_px_c, v_py_c = self._cell_to_pygame_center(v[0], v[1])
-                pygame.draw.line(self.screen, YELLOW, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
+                pygame.draw.line(render_surface, YELLOW, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
 
 
             # --- Draw Warehouse ---
             wh_r, wh_c = self.warehouse_pos
             wh_px_c, wh_py_c = self._cell_to_pygame_center(wh_r, wh_c)
             warehouse_radius = int(self.cell_size_px * 0.4)
-            pygame.draw.circle(self.screen, BLUE, (wh_px_c, wh_py_c), warehouse_radius)
-
-            # # --- Draw Base Stations ---
-            # bs_radius = int(self.cell_size_px * 0.3)
-            # for bs_r, bs_c in self.base_stations:
-            #     bs_px_c, bs_py_c = self._cell_to_pygame_center(bs_r, bs_c)
-            #     pygame.draw.circle(self.screen, DARK_GREEN, (bs_px_c, bs_py_c), bs_radius)
-            #     pygame.draw.circle(self.screen, BLACK, (bs_px_c, bs_py_c), bs_radius, 1) # Border
+            pygame.draw.circle(render_surface, BLUE, (wh_px_c, wh_py_c), warehouse_radius)
 
             for ugv_id, ugv in enumerate(self.ugv_states):
                 # --- Draw Tasks ---
                 task_r, task_c = ugv.active_task
                 task_px_c, task_py_c = self._cell_to_pygame_center(task_r, task_c)
                 task_radius = int(self.cell_size_px * 0.25)
-                pygame.draw.circle(self.screen, MAGENTA, (task_px_c, task_py_c), task_radius)
+                pygame.draw.circle(render_surface, MAGENTA, (task_px_c, task_py_c), task_radius)
 
                 # --- Draw UGVs and Battery ---
                 ugv_r, ugv_c = ugv.get_actual_position(self.time_elapsed)
@@ -318,34 +320,35 @@ class LMDEnv(gym.Env):
                     truck_img_rotated = pygame.transform.rotate(self.truck_image, (ugv_heading_dir-1)%4 * -90) # Rotate image based on heading
 
                     img_rect = truck_img_rotated.get_rect(center=(ugv_px_c, ugv_py_c))
-                    self.screen.blit(truck_img_rotated, img_rect)
-                    # Draw a small colored circle on the truck for identification if needed
-                    # id_radius = int(self.cell_size_px * 0.1)
-                    # pygame.draw.circle(self.screen, agent_color, (ugv_px_c + img_rect.width // 3, ugv_py_c - img_rect.height // 3), id_radius)
+                    render_surface.blit(truck_img_rotated, img_rect)
                 else:
                     # Fallback to drawing a colored rectangle
                     ugv_size = int(self.cell_size_px * 0.7)
                     ugv_rect = pygame.Rect(0, 0, ugv_size, ugv_size)
                     ugv_rect.center = (ugv_px_c, ugv_py_c)
-                    pygame.draw.rect(self.screen, agent_color, ugv_rect)
-                    pygame.draw.rect(self.screen, BLACK, ugv_rect, 1) # Border
+                    pygame.draw.rect(render_surface, agent_color, ugv_rect)
+                    pygame.draw.rect(render_surface, BLACK, ugv_rect, 1) # Border
 
-                # Draw Battery Bar below UGV
-                battery_width = int(self.cell_size_px * 0.8)
-                battery_height = max(3, int(self.cell_size_px * 0.1)) # Ensure minimum height
-                battery_x = ugv_px_c - battery_width // 2
-                # Position below the center, slightly offset
-                battery_y = ugv_py_c + (self.truck_image.get_height() // 2 if self.truck_image else self.cell_size_px // 2) + 2
+                # # Draw Battery Bar below UGV
+                # battery_width = int(self.cell_size_px * 0.8)
+                # battery_height = max(3, int(self.cell_size_px * 0.1)) # Ensure minimum height
+                # battery_x = ugv_px_c - battery_width // 2
+                # # Position below the center, slightly offset
+                # battery_y = ugv_py_c + (self.truck_image.get_height() // 2 if self.truck_image else self.cell_size_px // 2) + 2
 
-                filled_width = int(ugv.current_range_percent * battery_width)
+                # filled_width = int(ugv.current_range_percent * battery_width)
 
-                # Background of battery bar (e.g., light gray)
-                pygame.draw.rect(self.screen, GRAY, (battery_x, battery_y, battery_width, battery_height))
-                # Filled portion (Green)
-                pygame.draw.rect(self.screen, GREEN, (battery_x, battery_y, filled_width, battery_height))
-                # Border
-                pygame.draw.rect(self.screen, BLACK, (battery_x, battery_y, battery_width, battery_height), 1)
+                # # Background of battery bar (e.g., light gray)
+                # pygame.draw.rect(render_surface, GRAY, (battery_x, battery_y, battery_width, battery_height))
+                # # Filled portion (Green)
+                # pygame.draw.rect(render_surface, GREEN, (battery_x, battery_y, filled_width, battery_height))
+                # # Border
+                # pygame.draw.rect(render_surface, BLACK, (battery_x, battery_y, battery_width, battery_height), 1)
 
+            # For rgb_array mode, convert surface to numpy array and return
+            if self.render_mode == "rgb_array":
+                return self._get_array_from_surface(surface)
+            
             # --- Draw Info Text ---
             if self.font:
                 info_y_start = maze_area_height + 5 # Start below maze area
@@ -359,10 +362,9 @@ class LMDEnv(gym.Env):
                 ]
                 for i, text in enumerate(texts):
                     text_surface = self.font.render(text, True, BLACK)
-                    self.screen.blit(text_surface, (5, info_y_start + i * info_line_height))
-
-
-            # --- Update Display ---
+                    render_surface.blit(text_surface, (5, info_y_start + i * info_line_height))
+            
+            # For human mode, update the display
             pygame.display.flip()
 
             print("=== Environment State ===")
@@ -381,7 +383,7 @@ class LMDEnv(gym.Env):
             print("==========================")
             
             # Wait until the Return key is pressed before ending render
-            if self.num_tasks_completed < 10000:
+            if self.num_tasks_completed < self.ff:
                 self.clock.tick(self.metadata["render_fps"])
             else:
                 waiting = True
@@ -408,8 +410,10 @@ class LMDEnv(gym.Env):
             print("Traffic Information:")
             print(f"  Red Roads: {self.red_roads}")
             print(f"  Yellow Roads: {self.yellow_roads}")
-            print(f"  Traffic Centroids: {self.traffic_centeroids}")        
-
+            print(f"  Traffic Centroids: {self.traffic_centeroids}")      
+        
+        return None  # Return None for all render modes except rgb_array
+    
     def _cell_to_pygame_center(self, row, col):
         """Converts maze (row, col) to pygame pixel coordinates (center of cell)."""
         px, py = self._cell_to_pygame(row, col)
@@ -584,7 +588,8 @@ class LMDEnv(gym.Env):
 
             ugv_status.append(ugv.status)
 
-        steps2dest_flat = np.array(steps2dest, dtype=np.int32).flatten()
+        steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
+        steps2dest_flat /= self.max_row * self.max_col+1  # Normalize steps to destination
         nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
         obs_dict = {

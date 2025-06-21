@@ -22,13 +22,14 @@ if __name__ == '__main__':
         policy_name = os.urandom(4).hex()
         policy_dir = os.path.join(f"runs/{policy_name}")
         os.makedirs(policy_dir, exist_ok=True)
-        lmd_trainer(config, policy_dir)
-        
         config_file = os.path.join(policy_dir, "config.yaml")
         config['policy'] = policy_name
         config['simulation']['train'] = False
         with open(config_file, 'w') as f:
             yaml.dump(config, f)
+            
+        config['simulation']['train'] = True
+        lmd_trainer(config, policy_dir)
         
     else:
         metrics = lmd_simulator(config)

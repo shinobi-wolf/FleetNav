@@ -32,10 +32,11 @@ traffic:
 simulation:
   max_time: 50000
   bms: false
-  traffic: true
+  traffic: false
   algo: dqn
   render_mode: quiet
   train: true
+  render_fps: 30
 
 training:
   sarsa:
@@ -58,3 +59,7 @@ training:
     gamma: 0.99
     target_network_frequency: 500
     tau: 1.0
+
+debug:
+  fast_forward: 0
+  manual_control: false

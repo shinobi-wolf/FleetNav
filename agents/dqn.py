@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import time
+from scipy.stats import rankdata
 
 import torch
 import torch.nn as nn
@@ -59,8 +60,10 @@ class DQNWrapper(gym.Wrapper):
     def _transform_obs(self, obs_dict):
         """Convert dictionary observation to flattened array."""
         steps2dest = obs_dict['steps2dest']
+        # steps2dest = rankdata(steps2dest, method='ordinal')
         nb_traffic = obs_dict['nb_traffic']
         return np.concatenate((steps2dest, nb_traffic), axis=0).astype(np.float32)
+        # return steps_rank.astype(np.float32)
     
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -80,8 +83,6 @@ class DQNAgent(Agent):
         self.env = DQNWrapper(self.env)
         self.env = gym.wrappers.RecordEpisodeStatistics(self.env)
         self.env = gym.vector.SyncVectorEnv([lambda: self.env])
-        # self.obs_shape = config['training']['dqn']['dqn']['obs_shape']
-        # self.action_shape = config['fleet']['ugv']['num_primitives']
         self.epsilon = config['training']['dqn']['pred_epsilon']
         self.model = QNetwork(self.env).to('cuda')
         if policy_path:
@@ -92,6 +93,7 @@ class DQNAgent(Agent):
     def obs_converter(self, obs):
         assert isinstance(obs, dict), "Observation must be a dictionary"
         steps2dest = obs['steps2dest']
+        # steps2dest = rankdata(steps2dest, method='ordinal')
         nb_traffic = obs['nb_traffic']
         new_obs = np.concatenate((steps2dest, nb_traffic), axis=0)
         return new_obs
@@ -181,6 +183,7 @@ class DQNAgent(Agent):
                         target_network_param.data.copy_(
                             config['dqn']['tau'] * q_network_param.data + (1.0 - config['dqn']['tau']) * target_network_param.data
                         )
+                    torch.save(q_network.state_dict(), policy_path)
 
             if terminations.any():
                 obs, _ = self.env.reset()
@@ -198,5 +201,6 @@ class DQNAgent(Agent):
             action = int(action[0])
         else:
             q_values = self.model(torch.Tensor(obs).to('cuda'))
-            action = torch.argmax(q_values, dim=0).cpu().numpy()
+            q_values = q_values.cpu().detach().numpy().flatten()
+            action = np.argmax(q_values[:])
         return action

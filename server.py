@@ -84,7 +84,12 @@ def lmd_simulator(config):
                 continue
 
             # Get action from policy
-            action = agent.predict(obs)
+
+            if step_idx % 1==0:
+                action = agent.predict(obs)
+            else:
+                steps2dest = obs['steps2dest']
+                action = np.argmin(steps2dest)
             action_list.append(action)
 
         observation, reward, terminated, truncated, world_state = env.step(action_list)
