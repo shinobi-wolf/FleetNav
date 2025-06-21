@@ -94,6 +94,7 @@ class LMDEnv(gym.Env):
         self.clock = None
         self.font = None
         self.cell_size_px = 70 #config["world"].get("cell_size", 30) # Pixel size for rendering cells
+        self.wall_thickness = 4
         self.screen_width = None
         self.screen_height = None
         self.truck_image = None
@@ -249,7 +250,6 @@ class LMDEnv(gym.Env):
 
             # --- Draw Maze Area (Grid and Walls) ---
             maze_area_height = self.max_row * self.cell_size_px
-            wall_thickness = 4 # Thinner walls
             # --- Draw Maze Area (Grid and Walls) using self.G ---
             for r in range(1, self.max_row + 1):
                 for c in range(1, self.max_col + 1):
@@ -393,8 +393,19 @@ class LMDEnv(gym.Env):
                             self.close()
                             waiting = False
                         elif event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_RETURN:
-                                waiting = False
+                            if event.key == pygame.K_UP:
+                                key_pressed = 1
+                            elif event.key == pygame.K_RIGHT:
+                                key_pressed = 2
+                            elif event.key == pygame.K_DOWN:
+                                key_pressed = 3
+                            elif event.key == pygame.K_LEFT:
+                                key_pressed = 4
+                            elif event.key == pygame.K_SPACE:
+                                key_pressed = 5
+                            elif event.key != pygame.K_RETURN:
+                                continue
+                            waiting = False
                     self.clock.tick(self.metadata["render_fps"])
 
         elif self.render_mode == "print":
@@ -589,7 +600,7 @@ class LMDEnv(gym.Env):
             ugv_status.append(ugv.status)
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
-        steps2dest_flat /= self.max_row * self.max_col+1  # Normalize steps to destination
+        # steps2dest_flat /= (self.max_row * self.max_col+1)  # Normalize steps to destination
         nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
         obs_dict = {

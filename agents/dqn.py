@@ -61,6 +61,8 @@ class DQNWrapper(gym.Wrapper):
         """Convert dictionary observation to flattened array."""
         steps2dest = obs_dict['steps2dest']
         # steps2dest = rankdata(steps2dest, method='ordinal')
+        # Normalize steps2dest to a range of 0-1
+        steps2dest = (steps2dest - np.min(steps2dest)) / (np.max(steps2dest) - np.min(steps2dest))
         nb_traffic = obs_dict['nb_traffic']
         return np.concatenate((steps2dest, nb_traffic), axis=0).astype(np.float32)
         # return steps_rank.astype(np.float32)
@@ -84,6 +86,7 @@ class DQNAgent(Agent):
         self.env = gym.wrappers.RecordEpisodeStatistics(self.env)
         self.env = gym.vector.SyncVectorEnv([lambda: self.env])
         self.epsilon = config['training']['dqn']['pred_epsilon']
+        self.num_primitives = config['fleet']['ugv']['num_primitives']
         self.model = QNetwork(self.env).to('cuda')
         if policy_path:
             self.model.load_state_dict(torch.load(policy_path, map_location='cuda'))
@@ -94,6 +97,7 @@ class DQNAgent(Agent):
         assert isinstance(obs, dict), "Observation must be a dictionary"
         steps2dest = obs['steps2dest']
         # steps2dest = rankdata(steps2dest, method='ordinal')
+        steps2dest = (steps2dest - np.min(steps2dest)) / (np.max(steps2dest) - np.min(steps2dest))
         nb_traffic = obs['nb_traffic']
         new_obs = np.concatenate((steps2dest, nb_traffic), axis=0)
         return new_obs
@@ -196,11 +200,12 @@ class DQNAgent(Agent):
 
     def predict(self, obs):
         obs = self.obs_converter(obs)
+        print("State:", obs)
         if random.random() < self.epsilon:
             action = self.env.action_space.sample()
             action = int(action[0])
         else:
             q_values = self.model(torch.Tensor(obs).to('cuda'))
             q_values = q_values.cpu().detach().numpy().flatten()
-            action = np.argmax(q_values[:])
+            action = np.argmax(q_values[:self.num_primitives])
         return action
