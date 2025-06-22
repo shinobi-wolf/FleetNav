@@ -23,7 +23,7 @@ class QNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(16, 9),
             nn.ReLU(),
-            nn.Linear(9, env.single_action_space.n),
+            nn.Linear(9, 5),
         )
 
     def forward(self, x):
@@ -41,13 +41,10 @@ class DQNWrapper(gym.Wrapper):
     """
     def __init__(self, env):
         super().__init__(env)
-        
-        # Define the new flattened observation space
-        # For a single agent: 5 values from steps2dest + 4 values from nb_traffic = 9 values total
         self.observation_space = spaces.Box(
             low=-np.inf, 
             high=np.inf,
-            shape=(9,),  # 5 (steps2dest) + 4 (nb_traffic)
+            shape=(9,), 
             dtype=np.float32
         )
         
@@ -60,12 +57,8 @@ class DQNWrapper(gym.Wrapper):
     def _transform_obs(self, obs_dict):
         """Convert dictionary observation to flattened array."""
         steps2dest = obs_dict['steps2dest']
-        # steps2dest = rankdata(steps2dest, method='ordinal')
-        # Normalize steps2dest to a range of 0-1
-        steps2dest = (steps2dest - np.min(steps2dest)) / (np.max(steps2dest) - np.min(steps2dest))
         nb_traffic = obs_dict['nb_traffic']
         return np.concatenate((steps2dest, nb_traffic), axis=0).astype(np.float32)
-        # return steps_rank.astype(np.float32)
     
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -96,8 +89,6 @@ class DQNAgent(Agent):
     def obs_converter(self, obs):
         assert isinstance(obs, dict), "Observation must be a dictionary"
         steps2dest = obs['steps2dest']
-        # steps2dest = rankdata(steps2dest, method='ordinal')
-        steps2dest = (steps2dest - np.min(steps2dest)) / (np.max(steps2dest) - np.min(steps2dest))
         nb_traffic = obs['nb_traffic']
         new_obs = np.concatenate((steps2dest, nb_traffic), axis=0)
         return new_obs

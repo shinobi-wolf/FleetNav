@@ -38,12 +38,17 @@ class SARSAAgent(Agent):
             print(f"Policy loaded from {policy_path}")
 
     def _observation_to_state(self, observation):
-        step2dest = observation['steps2dest']
-        step2dest = int(np.argmin(step2dest))
+        # step2dest = observation['steps2dest']
+        # step2dest = int(np.argmin(step2dest))
 
-        nb_traffic = tuple(observation['nb_traffic'].tolist())
+        # nb_traffic = tuple(observation['nb_traffic'].tolist())
 
-        return (step2dest, nb_traffic)
+        # return (step2dest, nb_traffic)
+        
+        steps2dest = observation['steps2dest'].tolist()
+        nb_traffic = observation['nb_traffic'].tolist()
+        obs = tuple(steps2dest + nb_traffic)
+        return obs
 
     def predict(self, observation):
         """
@@ -70,7 +75,7 @@ class SARSAAgent(Agent):
         Run SARSA learning over multiple episodes. Each episode starts with an env.reset()
         and runs until done or a max number of steps is reached.
         """
-        policy_path = policy_path + 'policy.pkl'
+        policy_path = policy_path + '/policy.pkl'
         training_config = training_config['sarsa']
         num_episodes = training_config.get('num_episodes')
         gamma = training_config.get('gamma')

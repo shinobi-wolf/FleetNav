@@ -1,3 +1,6 @@
+debug:
+  fast_forward: 0
+  manual_control: false
 fleet:
   uav:
     num_uavs_per_bs: 2
@@ -8,20 +11,21 @@ fleet:
     count: 1
     drain_rate: 1
     num_primitives: 5
-    range: 3000
+    range: 100000000
     speed: 1
 maze:
   cell_size: 50
-  maze_loop_percentage: 90
+  maze_loop_percentage: 60
   maze_size: 5
   num_base_stations: 4
   warehouse: center
-policy: LMDEnv-v0__dqn__1__1749577114
+policy: sarsa
 simulation:
-  algo: dqn
+  algo: sarsa
   bms: false
   max_time: 50000
-  render_mode: human
+  render_fps: 30
+  render_mode: quiet
   traffic: true
   train: false
 task:
@@ -34,21 +38,23 @@ traffic:
   reset_dur: 5
   std_dev: 1
 training:
+  dqn:
+    batch_size: 128
+    buffer_size: 10000
+    end_e: 0.05
+    exploration_fraction: 0.5
+    gamma: 0.99
+    learning_rate: 0.0025
+    learning_starts: 10000
+    pred_epsilon: 0.1
+    start_e: 1
+    target_network_frequency: 500
+    tau: 1.0
+    total_timesteps: 1000000
+    train_frequency: 10
   sarsa:
     alpha: 0.1
     epsilon: 0.2
     epsilon_decay: 0.99
     gamma: 0.99
     num_episodes: 30000
-  dqn:
-    obs_shape: 9
-    batch_size: 64
-    buffer_size: 100000
-    learning_rate: 0.001
-    target_update_freq: 1000
-    epsilon_start: 1.0
-    epsilon_end: 0.01
-    epsilon_decay_steps: 10000
-    pred_epsilon: 0.1
-    gamma: 0.99
-    train_freq: 4

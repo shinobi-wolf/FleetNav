@@ -32,8 +32,8 @@ traffic:
 simulation:
   max_time: 50000
   bms: false
-  traffic: false
-  algo: dqn
+  traffic: true
+  algo: sarsa
   render_mode: quiet
   train: true
   render_fps: 30

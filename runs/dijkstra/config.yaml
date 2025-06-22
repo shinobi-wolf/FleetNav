@@ -1,3 +1,6 @@
+debug:
+  fast_forward: 0
+  manual_control: false
 fleet:
   uav:
     num_uavs_per_bs: 2
@@ -13,7 +16,7 @@ fleet:
 maze:
   cell_size: 50
   maze_loop_percentage: 60
-  maze_size: 10
+  maze_size: 5
   num_base_stations: 4
   warehouse: center
 policy: dijkstra
@@ -22,7 +25,7 @@ simulation:
   bms: false
   max_time: 50000
   render_mode: quiet
-  traffic: false
+  traffic: true
   train: false
   render_fps: 30
 task:

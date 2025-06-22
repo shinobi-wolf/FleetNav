@@ -502,21 +502,6 @@ class LMDEnv(gym.Env):
 
         all_shortest_path_lengths = dict(nx.all_pairs_shortest_path_length(G))
 
-        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-        for node in G.nodes:
-            wall_distances = []
-            for dr, dc in directions:
-                steps = 0
-                current = node
-                while steps < 2:
-                    next_node = (current[0] + dr, current[1] + dc)
-                    if not G.has_edge(current, next_node):
-                        break
-                    steps += 1
-                    current = next_node
-                wall_distances.append(steps)
-            G.nodes[node]['wall_distance'] = wall_distances
-
         return G, all_shortest_path_lengths
     
     def reset(self, seed=None, options=None):
