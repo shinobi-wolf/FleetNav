@@ -1,0 +1,3 @@
+[submodule "pixel-maze-rl"]
+	path = pixel-maze-rl
+	url = https://github.com/vemshari27/pixel-maze-rl.git
