@@ -24,7 +24,7 @@ class UGV:
         self.energy_consumed = 0.0
 
         self.task_list = []
-        self.active_task = None
+        self.active_task_list = []
         self.status = 1
         self.charging_status = 0  # 0: not charging, 1: charging
         self.task_completed = False
@@ -116,7 +116,8 @@ class UGV:
     def __str__(self):
         return (f"UGV Agent ID: {self.agent_id}, "
                 f"Position: {self.position}, "
-                f"Active Task: {self.active_task}, "
+                f"Active Task List: {self.active_task_list}, "
+                f"Dest Task: {self.task_list[0]}, "
                 f"Current Range: {self.current_range}, "
                 f"Local Time: {self.local_time}, "
                 f"Distance Traveled: {self.distance_traveled}, "

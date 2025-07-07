@@ -8,15 +8,16 @@ fleet:
     speed: 3
     swapping_time: 2
   ugv:
-    count: 1
+    count: 5
     drain_rate: 1
     num_primitives: 5
-    range: 100000000
+    range: 1000000
     speed: 1
 maze:
   cell_size: 50
   maze_loop_percentage: 60
-  maze_size: 5
+  maze_size: 10
+  fov: 5
   num_base_stations: 4
   warehouse: center
 policy: dqn
@@ -33,8 +34,8 @@ task:
   task_prob: 0.8
 traffic:
   delay_factor: 10
-  num_centroids: 2
-  prob: 0.7
+  num_centroids: 3
+  prob: 0.8
   reset_dur: 5
   std_dev: 1
 training:

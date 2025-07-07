@@ -96,8 +96,6 @@ def lmd_simulator(config):
         total_reward += reward
         step_idx += 1
 
-        env.render()
-
         # Log action and results
         logging.info(f"Observation: {observation}") # Observation can be large, maybe omit from console
         logging.info(f"Reward: {reward}")
@@ -106,6 +104,8 @@ def lmd_simulator(config):
             logging.info(f"UGV {ugv_id} Info...")
             action_str = acts[action_list[ugv_id]] # Format action list for logging
             logging.info(f"Action taken: {action_str}")
+            
+        env.render()
 
         logging.info("-------------------------------------------\n")
 

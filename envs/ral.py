@@ -107,6 +107,7 @@ class LMDEnv(gym.Env):
         self.max_col = config["maze"]["maze_size"]
         self.maze_lp = config["maze"]["maze_loop_percentage"]
         self.cell_size = config["maze"]["cell_size"] # Physical cell size
+        self.fov = config["maze"]["fov"]
 
         # Task vars
         self.num_tasks = config["task"]["num_tasks"]
@@ -303,7 +304,7 @@ class LMDEnv(gym.Env):
 
             for ugv_id, ugv in enumerate(self.ugv_states):
                 # --- Draw Tasks ---
-                task_r, task_c = ugv.active_task
+                task_r, task_c = ugv.active_task_list[-1]
                 task_px_c, task_py_c = self._cell_to_pygame_center(task_r, task_c)
                 task_radius = int(self.cell_size_px * 0.25)
                 pygame.draw.circle(render_surface, MAGENTA, (task_px_c, task_py_c), task_radius)
@@ -445,7 +446,25 @@ class LMDEnv(gym.Env):
                 ugv_task_list[label].append(task)
             for ugv in self.ugv_states:
                 ugv.task_list = ugv_task_list[ugv.agent_id]
-                ugv.active_task = ugv.task_list[0] if ugv.task_list else None
+                self.assign_ugv_task(ugv.agent_id, 0)  # Assign tasks to UGVs
+
+    def assign_ugv_task(self, ugv_id, mode):
+        ugv = self.ugv_states[ugv_id]
+        if not ugv.task_list:
+            return
+        
+        ugv.active_task_list = []
+        if mode == 0:
+            active_task = ugv.task_list[0]  # Get the first task
+        else:
+            active_task = self.warehouse_pos
+        ugv_pos = ugv.position
+        shortest_path = nx.shortest_path(self.G, source=ugv_pos, target=active_task)
+        while shortest_path:
+            next_pos = shortest_path.pop(0)
+            if abs(next_pos[0] - ugv_pos[0]) > self.fov//2 or abs(next_pos[1] - ugv_pos[1]) > self.fov//2 or next_pos == active_task:
+                ugv.active_task_list.append(next_pos)
+                ugv_pos = next_pos
 
     def fill_traffic_centroids(self):
         # Reset previous roads and weights
@@ -566,7 +585,7 @@ class LMDEnv(gym.Env):
 
         for ugv_id, ugv in enumerate(self.ugv_states):
             ugv_pos = ugv.position
-            task_pos = ugv.active_task
+            task_pos = ugv.active_task_list[0]
 
             # Steps to destination in each direction
             steps2dest_ = []
@@ -576,7 +595,7 @@ class LMDEnv(gym.Env):
                 if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
                     steps2dest_.append(self.all_shortest_path_lengths[(r,c)][task_pos])
                 else:
-                    steps2dest_.append(self.max_row * self.max_col+1)
+                    steps2dest_.append(self.fov*self.fov+1)
             steps2dest.append(steps2dest_)
 
             # Neighbor Traffic
@@ -603,7 +622,7 @@ class LMDEnv(gym.Env):
         task_completion_time_diffs = [self.task_completion_times[i] - self.task_completion_times[i-1] for i in range(1, len(self.task_completion_times))]
         avg_task_completion_time = np.mean(task_completion_time_diffs) if task_completion_time_diffs else 0.0
 
-        active_tasks = [ugv.active_task for ugv in self.ugv_states]
+        active_tasks = [ugv.active_task_list[-1] for ugv in self.ugv_states]
         info = {
             'time_elapsed': self.time_elapsed,
             'current_timestep': self.current_timestep,
@@ -657,21 +676,23 @@ class LMDEnv(gym.Env):
         for ugv_id, ugv in enumerate(self.ugv_states):
             if ugv.local_time == self.time_elapsed:
                 ugv.status = 1
-                if ugv.position == ugv.active_task:
+                if ugv.position == ugv.active_task_list[0]:
                     ugv.task_completed = True
                     truncated = True
-                    if ugv.active_task == ugv.task_list[0]:
+                    ugv.active_task_list.pop(0)
+                    if ugv.position == ugv.task_list[0]:
                         ugv.task_list.pop(0)
                         self.num_tasks_completed += 1
                         self.task_completion_times.append(self.time_elapsed)
                     dist2task = self.all_shortest_path_lengths[ugv.position][ugv.task_list[0]]*self.cell_size
                     dist2wh = self.all_shortest_path_lengths[ugv.task_list[0]][self.warehouse_pos]*self.cell_size
-                    if ugv.current_range >= dist2task+dist2wh:
-                        ugv.active_task = ugv.task_list[0]
-                        ugv.charging_status = 0
-                    else:
-                        ugv.active_task = self.warehouse_pos
-                        ugv.charging_status = 1
+                    if len(ugv.active_task_list) == 0:
+                        if ugv.current_range >= dist2task+dist2wh:
+                            self.assign_ugv_task(ugv_id, 0) # Assign new task if available
+                            ugv.charging_status = 0
+                        else:
+                            self.assign_ugv_task(ugv_id, 1) # Assign next task in the list
+                            ugv.charging_status = 1
                     ugv.prev_position = ugv.position
                 else:
                     ugv.task_completed = False
@@ -689,8 +710,8 @@ class LMDEnv(gym.Env):
                 # --- Progress-Based Shaping Reward ---
                 # Reward for moving closer to the nearest task
                 bonus_factor = 5.0 
-                current_distance = self.all_shortest_path_lengths[ugv.position][ugv.active_task]
-                prev_distance = self.all_shortest_path_lengths[ugv.prev_position][ugv.active_task]
+                current_distance = self.all_shortest_path_lengths[ugv.position][ugv.active_task_list[0]]
+                prev_distance = self.all_shortest_path_lengths[ugv.prev_position][ugv.active_task_list[0]]
                 reward += bonus_factor * (prev_distance - current_distance)
                 
                 # --- Task Completion Reward ---
