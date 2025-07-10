@@ -1,3 +1,5 @@
+import networkx as nx
+
 class UGV:
     def __init__(self, ugv_id, base_position, cell_dist, max_range, drain_rate, max_speed, traffic_delay_factor, G):
         super().__init__()
@@ -29,6 +31,8 @@ class UGV:
         self.charging_status = 0  # 0: not charging, 1: charging
         self.task_completed = False
 
+        self.path2warehouse = None  # Path to the warehouse for charging
+
 
     def move(self, action, graph):
         """
@@ -40,6 +44,24 @@ class UGV:
         4: Stay
         Returns True if move was successful, False if out of range
         """
+        if self.charging_status == 1:
+            if self.path2warehouse is None:
+                self.path2warehouse = nx.shortest_path(self.G, source=self.position, target=self.base_point)
+            if self.path2warehouse:
+                next_position = self.path2warehouse.pop(0)
+                # Determine direction of the next step towards the warehouse
+                curr_row, curr_col = self.position
+                next_row, next_col = next_position
+                if next_row < curr_row:
+                    action = 0  # Up
+                elif next_row > curr_row:
+                    action = 2  # Down
+                elif next_col > curr_col:
+                    action = 1  # Right
+                elif next_col < curr_col:
+                    action = 3  # Left
+                else:
+                    action = 4  # Stay
         if self.status:
             action = int(action)
             if action ==4:
@@ -74,8 +96,9 @@ class UGV:
                         traffic = graph.edges[(self.position, self.prev_position)]['traffic']
                         curr_speed = self.max_speed / (1 + self.traffic_delay_factor*traffic)  # Speed reduces with increasing traffic
                         self.move_time = self.cell_dist / curr_speed
-                        self.current_range = range_left
-                        self.current_range_percent = self.current_range / self.max_range
+                        if self.charging_status == 0:
+                            self.current_range = range_left
+                            self.current_range_percent = self.current_range / self.max_range
                         self.local_time += self.move_time
 
                         self.current_traffic = traffic

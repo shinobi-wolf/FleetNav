@@ -1,5 +1,5 @@
 debug:
-  fast_forward: 19
+  fast_forward: 0
   manual_control: false
 fleet:
   uav:
@@ -8,10 +8,10 @@ fleet:
     speed: 3
     swapping_time: 2
   ugv:
-    count: 5
+    count: 1
     drain_rate: 1
     num_primitives: 5
-    range: 1000000
+    range: 3000
     speed: 1
 maze:
   cell_size: 50

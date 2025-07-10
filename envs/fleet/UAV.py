@@ -1,58 +1,54 @@
-from envs.states.vehicle import Agent
-from gymnasium import spaces
+import numpy as np
+import random
 
-class UAVAgent(Agent):
-    def __init__(self, config, agent_id, base_position):
-        super().__init__()
+class UAV:
+    def __init__(self, agent_id, base_position, cell_dist, max_range, max_speed, G):
         self.agent_id = agent_id
-        self.position = base_position  # e.g., (row, col) or (x, y)
-        self.base_point = base_position
-        self.max_range = config["range"]        # maximum battery capacity or range
-        self.current_range = self.max_range    # start fully charged
-        self.current_range_percent = 1.0  # percentage of battery remaining
-        self.task_list = []               # tasks assigned to the UGV
-        self.path = []                    # planned path (list of positions)
-        self.task_timer = 0            # time spent on the current task
-        self.active_task = None        # current task being executed
+        self.base_station = np.array(base_position)  # Base station position
+        self.position = np.array(base_position)
+        self.offset = np.array([random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5)])  # Random offset for actual position
+        self.actual_position = base_position + self.offset
+        self.cell_dist = cell_dist
+        self.max_range = max_range
+        self.max_speed = max_speed
+        self.G = G
 
-        self.action_space = spaces.Discrete(5)
+        self.status = 0
+        self.current_range = max_range  # Start fully charged
+        self.current_range_percent = 1.0
+        self.local_time = 0.0
+        self.active_task = None
+        self.assigned_ugv = None
 
-    def move_to(self, new_position, cost):
-        """
-        Update the agent's position and reduce the current range by the movement cost.
-        """
-        self.position = new_position
-        self.current_range -= cost
-        if self.current_range < 0:
-            self.current_range = 0
+    def update(self, end_time):
+        reached_flag = False
 
-    def recharge(self):
-        """
-        Recharge the agent to its maximum range.
-        """
-        self.current_range = self.max_range
+        dt = (end_time - self.local_time)/self.cell_dist
+        if self.status == 0:
+            self.actual_position = self.base_station + self.offset
+        else:
+            uav_pos = np.array(self.position)
+            if self.status == 1:
+                dest_pos = np.array(self.active_task)
+            else:
+                dest_pos = np.array(self.base_station)
 
-    def assign_task(self, task):
-        """
-        Add a new task to the agent's task list.
-        """
-        self.task_list.append(task)
+            dx_ = np.linalg.norm(dest_pos - uav_pos)
+            if dx_ > self.max_speed * dt:
+                direction = (dest_pos - uav_pos) / dx_
+                self.position = uav_pos + direction * self.max_speed * dt
+                self.actual_position = self.position
+            else:
+                self.position = dest_pos
+                if self.status == 1:
+                    self.actual_position = self.position
+                    reached_flag = True
+                else:
+                    self.actual_position = self.position + self.offset
+                    self.status = 0
+        self.local_time = end_time
+        return reached_flag, self.assigned_ugv
 
-    def update_path(self, new_path):
-        """
-        Update the planned path for the agent.
-        """
-        self.path = new_path
 
     def __str__(self):
-        return (f"UGVAgent(id={self.agent_id}, position={self.position}, "
-                f"current_range={self.current_range}/{self.max_range}, tasks={self.task_list})")
-
-# Example usage:
-if __name__ == "__main__":
-    # Create a UGVAgent with ID 1, initial position (5, 5) and a max range of 100.
-    ugv = UAVAgent(agent_id=1, initial_position=(5, 5), max_range=100)
-    
-    # Print out the agent and its action space.
-    print(ugv)
-    print("Action Space:", ugv.action_space)
+        return f"UAV {self.agent_id}: Position={self.position}, Actual Position={self.actual_position}, Status={self.status}, Local Time={self.local_time}"

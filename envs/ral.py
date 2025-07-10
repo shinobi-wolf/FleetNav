@@ -15,9 +15,9 @@ import gymnasium as gym
 from gymnasium import spaces
 
 from envs.fleet.UGV import UGV
+from envs.fleet.UAV import UAV
 from sklearn.cluster import KMeans
 import numpy as np
-# from agents.UAV import UAVAgent
 
 def generate_df_maze(rows=20, cols=20, lp=80):
     # Create a Pyamaze maze
@@ -101,6 +101,7 @@ class LMDEnv(gym.Env):
         self.warehouse_image = None # Optional: image for warehouse
         self.task_image = None      # Optional: image for tasks
         self.bs_image = None        # Optional: image for base stations
+        self.uav_image = None       # Optional: image for UAVs
 
         '''LOADING THE CONFIGURATION VARIABLES'''
         self.max_row = config["maze"]["maze_size"]
@@ -125,19 +126,18 @@ class LMDEnv(gym.Env):
                 random.randint(1, self.max_col)
             )
 
-        # # Base station vars
-        # self.num_base_stations = config["world"]["num_base_stations"]
-        # bs_df = self.df_maze.sample(self.num_base_stations, random_state=47)[['row', 'col']]
-        # self.base_stations = []
-        # for t in bs_df.values.tolist():
-        #     self.base_stations.append( (int(t[0]), int(t[1])) )
+        # Base station vars
+        self.num_base_stations = config["maze"]["num_base_stations"]
 
         # Agent vars
         self.num_ugvs = config["fleet"]['ugv']["count"]
         self.max_ugv_range = config["fleet"]['ugv']['range']
         self.drain_rate = config["fleet"]['ugv']['drain_rate']
         self.ugv_speed = config["fleet"]['ugv']['speed']
-        
+        self.num_uavs_bs = config["fleet"]['uav']["count_bs"]
+        self.max_uav_range = config['fleet']['uav']['range']
+        self.uav_speed = config['fleet']['uav']['speed']
+
         # Simulation vars
         self.bms = config['simulation']['bms']
         self.max_time = config['simulation']['max_time']
@@ -200,10 +200,12 @@ class LMDEnv(gym.Env):
                 scale_factor = 0.8
                 img_size = int(self.cell_size_px * scale_factor)
                 self.truck_image = pygame.transform.scale(self.truck_image, (img_size, img_size))
-                # Optional: Load other images (warehouse, task, base station) here
-                # self.warehouse_image = pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'warehouse.png')).convert_alpha(), (img_size, img_size))
-                # self.task_image = pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'task.png')).convert_alpha(), (img_size // 2, img_size // 2))
-                # self.bs_image = pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'base_station.png')).convert_alpha(), (img_size, img_size))
+                if self.bms:
+                    uav_img_path = os.path.join('data/transparent_drone.png')
+                    self.uav_image = pygame.image.load(uav_img_path).convert_alpha() # Use convert_alpha for transparency
+                    scale_factor = 0.6
+                    img_size = int(self.cell_size_px * scale_factor)
+                    self.uav_image = pygame.transform.scale(self.uav_image, (img_size, img_size))
 
             except pygame.error as e:
                 print(f"Warning: Could not load image assets. Rendering with shapes. Error: {e}")
@@ -302,6 +304,14 @@ class LMDEnv(gym.Env):
             warehouse_radius = int(self.cell_size_px * 0.4)
             pygame.draw.circle(render_surface, BLUE, (wh_px_c, wh_py_c), warehouse_radius)
 
+            # --- Draw Base Stations ---
+            if self.bms:
+                bs_radius = int(self.cell_size_px * 0.3)
+                for bs_r, bs_c in self.base_stations:
+                    bs_px_c, bs_py_c = self._cell_to_pygame_center(bs_r, bs_c)
+                    pygame.draw.circle(self.screen, DARK_GREEN, (bs_px_c, bs_py_c), bs_radius)
+                    pygame.draw.circle(self.screen, BLACK, (bs_px_c, bs_py_c), bs_radius, 1) # Border
+
             for ugv_id, ugv in enumerate(self.ugv_states):
                 # --- Draw Tasks ---
                 task_r, task_c = ugv.active_task_list[-1]
@@ -330,21 +340,29 @@ class LMDEnv(gym.Env):
                     pygame.draw.rect(render_surface, agent_color, ugv_rect)
                     pygame.draw.rect(render_surface, BLACK, ugv_rect, 1) # Border
 
-                # # Draw Battery Bar below UGV
-                # battery_width = int(self.cell_size_px * 0.8)
-                # battery_height = max(3, int(self.cell_size_px * 0.1)) # Ensure minimum height
-                # battery_x = ugv_px_c - battery_width // 2
-                # # Position below the center, slightly offset
-                # battery_y = ugv_py_c + (self.truck_image.get_height() // 2 if self.truck_image else self.cell_size_px // 2) + 2
+                # Draw Battery Bar below UGV
+                battery_width = int(self.cell_size_px * 0.8)
+                battery_height = max(3, int(self.cell_size_px * 0.1)) # Ensure minimum height
+                battery_x = ugv_px_c - battery_width // 2
+                # Position below the center, slightly offset
+                battery_y = ugv_py_c + (self.truck_image.get_height() // 2 if self.truck_image else self.cell_size_px // 2) + 2
 
-                # filled_width = int(ugv.current_range_percent * battery_width)
+                filled_width = int(ugv.current_range_percent * battery_width)
 
-                # # Background of battery bar (e.g., light gray)
-                # pygame.draw.rect(render_surface, GRAY, (battery_x, battery_y, battery_width, battery_height))
-                # # Filled portion (Green)
-                # pygame.draw.rect(render_surface, GREEN, (battery_x, battery_y, filled_width, battery_height))
-                # # Border
-                # pygame.draw.rect(render_surface, BLACK, (battery_x, battery_y, battery_width, battery_height), 1)
+                # Background of battery bar (e.g., light gray)
+                pygame.draw.rect(render_surface, GRAY, (battery_x, battery_y, battery_width, battery_height))
+                # Filled portion (Green)
+                pygame.draw.rect(render_surface, GREEN, (battery_x, battery_y, filled_width, battery_height))
+                # Border
+                pygame.draw.rect(render_surface, BLACK, (battery_x, battery_y, battery_width, battery_height), 1)
+
+            if self.bms:
+                for uav_id, uav in enumerate(self.uav_states):
+                    # --- Draw UAVs ---
+                    uav_r, uav_c = uav.actual_position
+                    uav_px_c, uav_py_c = self._cell_to_pygame_center(uav_r, uav_c)
+                    img_rect = self.uav_image.get_rect(center=(uav_px_c, uav_py_c))
+                    self.screen.blit(self.uav_image, img_rect)
 
             # For rgb_array mode, convert surface to numpy array and return
             if self.render_mode == "rgb_array":
@@ -550,6 +568,14 @@ class LMDEnv(gym.Env):
         self.task_list = random.choices(list(self.G.nodes), k=self.num_tasks) # Randomly select tasks from graph nodes
         self.distrubute_tasks() # Distribute tasks to UGVs
 
+        if self.bms:
+            self.base_stations = random.sample(list(self.G.nodes), self.num_base_stations)
+            self.uav_states = []
+            for i in range(self.num_base_stations):
+                for j in range(self.num_uavs_bs):
+                        self.uav_states.append(UAV(agent_id=i*self.num_uavs_bs+j, base_position=self.base_stations[i], cell_dist=self.cell_size, max_range=self.max_uav_range, 
+                                            max_speed=self.uav_speed,G=self.G))
+
         # Metrics
         self.num_tasks_completed = 0
         self.task_completion_times = []
@@ -619,6 +645,8 @@ class LMDEnv(gym.Env):
         """Analyzes the current state and returns an info dictionary."""
         self.total_ev_distance = sum(ugv.distance_traveled for ugv in self.ugv_states)
         self.total_energy_consumed = sum(ugv.energy_consumed for ugv in self.ugv_states)
+        # if self.bms:
+
         task_completion_time_diffs = [self.task_completion_times[i] - self.task_completion_times[i-1] for i in range(1, len(self.task_completion_times))]
         avg_task_completion_time = np.mean(task_completion_time_diffs) if task_completion_time_diffs else 0.0
 
@@ -638,13 +666,48 @@ class LMDEnv(gym.Env):
         }
         return info
     
+    def bms_logic(self):
+        for ugv in self.ugv_states:
+            if ugv.status == 1 and ugv.charging_status == 0:
+                dist2warehouse = nx.shortest_path_length(self.G, source=ugv.position, target=self.warehouse_pos) * self.cell_size
+                curr_range = ugv.current_range
+                if curr_range-self.cell_size < dist2warehouse+self.cell_size: # If current range is less than distance to warehouse + cell size
+                    ugv.charging_status = 1
+                    if self.bms:
+                        free_uavs = []
+                        for uav in self.uav_states:
+                            if uav.status == 0:# and 2*d <= self.max_uav_range:
+                                free_uavs.append(uav)
+                        if free_uavs:
+                            nearest_uav = min(free_uavs, key=lambda uav: np.linalg.norm(np.array(uav.position) - np.array(ugv.position)))
+                            ugv.status = 2
+                            nearest_uav.status = 1 # Charging with UGV
+                            nearest_uav.active_task = ugv.position # UAV will charge at UGV's position
+                            nearest_uav.assigned_ugv = ugv.agent_id # Assign UGV to UAV
+                            continue
+                    self.assign_ugv_task(ugv.agent_id, 1) # Assign charging task if range is low
+
+    def uav_handler(self):
+        for uav_id, uav in enumerate(self.uav_states):
+            reached_flag, ugv_id = uav.update(self.time_elapsed)
+            if reached_flag:
+                ugv = self.ugv_states[ugv_id] 
+                ugv.recharge()
+                ugv.status = 1
+                uav.status = 2
+                uav.active_task = None # Clear active task after recharging
+                uav.assigned_ugv = None # Clear assigned UGV after recharging
+    
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
         self.ugv_handler(action)
+        if self.bms:
+            self.uav_handler() # Handle UAVs if BMS is enabled
         self.time_elapsed = min([ugv.local_time for ugv in self.ugv_states])
         truncated = self.task_handler() # Handle task completion and updates
         reward = self._get_reward()
+        self.bms_logic()
         
         self.current_timestep += 1
 
@@ -674,6 +737,8 @@ class LMDEnv(gym.Env):
     def task_handler(self):
         truncated = False
         for ugv_id, ugv in enumerate(self.ugv_states):
+            if ugv.status == 2: # If UGV is charging, skip task handling
+                continue
             if ugv.local_time == self.time_elapsed:
                 ugv.status = 1
                 if ugv.position == ugv.active_task_list[0]:
@@ -684,15 +749,9 @@ class LMDEnv(gym.Env):
                         ugv.task_list.pop(0)
                         self.num_tasks_completed += 1
                         self.task_completion_times.append(self.time_elapsed)
-                    dist2task = self.all_shortest_path_lengths[ugv.position][ugv.task_list[0]]*self.cell_size
-                    dist2wh = self.all_shortest_path_lengths[ugv.task_list[0]][self.warehouse_pos]*self.cell_size
                     if len(ugv.active_task_list) == 0:
-                        if ugv.current_range >= dist2task+dist2wh:
-                            self.assign_ugv_task(ugv_id, 0) # Assign new task if available
-                            ugv.charging_status = 0
-                        else:
-                            self.assign_ugv_task(ugv_id, 1) # Assign next task in the list
-                            ugv.charging_status = 1
+                        self.assign_ugv_task(ugv_id, 0) # Assign new task if available
+                        ugv.charging_status = 0
                     ugv.prev_position = ugv.position
                 else:
                     ugv.task_completed = False

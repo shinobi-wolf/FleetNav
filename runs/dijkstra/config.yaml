@@ -3,15 +3,15 @@ debug:
   manual_control: false
 fleet:
   uav:
-    num_uavs_per_bs: 2
-    range: 3000
+    count_bs: 2
+    range: 1500
     speed: 3
     swapping_time: 2
   ugv:
     count: 5
     drain_rate: 1
     num_primitives: 5
-    range: 1000000
+    range: 500
     speed: 1
 maze:
   cell_size: 50
@@ -23,7 +23,7 @@ maze:
 policy: dijkstra
 simulation:
   algo: dijkstra
-  bms: false
+  bms: true
   max_time: 50000
   render_mode: quiet
   traffic: true
