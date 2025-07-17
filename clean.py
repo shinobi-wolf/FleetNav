@@ -4,7 +4,7 @@ import shutil
 
 # Define paths
 csv_file_path = 'policy_experiment_map.csv'
-runs_path = 'runs/sarsa'
+runs_path = 'runs'
 
 # Read policy names from the CSV file
 with open(csv_file_path, mode='r') as csv_file:

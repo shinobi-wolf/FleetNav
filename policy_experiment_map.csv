@@ -1,3 +1,4 @@
 Policy Name,Algorithm,Experiment Description
-f6f386d2,sarsa,steps rank no wall info no task dir with traffic stay full episodes
-9e19ef9b,sarsa,cut episodes best direction nb traffic stay
+dijkstra,dijkstra,working on 5x5 maze
+sarsa,sarsa,working on 5x5 maze
+dqn,dqn,working on 5x5 maze

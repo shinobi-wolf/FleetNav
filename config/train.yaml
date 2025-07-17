@@ -1,0 +1,65 @@
+maze:
+  maze_size: 5
+  maze_loop_percentage: 60
+  cell_size: 50
+  warehouse: center
+  num_base_stations: 4
+
+task:
+  num_tasks: 5000
+  task_prob: 0.8
+
+fleet:  
+  ugv:
+    count: 1
+    range: 100000000
+    drain_rate: 1
+    num_primitives: 5
+    speed: 1
+  uav:
+    range: 3000
+    speed: 3
+    swapping_time: 2
+    num_uavs_per_bs: 2
+
+traffic:
+  delay_factor: 10
+  std_dev: 1
+  reset_dur: 5
+  prob: 0.7
+  num_centroids: 2
+
+simulation:
+  max_time: 50000
+  bms: false
+  traffic: true
+  algo: sarsa
+  render_mode: quiet
+  train: true
+  render_fps: 30
+
+training:
+  sarsa:
+    num_episodes: 30000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.2
+    epsilon_decay: 0.99
+  dqn:
+    pred_epsilon: 0.1
+    learning_rate: 2.5e-3
+    buffer_size: 10000
+    total_timesteps: 1000000
+    start_e: 1
+    end_e: 0.05
+    exploration_fraction: 0.5
+    learning_starts: 10000
+    train_frequency: 10
+    batch_size: 128
+    gamma: 0.99
+    target_network_frequency: 500
+    tau: 1.0
+
+debug:
+  fast_forward: 0
+  manual_control: false

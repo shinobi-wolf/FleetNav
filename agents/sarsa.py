@@ -15,18 +15,12 @@ class SARSAAgent(Agent):
       
     It uses the environment's reward function.
     """
-    def __init__(self, env, config, gamma=0.99, alpha=0.1, epsilon=0.2, epsilon_decay=0.995,
-                 policy_path=None, *args, **kwargs):
+    def __init__(self, env, config, policy_path=None, *args, **kwargs):
         super().__init__(env, *args, **kwargs)
-        self.gamma = gamma
-        self.alpha = alpha
-        self.epsilon = epsilon
-        self.epsilon_decay = epsilon_decay
-
-        self.cell_size = config['world']['cell_size']
-        self.max_range = config['ugv']['range']
+        self.cell_size = config['maze']['cell_size']
+        self.max_range = config['fleet']['ugv']['range']
         self.max_cell_range = int(self.max_range/self.cell_size)
-        self.max_rows = config['world']['maze_size']
+        self.max_rows = config['maze']['maze_size']
         self.max_cols = self.max_rows
 
         if hasattr(env.action_space, 'n'):
@@ -44,22 +38,17 @@ class SARSAAgent(Agent):
             print(f"Policy loaded from {policy_path}")
 
     def _observation_to_state(self, observation):
-        step2dest = observation['steps2dest']
+        # step2dest = observation['steps2dest']
+        # step2dest = int(np.argmin(step2dest))
 
-        # Normalize the step2dest values to be between 0 and 1
-        # step2dest = (step2dest - np.min(step2dest)) / (np.max(step2dest) - np.min(step2dest))
-        #Discretize the step2dest values into bins
-        # step2dest = tuple(np.digitize(step2dest, bins=np.linspace(0, 1, 8)).tolist())
+        # nb_traffic = tuple(observation['nb_traffic'].tolist())
 
-        # step2dest_ranked = rankdata(step2dest, method='min')  # Subtract 1 to make ranks zero-based
-        # step2dest = tuple(step2dest_ranked.tolist())
-        step2dest = int(np.argmin(step2dest))
-
-        nb_traffic = tuple(observation['nb_traffic'].tolist())
-
-        # battery_status = int(observation['battery_status'])
-
-        return (step2dest, nb_traffic)#, battery_status)
+        # return (step2dest, nb_traffic)
+        
+        steps2dest = observation['steps2dest'].tolist()
+        nb_traffic = observation['nb_traffic'].tolist()
+        obs = tuple(steps2dest + nb_traffic)
+        return obs
 
     def predict(self, observation):
         """
@@ -67,32 +56,39 @@ class SARSAAgent(Agent):
         for the given observation.
         """
         state = self._observation_to_state(observation)
-        # print("State: ", state)
         if state not in self.Q:
             self.Q[state] = np.zeros(len(self.action_list))
         return int(np.argmax(self.Q[state]))
     
-    def choose_action(self, state):
+    def choose_action(self, state, epsilon):
         """
         Epsilon-greedy action selection.
         If the state is not in the Q-table, initialize its Q-values to zeros.
         """
-        if random.random() < self.epsilon:
-            return random.choice(self.action_list)
+        if random.random() < epsilon:
+            return [random.choice(self.action_list)]
         else:
-            return int(np.argmax(self.Q[state]))
+            return [int(np.argmax(self.Q[state]))]
 
-    def learn(self, num_episodes=1000, policy_path=None, log_path=None):
+    def learn(self, training_config, policy_path=None, log_path=None):
         """
         Run SARSA learning over multiple episodes. Each episode starts with an env.reset()
         and runs until done or a max number of steps is reached.
         """
+        policy_path = policy_path + '/policy.pkl'
+        training_config = training_config['sarsa']
+        num_episodes = training_config.get('num_episodes')
+        gamma = training_config.get('gamma')
+        alpha = training_config.get('alpha')
+        epsilon = training_config.get('epsilon')
+        epsilon_decay = training_config.get('epsilon_decay')
+
         results = []
         obs, info = self.env.reset()
         state = self._observation_to_state(obs)
         if state not in self.Q:
             self.Q[state] = np.zeros(len(self.action_list))
-        action = self.choose_action(state)
+        action = self.choose_action(state, epsilon)
         total_reward = 0.0
         episode_idx = 0
         while episode_idx < num_episodes:
@@ -100,31 +96,31 @@ class SARSAAgent(Agent):
             next_state = self._observation_to_state(next_obs)
             if next_state not in self.Q:
                 self.Q[next_state] = np.zeros(len(self.action_list))
-            next_action = self.choose_action(next_state)
+            next_action = self.choose_action(next_state, epsilon)
 
             # SARSA update rule:
             if not trunc:
-                td_target = reward + self.gamma * self.Q[next_state][next_action]
+                td_target = reward + gamma * self.Q[next_state][next_action]
             else:
                 td_target = reward
-                print(f"Episode {episode_idx+1}/{num_episodes}  Total Reward: {total_reward:.2f}  Epsilon: {self.epsilon:.4f}")
-                results.append((total_reward, self.epsilon))
+                print(f"Episode {episode_idx+1}/{num_episodes}  Total Reward: {total_reward:.2f}  Epsilon: {epsilon:.4f}")
+                results.append((total_reward, epsilon))
                 episode_idx += 1
-                self.epsilon *= self.epsilon_decay
+                epsilon *= epsilon_decay
                 total_reward = 0.0
                 if episode_idx%1000 == 0:
                     with open(policy_path, 'wb') as f:
                         pickle.dump(self.Q, f)
                 
             td_error = td_target - self.Q[state][action]
-            self.Q[state][action] += self.alpha * td_error
+            self.Q[state][action] += alpha * td_error
 
             if done:
                 if not trunc:
-                    print(f"Episode {episode_idx+1}/{num_episodes}  Total Reward: {total_reward:.2f}  Epsilon: {self.epsilon:.4f}")
-                    results.append((total_reward, self.epsilon))
+                    print(f"Episode {episode_idx+1}/{num_episodes}  Total Reward: {total_reward:.2f}  Epsilon: {epsilon:.4f}")
+                    results.append((total_reward, epsilon))
                     episode_idx += 1
-                    self.epsilon *= self.epsilon_decay
+                    epsilon *= epsilon_decay
                     if episode_idx%1000 == 0:
                         with open(policy_path, 'wb') as f:
                             pickle.dump(self.Q, f)
@@ -132,7 +128,7 @@ class SARSAAgent(Agent):
                 state = self._observation_to_state(obs)
                 if state not in self.Q:
                     self.Q[state] = np.zeros(len(self.action_list))
-                action = self.choose_action(state)
+                action = self.choose_action(state, epsilon)
                 total_reward = 0.0
             else:
                 state = next_state

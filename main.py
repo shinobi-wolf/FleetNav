@@ -1,32 +1,36 @@
-import time
-# from console import startup
 import argparse
-from server import startup
+from server import lmd_simulator
+from trainer import lmd_trainer
+import yaml
+import os
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")
-    parser.add_argument('-a', '--algo', type=str, required=False)
+    parser.add_argument('-c', '--config', type=str, help="Configuration file path")
     parser.add_argument('-p', '--policy', type=str, required=False, help="Policy name (e.g., '0d318b44')")
-    parser.add_argument('-e', '--env', type=str, required=False, default='multi', help="Environment name (e.g., 'LMDEnv-v0')")
-    parser.add_argument('-rm', '--render_mode', type=str, required=False, default='human', help="Render mode (e.g., 'human', 'rgb_array')")
-
+    parser.add_argument('-t', '--train', action='store_true', help="Run training mode")
     args = parser.parse_args()
-    args.policy = "9e19ef9b"
 
-    if args.algo == 'dqn':
-        config_file = f"runs/dqn/{args.policy}/config.yaml"
-    elif args.algo == 'sarsa':
-        config_file = f"runs/sarsa/{args.policy}/config.yaml"
-    elif args.algo == 'a2c':
-        config_file = f"runs/a2c/{args.policy}/config.yaml"
-    elif args.algo == 'sarsa_l':
-        config_file = f"runs/sarsa_l/{args.policy}/config.yaml"
-    elif args.algo == 'dijkstras':
-        config_file = f"runs/dijkstras/config.yaml"
+
+    if args.config:
+        config_path = args.config
     else:
-        raise ValueError("Invalid algorithm specified. Use 'dqn' or 'sarsa'.")
-
-    render_mode = args.render_mode
-    env_type = args.env
-
-    startup(config_file, render_mode=render_mode, env_type=env_type)
+        config_path = f"runs/{args.policy}/config.yaml"
+    config = yaml.safe_load(open(config_path, 'r'))
+    
+    if args.train:
+        policy_name = os.urandom(4).hex()
+        policy_dir = os.path.join(f"runs/{policy_name}")
+        os.makedirs(policy_dir, exist_ok=True)
+        config_file = os.path.join(policy_dir, "config.yaml")
+        config['policy'] = policy_name
+        config['simulation']['train'] = False
+        with open(config_file, 'w') as f:
+            yaml.dump(config, f)
+            
+        config['simulation']['train'] = True
+        lmd_trainer(config, policy_dir)
+        
+    else:
+        metrics = lmd_simulator(config)
+        print("Metrics:", metrics)

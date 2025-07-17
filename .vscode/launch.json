@@ -2,224 +2,35 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Dijkstras Single Agent gui",
+            "name": "Run Dijkstras",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "-a", "dijkstras",
-                "-e", "single"
+                "-p", "dijkstra",
             ]
         },
         {
-            "name": "Run Dijkstras Single Agent Print",
+            "name": "Run Custom",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "-a", "dijkstras",
-                "-rm", "print",
-                "-e", "single"
+                "-p", "dqn",
             ]
         },
         {
-            "name": "Run Dijkstras Single Agent Quiet",
+            "name": "Train",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "-a", "dijkstras",
-                "-rm", "quiet",
-                "-e", "single"
+                "-c", "config/train.yaml",
+                "-t",
             ]
-        },
-        {
-            "name": "Run Dijkstras Multi Agent gui",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "dijkstras",
-                "-e", "multi"
-            ]
-        },
-        {
-            "name": "Run Dijkstras Multi Agent Print",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "dijkstras",
-                "-rm", "print",
-                "-e", "multi"
-            ]
-        },
-        {
-            "name": "Run Dijkstras Multi Agent Quiet",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "dijkstras",
-                "-rm", "quiet",
-                "-e", "multi"
-            ]
-        },
-        {
-            "name": "Run SARSA Single Agent GUI",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "sarsa",
-                // "-p", "7137e4e0",
-                "-e", "single"
-            ]
-        },
-        {
-            "name": "Run SARSA Single Agent print",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "sarsa",
-                "-rm", "print",
-                // "-p", "7137e4e0",
-                "-e", "single"
-            ]
-        },
-        {
-            "name": "Run SARSA Single Agent Quiet",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "sarsa",
-                "-rm", "quiet",
-                // "-p", "7137e4e0",
-                "-e", "single"
-            ]
-        },
-        {
-            "name": "Run SARSA Multi Agent GUI",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "sarsa",
-                // "-p", "7137e4e0",
-                "-e", "multi"
-            ]
-        },
-        {
-            "name": "Run SARSA Multi Agent print",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "sarsa",
-                "-rm", "print",
-                // "-p", "7137e4e0",
-                "-e", "multi"
-            ]
-        },
-        {
-            "name": "Run SARSA Multi Agent Quiet",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "sarsa",
-                "-rm", "quiet",
-                // "-p", "7137e4e0",
-                "-e", "multi"
-            ]
-        },
-        {
-            "name": "Run DQN GUI",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "dqn",
-                "-p", "ba6a4d47",
-            ]
-        },
-        {
-            "name": "Run DQN print",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "dqn",
-                "-rm", "print",
-                "-p", "ba6a4d47",
-            ]
-        },
-        {
-            "name": "Run A2C GUI",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "a2c",
-                "-p", "f408b86d",
-            ]
-        },
-        {
-            "name": "Run A2C print",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "-a", "a2c",
-                "-rm", "print",
-                "-p", "f408b86d",
-            ]
-        },
-        {
-            "name": "Train SARSA",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/sarsa_train.py",
-            "console": "integratedTerminal",
-        },
-        {
-            "name": "Train SARSA l",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/sarsa_l_train.py",
-            "console": "integratedTerminal",
-        },
-        {
-            "name": "Train DQN",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/dqn_train.py",
-            "console": "integratedTerminal",
-        },
-        {
-            "name": "Train A2C",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/a2c_train.py",
-            "console": "integratedTerminal",
         },
         {
             "name": "Clean Up",
