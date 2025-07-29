@@ -20,8 +20,6 @@ class SARSAAgent(Agent):
         self.cell_size = config['maze']['cell_size']
         self.max_range = config['fleet']['ugv']['range']
         self.max_cell_range = int(self.max_range/self.cell_size)
-        self.max_rows = config['maze']['maze_size']
-        self.max_cols = self.max_rows
 
         if hasattr(env.action_space, 'n'):
             self.action_list = list(range(env.action_space.n))

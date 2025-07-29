@@ -59,8 +59,7 @@ def lmd_simulator(config):
     render_mode = config['simulation']['render_mode']
     open(log_file, "w").close()
     setup_logging(render_mode, log_file=log_file)
-
-    env = gym.make("LMDEnv-v0", config=config)
+    env = gym.make("SumoLMDEnv-v0", config=config)
 
     num_agents = config['fleet']['ugv']['count']
     agents = get_agent(config, env)

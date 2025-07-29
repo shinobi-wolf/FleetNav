@@ -1,0 +1,1396 @@
+Starting Simulation
+Observation: {'steps2dest': array([2., 3., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  2.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 1., 2., 3., 2.], dtype=float32), 'nb_traffic': array([2, 2, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 3., 4., 3.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([1, 1, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 6.,  4.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -5.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 3., 5., 5., 4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  1.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7.,  9.,  9., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 8.,  6.,  8., 26.,  7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  2.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 6.,  7.,  8., 26.,  7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([7., 5., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 4., 5., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  4.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  5.,  3., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 2., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 9.,  7.,  9., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 8., 8., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 6., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  6.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 3., 5., 5., 4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  2.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([1, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([1, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([2, 2, 1, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([1, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  1.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([1, 0, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -5.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7.,  7.,  9., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 6., 8., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  6.,  7., 26.,  6.], dtype=float32), 'nb_traffic': array([0, 1, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  6.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([1, 0, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 4., 5., 5., 4.], dtype=float32), 'nb_traffic': array([0, 0, 1, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 2., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  2.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([1, 0, 1, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 6., 7., 7., 7.], dtype=float32), 'nb_traffic': array([1, 1, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -5.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 6., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 5., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  4.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  4.,  5., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 5., 5., 5., 4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 3., 4., 3.], dtype=float32), 'nb_traffic': array([2, 1, 2, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7.,  8.,  9., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 7., 7., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 6., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 6., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 4., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([1, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2., 26., 26.,  1.], dtype=float32), 'nb_traffic': array([1, 1, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  6.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([1, 1, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -5.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  3.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([1, 2, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([2, 0, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7., 26., 26., 26.,  8.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 7., 8., 8., 7.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  6.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  2.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  1.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([1, 1, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 6., 6., 5., 5.], dtype=float32), 'nb_traffic': array([2, 1, 1, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -5.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 3., 5., 5., 4.], dtype=float32), 'nb_traffic': array([2, 2, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  3.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([1, 2, 1, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 9.,  7.,  8., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([8., 6., 8., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 5., 6., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  5.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 3., 5., 5., 4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 3., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 6., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7., 26., 26., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 7., 8., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([1, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 4., 4., 3.], dtype=float32), 'nb_traffic': array([1, 1, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7., 26., 26., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 8., 8., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  5.,  7., 26.,  6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 4., 5., 6., 5.], dtype=float32), 'nb_traffic': array([1, 1, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 3., 5., 5., 4.], dtype=float32), 'nb_traffic': array([1, 2, 1, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 4., 4., 3.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([2, 1, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([1, 2, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 1, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([7., 6., 8., 8., 7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4.,  5.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  4.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  4.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  2.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([2, 2, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([7., 8., 9., 9., 8.], dtype=float32), 'nb_traffic': array([2, 2, 1, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 7., 8., 8., 7.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  7.,  7., 26.,  6.], dtype=float32), 'nb_traffic': array([1, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  4.,  6., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 2., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 3., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  1.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 5., 4., 5., 4.], dtype=float32), 'nb_traffic': array([1, 0, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 4., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 1, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3.,  3., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 1., 1., 1., 0.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([7., 7., 9., 9., 8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Stay
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 6.,  8.,  6., 26.,  7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 6., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 6., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 5., 3., 5., 4.], dtype=float32), 'nb_traffic': array([1, 2, 0, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  3., 26.,  3.], dtype=float32), 'nb_traffic': array([1, 0, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 1, 1, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7., 26., 26., 26.,  8.], dtype=float32), 'nb_traffic': array([1, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 6.,  8.,  8., 26.,  7.], dtype=float32), 'nb_traffic': array([0, 1, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 5.,  5.,  7., 26.,  6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 5., 6., 5.], dtype=float32), 'nb_traffic': array([0, 1, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 5., 5., 5., 4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 3., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 1., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 6.,  8.,  8., 26.,  7.], dtype=float32), 'nb_traffic': array([1, 0, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 1, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 4., 6., 6., 5.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  4.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 1, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 1., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 1., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7.,  7.,  8., 26.,  8.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 6.,  6.,  8., 26.,  7.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([7., 5., 7., 7., 6.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 5., 6., 6., 5.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 3.,  5.,  5., 26.,  4.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 4., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 1., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 0.,  2.,  2., 26.,  1.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 2.,  4.,  4., 26.,  3.], dtype=float32), 'nb_traffic': array([0, 0, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 2., 3., 3., 2.], dtype=float32), 'nb_traffic': array([0, 0, 0, 0], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'nb_traffic': array([0, 1, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 4., 26., 26., 26.,  5.], dtype=float32), 'nb_traffic': array([0, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 5., 4., 5., 4.], dtype=float32), 'nb_traffic': array([1, 0, 2, 1], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 4., 4., 3.], dtype=float32), 'nb_traffic': array([0, 0, 1, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -50.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 1.,  3., 26., 26.,  2.], dtype=float32), 'nb_traffic': array([0, 0, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 1., 2., 1.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([ 7.,  7.,  9., 26.,  8.], dtype=float32), 'nb_traffic': array([2, 2, 0, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -55.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([6., 7., 7., 8., 7.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([5., 7., 7., 7., 6.], dtype=float32), 'nb_traffic': array([2, 2, 2, 2], dtype=int32), 'ugv_status': array([1], dtype=int32)}
+Reward: -100.0
+Terminated: True, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+
+Simulation completed.
+Termination reason: Terminated
+Final frame: 198
+Total reward: -2340.0
+Tasks completed: 28
+EV distance traveled: 9850.0
+Total time taken: 50400.0
+Total energy consumed: 9850.0
