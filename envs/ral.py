@@ -802,7 +802,7 @@ class LMDEnv(gym.Env):
             if ugv.current_range >= self.cell_size:
                 no_fuel_flag = False
                 break
-        if self.time_elapsed >= self.max_time or no_fuel_flag:
+        if self.num_tasks_completed >= 100 or no_fuel_flag:
             self.terminated = True
         else:
             self.terminated = False
