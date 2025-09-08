@@ -2,3 +2,4 @@ Policy Name,Algorithm,Experiment Description
 dijkstra,dijkstra,working on 5x5 maze
 sarsa,sarsa,working on 5x5 maze
 dqn,dqn,working on 5x5 maze
+dynaq,dynaq

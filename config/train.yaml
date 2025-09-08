@@ -4,23 +4,24 @@ maze:
   cell_size: 50
   warehouse: center
   num_base_stations: 4
+  fov: 5
 
 task:
   num_tasks: 5000
   task_prob: 0.8
 
-fleet:  
-  ugv:
-    count: 1
-    range: 100000000
-    drain_rate: 1
-    num_primitives: 5
-    speed: 1
+fleet:
   uav:
-    range: 3000
+    count_bs: 2
+    range: 1500
     speed: 3
     swapping_time: 2
-    num_uavs_per_bs: 2
+  ugv:
+    count: 5
+    drain_rate: 1
+    num_primitives: 5
+    range: 10000000
+    speed: 1
 
 traffic:
   delay_factor: 10
@@ -33,7 +34,7 @@ simulation:
   max_time: 50000
   bms: false
   traffic: true
-  algo: sarsa
+  algo: dyna_q
   render_mode: quiet
   train: true
   render_fps: 30
@@ -41,6 +42,12 @@ simulation:
 training:
   sarsa:
     num_episodes: 30000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.2
+    epsilon_decay: 0.99
+  dyna_q:
+    num_episodes: 15000
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2

@@ -1,6 +1,7 @@
 from agents.sarsa import SARSAAgent
 from agents.dijkstra import DijkstraAgent
 from agents.dqn import DQNAgent
+from agents.dyna_q_oai import DynaQ
 
 def get_agent(config, env):
     """
@@ -23,6 +24,14 @@ def get_agent(config, env):
         if algo == 'sarsa':
             return [SARSAAgent(env, config=config, policy_path=policy_path) for _ in range(num_agents)]
         
+    elif algo == 'dyna_q':
+        policy_path = None
+        if not config['simulation']['train']:
+            policy_name = config['policy']
+            policy_path = f"runs/{policy_name}/policy.pkl"
+        if algo == 'dyna_q':
+            return [DynaQ(env, config=config, policy_path=policy_path) for _ in range(num_agents)]
+
     else:
         policy_path = None
         if not config['simulation']['train']:

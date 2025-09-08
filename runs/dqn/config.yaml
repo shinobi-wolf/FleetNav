@@ -8,22 +8,22 @@ fleet:
     speed: 3
     swapping_time: 2
   ugv:
-    count: 5
+    count: 1
     drain_rate: 1
-    num_primitives: 5
-    range: 500
+    num_primitives: 4
+    range: 10000000
     speed: 1
 maze:
   cell_size: 50
   maze_loop_percentage: 60
-  maze_size: 10
+  maze_size: 5
   fov: 5
   num_base_stations: 4
   warehouse: center
 policy: dqn
 simulation:
   algo: dqn
-  bms: true
+  bms: false
   max_time: 50000
   render_fps: 30
   render_mode: quiet
