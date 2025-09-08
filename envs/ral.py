@@ -621,7 +621,8 @@ class LMDEnv(gym.Env):
                 if (dr,dc)==(0,0) or (ugv_pos,(r,c)) in self.G.edges:
                     steps2dest_.append(self.all_shortest_path_lengths[(r,c)][task_pos])
                 else:
-                    steps2dest_.append(self.fov*self.fov+1)
+                    # steps2dest_.append(self.fov*self.fov+1)
+                    steps2dest_.append(26.0)
             steps2dest.append(steps2dest_)
 
             # Neighbor Traffic
@@ -802,7 +803,7 @@ class LMDEnv(gym.Env):
             if ugv.current_range >= self.cell_size:
                 no_fuel_flag = False
                 break
-        if self.time_elapsed >= self.max_time or no_fuel_flag:
+        if self.time_elapsed >= self.max_time or no_fuel_flag or self.num_tasks_completed >= 500:
             self.terminated = True
         else:
             self.terminated = False
