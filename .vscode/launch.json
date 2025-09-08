@@ -12,7 +12,27 @@
             ]
         },
         {
-            "name": "Run Custom",
+            "name": "Run SARSA",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-p", "sarsa",
+            ]
+        },
+        {
+            "name": "Run DynaQ",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-p", "dynaq",
+            ]
+        },
+        {
+            "name": "Run DQN",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",

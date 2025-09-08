@@ -191,7 +191,7 @@ class DQNAgent(Agent):
 
     def predict(self, obs):
         obs = self.obs_converter(obs)
-        print("State:", obs)
+        # print("State:", obs)
         if random.random() < self.epsilon:
             action = self.env.action_space.sample()
             action = int(action[0])

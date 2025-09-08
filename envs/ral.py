@@ -93,7 +93,7 @@ class LMDEnv(gym.Env):
         self.screen = None
         self.clock = None
         self.font = None
-        self.cell_size_px = 70 #config["world"].get("cell_size", 30) # Pixel size for rendering cells
+        self.cell_size_px = 30 #config["world"].get("cell_size", 30) # Pixel size for rendering cells
         self.wall_thickness = 4
         self.screen_width = None
         self.screen_height = None

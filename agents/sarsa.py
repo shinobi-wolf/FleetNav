@@ -56,7 +56,7 @@ class SARSAAgent(Agent):
         for the given observation.
         """
         state = self._observation_to_state(observation)
-        print("State:", state)
+        # print("State:", state)
         if state not in self.Q:
             self.Q[state] = np.zeros(len(self.action_list))
         return int(np.argmax(self.Q[state]))
