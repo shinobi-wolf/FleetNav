@@ -1,192 +1,182 @@
 import numpy as np
-import pickle
-import os
-import random
+import pandas as pd
+import matplotlib.pyplot as plt
 import networkx as nx
-from scipy.stats import rankdata
+import pygame
+import os
 
-from agents.agent import Agent
+# Define colors for pygame
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+GRAY = (200, 200, 200)
+DARK_GREEN = (0, 100, 0)
+CYAN = (0, 255, 255)
+MAGENTA = (255, 0, 255)
 
-class DynaQ(Agent):
-    """
-    Dyna-Q agent with per-UGV independent Q-tables and a simple model for planning.
-    - Uses epsilon-greedy action selection per UGV
-    - Q-learning updates on real transitions
-    - Planning updates using stored model samples
-    """
-    def __init__(self, env, config, policy_path=None, *args, **kwargs):
-        self.env = env
-        self.config = config or {}
-        # Hyperparameters (config overrides if provided)
-        self.alpha = self.config.get('alpha', 0.1)
-        self.gamma = self.config.get('gamma', 0.99)
-        self.epsilon = self.config.get('epsilon', 0.1)
-        self.epsilon_decay = self.config.get('epsilon_decay', 0.9995)
-        self.min_epsilon = self.config.get('min_epsilon', 0.01)
-        self.planning_steps = int(self.config.get('planning_steps', 5))
-        self.num_episodes = int(self.config.get('episodes', 100))
-        self.max_steps = int(self.config.get('max_steps', 1000))
+G = nx.read_gml('data/maze.gml')
+G_converted = nx.Graph()
+for u, v, data in G.edges(data=True):
+    u_converted = eval(u) if isinstance(u, str) else u
+    v_converted = eval(v) if isinstance(v, str) else v
+    G_converted.add_edge(u_converted, v_converted, **data)
+G = G_converted
 
-        # Environment-related
-        # Expect environment to expose num_ugvs and a MultiDiscrete action_space
-        try:
-            self.num_ugvs = getattr(self.env, 'num_ugvs')
-        except Exception:
-            # Fallback: try to infer from action_space length
-            if hasattr(self.env.action_space, 'nvec'):
-                self.num_ugvs = len(self.env.action_space.nvec)
-            else:
-                self.num_ugvs = 1
+yellow_roads = []
+red_roads = []
+for u, v, data in G.edges(data=True):
+    if 'traffic' in data:
+        if data['traffic'] == 1:
+            red_roads.append((u, v))
+        elif data['traffic'] == 2:
+            yellow_roads.append((u, v))
 
-        # Number of discrete actions per UGV (assume identical across UGVs)
-        if hasattr(self.env.action_space, 'nvec'):
-            self.num_actions = int(self.env.action_space.nvec[0])
+pygame.init()
+pygame.display.set_caption("LMD Simulation")
+pygame.display.set_mode((1, 1), pygame.NOFRAME)  # Create a minimal display to enable image loading
+clock = pygame.time.Clock()
+
+# Calculate screen dimensions based on maze size and cell pixel size
+# Add padding for potential info text display later
+padding = 200
+cell_size_px = 70
+max_row, max_col = 7, 7
+wall_thickness = 2
+warehouse_pos = (max_row//2+1, max_col//2+1)
+active_task = (1,5)
+ugv_pos = (3,3)
+ugv_heading_dir = 1
+time_elapsed = 0
+current_timestep = 0
+total_ev_distance = 0
+
+screen_width = max_col * cell_size_px
+screen_height = max_row * cell_size_px + padding # Add padding at the bottom
+
+# Load font
+try:
+    font = pygame.font.SysFont(None, 24) # Adjust font size as needed
+except Exception as e:
+    print(f"Warning: Could not load system font. Text rendering might fail. Error: {e}")
+    font = pygame.font.Font(None, 24) # Fallback to default font
+
+truck_img_path = os.path.join('data/truck.png')
+
+def _cell_to_pygame(row, col):
+        """Converts maze (row, col) to pygame pixel coordinates (top-left of cell)."""
+        # Pygame origin (0,0) is top-left
+        px = (col - 1) * cell_size_px
+        py = (row - 1) * cell_size_px # Adjusted for top-left origin
+        return int(px), int(py)
+
+def _cell_to_pygame_center(row, col):
+        """Converts maze (row, col) to pygame pixel coordinates (center of cell)."""
+        px, py = _cell_to_pygame(row, col)
+        px += cell_size_px // 2
+        py += cell_size_px // 2
+        return int(px), int(py)
+
+surface = pygame.Surface((screen_width, screen_height))
+render_surface = surface
+
+truck_image = pygame.image.load(truck_img_path).convert_alpha() # Use convert_alpha for transparency
+scale_factor = 0.8
+img_size = int(cell_size_px * scale_factor)
+truck_image = pygame.transform.scale(truck_image, (img_size, img_size))
+
+# --- Drawing ---
+render_surface.fill(WHITE) # Clear surface
+
+# --- Draw Maze Area (Grid and Walls) ---
+maze_area_height = max_row * cell_size_px
+# --- Draw Maze Area (Grid and Walls) using self.G ---
+for r in range(1, max_row + 1):
+    for c in range(1, max_col + 1):
+        current_node = (r, c)
+        # Skip if node somehow doesn't exist in the graph (should not happen for grid)
+        if current_node not in G:
+            continue
+
+        px_top_left, py_top_left = _cell_to_pygame(r, c)
+
+        # Check North Wall: Draw wall if no edge exists between current node and North neighbor (r-1, c)
+        # G.has_edge handles boundary cases (e.g., r=1, neighbor (0,c) doesn't exist, so has_edge is False)
+        north_neighbor = (r - 1, c)
+        if not G.has_edge(current_node, north_neighbor):
+            # Draw the North wall of cell (r, c)
+            pygame.draw.line(render_surface, BLACK, (px_top_left, py_top_left), (px_top_left + cell_size_px, py_top_left), wall_thickness)
         else:
-            self.num_actions = int(self.env.action_space.n)
+            pygame.draw.line(render_surface, GRAY, (px_top_left, py_top_left), (px_top_left + cell_size_px, py_top_left), wall_thickness)
 
-        # Q-tables: one dict per UGV mapping state_key -> np.array of action values
-        self.Q = [dict() for _ in range(self.num_ugvs)]
-        # Model: one dict per UGV mapping (state_key, action) -> (reward, next_state_key)
-        self.model = [dict() for _ in range(self.num_ugvs)]
+        # Check West Wall: Draw wall if no edge exists between current node and West neighbor (r, c-1)
+        west_neighbor = (r, c - 1)
+        if not G.has_edge(current_node, west_neighbor):
+            # Draw the West wall of cell (r, c)
+            pygame.draw.line(render_surface, BLACK, (px_top_left, py_top_left), (px_top_left, py_top_left + cell_size_px), wall_thickness)
+        else:
+            pygame.draw.line(render_surface, GRAY, (px_top_left, py_top_left), (px_top_left, py_top_left + cell_size_px), wall_thickness)
 
-        # Policy file
-        self.policy_path = policy_path
-        if self.policy_path and os.path.exists(self.policy_path):
-            try:
-                self.load_policy(self.policy_path)
-            except Exception:
-                # Ignore load errors and start fresh
-                pass
+# Draw outer boundary walls (South and East edges explicitly)
+# This ensures the bottom border of the last row and the right border of the last column are drawn.
+pygame.draw.line(render_surface, BLACK, (0, maze_area_height), (screen_width, maze_area_height), wall_thickness) # Bottom boundary
+pygame.draw.line(render_surface, BLACK, (screen_width, 0), (screen_width, maze_area_height), wall_thickness) # Right boundary
 
-    def _state_key_for_ugv(self, observation, ugv_id):
-        """Convert full observation dict to a compact, hashable state key for a single UGV."""
-        # Observation structure expected: dict with keys 'steps2dest', 'nb_traffic', 'ugv_status'
-        steps = np.array(observation['steps2dest'], dtype=float)
-        nb = np.array(observation['nb_traffic'], dtype=int)
-        status = np.array(observation['ugv_status'], dtype=int)
 
-        # slices
-        steps_per = 5
-        nb_per = 4
-        s_slice = steps[ugv_id * steps_per:(ugv_id + 1) * steps_per]
-        nb_slice = nb[ugv_id * nb_per:(ugv_id + 1) * nb_per]
-        st = int(status[ugv_id])
+# --- Draw Traffic Roads ---
+road_thickness = max(1, int(cell_size_px * 0.15)) # Adjust thickness relative to cell size
+for u, v in red_roads:
+    u_px_c, u_py_c = _cell_to_pygame_center(u[0], u[1])
+    v_px_c, v_py_c = _cell_to_pygame_center(v[0], v[1])
+    pygame.draw.line(render_surface, RED, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
+for u, v in yellow_roads:
+    u_px_c, u_py_c = _cell_to_pygame_center(u[0], u[1])
+    v_px_c, v_py_c = _cell_to_pygame_center(v[0], v[1])
+    pygame.draw.line(render_surface, YELLOW, (u_px_c, u_py_c), (v_px_c, v_py_c), road_thickness)
 
-        # Quantize steps (they are integer-like but may be floats) and clamp
-        s_q = tuple(int(np.clip(np.round(s), 0, 9999)) for s in s_slice)
-        nb_q = tuple(int(x) for x in nb_slice)
-        key = (s_q, nb_q, st)
-        return key
 
-    def _observe_to_state_keys(self, observation):
-        return [self._state_key_for_ugv(observation, i) for i in range(self.num_ugvs)]
+# --- Draw Warehouse ---
+wh_r, wh_c = warehouse_pos
+wh_px_c, wh_py_c = _cell_to_pygame_center(wh_r, wh_c)
+warehouse_radius = int(cell_size_px * 0.4)
+pygame.draw.circle(render_surface, BLUE, (wh_px_c, wh_py_c), warehouse_radius)
 
-    def predict(self, observation):
-        """Return an action array (one action per UGV) using epsilon-greedy policy."""
-        state_keys = self._observe_to_state_keys(observation)
-        actions = np.zeros(self.num_ugvs, dtype=int)
-        for i, sk in enumerate(state_keys):
-            # Ensure Q entry exists
-            if sk not in self.Q[i]:
-                self.Q[i][sk] = np.zeros(self.num_actions, dtype=float)
+# --- Draw Tasks ---
+task_r, task_c = active_task
+task_px_c, task_py_c = _cell_to_pygame_center(task_r, task_c)
+task_radius = int(cell_size_px * 0.25)
+pygame.draw.circle(render_surface, MAGENTA, (task_px_c, task_py_c), task_radius)
 
-            if random.random() < self.epsilon:
-                actions[i] = random.randrange(self.num_actions)
-            else:
-                # argmax with tie-breaking
-                qvals = self.Q[i][sk]
-                max_inds = np.flatnonzero(qvals == qvals.max())
-                actions[i] = int(np.random.choice(max_inds))
-        return actions
+ugv_r, ugv_c = ugv_pos
+ugv_px_c, ugv_py_c = _cell_to_pygame_center(ugv_r, ugv_c)
 
-    def learn(self, training_config=None, policy_path=None, log_path=None):
-        """Train the agent in the provided environment using Dyna-Q.
-        training_config may override self.num_episodes, self.max_steps, etc.
-        """
-        cfg = training_config or {}
-        episodes = int(cfg.get('episodes', self.num_episodes))
-        max_steps = int(cfg.get('max_steps', self.max_steps))
-        planning_steps = int(cfg.get('planning_steps', self.planning_steps))
+# Draw UGV (Image or Shape)
+truck_img_rotated = pygame.transform.rotate(truck_image, (ugv_heading_dir-1)%4 * -90) # Rotate image based on heading
 
-        for ep in range(episodes):
-            obs, info = self.env.reset()
-            state_keys = self._observe_to_state_keys(obs)
-            for t in range(max_steps):
-                action = self.predict(obs)
-                next_obs, reward, terminated, truncated, info = self.env.step(action)
+img_rect = truck_img_rotated.get_rect(center=(ugv_px_c, ugv_py_c))
+render_surface.blit(truck_img_rotated, img_rect)
 
-                # Normalize reward to float
-                r = float(reward) if reward is not None else 0.0
+# For rgb_array mode, convert surface to numpy array and return
 
-                next_state_keys = self._observe_to_state_keys(next_obs)
+# --- Draw Info Text ---
+if font:
+    info_y_start = maze_area_height + 5 # Start below maze area
+    info_line_height = 20
+    texts = [
+        f"Time Elapsed: {time_elapsed:.2f}s",
+        f"Timestep: {current_timestep}",
+        f"Total Dist: {total_ev_distance:.1f}m",
+    ]
+    for i, text in enumerate(texts):
+        text_surface = font.render(text, True, BLACK)
+        render_surface.blit(text_surface, (5, info_y_start + i * info_line_height))
 
-                # Real experience Q-learning update and model storage
-                for i in range(self.num_ugvs):
-                    s = state_keys[i]
-                    a = int(action[i])
-                    s_next = next_state_keys[i]
+# # For human mode, update the display
+# pygame.display.flip()
 
-                    qs = self.Q[i].setdefault(s, np.zeros(self.num_actions, dtype=float))
-                    qnext = self.Q[i].setdefault(s_next, np.zeros(self.num_actions, dtype=float))
-
-                    td_target = r + self.gamma * np.max(qnext)
-                    qs[a] += self.alpha * (td_target - qs[a])
-
-                    # Update model
-                    self.model[i][(s, a)] = (r, s_next)
-
-                # Planning updates
-                for _ in range(planning_steps):
-                    # Randomly pick a UGV that has model entries
-                    ugv_candidates = [i for i in range(self.num_ugvs) if len(self.model[i]) > 0]
-                    if not ugv_candidates:
-                        break
-                    i = random.choice(ugv_candidates)
-                    (s_p, a_p), (r_p, s_p_next) = random.choice(list(self.model[i].items()))
-                    qs = self.Q[i].setdefault(s_p, np.zeros(self.num_actions, dtype=float))
-                    qnext = self.Q[i].setdefault(s_p_next, np.zeros(self.num_actions, dtype=float))
-                    td_target = r_p + self.gamma * np.max(qnext)
-                    qs[a_p] += self.alpha * (td_target - qs[a_p])
-
-                obs = next_obs
-                state_keys = next_state_keys
-
-                if terminated or truncated:
-                    break
-
-            # Decay epsilon after each episode
-            self.epsilon = max(self.min_epsilon, self.epsilon * self.epsilon_decay)
-
-            # Optionally save policy per-episode
-            if policy_path or self.policy_path:
-                out_path = policy_path or self.policy_path
-                try:
-                    self.save_policy(out_path)
-                except Exception:
-                    pass
-
-        return self.Q
-
-    def save_policy(self, path):
-        data = {
-            'Q': self.Q,
-            'model': self.model,
-            'alpha': self.alpha,
-            'gamma': self.gamma,
-            'epsilon': self.epsilon,
-            'num_ugvs': self.num_ugvs,
-            'num_actions': self.num_actions,
-        }
-        with open(path, 'wb') as f:
-            pickle.dump(data, f)
-
-    def load_policy(self, path):
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-        self.Q = data.get('Q', self.Q)
-        self.model = data.get('model', self.model)
-        self.alpha = data.get('alpha', self.alpha)
-        self.gamma = data.get('gamma', self.gamma)
-        self.epsilon = data.get('epsilon', self.epsilon)
-        self.num_ugvs = data.get('num_ugvs', self.num_ugvs)
-        self.num_actions = data.get('num_actions', self.num_actions)
+# Save the rendered maze as a PNG image
+output_path = 'maze_output.png'
+pygame.image.save(render_surface, output_path)
+print(f"Maze image saved to {output_path}")

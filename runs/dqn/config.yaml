@@ -1,6 +1,6 @@
 debug:
   fast_forward: 0
-  manual_control: false
+  manual_control: true
 fleet:
   uav:
     count_bs: 2
@@ -8,15 +8,15 @@ fleet:
     speed: 3
     swapping_time: 2
   ugv:
-    count: 7
+    count: 1
     drain_rate: 1
-    num_primitives: 5
-    range: 2000
+    num_primitives: 4
+    range: 100000000
     speed: 1
 maze:
   cell_size: 50
-  maze_loop_percentage: 50
-  maze_size: 10
+  maze_loop_percentage: 60
+  maze_size: 7
   fov: 5
   num_base_stations: 4
   warehouse: center
@@ -24,9 +24,9 @@ policy: dqn
 simulation:
   algo: dqn
   bms: false
-  max_time: 50000
+  max_time: 5000
   render_fps: 30
-  render_mode: quiet
+  render_mode: human
   traffic: true
   train: false
 task:
@@ -34,8 +34,8 @@ task:
   task_prob: 0.8
 traffic:
   delay_factor: 10
-  num_centroids: 2
-  prob: 0.7
+  num_centroids: 3
+  prob: 0.8
   reset_dur: 5
   std_dev: 1
 training:
