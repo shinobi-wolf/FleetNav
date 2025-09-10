@@ -1,5 +1,5 @@
 import argparse
-from server import lmd_simulator
+from server_pp import lmd_simulator
 from trainer import lmd_trainer
 import yaml
 import os
