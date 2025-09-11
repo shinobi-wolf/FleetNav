@@ -8,15 +8,15 @@ fleet:
     speed: 3
     swapping_time: 2
   ugv:
-    count: 1
+    count: 20
     drain_rate: 1
     num_primitives: 5
-    range: 10000000
+    range: 4500
     speed: 1
 maze:
   cell_size: 50
   maze_loop_percentage: 70
-  maze_size: 7
+  maze_size: 30
   fov: 5
   num_base_stations: 4
   warehouse: center
@@ -30,14 +30,15 @@ simulation:
   traffic: true
   train: false
 task:
-  num_tasks: 50000
+  num_tasks: 300
   task_prob: 0.8
+  global_planner: mtsp
 traffic:
   delay_factor: 10
-  num_centroids: 3
+  num_centroids: 12
   prob: 0.9
   reset_dur: 5
-  std_dev: 1
+  std_dev: 2.7
 training:
   sarsa:
     alpha: 0.1

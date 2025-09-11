@@ -84,7 +84,7 @@ class DQNAgent(Agent):
         if policy_path:
             self.model.load_state_dict(torch.load(policy_path, map_location='cuda'))
             self.model.eval()
-            print(self.model)
+            # print(self.model)
 
     def obs_converter(self, obs):
         assert isinstance(obs, dict), "Observation must be a dictionary"

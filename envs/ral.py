@@ -48,6 +48,194 @@ def generate_df_maze(rows=20, cols=20, lp=80):
         )
     return df
 
+def evrp_solver(G, num_vehicles):
+    """
+    Solves the Vehicle Routing Problem (EVRP) using a combination of clustering
+    and nearest neighbor heuristics.
+    
+    Args:
+        G: NetworkX graph where nodes represent locations (warehouse at index 0, tasks at indices 1+)
+           and edges have 'weight' attributes representing distances
+        num_vehicles: Number of vehicles (UGVs) available
+    
+    Returns:
+        List of lists, where each inner list contains the task indices assigned to each vehicle
+    """
+    import numpy as np
+    from sklearn.cluster import KMeans
+    from collections import defaultdict
+    
+    # Extract nodes and create a mapping
+    nodes = list(G.nodes())
+    warehouse_idx = 0  # Warehouse is always at index 0
+    task_indices = [i for i in nodes if i != warehouse_idx]
+    
+    if not task_indices:
+        return [[] for _ in range(num_vehicles)]
+    
+    # If fewer tasks than vehicles, assign one task per vehicle
+    if len(task_indices) <= num_vehicles:
+        vehicle_routes = [[] for _ in range(num_vehicles)]
+        for i, task_idx in enumerate(task_indices):
+            vehicle_routes[i].append(task_idx)
+        return vehicle_routes
+    
+    # Create a distance matrix for clustering
+    n_tasks = len(task_indices)
+    positions = np.zeros((n_tasks, 2))
+    
+    # For clustering, we need positions. Since we have a graph with distances,
+    # we'll use multidimensional scaling to approximate positions
+    # Alternatively, if the graph represents a grid, we can extract coordinates
+    
+    # First, try to extract coordinates from the graph if available
+    # Assuming task indices are tuples (row, col) based on the code structure
+    use_mds = False
+    try:
+        for i, task_idx in enumerate(task_indices):
+            if isinstance(task_idx, tuple) and len(task_idx) == 2:
+                positions[i] = [task_idx[0], task_idx[1]]
+            else:
+                use_mds = True
+                break
+    except:
+        use_mds = True
+    
+    if use_mds:
+        # Use Multi-Dimensional Scaling to approximate positions from distances
+        from sklearn.manifold import MDS
+        
+        # Create distance matrix including warehouse
+        all_nodes = [warehouse_idx] + task_indices
+        n_all = len(all_nodes)
+        dist_matrix = np.zeros((n_all, n_all))
+        
+        for i, node_i in enumerate(all_nodes):
+            for j, node_j in enumerate(all_nodes):
+                if i != j:
+                    dist_matrix[i, j] = G[node_i][node_j]['weight']
+        
+        # Apply MDS to get 2D positions
+        mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
+        all_positions = mds.fit_transform(dist_matrix)
+        positions = all_positions[1:]  # Exclude warehouse for clustering
+    
+    # Step 1: Cluster tasks using K-means
+    kmeans = KMeans(n_clusters=num_vehicles, random_state=42)
+    cluster_labels = kmeans.fit_predict(positions)
+    
+    # Step 2: Assign tasks to vehicles based on clusters
+    vehicle_tasks = defaultdict(list)
+    for task_idx, cluster_id in zip(task_indices, cluster_labels):
+        vehicle_tasks[cluster_id].append(task_idx)
+    
+    # Step 3: Optimize route within each cluster using nearest neighbor heuristic
+    vehicle_routes = []
+    
+    for vehicle_id in range(num_vehicles):
+        tasks = vehicle_tasks[vehicle_id]
+        
+        if not tasks:
+            vehicle_routes.append([])
+            continue
+        
+        # Create a subgraph for this vehicle's tasks plus warehouse
+        subgraph_nodes = [warehouse_idx] + tasks
+        route = []
+        
+        if len(tasks) == 1:
+            route = tasks
+        else:
+            # Use nearest neighbor heuristic starting from warehouse
+            unvisited = set(tasks)
+            current = warehouse_idx
+            
+            while unvisited:
+                # Find nearest unvisited task
+                nearest_task = None
+                min_dist = float('inf')
+                
+                for task in unvisited:
+                    dist = G[current][task]['weight']
+                    if dist < min_dist:
+                        min_dist = dist
+                        nearest_task = task
+                
+                if nearest_task is not None:
+                    route.append(nearest_task)
+                    unvisited.remove(nearest_task)
+                    current = nearest_task
+        
+        vehicle_routes.append(route)
+    
+    # Step 4: Balance workload if there's significant imbalance
+    # Calculate total distance for each vehicle
+    vehicle_distances = []
+    for route in vehicle_routes:
+        total_dist = 0
+        if route:
+            # Distance from warehouse to first task
+            total_dist += G[warehouse_idx][route[0]]['weight']
+            # Distance between consecutive tasks
+            for i in range(len(route) - 1):
+                total_dist += G[route[i]][route[i+1]]['weight']
+            # Distance from last task back to warehouse
+            total_dist += G[route[-1]][warehouse_idx]['weight']
+        vehicle_distances.append(total_dist)
+    
+    # Optional: Rebalance if there's significant imbalance
+    if vehicle_distances:
+        avg_dist = sum(vehicle_distances) / len(vehicle_distances)
+        max_dist = max(vehicle_distances)
+        
+        # If max distance is significantly higher than average, try to rebalance
+        if max_dist > 1.5 * avg_dist and len(vehicle_routes) > 1:
+            # Find vehicle with maximum and minimum load
+            max_vehicle = vehicle_distances.index(max_dist)
+            min_vehicle = vehicle_distances.index(min(vehicle_distances))
+            
+            # Try to move a task from max_vehicle to min_vehicle
+            if len(vehicle_routes[max_vehicle]) > 1:
+                # Find the task that's closest to min_vehicle's route
+                best_task_to_move = None
+                min_increase = float('inf')
+                
+                for task in vehicle_routes[max_vehicle]:
+                    # Calculate distance increase for min_vehicle
+                    if vehicle_routes[min_vehicle]:
+                        # Distance to nearest task in min_vehicle's route
+                        min_dist_to_route = min(
+                            G[task][t]['weight'] 
+                            for t in vehicle_routes[min_vehicle]
+                        )
+                    else:
+                        # Distance to warehouse if min_vehicle has no tasks
+                        min_dist_to_route = G[warehouse_idx][task]['weight']
+                    
+                    if min_dist_to_route < min_increase:
+                        min_increase = min_dist_to_route
+                        best_task_to_move = task
+                
+                # Move the task if it improves balance
+                if best_task_to_move is not None:
+                    vehicle_routes[max_vehicle].remove(best_task_to_move)
+                    vehicle_routes[min_vehicle].append(best_task_to_move)
+    
+    # Convert the routes to the format expected by the main code
+    # The main code expects the actual task positions, not indices
+    final_routes = []
+    for route in vehicle_routes:
+        # If indices are the actual positions (tuples), keep them
+        # Otherwise, map them back to positions
+        if all(isinstance(task, tuple) for task in route):
+            final_routes.append(route)
+        else:
+            # Map indices back to actual positions if needed
+            final_routes.append(route)
+    
+    return final_routes
+
+
 # Define colors for pygame
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -113,6 +301,7 @@ class LMDEnv(gym.Env):
         # Task vars
         self.num_tasks = config["task"]["num_tasks"]
         self.task_prob = config["task"]["task_prob"]
+        self.global_planner = config["task"]["global_planner"]
 
         # Warehouse vars
         self.warehouse_opt = config["maze"]["warehouse"]
@@ -451,20 +640,37 @@ class LMDEnv(gym.Env):
         py += self.cell_size_px // 2
         return int(px), int(py)
 
-    def distrubute_tasks(self):
+    def distribute_tasks(self):
         if self.task_list:
-            # Convert task tuples to a NumPy array of shape (n_tasks, 2)
-            tasks_array = np.array(self.task_list)
-            # Cluster tasks into self.num_ugvs clusters
-            kmeans = KMeans(n_clusters=self.num_ugvs)
-            labels = kmeans.fit_predict(tasks_array)
-            # Assign tasks to each UGV based on clustering labels
             ugv_task_list = [[] for _ in range(self.num_ugvs)]
-            for task, label in zip(self.task_list, labels):
-                ugv_task_list[label].append(task)
+            if self.global_planner == "mtsp":
+                # Convert task tuples to a NumPy array of shape (n_tasks, 2)
+                tasks_array = np.array(self.task_list)
+                # Cluster tasks into self.num_ugvs clusters
+                kmeans = KMeans(n_clusters=self.num_ugvs)
+                labels = kmeans.fit_predict(tasks_array)
+                # Assign tasks to each UGV based on clustering labels
+                for task, label in zip(self.task_list, labels):
+                    ugv_task_list[label].append(task)
+            elif self.global_planner == "evrp":
+                # Create a complete graph where nodes are tasks and warehouse
+                G_ = nx.Graph()
+                all_points = [self.warehouse_pos] + self.task_list
+                
+                # Add edges between all points with shortest path length as weight
+                for i, point1 in enumerate(all_points):
+                    for j, point2 in enumerate(all_points):
+                        if i != j:
+                            G_.add_edge(i, j, weight=self.all_shortest_path_lengths[point1][point2])
+                ugv_task_list_ = evrp_solver(G_, self.num_ugvs)
+                ugv_task_list = [[all_points[idx] for idx in route]+[self.warehouse_pos] for route in ugv_task_list_]
+
+            print("=== Task Distribution ===")
+            for idx, tasks in enumerate(ugv_task_list):
+                print(f"UGV {idx} Tasks: {tasks}")
             for ugv in self.ugv_states:
-                ugv.task_list = ugv_task_list[ugv.agent_id]
-                self.assign_ugv_task(ugv.agent_id, 0)  # Assign tasks to UGVs
+                    ugv.task_list = ugv_task_list[ugv.agent_id]*2
+                    self.assign_ugv_task(ugv.agent_id, 0)  # Assign tasks to UGVs
 
     def assign_ugv_task(self, ugv_id, mode):
         ugv = self.ugv_states[ugv_id]
@@ -565,8 +771,8 @@ class LMDEnv(gym.Env):
         # UGV States
         self.ugv_states = [UGV(ugv_id=i, base_position=self.warehouse_pos, cell_dist=self.cell_size, max_range=self.max_ugv_range,drain_rate=self.drain_rate, 
                        max_speed=self.ugv_speed, traffic_delay_factor= self.traffic_delay_factor, G=self.G) for i in range(self.num_ugvs)]
-        self.task_list = random.choices(list(self.G.nodes), k=self.num_tasks) # Randomly select tasks from graph nodes
-        self.distrubute_tasks() # Distribute tasks to UGVs
+        self.task_list = random.sample(list(self.G.nodes), k=self.num_tasks) # Randomly select tasks from graph nodes
+        self.distribute_tasks() # Distribute tasks to UGVs
 
         if self.bms:
             self.base_stations = random.sample(list(self.G.nodes), self.num_base_stations)
@@ -803,7 +1009,7 @@ class LMDEnv(gym.Env):
             if ugv.current_range >= self.cell_size:
                 no_fuel_flag = False
                 break
-        if self.time_elapsed >= self.max_time or no_fuel_flag or self.num_tasks_completed >= 500:
+        if self.time_elapsed >= self.max_time or no_fuel_flag or self.num_tasks_completed >= 50:
             self.terminated = True
         else:
             self.terminated = False

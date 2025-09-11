@@ -44,6 +44,9 @@ class UGV:
         4: Stay
         Returns True if move was successful, False if out of range
         """
+        if self.status == -1:
+            self.act_response = 1
+            return
         if self.charging_status == 1:
             if self.path2warehouse is None:
                 self.path2warehouse = nx.shortest_path(self.G, source=self.position, target=self.base_point)
@@ -97,6 +100,7 @@ class UGV:
                         curr_speed = self.max_speed / (1 + self.traffic_delay_factor*traffic)  # Speed reduces with increasing traffic
                         self.move_time = self.cell_dist / curr_speed
                         if self.charging_status == 0:
+                        # if True:
                             self.current_range = range_left
                             self.current_range_percent = self.current_range / self.max_range
                         self.local_time += self.move_time

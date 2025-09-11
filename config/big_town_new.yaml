@@ -1,0 +1,51 @@
+debug:
+  fast_forward: 0
+  manual_control: false
+fleet:
+  uav:
+    count_bs: 2
+    range: 1500
+    speed: 3
+    swapping_time: 2
+  ugv:
+    count: 20
+    drain_rate: 1
+    num_primitives: 5
+    range: 4500
+    speed: 1
+maze:
+  cell_size: 50
+  maze_loop_percentage: 70
+  maze_size: 30
+  fov: 5
+  num_base_stations: 4
+  warehouse: center
+policy: dijkstra
+simulation:
+  algo: dijkstra
+  bms: false
+  max_time: 50000
+  render_fps: 30
+  render_mode: quiet
+  traffic: true
+  train: false
+task:
+  num_tasks: 300
+  task_prob: 0.8
+  global_planner: mtsp
+traffic:
+  delay_factor: 10
+  num_centroids: 12
+  prob: 0.9
+  reset_dur: 5
+  std_dev: 2.7
+training:
+  sarsa:
+    alpha: 0.1
+    epsilon: 0.2
+    epsilon_decay: 0.99
+    gamma: 0.99
+    num_episodes: 30000
+debug:
+  fast_forward: 0
+  manual_control: true
