@@ -19,6 +19,11 @@ from envs.fleet.UAV import UAV
 from sklearn.cluster import KMeans
 import numpy as np
 
+# from ortools.constraint_solver import routing_enums_pb2
+# from ortools.constraint_solver import pywrapcp
+
+mean_shortest_path = False
+
 def generate_df_maze(rows=20, cols=20, lp=80):
     # Create a Pyamaze maze
     m = maze(rows, cols)
@@ -235,6 +240,74 @@ def evrp_solver(G, num_vehicles):
     
     return final_routes
 
+def vrp_solver(G, num_vehicles, depot_node, fuel_capacity):
+    def create_distance_matrix(G):
+        nodes = sorted(G.nodes())
+        node_to_idx = {node: idx for idx, node in enumerate(nodes)}
+        n = len(nodes)
+        
+        dist_matrix = np.zeros((n, n), dtype=int)
+        for i, node_i in enumerate(nodes):
+            for j, node_j in enumerate(nodes):
+                if i != j:
+                    if nx.has_path(G, node_i, node_j):
+                        dist = nx.shortest_path_length(G, node_i, node_j)
+                        dist_matrix[i, j] = dist * 50  # Scale for better numeric stability
+                    else:
+                        dist_matrix[i, j] = 999999  # No path exists
+        
+        return dist_matrix, nodes, node_to_idx
+    
+    distance_matrix, nodes, node_to_idx = create_distance_matrix(G)
+
+    depot_idx = node_to_idx[depot_node]
+    
+    manager = pywrapcp.RoutingIndexManager(len(distance_matrix), num_vehicles, depot_idx)
+    routing = pywrapcp.RoutingModel(manager)
+    
+    def distance_callback(from_idx, to_idx):
+        from_node = manager.IndexToNode(from_idx)
+        to_node = manager.IndexToNode(to_idx)
+        return distance_matrix[from_node][to_node]
+    
+    transit_callback_idx = routing.RegisterTransitCallback(distance_callback)
+    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_idx)
+
+    num_nodes = manager.GetNumberOfNodes()
+    slacks = [0] * num_nodes
+    
+    
+    routing.AddDimension(
+        transit_callback_idx,
+        0,  # no slack
+        fuel_capacity,  # vehicle fuel capacity
+        True,  # start cumul to zero
+        'Fuel'
+    )
+    distance_dimension = routing.GetDimensionOrDie('Fuel')
+    distance_dimension.SetGlobalSpanCostCoefficient(100)
+    
+    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+    search_parameters.first_solution_strategy = (
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+    )
+    
+    solution = routing.SolveWithParameters(search_parameters)
+    ugv_task_list = []
+    if solution:
+        for vehicle_id in range(routing.vehicles()):
+            route = []
+            index = routing.Start(vehicle_id)
+            
+            while not routing.IsEnd(index):
+                node_idx = manager.IndexToNode(index)
+                route.append(nodes[node_idx])
+                index = solution.Value(routing.NextVar(index))
+                
+            node_idx = manager.IndexToNode(index)
+            route.append(nodes[node_idx])
+            ugv_task_list.append(route[1:])  # Exclude depot from tasks
+    return ugv_task_list
 
 # Define colors for pygame
 WHITE = (255, 255, 255)
@@ -664,6 +737,18 @@ class LMDEnv(gym.Env):
                             G_.add_edge(i, j, weight=self.all_shortest_path_lengths[point1][point2])
                 ugv_task_list_ = evrp_solver(G_, self.num_ugvs)
                 ugv_task_list = [[all_points[idx] for idx in route]+[self.warehouse_pos] for route in ugv_task_list_]
+            elif self.global_planner == "vrp":
+                G_ = nx.Graph()
+                all_points = [self.warehouse_pos] + self.task_list
+                
+                # Add edges between all points with shortest path length as weight
+                for i, point1 in enumerate(all_points):
+                    for j, point2 in enumerate(all_points):
+                        if i != j:
+                            G_.add_edge(i, j, weight=self.all_shortest_path_lengths[point1][point2])
+
+                ugv_task_list_ = vrp_solver(G_, self.num_ugvs, self.warehouse_pos, 100000000)
+                ugv_task_list = [[all_points[idx] for idx in route]+[self.warehouse_pos] for route in ugv_task_list_]
 
             print("=== Task Distribution ===")
             for idx, tasks in enumerate(ugv_task_list):
@@ -743,6 +828,28 @@ class LMDEnv(gym.Env):
             if row['S'] == 1:
                 G.add_edge((r, c), (r + 1,c), traffic=0)
 
+        if mean_shortest_path:
+            all_shortest_path_lengths = {}
+            for source in G.nodes():
+                all_shortest_path_lengths[source] = {}
+                for target in G.nodes():
+                    if source == target:
+                        all_shortest_path_lengths[source][target] = 0
+                        continue
+                    
+                    # Find all simple paths with limited length
+                    try:
+                        # Get up to 3 shortest paths
+                        paths = list(nx.shortest_simple_paths(G, source, target))[:3]
+                        if paths:
+                            # Calculate mean length of available paths (up to 3)
+                            path_lengths = [len(path) - 1 for path in paths]  # -1 because path length includes nodes
+                            all_shortest_path_lengths[source][target] = sum(path_lengths) / len(path_lengths)
+                        else:
+                            # If no path exists, use infinity or a large value
+                            all_shortest_path_lengths[source][target] = float('inf')
+                    except nx.NetworkXNoPath:
+                        all_shortest_path_lengths[source][target] = float('inf')
         all_shortest_path_lengths = dict(nx.all_pairs_shortest_path_length(G))
 
         return G, all_shortest_path_lengths
@@ -768,10 +875,21 @@ class LMDEnv(gym.Env):
         if self.traffic_b:
             self.fill_traffic_centroids() # Generate initial traffic if enabled
 
+
         # UGV States
         self.ugv_states = [UGV(ugv_id=i, base_position=self.warehouse_pos, cell_dist=self.cell_size, max_range=self.max_ugv_range,drain_rate=self.drain_rate, 
                        max_speed=self.ugv_speed, traffic_delay_factor= self.traffic_delay_factor, G=self.G) for i in range(self.num_ugvs)]
         self.task_list = random.sample(list(self.G.nodes), k=self.num_tasks) # Randomly select tasks from graph nodes
+        # Save the maze graph to a GML file
+        G_ = nx.Graph()
+        all_points = [self.warehouse_pos] + self.task_list
+        
+        # Add edges between all points with shortest path length as weight
+        for i, point1 in enumerate(all_points):
+            for j, point2 in enumerate(all_points):
+                if i != j:
+                    G_.add_edge(i, j, weight=self.all_shortest_path_lengths[point1][point2])
+        nx.write_gml(G_, os.path.join('data', 'maze.gml'))
         self.distribute_tasks() # Distribute tasks to UGVs
 
         if self.bms:
