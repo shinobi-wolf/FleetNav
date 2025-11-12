@@ -3,8 +3,7 @@ import numpy as np
 
 
 class Agent:
-    def __init__(self, env, *args, **kwargs):
-        self.env = env
+    def __init__(self, *args, **kwargs):
 
         self.state = None
 
@@ -12,7 +11,6 @@ class Agent:
         self.policy = {}  # key: state, value: action
 
         # Store action space for sampling random actions
-        self.action_space = env.action_space
 
     def predict(self, observation):
         """

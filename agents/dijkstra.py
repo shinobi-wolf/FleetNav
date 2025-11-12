@@ -8,10 +8,9 @@ class DijkstraAgent(Agent):
     Does not learn - simply uses Dijkstra's algorithm for pathfinding.
     """
     
-    def __init__(self, agent_id, env, *args, **kwargs):
-        super().__init__(env, *args, **kwargs)
+    def __init__(self, agent_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.agent_id = agent_id
-        self.env = env
         
     def predict(self, observation):
         steps2dest = observation['steps2dest']

@@ -12,25 +12,30 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 
-    if args.config:
-        config_path = args.config
-    else:
-        config_path = f"runs/{args.policy}/config.yaml"
-    config = yaml.safe_load(open(config_path, 'r'))
-    
     if args.train:
+        if args.config:
+            config_path = args.config
+        else:
+            config_path = f"config/train.yaml"
+        config = yaml.safe_load(open(config_path, 'r'))
+        
         policy_name = os.urandom(4).hex()
         policy_dir = os.path.join(f"runs/{policy_name}")
         os.makedirs(policy_dir, exist_ok=True)
+        lmd_trainer(config, policy_dir)
+
         config_file = os.path.join(policy_dir, "config.yaml")
         config['policy'] = policy_name
         config['simulation']['train'] = False
         with open(config_file, 'w') as f:
             yaml.dump(config, f)
             
-        config['simulation']['train'] = True
-        lmd_trainer(config, policy_dir)
-        
     else:
+        if args.config:
+            config_path = args.config
+        else:
+            config_path = f"runs/{args.policy}/config.yaml"
+        config = yaml.safe_load(open(config_path, 'r'))
+     
         metrics = lmd_simulator(config)
         print("Metrics:", metrics)
