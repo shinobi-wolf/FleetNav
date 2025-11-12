@@ -1,7 +1,7 @@
 debug:
   fast_forward: 100
 fleet:
-  count: 1
+  count: 4
   range: 100000000
   max_speed: 1
 net:
@@ -15,7 +15,7 @@ simulation:
   render_fps: 30
   step_length: 1
 task:
-  demand_per: 40
+  demand_per: 60
 traffic:
   p:1
   b:1

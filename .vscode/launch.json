@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["-p", "dijkstra_sumo"],
+            "args": ["-p", "dijkstra"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/visualize_sumo_simulation.py",
             "console": "integratedTerminal",
-            "args": ["dijkstra_sumo"],
+            "args": ["dijkstra"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
