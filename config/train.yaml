@@ -39,7 +39,7 @@ simulation:
 
 training:
   sarsa:
-    num_episodes: 1500
+    num_episodes: 3000
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2

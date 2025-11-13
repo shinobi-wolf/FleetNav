@@ -1,0 +1,202 @@
+Starting Simulation
+Observation: {'steps2dest': array([  1.,   3.,   3., 100.,   2.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([15,  2], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([  0.,   2.,   2., 100.,   1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([10,  2], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([  6.,   4.,   4., 100.,   5.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([ 2, 18], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([  5.,   3.,   3., 100.,   4.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([10, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 4., 2., 2., 3.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([11, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 3., 1., 1., 2.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([12, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 0., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([17, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Left
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 4., 4., 3.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([18,  6], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 1., 3., 3., 2.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([13,  6], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([12,  6], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([6, 3], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([  2.,   4.,   2., 100.,   3.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([3, 2], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 1., 3., 3., 2.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([6, 2], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 0., 2., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([4, 2], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([  6.,   4.,   4., 100.,   5.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([ 2, 18], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([  5.,   3.,   3., 100.,   4.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([10, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([4., 4., 2., 2., 3.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([11, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 3., 1., 1., 2.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([12, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 0., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([17, 18], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Left
+-------------------------------------------
+
+Observation: {'steps2dest': array([0., 2., 2., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([18, 13], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 0., 2., 1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([13, 14], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([  5.,   5.,   7., 100.,   6.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([14,  0], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Down
+-------------------------------------------
+
+Observation: {'steps2dest': array([  4.,   4.,   6., 100.,   5.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([9, 0], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([3., 3., 5., 5., 4.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([8, 0], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([2., 2., 4., 4., 3.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([6, 0], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([1., 1., 3., 3., 2.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([4, 0], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([  0.,   2.,   2., 100.,   1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([2, 0], dtype=int32)}
+Reward: 0.0
+Terminated: False, Truncated: False
+UGV 0 Info...
+Action taken: Right
+-------------------------------------------
+
+Observation: {'steps2dest': array([  2.,   0., 100., 100.,   1.], dtype=float32), 'ugv_status': array([1], dtype=int32), 'state_info': array([0, 2], dtype=int32)}
+Reward: 45.0
+Terminated: False, Truncated: True
+UGV 0 Info...
+Action taken: Up
+-------------------------------------------
+
+Observation: {'steps2dest': array([100., 100., 100., 100., 100.], dtype=float32), 'ugv_status': array([0], dtype=int32), 'state_info': array([2, 2], dtype=int32)}
+Reward: 45.0
+Terminated: True, Truncated: True
+UGV 0 Info...
+Action taken: Right

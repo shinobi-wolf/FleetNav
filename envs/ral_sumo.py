@@ -66,11 +66,13 @@ class SumoLMDEnv(gym.Env):
         ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
         max_moves = 100
         steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_primitives*self.num_ugvs))
-        nb_traffic_space = spaces.MultiDiscrete(np.array([3]*(self.num_primitives-1)*self.num_ugvs))
+        # nb_traffic_space = spaces.MultiDiscrete(np.array([3]*(self.num_primitives-1)*self.num_ugvs))
+        state_info_space = spaces.MultiDiscrete(np.array([1000]*2*self.num_ugvs))
         self.observation_space = spaces.Dict({
             'ugv_status': ugv_status_space,
             'steps2dest': steps2dest_space,
-            'nb_traffic': nb_traffic_space,
+            # 'nb_traffic': nb_traffic_space,
+            'state_info': state_info_space,
         })
 
     def distribute_tasks(self):
@@ -212,7 +214,7 @@ class SumoLMDEnv(gym.Env):
 
         Sumo_config = [
             'sumo',
-            '-c', '/home/shinobi-owl/PhD/battery/DroneSim/data/grid/grid.sumocfg',
+            '-c', '/home/shinobi-owl/PhD/battery/DroneSim/data/road_grid/road_grid.sumocfg',
             '--step-length', '1',
             # '--delay', '500',
         ]
@@ -267,8 +269,9 @@ class SumoLMDEnv(gym.Env):
     
     def _get_observation(self):
         steps2dest = []
-        nb_traffic = []
+        # nb_traffic = []
         ugv_status = []
+        state_info = []
 
         for ugv_id, ugv in enumerate(self.ugv_states):
             ugv_pos = ugv.position
@@ -285,23 +288,32 @@ class SumoLMDEnv(gym.Env):
                 steps2dest_.append(self.all_shortest_path_lengths[ugv_pos][task_pos])
                 steps2dest.append(steps2dest_)
 
-                # Neighbor Traffic
-                nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
+                # # Neighbor Traffic
+                # nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
 
                 ugv_status.append(ugv.status)
+
+                ugv_pos_idx = list(self.G.nodes).index(ugv_pos)
+                task_pos_idx = list(self.G.nodes).index(task_pos)
+                state_info.append([ugv_pos_idx, task_pos_idx])
             else:
                 steps2dest.append([100]*self.num_primitives)
-                nb_traffic.append([2]*(self.num_primitives-1))
+                # nb_traffic.append([2]*(self.num_primitives-1))
                 ugv_status.append(0)
+                ugv_pos_idx = list(self.G.nodes).index(ugv_pos)
+                state_info.append([ugv_pos_idx, ugv_pos_idx]) # No task assigned
+
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
         # steps2dest_flat /= (self.max_row * self.max_col+1)  # Normalize steps to destination
-        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
+        state_info_flat = np.array(state_info, dtype=np.int32).flatten()
         obs_dict = {
             'steps2dest': steps2dest_flat,
-            'nb_traffic': nb_traffic_flat,
+            # 'nb_traffic': nb_traffic_flat,
             'ugv_status': ugv_status_flat,
+            'state_info': state_info_flat
         }
 
         return obs_dict

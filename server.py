@@ -40,14 +40,16 @@ def setup_logging(mode, log_file="simulation_log.txt"):
 def extract_observations(observation, num_agents):
     ugv_status = observation['ugv_status'].reshape(num_agents, 1)
     steps2dest = observation['steps2dest'].reshape(num_agents, 5)
-    nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
+    # nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
+    state_info = observation['state_info'].reshape(num_agents, 2)
 
     all_obs = []
     for i in range(num_agents):
         obs = {
             'ugv_status': ugv_status[i],
             'steps2dest': steps2dest[i],
-            'nb_traffic': nb_traffic[i],
+            # 'nb_traffic': nb_traffic[i],
+            'state_info': state_info[i],
         }
         all_obs.append(obs)
     return all_obs

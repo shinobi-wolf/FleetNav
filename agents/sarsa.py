@@ -36,16 +36,12 @@ class SARSAAgent(Agent):
             print(f"Policy loaded from {policy_path}")
 
     def _observation_to_state(self, observation):
-        # step2dest = observation['steps2dest']
-        # step2dest = int(np.argmin(step2dest))
-
-        # nb_traffic = tuple(observation['nb_traffic'].tolist())
-
-        # return (step2dest, nb_traffic)
-        
-        steps2dest = observation['steps2dest'].tolist()
-        nb_traffic = observation['nb_traffic'].tolist()
-        obs = tuple(steps2dest + nb_traffic)
+        # steps2dest = observation['steps2dest'].tolist()
+        # nb_traffic = observation['nb_traffic'].tolist()
+        # obs = tuple(steps2dest + nb_traffic)
+        # return obs
+        state_info = observation['state_info'].tolist()
+        obs = tuple(state_info)
         return obs
 
     def predict(self, observation):
