@@ -6,9 +6,13 @@ This script takes a policy name, reads the server log and config,
 builds the SUMO network graph, creates routes for each UGV based on
 their logged positions, and replays the simulation in SUMO.
 
+It can also compare two policies side-by-side with metrics and color-coded routes.
+
 Usage:
     python visualize_sumo_simulation.py <policy_name>
     python visualize_sumo_simulation.py dijkstra_sumo
+    python visualize_sumo_simulation.py <policy1> --compare <policy2>
+    python visualize_sumo_simulation.py dijkstra --compare dqn
 """
 
 import argparse
@@ -116,7 +120,7 @@ def convert_node_path_to_edges(node_path, graph):
     return edge_path
 
 
-def extract_ugv_routes(ugv_trajectories, graph):
+def extract_ugv_routes(ugv_trajectories, graph, verbose=True):
     """
     Extract edge-based routes for each UGV from their node trajectories.
     
@@ -139,13 +143,60 @@ def extract_ugv_routes(ugv_trajectories, graph):
         if len(node_path) > 1:
             edge_path = convert_node_path_to_edges(node_path, graph)
             ugv_routes[ugv_id] = edge_path
-            print(f"UGV {ugv_id}: {len(node_path)} nodes -> {len(edge_path)} edges")
-            print(f"  Node path: {' -> '.join(node_path)}")
+            if verbose:
+                print(f"UGV {ugv_id}: {len(node_path)} nodes -> {len(edge_path)} edges")
+                print(f"  Node path: {' -> '.join(node_path)}")
         else:
-            print(f"UGV {ugv_id}: No movement detected (stayed at {node_path[0] if node_path else 'unknown'})")
+            if verbose:
+                print(f"UGV {ugv_id}: No movement detected (stayed at {node_path[0] if node_path else 'unknown'})")
             ugv_routes[ugv_id] = []
     
     return ugv_routes
+
+
+def calculate_route_metrics(ugv_routes, ugv_trajectories, graph):
+    """
+    Calculate metrics for a set of routes.
+    
+    Returns:
+        Dict with metrics: total_distance, total_steps, max_steps, num_ugvs, tasks_completed
+    """
+    total_distance = 0.0
+    total_steps = 0
+    max_steps = 0
+    tasks_completed = set()
+    
+    for ugv_id, edge_path in ugv_routes.items():
+        # Calculate distance using graph edge lengths
+        for edge_id in edge_path:
+            # Find the edge in the graph by matching edge IDs
+            for u, v, data in graph.edges(data=True):
+                if data.get('id') == edge_id:
+                    total_distance += data.get('length', 0.0)
+                    break
+        
+        # Get steps from trajectory
+        if ugv_id in ugv_trajectories:
+            trajectory = ugv_trajectories[ugv_id]
+            if trajectory:
+                steps = trajectory[-1]['step'] - trajectory[0]['step'] + 1
+                total_steps += steps
+                max_steps = max(max_steps, steps)
+                
+                # Count unique tasks
+                for entry in trajectory:
+                    if entry['active_task'] and entry['active_task'] != 'None':
+                        tasks_completed.add(entry['active_task'])
+    
+    return {
+        'total_distance': total_distance,
+        'total_steps': total_steps,
+        'max_steps': max_steps,
+        'num_ugvs': len(ugv_routes),
+        'tasks_completed': len(tasks_completed),
+        'avg_distance_per_ugv': total_distance / len(ugv_routes) if ugv_routes else 0,
+        'avg_steps_per_ugv': total_steps / len(ugv_routes) if ugv_routes else 0
+    }
 
 
 def draw_circle(id_prefix, center, color, radius=5, num_points=16):
@@ -166,52 +217,113 @@ def draw_circle(id_prefix, center, color, radius=5, num_points=16):
     )
 
 
-def visualize_simulation(policy_name):
+def print_comparison_table(metrics1, metrics2, policy1_name, policy2_name):
+    """Print a formatted comparison table of metrics."""
+    print("\n" + "="*80)
+    print("POLICY COMPARISON")
+    print("="*80)
+    print(f"{'Metric':<30} {policy1_name:<25} {policy2_name:<25} {'Difference':<15}")
+    print("-"*80)
+    
+    metrics_to_compare = [
+        ('Total Distance (m)', 'total_distance', '{:.2f}'),
+        ('Total Steps', 'total_steps', '{:d}'),
+        ('Max Steps (any UGV)', 'max_steps', '{:d}'),
+        ('Tasks Completed', 'tasks_completed', '{:d}'),
+        ('Avg Distance/UGV (m)', 'avg_distance_per_ugv', '{:.2f}'),
+        ('Avg Steps/UGV', 'avg_steps_per_ugv', '{:.1f}'),
+    ]
+    
+    for label, key, fmt in metrics_to_compare:
+        val1 = metrics1.get(key, 0)
+        val2 = metrics2.get(key, 0)
+        diff = val1 - val2
+        diff_str = f"{diff:+.2f}" if isinstance(diff, float) else f"{diff:+d}"
+        
+        print(f"{label:<30} {fmt.format(val1):<25} {fmt.format(val2):<25} {diff_str:<15}")
+    
+    print("="*80)
+    
+    # Determine winner
+    better_policy = None
+    if metrics1['total_distance'] < metrics2['total_distance']:
+        better_policy = f"{policy1_name} (shorter distance)"
+    elif metrics2['total_distance'] < metrics1['total_distance']:
+        better_policy = f"{policy2_name} (shorter distance)"
+    
+    if metrics1['total_steps'] < metrics2['total_steps']:
+        if better_policy:
+            better_policy += f" and {policy1_name} (fewer steps)"
+        else:
+            better_policy = f"{policy1_name} (fewer steps)"
+    elif metrics2['total_steps'] < metrics1['total_steps']:
+        if better_policy:
+            better_policy += f" and {policy2_name} (fewer steps)"
+        else:
+            better_policy = f"{policy2_name} (fewer steps)"
+    
+    if better_policy:
+        print(f"\nBest Policy: {better_policy}")
+    else:
+        print("\nPolicies are similar in performance")
+    print()
+
+
+def visualize_simulation(policy_name, compare_policy=None):
     """
     Main visualization function.
     
     Args:
-        policy_name: Name of the policy (e.g., 'dijkstra_sumo')
+        policy_name: Name of the first policy (e.g., 'dijkstra_sumo')
+        compare_policy: Optional name of second policy to compare
     """
-    # Construct paths
-    run_dir = f"runs/{policy_name}"
-    log_path = os.path.join(run_dir, "server_log.txt")
+    # Load first policy
+    run_dir1 = f"runs/{policy_name}"
+    log_path1 = os.path.join(run_dir1, "server_log.txt")
     
-    if not os.path.exists(log_path):
-        print(f"Error: Server log not found at {log_path}")
+    if not os.path.exists(log_path1):
+        print(f"Error: Server log not found at {log_path1}")
         return
     
-    print(f"Reading server log from: {log_path}")
+    print(f"Reading server log from: {log_path1}")
+    config_path1, ugv_trajectories1 = parse_server_log(log_path1)
     
-    # Parse the log
-    config_path, ugv_trajectories = parse_server_log(log_path)
-    
-    if not config_path:
+    if not config_path1:
         print("Error: Could not find config path in server log")
         return
     
     # Handle relative path in config
-    if not os.path.isabs(config_path):
-        # If the config path is relative, it's relative to the current directory
-        if not os.path.exists(config_path):
-            # Try relative to run directory
-            config_path = os.path.join(run_dir, os.path.basename(config_path))
+    if not os.path.isabs(config_path1):
+        if not os.path.exists(config_path1):
+            config_path1 = os.path.join(run_dir1, os.path.basename(config_path1))
     
-    if not os.path.exists(config_path):
-        # Fall back to the run directory's config
-        config_path = os.path.join(run_dir, "config.yaml")
+    if not os.path.exists(config_path1):
+        config_path1 = os.path.join(run_dir1, "config.yaml")
     
-    print(f"Loading config from: {config_path}")
+    print(f"Loading config from: {config_path1}")
+    with open(config_path1, 'r') as f:
+        config1 = yaml.safe_load(f)
     
-    # Load config
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
+    net_path = config1["net"]["net_path"]
+    step_length = config1['simulation']['step_length']
     
-    net_path = config["net"]["net_path"]
-    step_length = config['simulation']['step_length']
+    # Load second policy if comparing
+    ugv_trajectories2 = None
+    if compare_policy:
+        run_dir2 = f"runs/{compare_policy}"
+        log_path2 = os.path.join(run_dir2, "server_log.txt")
+        
+        if not os.path.exists(log_path2):
+            print(f"Error: Comparison server log not found at {log_path2}")
+            return
+        
+        print(f"Reading comparison server log from: {log_path2}")
+        config_path2, ugv_trajectories2 = parse_server_log(log_path2)
     
     print(f"Network path: {net_path}")
-    print(f"Found {len(ugv_trajectories)} UGVs in log")
+    print(f"Policy 1: Found {len(ugv_trajectories1)} UGVs in log")
+    if compare_policy:
+        print(f"Policy 2: Found {len(ugv_trajectories2)} UGVs in log")
     
     # Use only the network file, not the full config to avoid route conflicts
     # net_file = net_path.replace('.sumocfg', '.net.xml')
@@ -221,7 +333,6 @@ def visualize_simulation(policy_name):
         '-c', net_path,
         '--step-length', str(step_length),
         '--delay', '500',
-        '--start',  # Auto-start simulation
         '--quit-on-end',  # Close when done
     ]
     
@@ -235,16 +346,36 @@ def visualize_simulation(policy_name):
         print(f"Graph: {len(G.nodes)} nodes, {len(G.edges)} edges")
         
         # Extract routes from trajectories
-        print("\nExtracting UGV routes...")
-        ugv_routes = extract_ugv_routes(ugv_trajectories, G)
+        print("\nExtracting UGV routes for Policy 1...")
+        ugv_routes1 = extract_ugv_routes(ugv_trajectories1, G, verbose=not compare_policy)
+        
+        # Calculate metrics for policy 1
+        metrics1 = calculate_route_metrics(ugv_routes1, ugv_trajectories1, G)
+        
+        # Extract routes for policy 2 if comparing
+        ugv_routes2 = None
+        metrics2 = None
+        if compare_policy and ugv_trajectories2:
+            print("\nExtracting UGV routes for Policy 2...")
+            ugv_routes2 = extract_ugv_routes(ugv_trajectories2, G, verbose=False)
+            metrics2 = calculate_route_metrics(ugv_routes2, ugv_trajectories2, G)
+            
+            # Print comparison table
+            print_comparison_table(metrics1, metrics2, policy_name, compare_policy)
         
         # Visualize task locations and routes
-        # Collect all unique task locations from the trajectories
+        # Collect all unique task locations from both trajectories
         all_tasks = set()
-        for ugv_id, trajectory in ugv_trajectories.items():
+        for ugv_id, trajectory in ugv_trajectories1.items():
             for entry in trajectory:
                 if entry['active_task'] and entry['active_task'] != 'None':
                     all_tasks.add(entry['active_task'])
+        
+        if compare_policy and ugv_trajectories2:
+            for ugv_id, trajectory in ugv_trajectories2.items():
+                for entry in trajectory:
+                    if entry['active_task'] and entry['active_task'] != 'None':
+                        all_tasks.add(entry['active_task'])
         
         # Draw task locations (red circles)
         print(f"\nVisualizing {len(all_tasks)} task locations...")
@@ -254,36 +385,62 @@ def visualize_simulation(policy_name):
                 draw_circle(f"task_{task_node}", pos, (255, 0, 0, 255), radius=5)
         
         # Find warehouse (start position of UGV 0)
-        if ugv_trajectories:
-            warehouse_node = ugv_trajectories[0][0]['position']
+        if ugv_trajectories1:
+            warehouse_node = ugv_trajectories1[0][0]['position']
             print(f"Warehouse node: {warehouse_node}")
             if warehouse_node in G.nodes:
                 warehouse_pos = traci.junction.getPosition(warehouse_node)
                 draw_circle("warehouse", warehouse_pos, (0, 255, 0, 255), radius=8)
         
-        # Create routes and vehicles
-        print("\nCreating SUMO routes and vehicles...")
-        for ugv_id, edge_path in ugv_routes.items():
+        # Create routes and vehicles for policy 1 (blue)
+        print("\nCreating SUMO routes and vehicles for Policy 1 (BLUE)...")
+        for ugv_id, edge_path in ugv_routes1.items():
             if edge_path:  # Only create route if there are edges
-                route_id = f"ugv_{ugv_id}_route"
+                route_id = f"p1_ugv_{ugv_id}_route"
                 traci.route.add(route_id, edge_path)
                 
-                veh_id = f"ugv_{ugv_id}"
+                veh_id = f"p1_ugv_{ugv_id}"
                 traci.vehicle.add(veh_id, route_id)
                 
-                # Color vehicles blue
+                # Color vehicles blue for policy 1
                 traci.vehicle.setColor(veh_id, (0, 0, 255, 255))
                 
-                print(f"  Created route for UGV {ugv_id}: {len(edge_path)} edges")
+                if not compare_policy:
+                    print(f"  Created route for UGV {ugv_id}: {len(edge_path)} edges")
+        
+        # Create routes and vehicles for policy 2 (red/orange) if comparing
+        if compare_policy and ugv_routes2:
+            print("\nCreating SUMO routes and vehicles for Policy 2 (RED/ORANGE)...")
+            for ugv_id, edge_path in ugv_routes2.items():
+                if edge_path:  # Only create route if there are edges
+                    route_id = f"p2_ugv_{ugv_id}_route"
+                    traci.route.add(route_id, edge_path)
+                    
+                    veh_id = f"p2_ugv_{ugv_id}"
+                    traci.vehicle.add(veh_id, route_id)
+                    
+                    # Color vehicles red/orange for policy 2
+                    traci.vehicle.setColor(veh_id, (255, 100, 0, 255))
+        
+        # Update active vehicles set
+        active_vehicles = set(ugv_routes1.keys())
+        if compare_policy and ugv_routes2:
+            active_vehicles.update(ugv_routes2.keys())
         
         # Run simulation
         print("\n" + "="*60)
-        print("Starting simulation replay...")
+        if compare_policy:
+            print(f"Starting simulation replay...")
+            print(f"Policy 1 ({policy_name}): BLUE vehicles")
+            print(f"Policy 2 ({compare_policy}): RED/ORANGE vehicles")
+        else:
+            print("Starting simulation replay...")
         print("Close SUMO window to exit")
         print("="*60)
         
         step = 0
-        active_vehicles = set(ugv_routes.keys())
+        completed_p1 = set()
+        completed_p2 = set()
         
         while active_vehicles:
             traci.simulationStep()
@@ -291,12 +448,22 @@ def visualize_simulation(policy_name):
             
             # Check which vehicles have finished
             current_vehicles = set()
-            for ugv_id in active_vehicles:
-                veh_id = f"ugv_{ugv_id}"
+            for ugv_id in ugv_routes1.keys():
+                veh_id = f"p1_ugv_{ugv_id}"
                 if veh_id in traci.vehicle.getIDList():
                     current_vehicles.add(ugv_id)
-                else:
-                    print(f"UGV {ugv_id} completed route at step {step} (t={sim_time:.1f}s)")
+                elif ugv_id not in completed_p1:
+                    completed_p1.add(ugv_id)
+                    print(f"Policy 1 - UGV {ugv_id} completed route at step {step} (t={sim_time:.1f}s)")
+            
+            if compare_policy and ugv_routes2:
+                for ugv_id in ugv_routes2.keys():
+                    veh_id = f"p2_ugv_{ugv_id}"
+                    if veh_id in traci.vehicle.getIDList():
+                        current_vehicles.add(ugv_id)
+                    elif ugv_id not in completed_p2:
+                        completed_p2.add(ugv_id)
+                        print(f"Policy 2 - UGV {ugv_id} completed route at step {step} (t={sim_time:.1f}s)")
             
             active_vehicles = current_vehicles
             
@@ -312,6 +479,10 @@ def visualize_simulation(policy_name):
                 break
         
         print(f"\nSimulation complete! Total steps: {step}")
+        if compare_policy:
+            print(f"Policy 1 completed: {len(completed_p1)}/{len(ugv_routes1)} UGVs")
+            if ugv_routes2:
+                print(f"Policy 2 completed: {len(completed_p2)}/{len(ugv_routes2)} UGVs")
         
     except traci.exceptions.FatalTraCIError as e:
         print(f"\nTraCI Error: {e}")
@@ -335,14 +506,21 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python visualize_sumo_simulation.py dijkstra_sumo
-  python visualize_sumo_simulation.py dqn_sumo
+  python visualize_sumo_simulation.py dijkstra
+  python visualize_sumo_simulation.py dqn
+  python visualize_sumo_simulation.py dijkstra --compare dqn
         """
     )
     parser.add_argument(
         'policy_name',
         type=str,
-        help='Name of the policy (e.g., dijkstra_sumo, dqn_sumo)'
+        help='Name of the first policy (e.g., dijkstra, dqn)'
+    )
+    parser.add_argument(
+        '--compare',
+        type=str,
+        default=None,
+        help='Name of second policy to compare (e.g., --compare dqn)'
     )
     
     args = parser.parse_args()
@@ -350,9 +528,15 @@ Examples:
     print("="*60)
     print("SUMO Simulation Visualizer")
     print("="*60)
-    print(f"Policy: {args.policy_name}\n")
+    if args.compare:
+        print(f"Comparing Policies:")
+        print(f"  Policy 1: {args.policy_name} (BLUE)")
+        print(f"  Policy 2: {args.compare} (RED/ORANGE)")
+    else:
+        print(f"Policy: {args.policy_name}")
+    print()
     
-    visualize_simulation(args.policy_name)
+    visualize_simulation(args.policy_name, args.compare)
 
 
 if __name__ == "__main__":

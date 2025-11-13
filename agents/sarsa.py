@@ -15,11 +15,10 @@ class SARSAAgent(Agent):
       
     It uses the environment's reward function.
     """
-    def __init__(self, env, config, policy_path=None, *args, **kwargs):
-        super().__init__(env, *args, **kwargs)
-        self.cell_size = config['maze']['cell_size']
-        self.max_range = config['fleet']['ugv']['range']
-        self.max_cell_range = int(self.max_range/self.cell_size)
+    def __init__(self, env, policy_path=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.Q = {}
+        self.env = env
 
         if hasattr(env.action_space, 'n'):
             self.action_list = list(range(env.action_space.n))
@@ -28,21 +27,15 @@ class SARSAAgent(Agent):
         else:
             raise ValueError("Unsupported action space type.")
 
-        self.Q = {}
-
         if policy_path is not None:
             with open(policy_path, 'rb') as f:
                 self.Q = pickle.load(f)
             print(f"Policy loaded from {policy_path}")
 
     def _observation_to_state(self, observation):
-        # step2dest = observation['steps2dest']
-        # step2dest = int(np.argmin(step2dest))
-
-        # nb_traffic = tuple(observation['nb_traffic'].tolist())
-
-        # return (step2dest, nb_traffic)
-        
+        # graph_node = int(observation['graph_node'][0])
+        # target_node = int(observation['target_node'][0])
+        # return (graph_node, target_node)
         steps2dest = observation['steps2dest'].tolist()
         nb_traffic = observation['nb_traffic'].tolist()
         obs = tuple(steps2dest + nb_traffic)
@@ -52,11 +45,16 @@ class SARSAAgent(Agent):
         """
         For inference, return the best action (greedy with respect to Q-values)
         for the given observation.
+        Also returns the number of neighbors at the current node.
         """
+        G = self.env.unwrapped.G
         state = self._observation_to_state(observation)
         if state not in self.Q:
-            self.Q[state] = np.zeros(len(self.action_list))
-        return int(np.argmax(self.Q[state]))
+            return random.randint(0, 4)
+        curr_node = sorted(list(G.nodes))[int(state[0])]
+        num_neib = len(list(G.neighbors(curr_node)))
+        q = self.Q[state][:num_neib]
+        return int(np.argmax(q))
     
     def choose_action(self, state, epsilon):
         """
@@ -68,12 +66,13 @@ class SARSAAgent(Agent):
         else:
             return [int(np.argmax(self.Q[state]))]
 
-    def learn(self, training_config, policy_path=None, log_path=None):
+    def learn(self, training_config, policy_dir=None, log_path=None):
         """
         Run SARSA learning over multiple episodes. Each episode starts with an env.reset()
         and runs until done or a max number of steps is reached.
         """
-        policy_path = policy_path + '/policy.pkl'
+
+        policy_path = policy_dir + '/policy.pkl'
         training_config = training_config['sarsa']
         num_episodes = training_config.get('num_episodes')
         gamma = training_config.get('gamma')
@@ -122,6 +121,7 @@ class SARSAAgent(Agent):
                     if episode_idx%1000 == 0:
                         with open(policy_path, 'wb') as f:
                             pickle.dump(self.Q, f)
+                self.env.close()
                 obs, info = self.env.reset()
                 state = self._observation_to_state(obs)
                 if state not in self.Q:

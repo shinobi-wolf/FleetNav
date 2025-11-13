@@ -21,25 +21,43 @@ class UGVSumo:
         self.edge_route=[]
         self.veh_id=None
         
-    def move(self, action, graph):
-        if self.status==1:
-            current_node = self.position
-            neighbors = sorted(list(graph.neighbors(current_node)))
+        # Reward tracking variables
+        self.task_completed_this_step = False  # Flag for task completion in current step
+        self.invalid_action_this_step = False  # Flag for invalid action in last step
+        self.last_move_time = None  # Start time of the last move
+        self.last_position = None
+        
+    def move(self, action, current_time, graph):
+        self.task_completed_this_step = False
+        self.invalid_action_this_step = False
+        if self.status != 1:
+            # Not in moving state, action is invalid
+            self.last_move_time = None
+            return False, None
 
-            if action < len(neighbors):
-                next_node = neighbors[action]
-                edge_id = graph.edges[(current_node, next_node)]['id']
-                edge_length = graph.edges[(current_node, next_node)]['length']
-                self.distance_traveled += edge_length
-                self.current_range -= edge_length
-                self.current_range_percent = self.current_range / self.max_range
-                self.position = next_node
-                if self.current_range >= 0:
-                    self.edge_route.append(edge_id)
-                    return True, edge_id
-                else:
-                    self.status = 2
-        return False, None
+        self.last_move_time = current_time
+        
+        current_node = self.position
+        neighbors = sorted(list(graph.neighbors(current_node)))
+
+        if action >= len(neighbors):
+            # Action out of bounds
+            self.invalid_action_this_step = True
+            return False, None
+
+        next_node = neighbors[action]
+        edge_id = graph.edges[(current_node, next_node)]['id']
+        edge_length = graph.edges[(current_node, next_node)]['length']
+        self.current_range -= edge_length
+        self.current_range_percent = self.current_range / self.max_range
+        if self.current_range_percent <= 0:
+            self.invalid_action_this_step = True
+            self.status = 2
+            return False, None
+        self.distance_traveled += edge_length
+        self.position = next_node
+        self.edge_route.append(edge_id)
+        return True, edge_id
 
     def recharge(self):
         """

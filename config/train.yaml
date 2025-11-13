@@ -1,46 +1,29 @@
-maze:
-  maze_size: 5
-  maze_loop_percentage: 60
-  cell_size: 50
-  warehouse: center
-  num_base_stations: 4
-
-task:
-  num_tasks: 5000
-  task_prob: 0.8
-
-fleet:  
-  ugv:
-    count: 1
-    range: 100000000
-    drain_rate: 1
-    num_primitives: 5
-    speed: 1
-  uav:
-    range: 3000
-    speed: 3
-    swapping_time: 2
-    num_uavs_per_bs: 2
-
-traffic:
-  delay_factor: 10
-  std_dev: 1
-  reset_dur: 5
-  prob: 0.7
-  num_centroids: 2
-
+debug:
+  fast_forward: 100
+fleet:
+  count: 1
+  range: 100000000
+  max_speed: 1
+net:
+  net_path: data/grid/grid.sumocfg
+  warehouse: random
 simulation:
-  max_time: 50000
-  bms: false
-  traffic: true
-  algo: sarsa
+  max_time: 5000
+  max_steps: 1000
   render_mode: quiet
-  train: true
   render_fps: 30
-
+  step_length: 1
+  train: true
+task:
+  demand_per: 60
+traffic:
+  p:default
+  b:default
+agent:
+  algo: sarsa
 training:
   sarsa:
-    num_episodes: 30000
+    num_episodes: 2000
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2
@@ -59,7 +42,3 @@ training:
     gamma: 0.99
     target_network_frequency: 500
     tau: 1.0
-
-debug:
-  fast_forward: 0
-  manual_control: false

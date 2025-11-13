@@ -42,6 +42,8 @@ def setup_logging(mode, log_file="simulation_log.txt"):
 def extract_observations(observation, num_agents):
     ugv_status = observation['ugv_status'].reshape(num_agents, 1)
     steps2dest = observation['steps2dest'].reshape(num_agents, 4)
+    target_node = observation['target_node'].reshape(num_agents, 1)
+    graph_node = observation['graph_node'].reshape(num_agents, 1)
     # nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
 
     all_obs = []
@@ -49,13 +51,15 @@ def extract_observations(observation, num_agents):
         obs = {
             'ugv_status': ugv_status[i],
             'steps2dest': steps2dest[i],
+            'target_node': target_node[i],
+            'graph_node': graph_node[i],
             # 'nb_traffic': nb_traffic[i],
         }
         all_obs.append(obs)
     return all_obs
 
 def lmd_simulator(config):
-    policy_name = config["policy"]
+    policy_name = config['agent']["policy"]
     policy_dir = f"runs/{policy_name}/"
     log_file = f"{policy_dir}/server_log.txt"
     render_mode = config['simulation']['render_mode']
@@ -64,7 +68,7 @@ def lmd_simulator(config):
     env = gym.make("SumoLMDEnv-v0", config=config)
 
     num_agents = config['fleet']['count']
-    agents = [get_agent(config['agent'], i) for i in range(num_agents)]
+    agents = [get_agent(env, config['agent'], i) for i in range(num_agents)]
 
     # Enhanced simulation startup logging
     logging.info(f"Config: {policy_dir}/config.yaml")
@@ -111,7 +115,7 @@ def lmd_simulator(config):
         # Execute step
         observation, reward, terminated, truncated, world_state = env.step(action_list)
         total_reward += reward
-        step_execution_time = time.time() - step_start_time
+        print("Reward:", reward)
         
         
         for ugv_id in range(num_agents):

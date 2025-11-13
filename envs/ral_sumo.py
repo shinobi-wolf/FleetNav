@@ -1,3 +1,4 @@
+from shutil import move
 import numpy as np
 import networkx as nx
 import random
@@ -37,18 +38,25 @@ class SumoLMDEnv(gym.Env):
         self.render_mode = config['simulation']['render_mode']  # Render mode from config
         self.render_fps = config['simulation'].get('render_fps', 30)  # Default to 30 if not specified
         self.step_length = config['simulation']['step_length']
+        self.train_mode = config['simulation']['train']
         self.ff = config['debug']['fast_forward']
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
-        self.action_space = spaces.MultiDiscrete([4]*self.num_ugvs)
+        self.action_space = spaces.MultiDiscrete([5]*self.num_ugvs)
         
         ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
         max_moves = 50
         steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
+        graph_node_space = spaces.MultiDiscrete([1000]*self.num_ugvs)
+        nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
         self.observation_space = spaces.Dict({
             'ugv_status': ugv_status_space,
             'steps2dest': steps2dest_space,
+            'graph_node': graph_node_space,
+            'target_node': graph_node_space,
+            'nb_traffic': nb_traffic_space,
         })
+        
 
     def distribute_tasks(self):
         num_tasks_per_ugv = max(1, len(self.task_list) // self.num_ugvs)
@@ -135,28 +143,43 @@ class SumoLMDEnv(gym.Env):
 
         return obs, info
 
-    # def _get_nb_traffic(self, position, nb_nodes):
-    #     """
-    #     Get the traffic density in the North, East, South, and West directions
-    #     from the given UGV's position using the traffic_centroids as Gaussian centers.
-    #     Returns a list of four discrete traffic levels (0, 1, 2) corresponding to [N, E, S, W].
-    #     """
-    #     traffic_levels = [self.G.edges.get((position, neighbor), {}).get('traffic', 0) for neighbor in nb_nodes]
-    #     traffic_levels += [0] * (4 - len(traffic_levels))  # Pad to 4 directions
-    #     return traffic_levels
+    def _get_nb_traffic(self, position, nb_nodes):
+        # mean speed in last step
+        nb_traffic = []
+        for nb_node in nb_nodes:
+            edge = self.G.edges[(position, nb_node)]['id']
+            v_mean = traci.edge.getLastStepMeanSpeed(edge)
+
+            v_limit = traci.lane.getMaxSpeed(edge+'_0')
+
+            # congestion percent (0% = free flow, 100% = stopped)
+            cong = max(0.0, min(1.0 - v_mean / v_limit, 1.0)) * 100.0
+
+            # 3-bin discretization
+            if cong < 33:
+                nb_traffic.append(0)
+            elif cong < 66:
+                nb_traffic.append(1)     # medium congestion
+            else:
+                nb_traffic.append(2)     # high congestion
+        while len(nb_traffic) < 4:
+            nb_traffic.append(2)
+        return nb_traffic
     
     def _get_observation(self):
         steps2dest = []
         nb_traffic = []
         ugv_status = []
+        graph_node = []
+        target_node = []
 
         for ugv_id, ugv in enumerate(self.ugv_states):
             ugv_pos = ugv.position
             # Steps to destination in each direction
             steps2dest_ = []
+            nb_nodes = sorted(self.G.neighbors(ugv_pos))[:4]
             if ugv.task_list:  # Check if task list is not empty
                 task_pos = ugv.task_list[0]
-                nb_nodes = sorted(self.G.neighbors(ugv_pos))[:4]
                 for nb_node in nb_nodes:
                     steps2dest_.append(self.all_shortest_path_lengths[nb_node][task_pos])
                 for _ in range(4 - len(nb_nodes)):
@@ -166,18 +189,28 @@ class SumoLMDEnv(gym.Env):
                 steps2dest_ = [100] * 4
             steps2dest.append(steps2dest_)
 
-            # # Neighbor Traffic
-            # nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
+            # Neighbor Traffic
+            nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
 
             ugv_status.append(ugv.status)
+            graph_node.append(sorted(list(self.G.nodes)).index(ugv.position))
+            if ugv.task_list:
+                target_node.append(sorted(list(self.G.nodes)).index(ugv.task_list[0]))
+            else:
+                target_node.append(-1)
+
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
-        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
+        graph_node_flat = np.array(graph_node, dtype=np.int32).flatten()
+        target_node_flat = np.array(target_node, dtype=np.int32).flatten()
         obs_dict = {
             'steps2dest': steps2dest_flat,
-            # 'nb_traffic': nb_traffic_flat,
+            'nb_traffic': nb_traffic_flat,
             'ugv_status': ugv_status_flat,
+            'graph_node': graph_node_flat,
+            'target_node': target_node_flat,
         }
 
         return obs_dict
@@ -208,22 +241,30 @@ class SumoLMDEnv(gym.Env):
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
+        
         self.ugv_handler(action)
         truncated = self.task_handler() # Handle task completion and updates
-        # reward = self._get_reward()
         
         self.current_timestep += 1
-        traci.simulationStep()
-        self.time_elapsed = traci.simulation.getTime()
+        if self.train_mode:
+            veh_id = self.ugv_states[0].veh_id
+            traci.simulationStep()
+            self.time_elapsed = traci.simulation.getTime()
+            while veh_id is not None and veh_id in traci.vehicle.getIDList():
+                traci.simulationStep()
+                self.time_elapsed = traci.simulation.getTime()
+        else:
+            traci.simulationStep()
+            self.time_elapsed = traci.simulation.getTime()
+        
+        reward = self._get_reward()
 
         self._check_termination_condition() # Check termination based on new state
 
         obs = self._get_observation() # Gets observation *after* action/reward
         self.info = self.analyzer() # Update info with current state
-        # self.last_move_time = [0 for _ in range(self.num_ugvs)]
-        # self.action_response = [None for _ in range(self.num_ugvs)]
 
-        return obs, 0, self.terminated, truncated, self.info # Return standard gym step tuple
+        return obs, reward, self.terminated, truncated, self.info # Return standard gym step tuple
 
     def ugv_handler(self, action):
         for ugv_id, ugv in enumerate(self.ugv_states):
@@ -231,15 +272,22 @@ class SumoLMDEnv(gym.Env):
                 continue
             if ugv.veh_id and ugv.veh_id in traci.vehicle.getIDList():
                 ugv.status = 0
-            else:
-                ugv.status = 1
+                continue
+            ugv.status = 1
             act = action[ugv_id]
-            move_flag, edge_id = ugv.move(act, self.G)
+            ugv.last_position = ugv.position    
+            if act == 4:
+                continue
+            move_flag, edge_id = ugv.move(act, self.time_elapsed, self.G)
+            
             if move_flag:
+                # Only track move time if move was successful
                 route_id = f"ugv_{ugv_id}_{self.current_timestep}_route"
                 ugv.veh_id = f"ugv_{ugv_id}_{self.current_timestep}"
                 traci.route.add(route_id, [edge_id])
                 traci.vehicle.add(ugv.veh_id, route_id)
+            # else park
+            
             if ugv.position == self.warehouse_node:
                 ugv.recharge()
 
@@ -250,6 +298,7 @@ class SumoLMDEnv(gym.Env):
                 if ugv.task_list and ugv.position == ugv.task_list[0]:
                     truncated = True
                     ugv.task_list.pop(0)
+                    ugv.task_completed_this_step = True  # Mark task completion for reward
                     self.num_tasks_completed += 1
                     self.task_completion_times.append(self.time_elapsed)
                     if len(ugv.task_list) == 0:
@@ -258,43 +307,44 @@ class SumoLMDEnv(gym.Env):
         return truncated # Return if any UGV completed a task
     
     def _get_reward(self):
-        # Calculate reward based on the outcome of the action in the previous state
-        reward = 0.0
+        """
+        Calculate reward for each UGV based on:
+        1. Completion reward: High positive reward when task is reached
+        2. Invalid action reward: High negative reward for invalid actions
+        3. Move reward: Low negative reward proportional to move time
+        """
+        total_reward = 0.0
+        
+        # Reward constants
+        COMPLETION_REWARD = 50.0  # High positive reward for task completion
+        INVALID_ACTION_PENALTY = -15.0  # High negative reward for invalid actions
+        MOVE_TIME_PENALTY_SCALE = -5.0  # Low negative reward per unit time (proportional to move time)
+        
+        for ugv in self.ugv_states:
+            ugv_reward = 0.0
+            
+            # 1. Completion reward: High positive reward if task was completed
+            if ugv.task_completed_this_step:
+                ugv_reward += COMPLETION_REWARD
+            
+            # 2. Invalid action reward: High negative reward if invalid action was performed
+            if ugv.invalid_action_this_step:
+                ugv_reward += INVALID_ACTION_PENALTY
+            
+            # 3. Move reward: Low negative reward proportional to move time
+            # Only apply if a move was actually made (last_move_time > 0)
+            move_time = self.time_elapsed - ugv.last_move_time
+            if move_time > 0:
+                ugv_reward += MOVE_TIME_PENALTY_SCALE * move_time
 
-        for ugv_id, ugv in enumerate(self.ugv_states):
-            if ugv.status and ugv.task_list:
-                # --- Progress-Based Shaping Reward ---
-                # Reward for moving closer to the nearest task
-                # Note: This reward requires tracking prev_position which is not currently in UGVSumo
-                # Commenting out until prev_position is added to UGVSumo class
-                # bonus_factor = 5.0 
-                # current_distance = self.all_shortest_path_lengths[ugv.position][ugv.task_list[0]]
-                # prev_distance = self.all_shortest_path_lengths[ugv.prev_position][ugv.task_list[0]]
-                # reward += bonus_factor * (prev_distance - current_distance)
-                
-                # --- Task Completion Reward ---
-                # Note: This reward requires tracking task_completed which is not currently in UGVSumo
-                # Commenting out until task_completed is added to UGVSumo class
-                # task_completion_reward = 50.0
-                # if ugv.task_completed:
-                #     reward += task_completion_reward
-                # --- Time Penalty ---
-                # Note: This penalty requires tracking move_time which is not currently in UGVSumo
-                # time_penalty_factor = 5.0
-                # reward -= time_penalty_factor * ugv.move_time/self.cell_size
-
-                # --- Invalid Move Penalty ---
-                # Note: This penalty requires tracking act_response which is not currently in UGVSumo
-                # invalid_move_penalty = 40.0
-                # if ugv.act_response == 0:
-                #     reward -= invalid_move_penalty
-
-                # If UGV is out of range, apply a penalty
-                out_of_range_penalty = 20.0
-                if ugv.current_range < 0:
-                    reward -= out_of_range_penalty
-
-        return reward
+            if not ugv.task_completed_this_step:
+                curr_dist = self.all_shortest_path_lengths[ugv.position][ugv.task_list[0]]
+                prev_dist = self.all_shortest_path_lengths[ugv.last_position][ugv.task_list[0]]
+                ugv_reward += 5.0*(prev_dist-curr_dist)
+            
+            total_reward += ugv_reward
+        
+        return total_reward
 
 
     def _check_termination_condition(self):

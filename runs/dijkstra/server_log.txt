@@ -1,486 +1,443 @@
 Config: runs/dijkstra//config.yaml
 Step 0:
 UGV 0: Position=E0, Active Task=B0, Status=1
-UGV 1: Position=E0, Active Task=A2, Status=1
-UGV 2: Position=E0, Active Task=C3, Status=1
-UGV 3: Position=E0, Active Task=B0, Status=1
 Step 1:
 UGV 0: Position=D0, Active Task=B0, Status=1
-UGV 1: Position=D0, Active Task=A2, Status=1
-UGV 2: Position=D0, Active Task=C3, Status=1
-UGV 3: Position=D0, Active Task=B0, Status=1
 Step 2:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=1
-UGV 2: Position=C0, Active Task=C3, Status=1
-UGV 3: Position=C0, Active Task=B0, Status=1
 Step 3:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=1
-UGV 3: Position=B0, Active Task=A3, Status=1
 Step 4:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 5:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 6:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 7:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 8:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 9:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 10:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 11:
 UGV 0: Position=D0, Active Task=B0, Status=0
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 12:
 UGV 0: Position=D0, Active Task=B0, Status=1
-UGV 1: Position=C0, Active Task=A2, Status=0
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=0
 Step 13:
 UGV 0: Position=C0, Active Task=B0, Status=1
-UGV 1: Position=C0, Active Task=A2, Status=1
-UGV 2: Position=C1, Active Task=C3, Status=0
-UGV 3: Position=B0, Active Task=A3, Status=1
 Step 14:
-UGV 0: Position=B0, Active Task=D3, Status=1
-UGV 1: Position=B0, Active Task=A2, Status=1
-UGV 2: Position=C1, Active Task=C3, Status=1
-UGV 3: Position=A0, Active Task=A3, Status=1
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 15:
-UGV 0: Position=B1, Active Task=D3, Status=1
-UGV 1: Position=A0, Active Task=A2, Status=1
-UGV 2: Position=C2, Active Task=C3, Status=1
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 16:
-UGV 0: Position=B2, Active Task=D3, Status=1
-UGV 1: Position=A1, Active Task=A2, Status=1
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 17:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 18:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 19:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 20:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 21:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 22:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 23:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=0
 Step 24:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=0
-UGV 3: Position=A0, Active Task=A3, Status=0
+UGV 0: Position=C0, Active Task=B0, Status=1
 Step 25:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C2, Active Task=C3, Status=1
-UGV 3: Position=A0, Active Task=A3, Status=1
+UGV 0: Position=B0, Active Task=D3, Status=1
 Step 26:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=1
-UGV 3: Position=A1, Active Task=A3, Status=1
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 27:
-UGV 0: Position=B2, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=A2, Status=1
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=1
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 28:
-UGV 0: Position=B2, Active Task=D3, Status=1
-UGV 1: Position=A2, Active Task=B0, Status=1
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 29:
-UGV 0: Position=B3, Active Task=D3, Status=1
-UGV 1: Position=A1, Active Task=B0, Status=1
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 30:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 31:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 32:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 33:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 34:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=0
 Step 35:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=0
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B0, Active Task=D3, Status=1
 Step 36:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C3, Active Task=C4, Status=1
-UGV 3: Position=A2, Active Task=A3, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=1
 Step 37:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=C4, Active Task=A0, Status=1
-UGV 3: Position=A2, Active Task=A3, Status=1
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 38:
-UGV 0: Position=B3, Active Task=D3, Status=0
-UGV 1: Position=A1, Active Task=B0, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=1
-UGV 3: Position=A3, Active Task=D0, Status=1
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 39:
-UGV 0: Position=B3, Active Task=D3, Status=1
-UGV 1: Position=A1, Active Task=B0, Status=1
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 40:
-UGV 0: Position=C3, Active Task=D3, Status=1
-UGV 1: Position=A0, Active Task=B0, Status=1
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 41:
-UGV 0: Position=D3, Active Task=B2, Status=1
-UGV 1: Position=B0, Active Task=D3, Status=1
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 42:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 43:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 44:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 45:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=0
 Step 46:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B1, Active Task=D3, Status=1
 Step 47:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=D3, Status=1
 Step 48:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=0
-UGV 3: Position=A3, Active Task=D0, Status=1
+UGV 0: Position=B3, Active Task=D3, Status=1
 Step 49:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=B4, Active Task=A0, Status=1
-UGV 3: Position=A2, Active Task=D0, Status=1
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 50:
-UGV 0: Position=D3, Active Task=B2, Status=0
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=1
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 51:
-UGV 0: Position=D3, Active Task=B2, Status=1
-UGV 1: Position=B0, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 52:
-UGV 0: Position=C3, Active Task=B2, Status=1
-UGV 1: Position=B0, Active Task=D3, Status=1
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 53:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=1
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 54:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 55:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 56:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 57:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 58:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=0
 Step 59:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=0
+UGV 0: Position=B3, Active Task=D3, Status=1
 Step 60:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=0
-UGV 3: Position=A2, Active Task=D0, Status=1
+UGV 0: Position=C3, Active Task=D3, Status=1
 Step 61:
-UGV 0: Position=C3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A4, Active Task=A0, Status=1
-UGV 3: Position=A1, Active Task=D0, Status=1
+UGV 0: Position=D3, Active Task=B2, Status=1
 Step 62:
-UGV 0: Position=C3, Active Task=B2, Status=1
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=1
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 63:
-UGV 0: Position=B3, Active Task=B2, Status=1
-UGV 1: Position=B1, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 64:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B1, Active Task=D3, Status=1
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 65:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=1
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 66:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 67:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 68:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 69:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 70:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=0
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 71:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A1, Active Task=D0, Status=1
+UGV 0: Position=D3, Active Task=B2, Status=0
 Step 72:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=0
-UGV 3: Position=A0, Active Task=D0, Status=1
+UGV 0: Position=D3, Active Task=B2, Status=1
 Step 73:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A3, Active Task=A0, Status=1
-UGV 3: Position=B0, Active Task=D0, Status=1
+UGV 0: Position=C3, Active Task=B2, Status=1
 Step 74:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A2, Active Task=A0, Status=1
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 75:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=1
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 76:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B2, Active Task=D3, Status=1
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 77:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B3, Active Task=D3, Status=1
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 78:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 79:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 80:
-UGV 0: Position=B3, Active Task=B2, Status=0
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 81:
-UGV 0: Position=B3, Active Task=B2, Status=1
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 82:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=0
+UGV 0: Position=C3, Active Task=B2, Status=0
 Step 83:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=B0, Active Task=D0, Status=1
+UGV 0: Position=C3, Active Task=B2, Status=1
 Step 84:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=C0, Active Task=D0, Status=1
+UGV 0: Position=B3, Active Task=B2, Status=1
 Step 85:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=0
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=1
 Step 86:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A1, Active Task=A0, Status=1
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 87:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=0
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 88:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=B3, Active Task=D3, Status=1
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 89:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=C3, Active Task=D3, Status=1
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 90:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 91:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 92:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 93:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 94:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=0
+UGV 0: Position=B2, Active Task=A2, Status=0
 Step 95:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=C0, Active Task=D0, Status=1
+UGV 0: Position=B2, Active Task=A2, Status=1
 Step 96:
-UGV 0: Position=B2, Active Task=None, Status=2
-UGV 1: Position=D3, Active Task=None, Status=2
-UGV 2: Position=A0, Active Task=None, Status=2
-UGV 3: Position=D0, Active Task=None, Status=2
+UGV 0: Position=A2, Active Task=B0, Status=1
+Step 97:
+UGV 0: Position=A1, Active Task=B0, Status=1
+Step 98:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 99:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 100:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 101:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 102:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 103:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 104:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 105:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 106:
+UGV 0: Position=A1, Active Task=B0, Status=0
+Step 107:
+UGV 0: Position=A1, Active Task=B0, Status=1
+Step 108:
+UGV 0: Position=A0, Active Task=B0, Status=1
+Step 109:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 110:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 111:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 112:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 113:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 114:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 115:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 116:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 117:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 118:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 119:
+UGV 0: Position=A0, Active Task=B0, Status=1
+Step 120:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 121:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 122:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 123:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 124:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 125:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 126:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 127:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 128:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 129:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 130:
+UGV 0: Position=B0, Active Task=D3, Status=0
+Step 131:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 132:
+UGV 0: Position=B1, Active Task=D3, Status=1
+Step 133:
+UGV 0: Position=B2, Active Task=D3, Status=1
+Step 134:
+UGV 0: Position=B3, Active Task=D3, Status=1
+Step 135:
+UGV 0: Position=C3, Active Task=D3, Status=1
+Step 136:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 137:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 138:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 139:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 140:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 141:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 142:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 143:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 144:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 145:
+UGV 0: Position=C3, Active Task=D3, Status=0
+Step 146:
+UGV 0: Position=C3, Active Task=D3, Status=1
+Step 147:
+UGV 0: Position=D3, Active Task=C3, Status=1
+Step 148:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 149:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 150:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 151:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 152:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 153:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 154:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 155:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 156:
+UGV 0: Position=D3, Active Task=C3, Status=0
+Step 157:
+UGV 0: Position=D3, Active Task=C3, Status=1
+Step 158:
+UGV 0: Position=C3, Active Task=C4, Status=1
+Step 159:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 160:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 161:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 162:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 163:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 164:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 165:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 166:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 167:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 168:
+UGV 0: Position=C3, Active Task=C4, Status=0
+Step 169:
+UGV 0: Position=C3, Active Task=C4, Status=1
+Step 170:
+UGV 0: Position=C4, Active Task=A0, Status=1
+Step 171:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 172:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 173:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 174:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 175:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 176:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 177:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 178:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 179:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 180:
+UGV 0: Position=C4, Active Task=A0, Status=0
+Step 181:
+UGV 0: Position=C4, Active Task=A0, Status=1
+Step 182:
+UGV 0: Position=B4, Active Task=A0, Status=1
+Step 183:
+UGV 0: Position=A4, Active Task=A0, Status=1
+Step 184:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 185:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 186:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 187:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 188:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 189:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 190:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 191:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 192:
+UGV 0: Position=A4, Active Task=A0, Status=0
+Step 193:
+UGV 0: Position=A4, Active Task=A0, Status=1
+Step 194:
+UGV 0: Position=A3, Active Task=A0, Status=1
+Step 195:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 196:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 197:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 198:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 199:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 200:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 201:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 202:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 203:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 204:
+UGV 0: Position=A3, Active Task=A0, Status=0
+Step 205:
+UGV 0: Position=A3, Active Task=A0, Status=1
+Step 206:
+UGV 0: Position=A2, Active Task=A0, Status=1
+Step 207:
+UGV 0: Position=A1, Active Task=A0, Status=1
+Step 208:
+UGV 0: Position=A0, Active Task=B0, Status=1
+Step 209:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 210:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 211:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 212:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 213:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 214:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 215:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 216:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 217:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 218:
+UGV 0: Position=A0, Active Task=B0, Status=0
+Step 219:
+UGV 0: Position=A0, Active Task=B0, Status=1
+Step 220:
+UGV 0: Position=B0, Active Task=None, Status=2

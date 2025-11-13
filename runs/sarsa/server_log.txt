@@ -1,0 +1,159 @@
+Config: runs/sarsa//config.yaml
+Step 0:
+UGV 0: Position=E0, Active Task=B0, Status=1
+Step 1:
+UGV 0: Position=D0, Active Task=B0, Status=1
+Step 2:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 3:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 4:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 5:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 6:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 7:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 8:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 9:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 10:
+UGV 0: Position=D0, Active Task=B0, Status=0
+Step 11:
+UGV 0: Position=D0, Active Task=B0, Status=1
+Step 12:
+UGV 0: Position=C0, Active Task=B0, Status=1
+Step 13:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 14:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 15:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 16:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 17:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 18:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 19:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 20:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 21:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 22:
+UGV 0: Position=C0, Active Task=B0, Status=0
+Step 23:
+UGV 0: Position=C0, Active Task=B0, Status=1
+Step 24:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 25:
+UGV 0: Position=B1, Active Task=D3, Status=1
+Step 26:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 27:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 28:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 29:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 30:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 31:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 32:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 33:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 34:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 35:
+UGV 0: Position=B1, Active Task=D3, Status=0
+Step 36:
+UGV 0: Position=B1, Active Task=D3, Status=1
+Step 37:
+UGV 0: Position=B2, Active Task=D3, Status=1
+Step 38:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 39:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 40:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 41:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 42:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 43:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 44:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 45:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 46:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 47:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 48:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 49:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 50:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 51:
+UGV 0: Position=B2, Active Task=D3, Status=0
+Step 52:
+UGV 0: Position=B2, Active Task=D3, Status=1
+Step 53:
+UGV 0: Position=C2, Active Task=D3, Status=1
+Step 54:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 55:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 56:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 57:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 58:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 59:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 60:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 61:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 62:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 63:
+UGV 0: Position=C2, Active Task=D3, Status=0
+Step 64:
+UGV 0: Position=C2, Active Task=D3, Status=1
+Step 65:
+UGV 0: Position=D2, Active Task=D3, Status=1
+Step 66:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 67:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 68:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 69:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 70:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 71:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 72:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 73:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 74:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 75:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 76:
+UGV 0: Position=D2, Active Task=D3, Status=0
+Step 77:
+UGV 0: Position=D2, Active Task=D3, Status=1
+Step 78:
+UGV 0: Position=D3, Active Task=None, Status=2
