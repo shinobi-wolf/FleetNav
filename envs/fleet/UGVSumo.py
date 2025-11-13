@@ -2,7 +2,8 @@ import networkx as nx
 import numpy as np
 
 class UGVSumo:
-    def __init__(self, ugv_id, base_position, cell_dist, max_range, drain_rate, max_speed, traffic_delay_factor, G):
+    def __init__(self, ugv_id, base_position, cell_dist, max_range, drain_rate, max_speed, traffic_delay_factor, G,
+                 num_primitives=5):
         super().__init__()
         self.agent_id = ugv_id
         self.position = base_position  # e.g., (row, col) or (x, y)
@@ -13,6 +14,7 @@ class UGVSumo:
         self.max_speed = max_speed
         self.cell_dist = cell_dist
         self.traffic_delay_factor = traffic_delay_factor
+        self.num_primitives = num_primitives
 
         self.current_range = self.max_range    # start fully charged
         self.current_range_percent = 1.0
@@ -50,11 +52,11 @@ class UGVSumo:
                 self.path2warehouse = nx.shortest_path(self.G, source=self.position, target=self.base_point)[1:]
             if self.path2warehouse:
                 next_position = self.path2warehouse.pop(0)
-                nb_nodes = sorted(graph.neighbors(self.position))[:4]
+                nb_nodes = sorted(graph.neighbors(self.position))[:self.num_primitives-1]
                 action = nb_nodes.index(next_position)
         if self.status:
             action = int(action)
-            if action ==4:
+            if action == self.num_primitives - 1:  # Stay action
                 self.current_traffic = 0
                 self.prev_position = self.position
                 self.move_time = self.cell_dist/self.max_speed
@@ -70,7 +72,8 @@ class UGVSumo:
                     self.act_response = 0
                 else:
                     task_pos = self.active_task_list[0]
-                    nb_nodes = sorted(graph.neighbors(self.position), key=lambda x: np.linalg.norm(np.array([graph.nodes[x]['x'], graph.nodes[x]['y']]) - np.array([graph.nodes[task_pos]['x'], graph.nodes[task_pos]['y']])))[:4]
+                    # nb_nodes = sorted(graph.neighbors(self.position), key=lambda x: np.linalg.norm(np.array([graph.nodes[x]['x'], graph.nodes[x]['y']]) - np.array([graph.nodes[task_pos]['x'], graph.nodes[task_pos]['y']])))[:4]
+                    nb_nodes = sorted(graph.neighbors(self.position))[:self.num_primitives-1]
                     self.prev_position = self.position
                     if action < len(nb_nodes):
                         self.position = nb_nodes[action]

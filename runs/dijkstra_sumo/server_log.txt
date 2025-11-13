@@ -1,2 +1,0 @@
-Starting Simulation
-Loaded backend tkagg version unknown.

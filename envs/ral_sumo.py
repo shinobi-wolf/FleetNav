@@ -58,13 +58,15 @@ class SumoLMDEnv(gym.Env):
         self.traffic_num_centroids = config['traffic']['num_centroids']
         self.traffic_delay_factor = config['traffic']['delay_factor']  # Factor to adjust traffic delay
 
+        self.num_primitives = config["fleet"]['ugv']["num_primitives"]
+
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
-        self.action_space = spaces.MultiDiscrete([config["fleet"]['ugv']["num_primitives"]]*self.num_ugvs)
+        self.action_space = spaces.MultiDiscrete([self.num_primitives]*self.num_ugvs)
         
         ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
-        max_moves = 50
-        steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
-        nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
+        max_moves = 100
+        steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_primitives*self.num_ugvs))
+        nb_traffic_space = spaces.MultiDiscrete(np.array([3]*(self.num_primitives-1)*self.num_ugvs))
         self.observation_space = spaces.Dict({
             'ugv_status': ugv_status_space,
             'steps2dest': steps2dest_space,
@@ -138,7 +140,26 @@ class SumoLMDEnv(gym.Env):
         #     for u, v in self.G.edges():
         #          self.G[u][v]['traffic'] = 0
 
-        
+        # Reset previous roads and weights
+        self.red_roads = []
+        self.yellow_roads = []
+        for edge in self.G.edges():
+            edge_id = self.G.edges[edge]['id']
+            v_mean = traci.edge.getLastStepMeanSpeed(edge_id)
+            v_limit = traci.lane.getMaxSpeed(edge_id+'_0')
+
+            # congestion percent (0% = free flow, 100% = stopped)
+            cong = max(0.0, min(1.0 - v_mean / v_limit, 1.0)) * 100.0
+
+            # 3-bin discretization
+            if cong < 33:
+                self.G.edges[edge]['traffic'] = 0
+            elif cong < 66:
+                self.G.edges[edge]['traffic'] = 1
+                self.yellow_roads.append(edge)
+            else:
+                self.G.edges[edge]['traffic'] = 2 
+                self.red_roads.append(edge)
 
     def build_graph(self,):
         G = nx.DiGraph()
@@ -196,6 +217,7 @@ class SumoLMDEnv(gym.Env):
             # '--delay', '500',
         ]
         traci.start(Sumo_config)
+        traci.simulationStep()
 
         # Maze State
         self.G, self.all_shortest_path_lengths = self.build_graph() # Rebuild graph with new maze
@@ -209,8 +231,8 @@ class SumoLMDEnv(gym.Env):
             self.fill_traffic_centroids() # Generate initial traffic if enabled
 
         # UGV States
-        self.ugv_states = [UGVSumo(ugv_id=i, base_position=self.warehouse_node, cell_dist=self.cell_size, max_range=self.max_ugv_range,drain_rate=self.drain_rate, 
-                       max_speed=self.ugv_speed, traffic_delay_factor= self.traffic_delay_factor, G=self.G) for i in range(self.num_ugvs)]
+        self.ugv_states = [UGVSumo(ugv_id=i, base_position=self.warehouse_node, cell_dist=self.cell_size, max_range=self.max_ugv_range,drain_rate=self.drain_rate,
+                       max_speed=self.ugv_speed, traffic_delay_factor= self.traffic_delay_factor, G=self.G, num_primitives=self.num_primitives) for i in range(self.num_ugvs)]
         self.task_list = random.choices(list(self.G.nodes), k=self.num_tasks) # Randomly select tasks from graph nodes
         self.distribute_tasks() # Distribute tasks to UGVs
 
@@ -239,8 +261,8 @@ class SumoLMDEnv(gym.Env):
         from the given UGV's position using the traffic_centroids as Gaussian centers.
         Returns a list of four discrete traffic levels (0, 1, 2) corresponding to [N, E, S, W].
         """
-        traffic_levels = [self.G.edges.get((position, neighbor), {}).get('traffic', 0) for neighbor in nb_nodes]
-        traffic_levels += [0] * (4 - len(traffic_levels))  # Pad to 4 directions
+        traffic_levels = [self.G.edges.get((position, neighbor), {}).get('traffic', 2) for neighbor in nb_nodes]
+        traffic_levels += [2] * (self.num_primitives-1 - len(traffic_levels))  # Pad to 4 directions
         return traffic_levels
     
     def _get_observation(self):
@@ -250,21 +272,27 @@ class SumoLMDEnv(gym.Env):
 
         for ugv_id, ugv in enumerate(self.ugv_states):
             ugv_pos = ugv.position
-            task_pos = ugv.active_task_list[0]
+            if ugv.active_task_list:
+                task_pos = ugv.active_task_list[0]
 
-            # Steps to destination in each direction
-            steps2dest_ = []
-            nb_nodes = sorted(self.G.neighbors(ugv_pos), key=lambda x: np.linalg.norm(np.array([self.G.nodes[x]['x'], self.G.nodes[x]['y']]) - np.array([self.G.nodes[task_pos]['x'], self.G.nodes[task_pos]['y']])))[:4]
-            for nb_node in nb_nodes:
-                steps2dest_.append(self.all_shortest_path_lengths[nb_node][task_pos])
-            steps2dest_ += [self.fov*self.fov+1] * (4 - len(steps2dest_))  # Pad to 5 directions
-            steps2dest_.append(self.all_shortest_path_lengths[ugv_pos][task_pos])
-            steps2dest.append(steps2dest_)
+                # Steps to destination in each direction
+                steps2dest_ = []
+                # nb_nodes = sorted(self.G.neighbors(ugv_pos), key=lambda x: np.linalg.norm(np.array([self.G.nodes[x]['x'], self.G.nodes[x]['y']]) - np.array([self.G.nodes[task_pos]['x'], self.G.nodes[task_pos]['y']])))[:4]
+                nb_nodes = sorted(self.G.neighbors(ugv_pos))[:self.num_primitives-1]
+                for nb_node in nb_nodes:
+                    steps2dest_.append(self.all_shortest_path_lengths[nb_node][task_pos])
+                steps2dest_ += [100] * (self.num_primitives-1 - len(steps2dest_))  # Pad to 5 directions
+                steps2dest_.append(self.all_shortest_path_lengths[ugv_pos][task_pos])
+                steps2dest.append(steps2dest_)
 
-            # Neighbor Traffic
-            nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
+                # Neighbor Traffic
+                nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
 
-            ugv_status.append(ugv.status)
+                ugv_status.append(ugv.status)
+            else:
+                steps2dest.append([100]*self.num_primitives)
+                nb_traffic.append([2]*(self.num_primitives-1))
+                ugv_status.append(0)
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
         # steps2dest_flat /= (self.max_row * self.max_col+1)  # Normalize steps to destination
@@ -287,7 +315,7 @@ class SumoLMDEnv(gym.Env):
         task_completion_time_diffs = [self.task_completion_times[i] - self.task_completion_times[i-1] for i in range(1, len(self.task_completion_times))]
         avg_task_completion_time = np.mean(task_completion_time_diffs) if task_completion_time_diffs else 0.0
 
-        active_tasks = [ugv.active_task_list[-1] for ugv in self.ugv_states]
+        active_tasks = [ugv.active_task_list[-1] if ugv.active_task_list else None for ugv in self.ugv_states]
         info = {
             'time_elapsed': self.time_elapsed,
             'current_timestep': self.current_timestep,
@@ -338,6 +366,7 @@ class SumoLMDEnv(gym.Env):
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
+        traci.simulationStep()
         self.ugv_handler(action)
         if self.bms:
             self.uav_handler() # Handle UAVs if BMS is enabled
@@ -406,9 +435,10 @@ class SumoLMDEnv(gym.Env):
                 # --- Progress-Based Shaping Reward ---
                 # Reward for moving closer to the nearest task
                 bonus_factor = 5.0 
-                current_distance = self.all_shortest_path_lengths[ugv.position][ugv.active_task_list[0]]
-                prev_distance = self.all_shortest_path_lengths[ugv.prev_position][ugv.active_task_list[0]]
-                reward += bonus_factor * (prev_distance - current_distance)
+                if ugv.active_task_list:
+                    current_distance = self.all_shortest_path_lengths[ugv.position][ugv.active_task_list[0]]
+                    prev_distance = self.all_shortest_path_lengths[ugv.prev_position][ugv.active_task_list[0]]
+                    reward += bonus_factor * (prev_distance - current_distance)
                 
                 # --- Task Completion Reward ---
                 task_completion_reward = 50.0
@@ -443,6 +473,8 @@ class SumoLMDEnv(gym.Env):
             self.terminated = True
         else:
             self.terminated = False
+        if not self.ugv_states[0].active_task_list:
+            self.terminated = True
 
     def render(self):
         """
@@ -562,4 +594,5 @@ class SumoLMDEnv(gym.Env):
             pygame.display.quit()
             pygame.quit()
             self.screen = None
+        traci.close()
 

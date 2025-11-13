@@ -1,33 +1,32 @@
 maze:
-  maze_size: 5
-  maze_loop_percentage: 60
-  cell_size: 50
-  warehouse: center
+  map: data/grid/grid.net.xml
+  fov: 5
   num_base_stations: 4
+  cell_size: 50
 
 task:
   num_tasks: 5000
   task_prob: 0.8
 
-fleet:  
-  ugv:
-    count: 1
-    range: 100000000
-    drain_rate: 1
-    num_primitives: 5
-    speed: 1
+fleet:
   uav:
-    range: 3000
+    count_bs: 2
+    range: 1500
     speed: 3
     swapping_time: 2
-    num_uavs_per_bs: 2
+  ugv:
+    count: 1
+    drain_rate: 1
+    num_primitives: 5
+    range: 1000000
+    speed: 1
 
 traffic:
   delay_factor: 10
-  std_dev: 1
+  num_centroids: 5
+  prob: 0.8
   reset_dur: 5
-  prob: 0.7
-  num_centroids: 2
+  std_dev: 150
 
 simulation:
   max_time: 50000
@@ -40,7 +39,7 @@ simulation:
 
 training:
   sarsa:
-    num_episodes: 30000
+    num_episodes: 1500
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2

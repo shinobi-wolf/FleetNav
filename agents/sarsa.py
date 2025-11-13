@@ -122,6 +122,7 @@ class SARSAAgent(Agent):
                     if episode_idx%1000 == 0:
                         with open(policy_path, 'wb') as f:
                             pickle.dump(self.Q, f)
+                self.env.close()
                 obs, info = self.env.reset()
                 state = self._observation_to_state(obs)
                 if state not in self.Q:

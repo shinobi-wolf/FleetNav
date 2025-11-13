@@ -20,7 +20,7 @@ def lmd_trainer(config, policy_dir):
     config['fleet']['ugv']['count'] = 1
     config['fleet']['ugv']['range'] = 100000000
     config['simulation']['bms'] = False
-    env = gym.make('LMDEnv-v0', config=config)
+    env = gym.make('SumoLMDEnv-v0', config=config)
     
     agent = get_agent(config, env)[0]
 
