@@ -3,14 +3,11 @@ import pandas as pd
 import networkx as nx
 from sklearn.cluster import KMeans
 import random
-from pyamaze import maze
-import tkinter as tk
-tk.Tk.state = lambda self, s=None: self.wm_state('normal' if s == 'zoomed' else s)
 import math
 import pygame # Added pygame
 import os # Added os for path joining
 import time
-import SumoNetVis
+import traci
 
 import gymnasium as gym
 from gymnasium import spaces
@@ -109,61 +106,71 @@ class SumoLMDEnv(gym.Env):
 
     def fill_traffic_centroids(self):
         # Reset previous roads and weights
-        self.red_roads = []
-        self.yellow_roads = []
-        for u, v in self.G.edges():
-            self.G[u][v]['traffic'] = 0
+        # self.red_roads = []
+        # self.yellow_roads = []
+        # for u, v in self.G.edges():
+        #     self.G[u][v]['traffic'] = 0
 
-        if random.random() < self.traffic_prob:
-            self.traffic_centeroids = [[self.G.nodes[i]['x'], self.G.nodes[i]['y']] for i in random.sample(list(self.G.nodes), self.traffic_num_centroids)]
-            centroid_array = np.array(self.traffic_centeroids)
+        # if random.random() < self.traffic_prob:
+        #     self.traffic_centeroids = [[self.G.nodes[i]['x'], self.G.nodes[i]['y']] for i in random.sample(list(self.G.nodes), self.traffic_num_centroids)]
+        #     centroid_array = np.array(self.traffic_centeroids)
 
-            for u, v in self.G.edges():
-                midpoint = np.array([(self.G.nodes[u]['x'] + self.G.nodes[v]['x']) / 2, (self.G.nodes[u]['y'] + self.G.nodes[v]['y']) / 2])
-                total_contrib = 0
-                if centroid_array.size > 0: # Check if centroids exist
-                    for centroid in centroid_array:
-                        dist_sq = np.sum((midpoint - centroid)**2)
-                        contrib = np.exp(-dist_sq / (2.0 * self.traffic_std_dev**2))
-                        total_contrib += contrib
+        #     for u, v in self.G.edges():
+        #         midpoint = np.array([(self.G.nodes[u]['x'] + self.G.nodes[v]['x']) / 2, (self.G.nodes[u]['y'] + self.G.nodes[v]['y']) / 2])
+        #         total_contrib = 0
+        #         if centroid_array.size > 0: # Check if centroids exist
+        #             for centroid in centroid_array:
+        #                 dist_sq = np.sum((midpoint - centroid)**2)
+        #                 contrib = np.exp(-dist_sq / (2.0 * self.traffic_std_dev**2))
+        #                 total_contrib += contrib
 
-                if total_contrib < 0.33:
-                    self.G[u][v]['traffic'] = 0
-                elif total_contrib < 0.66:
-                    self.G[u][v]['traffic'] = 1
-                    self.yellow_roads.append((u, v))
-                else:
-                    self.G[u][v]['traffic'] = 2
-                    self.red_roads.append((u, v))
-        else:
-            self.traffic_centeroids = []
-            # Ensure weights are reset even if no traffic is generated
-            for u, v in self.G.edges():
-                 self.G[u][v]['traffic'] = 0
+        #         if total_contrib < 0.33:
+        #             self.G[u][v]['traffic'] = 0
+        #         elif total_contrib < 0.66:
+        #             self.G[u][v]['traffic'] = 1
+        #             self.yellow_roads.append((u, v))
+        #         else:
+        #             self.G[u][v]['traffic'] = 2
+        #             self.red_roads.append((u, v))
+        # else:
+        #     self.traffic_centeroids = []
+        #     # Ensure weights are reset even if no traffic is generated
+        #     for u, v in self.G.edges():
+        #          self.G[u][v]['traffic'] = 0
 
-    def build_graph(self):
-        G = nx.Graph()
-        net = SumoNetVis.Net(self.map)
+        
 
-        juncs = net.junctions
+    def build_graph(self,):
+        G = nx.DiGraph()
 
-        # Add nodes for each edge in the SUMO network
-        for edge in net.edges.values():
-            # Get the from and to junctions for this edge
-            if edge.from_junction_id is None or edge.to_junction_id is None:
-                continue
-            from_junction = edge.from_junction_id
-            to_junction = edge.to_junction_id
+        # Get all edges (skip internal)
+        edge_ids = [e for e in traci.edge.getIDList() if not e.startswith(":")]
 
-            G.add_node(int(from_junction), x=float(juncs[from_junction].x), y=float(juncs[from_junction].y))
-            G.add_node(int(to_junction), x=float(juncs[to_junction].x), y=float(juncs[to_junction].y))
+        for eid in edge_ids:
+            from_node = traci.edge.getFromJunction(eid)
+            to_node = traci.edge.getToJunction(eid)
 
-            # Add edge between the junctions
-            G.add_edge(int(from_junction), int(to_junction), traffic=0)#, weight=edge.getLength())
+            lid = f"{eid}_0"  # Assume single lane per edge for simplicity
+            length = traci.lane.getLength(lid)
+            speed = traci.edge.getLastStepMeanSpeed(eid)
 
-        # Calculate all shortest path lengths for observation space
+            # Add nodes (junctions)
+            fx, fy = traci.junction.getPosition(from_node)
+            tx, ty = traci.junction.getPosition(to_node)
+            G.add_node(from_node, x=fx, y=fy)
+            G.add_node(to_node, x=tx, y=ty)
+
+            # Add directed edge with attributes
+            G.add_edge(
+                from_node,
+                to_node,
+                id=eid,
+                length=length,
+                speed=speed,
+                weight=length / speed if speed > 0 else float("inf")
+            )
+
         all_shortest_path_lengths = dict(nx.all_pairs_shortest_path_length(G))
-
         return G, all_shortest_path_lengths
     
     def reset(self, seed=None, options=None):
@@ -181,6 +188,14 @@ class SumoLMDEnv(gym.Env):
         self.screen = None
         self.clock = None
         self.render_mode = getattr(self, 'render_mode', None)
+
+        Sumo_config = [
+            'sumo',
+            '-c', '/home/shinobi-owl/PhD/battery/DroneSim/data/grid/grid.sumocfg',
+            '--step-length', '1',
+            # '--delay', '500',
+        ]
+        traci.start(Sumo_config)
 
         # Maze State
         self.G, self.all_shortest_path_lengths = self.build_graph() # Rebuild graph with new maze

@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "-p", "dijkstra",
+                "-p", "dijkstra_sumo",
             ]
         },
         {
