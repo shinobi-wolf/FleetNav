@@ -24,28 +24,20 @@ class SumoLMDEnv(gym.Env):
         super(SumoLMDEnv, self).__init__()
 
         '''LOADING THE CONFIGURATION VARIABLES'''
-        self.fov = config["maze"]["fov"]
         self.map = config["maze"]["map"]
         self.cell_size = config["maze"]["cell_size"]
 
         # Task vars
         self.num_tasks = config["task"]["num_tasks"]
-        self.task_prob = config["task"]["task_prob"]
-
-        # Base station vars
-        self.num_base_stations = config["maze"]["num_base_stations"]
 
         # Agent vars
-        self.num_ugvs = config["fleet"]['ugv']["count"]
-        self.max_ugv_range = config["fleet"]['ugv']['range']
-        self.drain_rate = config["fleet"]['ugv']['drain_rate']
-        self.ugv_speed = config["fleet"]['ugv']['speed']
-        self.num_uavs_bs = config["fleet"]['uav']["count_bs"]
-        self.max_uav_range = config['fleet']['uav']['range']
-        self.uav_speed = config['fleet']['uav']['speed']
+        self.num_ugvs = config["fleet"]["count"]
+        self.max_ugv_range = config["fleet"]["range"]
+        self.drain_rate = config["fleet"]["drain_rate"]
+        self.ugv_speed = config["fleet"]["speed"]
+        self.num_primitives = config["fleet"]["num_primitives"]
 
         # Simulation vars
-        self.bms = config['simulation']['bms']
         self.max_time = config['simulation']['max_time']
         self.traffic_b = config['simulation']['traffic']
         self.ff = config['debug']['fast_forward'] # Fast forward factor for rendering
@@ -58,7 +50,6 @@ class SumoLMDEnv(gym.Env):
         self.traffic_num_centroids = config['traffic']['num_centroids']
         self.traffic_delay_factor = config['traffic']['delay_factor']  # Factor to adjust traffic delay
 
-        self.num_primitives = config["fleet"]['ugv']["num_primitives"]
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
         self.action_space = spaces.MultiDiscrete([self.num_primitives]*self.num_ugvs)
@@ -66,12 +57,12 @@ class SumoLMDEnv(gym.Env):
         ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
         max_moves = 100
         steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_primitives*self.num_ugvs))
-        # nb_traffic_space = spaces.MultiDiscrete(np.array([3]*(self.num_primitives-1)*self.num_ugvs))
+        nb_traffic_space = spaces.MultiDiscrete(np.array([3]*(self.num_primitives-1)*self.num_ugvs))
         state_info_space = spaces.MultiDiscrete(np.array([1000]*2*self.num_ugvs))
         self.observation_space = spaces.Dict({
             'ugv_status': ugv_status_space,
             'steps2dest': steps2dest_space,
-            # 'nb_traffic': nb_traffic_space,
+            'nb_traffic': nb_traffic_space,
             'state_info': state_info_space,
         })
 
@@ -214,7 +205,7 @@ class SumoLMDEnv(gym.Env):
 
         Sumo_config = [
             'sumo',
-            '-c', '/home/shinobi-owl/PhD/battery/DroneSim/data/road_grid/road_grid.sumocfg',
+            '-c', self.map,
             '--step-length', '1',
             # '--delay', '500',
         ]
@@ -237,14 +228,6 @@ class SumoLMDEnv(gym.Env):
                        max_speed=self.ugv_speed, traffic_delay_factor= self.traffic_delay_factor, G=self.G, num_primitives=self.num_primitives) for i in range(self.num_ugvs)]
         self.task_list = random.choices(list(self.G.nodes), k=self.num_tasks) # Randomly select tasks from graph nodes
         self.distribute_tasks() # Distribute tasks to UGVs
-
-        if self.bms:
-            self.base_stations = random.sample(list(self.G.nodes), self.num_base_stations)
-            self.uav_states = []
-            for i in range(self.num_base_stations):
-                for j in range(self.num_uavs_bs):
-                        self.uav_states.append(UAV(agent_id=i*self.num_uavs_bs+j, base_position=self.base_stations[i], cell_dist=50, max_range=self.max_uav_range, 
-                                            max_speed=self.uav_speed,G=self.G))
 
         # Metrics
         self.num_tasks_completed = 0
@@ -269,7 +252,7 @@ class SumoLMDEnv(gym.Env):
     
     def _get_observation(self):
         steps2dest = []
-        # nb_traffic = []
+        nb_traffic = []
         ugv_status = []
         state_info = []
 
@@ -288,8 +271,8 @@ class SumoLMDEnv(gym.Env):
                 steps2dest_.append(self.all_shortest_path_lengths[ugv_pos][task_pos])
                 steps2dest.append(steps2dest_)
 
-                # # Neighbor Traffic
-                # nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
+                # Neighbor Traffic
+                nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
 
                 ugv_status.append(ugv.status)
 
@@ -298,20 +281,19 @@ class SumoLMDEnv(gym.Env):
                 state_info.append([ugv_pos_idx, task_pos_idx])
             else:
                 steps2dest.append([100]*self.num_primitives)
-                # nb_traffic.append([2]*(self.num_primitives-1))
+                nb_traffic.append([2]*(self.num_primitives-1))
                 ugv_status.append(0)
                 ugv_pos_idx = list(self.G.nodes).index(ugv_pos)
                 state_info.append([ugv_pos_idx, ugv_pos_idx]) # No task assigned
 
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
-        # steps2dest_flat /= (self.max_row * self.max_col+1)  # Normalize steps to destination
-        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
         state_info_flat = np.array(state_info, dtype=np.int32).flatten()
         obs_dict = {
             'steps2dest': steps2dest_flat,
-            # 'nb_traffic': nb_traffic_flat,
+            'nb_traffic': nb_traffic_flat,
             'ugv_status': ugv_status_flat,
             'state_info': state_info_flat
         }
@@ -342,50 +324,15 @@ class SumoLMDEnv(gym.Env):
             'yellow_roads': self.yellow_roads,
         }
         return info
-    
-    def bms_logic(self):
-        for ugv in self.ugv_states:
-            if ugv.status == 1 and ugv.charging_status == 0:
-                dist2warehouse = nx.shortest_path_length(self.G, source=ugv.position, target=self.warehouse_node) * 50
-                curr_range = ugv.current_range
-                if curr_range-50 < dist2warehouse+50: # If current range is less than distance to warehouse + cell size
-                    ugv.charging_status = 1
-                    if self.bms:
-                        free_uavs = []
-                        for uav in self.uav_states:
-                            if uav.status == 0:# and 2*d <= self.max_uav_range:
-                                free_uavs.append(uav)
-                        if free_uavs:
-                            nearest_uav = min(free_uavs, key=lambda uav: np.linalg.norm(np.array(uav.position) - np.array(ugv.position)))
-                            ugv.status = 2
-                            nearest_uav.status = 1 # Charging with UGV
-                            nearest_uav.active_task = ugv.position # UAV will charge at UGV's position
-                            nearest_uav.assigned_ugv = ugv.agent_id # Assign UGV to UAV
-                            continue
-                    self.assign_ugv_task(ugv.agent_id, 1) # Assign charging task if range is low
 
-    def uav_handler(self):
-        for uav_id, uav in enumerate(self.uav_states):
-            reached_flag, ugv_id = uav.update(self.time_elapsed)
-            if reached_flag:
-                ugv = self.ugv_states[ugv_id] 
-                ugv.recharge()
-                ugv.status = 1
-                uav.status = 2
-                uav.active_task = None # Clear active task after recharging
-                uav.assigned_ugv = None # Clear assigned UGV after recharging
-    
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
         traci.simulationStep()
         self.ugv_handler(action)
-        if self.bms:
-            self.uav_handler() # Handle UAVs if BMS is enabled
         self.time_elapsed = min([ugv.local_time for ugv in self.ugv_states])
         truncated = self.task_handler() # Handle task completion and updates
         reward = self._get_reward()
-        self.bms_logic()
         
         self.current_timestep += 1
 
@@ -444,6 +391,7 @@ class SumoLMDEnv(gym.Env):
 
         for ugv_id, ugv in enumerate(self.ugv_states):
             if ugv.status:
+                # print("Computing reward for UGV:", ugv_id)
                 # --- Progress-Based Shaping Reward ---
                 # Reward for moving closer to the nearest task
                 bonus_factor = 5.0 
@@ -451,26 +399,31 @@ class SumoLMDEnv(gym.Env):
                     current_distance = self.all_shortest_path_lengths[ugv.position][ugv.active_task_list[0]]
                     prev_distance = self.all_shortest_path_lengths[ugv.prev_position][ugv.active_task_list[0]]
                     reward += bonus_factor * (prev_distance - current_distance)
+                    print("Progress Reward:", bonus_factor * (prev_distance - current_distance))
                 
                 # --- Task Completion Reward ---
                 task_completion_reward = 50.0
                 if ugv.task_completed:
                     reward += task_completion_reward
+                    print("Task Completion Reward:", task_completion_reward)
 
                 # --- Time Penalty ---
                 # Penalize based on the time taken for the action
                 time_penalty_factor = 5.0 # Adjust this factor based on desired behavior
                 reward -= time_penalty_factor * ugv.move_time/self.cell_size
+                print("Time Penalty:", -1*time_penalty_factor * ugv.move_time/self.cell_size)
 
                 # --- Invalid Move Penalty ---
                 invalid_move_penalty = 40.0
                 if ugv.act_response == 0:
                     reward -= invalid_move_penalty
+                    print("Invalid Move Penalty:", -1*invalid_move_penalty)
 
                 # If UGV is out of range, apply a penalty
-                out_of_range_penalty = 20.0
-                if ugv.current_range < nx.shortest_path_length(self.G, ugv.position, self.warehouse_node)*50:
-                    reward -= out_of_range_penalty
+                # out_of_range_penalty = 20.0
+                # if ugv.current_range < nx.shortest_path_length(self.G, ugv.position, self.warehouse_node)*50:
+                #     reward -= out_of_range_penalty
+                    # print("Out of Range Penalty:", out_of_range_penalty)
 
         return reward
 

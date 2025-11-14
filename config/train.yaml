@@ -1,36 +1,26 @@
 maze:
-  map: data/grid/grid.net.xml
-  fov: 5
-  num_base_stations: 4
   cell_size: 50
+  map: data/road_grid/road_grid.sumocfg
 
 task:
   num_tasks: 5000
-  task_prob: 0.8
 
 fleet:
-  uav:
-    count_bs: 2
-    range: 1500
-    speed: 3
-    swapping_time: 2
-  ugv:
-    count: 1
-    drain_rate: 1
-    num_primitives: 5
-    range: 1000000
-    speed: 1
+  count: 1
+  drain_rate: 1
+  num_primitives: 5
+  range: 1000000
+  speed: 1
 
 traffic:
   delay_factor: 10
   num_centroids: 5
   prob: 0.8
-  reset_dur: 5
+  reset_dur: 1
   std_dev: 150
 
 simulation:
   max_time: 50000
-  bms: false
   traffic: true
   algo: sarsa
   render_mode: quiet

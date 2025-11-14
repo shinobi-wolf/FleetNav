@@ -10,7 +10,7 @@ def get_agent(config, env):
     :return: An agent instance or a list of agents for multi-agent environments.
     """
     algo = config['simulation']['algo']
-    num_agents = config['fleet']['ugv']['count']
+    num_agents = config['fleet']['count']
 
     if algo == 'dijkstra':
         return [DijkstraAgent(i, env) for i in range(num_agents)]

@@ -40,7 +40,7 @@ def setup_logging(mode, log_file="simulation_log.txt"):
 def extract_observations(observation, num_agents):
     ugv_status = observation['ugv_status'].reshape(num_agents, 1)
     steps2dest = observation['steps2dest'].reshape(num_agents, 5)
-    # nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
+    nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
     state_info = observation['state_info'].reshape(num_agents, 2)
 
     all_obs = []
@@ -48,7 +48,7 @@ def extract_observations(observation, num_agents):
         obs = {
             'ugv_status': ugv_status[i],
             'steps2dest': steps2dest[i],
-            # 'nb_traffic': nb_traffic[i],
+            'nb_traffic': nb_traffic[i],
             'state_info': state_info[i],
         }
         all_obs.append(obs)
@@ -63,14 +63,15 @@ def lmd_simulator(config):
     setup_logging(render_mode, log_file=log_file)
     env = gym.make("SumoLMDEnv-v0", config=config)
 
-    num_agents = config['fleet']['ugv']['count']
+    num_agents = config['fleet']['count']
     agents = get_agent(config, env)
 
     logging.info("Starting Simulation")
     observation, world_state = env.reset(seed=42)
+    # Log action and results
+    logging.info(f"Observation: {observation}") # Observation can be large, maybe omit from console
     env.render()
 
-    acts = ["Up", "Right", "Down", "Left", "Stay"]
     terminated = False
     total_reward = 0.0
     step_idx = 0
@@ -103,8 +104,7 @@ def lmd_simulator(config):
         logging.info(f"Terminated: {terminated}, Truncated: {truncated}")
         for ugv_id in range(num_agents):
             logging.info(f"UGV {ugv_id} Info...")
-            action_str = acts[action_list[ugv_id]] # Format action list for logging
-            logging.info(f"Action taken: {action_str}")
+            logging.info(f"Action taken: {action_list[ugv_id]}")
             
         env.render()
 

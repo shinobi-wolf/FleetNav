@@ -18,7 +18,7 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "-p", "9b752e15",
+                "-p", "sarsa_grid_gen",
             ]
         },
         {

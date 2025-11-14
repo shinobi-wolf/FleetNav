@@ -18,7 +18,7 @@ class SARSAAgent(Agent):
     def __init__(self, env, config, policy_path=None, *args, **kwargs):
         super().__init__(env, *args, **kwargs)
         self.cell_size = config['maze']['cell_size']
-        self.max_range = config['fleet']['ugv']['range']
+        self.max_range = config['fleet']['range']
         self.max_cell_range = int(self.max_range/self.cell_size)
 
         if hasattr(env.action_space, 'n'):
@@ -36,13 +36,13 @@ class SARSAAgent(Agent):
             print(f"Policy loaded from {policy_path}")
 
     def _observation_to_state(self, observation):
-        # steps2dest = observation['steps2dest'].tolist()
-        # nb_traffic = observation['nb_traffic'].tolist()
-        # obs = tuple(steps2dest + nb_traffic)
+        steps2dest = observation['steps2dest']
+        nb_traffic = observation['nb_traffic'].tolist()
+        obs = nb_traffic+[int(np.argmin(steps2dest))]
+        return tuple(obs)
+        # state_info = observation['state_info'].tolist()
+        # obs = tuple(state_info)
         # return obs
-        state_info = observation['state_info'].tolist()
-        obs = tuple(state_info)
-        return obs
 
     def predict(self, observation):
         """
@@ -50,8 +50,10 @@ class SARSAAgent(Agent):
         for the given observation.
         """
         state = self._observation_to_state(observation)
+        print("Predict State:", state)
         if state not in self.Q:
-            self.Q[state] = np.zeros(len(self.action_list))
+            print("State not in Q-table, randomizing action.")
+            return random.randint(0, len(self.action_list)-1)
         return int(np.argmax(self.Q[state]))
     
     def choose_action(self, state, epsilon):
