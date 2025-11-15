@@ -9,13 +9,13 @@ fleet:
   speed: 1
 maze:
   cell_size: 50
-  map: data/grid/grid.sumocfg
+  map: data/pedestrian_grid/ped_grid.sumocfg
 policy: dijkstra_sumo
 simulation:
   algo: dijkstra
   max_time: 50000
   render_fps: 30
-  render_mode: quiet
+  render_mode: human
   traffic: true
   train: false
 task:
