@@ -31,6 +31,7 @@ class SumoLMDEnv(gym.Env):
         self.num_ugvs = config["fleet"]["count"]
         self.max_ugv_range = config["fleet"]['range']
         self.ugv_speed = config["fleet"]['max_speed']
+        self.num_actions = config['net']['max_degree']
 
         # Simulation vars
         self.max_time = config['simulation']['max_time']
@@ -42,11 +43,11 @@ class SumoLMDEnv(gym.Env):
         self.ff = config['debug']['fast_forward']
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
-        self.action_space = spaces.MultiDiscrete([5]*self.num_ugvs)
+        self.action_space = spaces.MultiDiscrete([self.num_actions]*self.num_ugvs)
         
         ugv_status_space = spaces.MultiDiscrete([3]*self.num_ugvs) # 0: idle, 1: moving, 2: charging
-        max_moves = 50
-        steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*5*self.num_ugvs))
+        max_moves = 100
+        steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_actions*self.num_ugvs))
         graph_node_space = spaces.MultiDiscrete([1000]*self.num_ugvs)
         nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
         self.observation_space = spaces.Dict({
@@ -115,10 +116,11 @@ class SumoLMDEnv(gym.Env):
         self.render_mode = getattr(self, 'render_mode', None)
 
         Sumo_config = [
-            'sumo',
+            'sumo-gui',
             '-c', self.net_path,
             '--step-length', str(self.step_length),
-            # '--delay', '500',
+            '--delay', '500',
+            '--scale', '15'
         ]
         traci.start(Sumo_config)
 
@@ -177,16 +179,16 @@ class SumoLMDEnv(gym.Env):
             ugv_pos = ugv.position
             # Steps to destination in each direction
             steps2dest_ = []
-            nb_nodes = sorted(self.G.neighbors(ugv_pos))[:4]
+            nb_nodes = sorted(self.G.neighbors(ugv_pos))[:self.num_actions]  # Get up to num_actions neighbors
             if ugv.task_list:  # Check if task list is not empty
                 task_pos = ugv.task_list[0]
                 for nb_node in nb_nodes:
                     steps2dest_.append(self.all_shortest_path_lengths[nb_node][task_pos])
-                for _ in range(4 - len(nb_nodes)):
+                for _ in range(self.num_actions - len(nb_nodes)):
                     steps2dest_.append(100)
             else:
                 # If no tasks, use zeros for steps
-                steps2dest_ = [100] * 4
+                steps2dest_ = [100] * self.num_actions
             steps2dest.append(steps2dest_)
 
             # Neighbor Traffic
@@ -246,16 +248,20 @@ class SumoLMDEnv(gym.Env):
         truncated = self.task_handler() # Handle task completion and updates
         
         self.current_timestep += 1
-        if self.train_mode:
-            veh_id = self.ugv_states[0].veh_id
+        # if self.train_mode:
+        traci.simulationStep()
+        self.time_elapsed = traci.simulation.getTime()
+        reached_flag = False
+        while not reached_flag:
+            for ugv in self.ugv_states:
+                if ugv.veh_id and ugv.veh_id not in traci.person.getIDList():
+                    ugv.status = 1
+                    reached_flag = True
             traci.simulationStep()
             self.time_elapsed = traci.simulation.getTime()
-            while veh_id is not None and veh_id in traci.vehicle.getIDList():
-                traci.simulationStep()
-                self.time_elapsed = traci.simulation.getTime()
-        else:
-            traci.simulationStep()
-            self.time_elapsed = traci.simulation.getTime()
+        # else:
+        #     traci.simulationStep()
+        #     self.time_elapsed = traci.simulation.getTime()
         
         reward = self._get_reward()
 
@@ -270,13 +276,13 @@ class SumoLMDEnv(gym.Env):
         for ugv_id, ugv in enumerate(self.ugv_states):
             if ugv.status==2:
                 continue
-            if ugv.veh_id and ugv.veh_id in traci.vehicle.getIDList():
+            if ugv.veh_id and ugv.veh_id in traci.person.getIDList():
                 ugv.status = 0
                 continue
             ugv.status = 1
             act = action[ugv_id]
             ugv.last_position = ugv.position    
-            if act == 4:
+            if act == self.num_actions:
                 continue
             move_flag, edge_id = ugv.move(act, self.time_elapsed, self.G)
             
@@ -284,9 +290,10 @@ class SumoLMDEnv(gym.Env):
                 # Only track move time if move was successful
                 route_id = f"ugv_{ugv_id}_{self.current_timestep}_route"
                 ugv.veh_id = f"ugv_{ugv_id}_{self.current_timestep}"
-                traci.route.add(route_id, [edge_id])
-                traci.vehicle.add(ugv.veh_id, route_id)
-            # else park
+                # add person and set a visible color based on UGV id
+                traci.person.add(ugv.veh_id, edge_id, 0.0)
+                traci.person.setColor(ugv.veh_id, (255,0,0,255))
+                traci.person.appendWalkingStage(ugv.veh_id, [edge_id], arrivalPos=-1, speed=2.0)
             
             if ugv.position == self.warehouse_node:
                 ugv.recharge()

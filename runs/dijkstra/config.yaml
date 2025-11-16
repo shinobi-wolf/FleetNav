@@ -8,9 +8,9 @@ fleet:
   max_speed: 1
   range: 100000000
 net:
-  net_path: data/grid/grid.sumocfg
+  net_path: data/pedestrian_grid/ped_grid.sumocfg
   warehouse: random
-policy: cb6b6c44
+  max_degree: 4
 simulation:
   max_steps: 1000
   max_time: 5000
