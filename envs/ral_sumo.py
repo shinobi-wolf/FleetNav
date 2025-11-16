@@ -49,13 +49,13 @@ class SumoLMDEnv(gym.Env):
         max_moves = 100
         steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_actions*self.num_ugvs))
         graph_node_space = spaces.MultiDiscrete([1000]*self.num_ugvs)
-        nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
+        # nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
         self.observation_space = spaces.Dict({
             'ugv_status': ugv_status_space,
             'steps2dest': steps2dest_space,
             'graph_node': graph_node_space,
             'target_node': graph_node_space,
-            'nb_traffic': nb_traffic_space,
+            # 'nb_traffic': nb_traffic_space,
         })
         
 
@@ -120,7 +120,7 @@ class SumoLMDEnv(gym.Env):
             '-c', self.net_path,
             '--step-length', str(self.step_length),
             '--delay', '500',
-            '--scale', '15'
+            # '--scale', '5'
         ]
         traci.start(Sumo_config)
 
@@ -170,7 +170,7 @@ class SumoLMDEnv(gym.Env):
     
     def _get_observation(self):
         steps2dest = []
-        nb_traffic = []
+        # nb_traffic = []
         ugv_status = []
         graph_node = []
         target_node = []
@@ -191,8 +191,8 @@ class SumoLMDEnv(gym.Env):
                 steps2dest_ = [100] * self.num_actions
             steps2dest.append(steps2dest_)
 
-            # Neighbor Traffic
-            nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
+            # # Neighbor Traffic
+            # nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
 
             ugv_status.append(ugv.status)
             graph_node.append(sorted(list(self.G.nodes)).index(ugv.position))
@@ -203,13 +203,13 @@ class SumoLMDEnv(gym.Env):
 
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
-        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
         graph_node_flat = np.array(graph_node, dtype=np.int32).flatten()
         target_node_flat = np.array(target_node, dtype=np.int32).flatten()
         obs_dict = {
             'steps2dest': steps2dest_flat,
-            'nb_traffic': nb_traffic_flat,
+            # 'nb_traffic': nb_traffic_flat,
             'ugv_status': ugv_status_flat,
             'graph_node': graph_node_flat,
             'target_node': target_node_flat,
@@ -252,7 +252,7 @@ class SumoLMDEnv(gym.Env):
         traci.simulationStep()
         self.time_elapsed = traci.simulation.getTime()
         reached_flag = False
-        while not reached_flag:
+        while not reached_flag and self.time_elapsed < self.max_time:
             for ugv in self.ugv_states:
                 if ugv.veh_id and ugv.veh_id not in traci.person.getIDList():
                     ugv.status = 1
@@ -262,7 +262,6 @@ class SumoLMDEnv(gym.Env):
         # else:
         #     traci.simulationStep()
         #     self.time_elapsed = traci.simulation.getTime()
-        
         reward = self._get_reward()
 
         self._check_termination_condition() # Check termination based on new state
@@ -293,7 +292,7 @@ class SumoLMDEnv(gym.Env):
                 # add person and set a visible color based on UGV id
                 traci.person.add(ugv.veh_id, edge_id, 0.0)
                 traci.person.setColor(ugv.veh_id, (255,0,0,255))
-                traci.person.appendWalkingStage(ugv.veh_id, [edge_id], arrivalPos=-1, speed=2.0)
+                traci.person.appendWalkingStage(ugv.veh_id, [edge_id], arrivalPos=-1, speed=3.0)
             
             if ugv.position == self.warehouse_node:
                 ugv.recharge()
@@ -344,10 +343,10 @@ class SumoLMDEnv(gym.Env):
             if move_time > 0:
                 ugv_reward += MOVE_TIME_PENALTY_SCALE * move_time
 
-            if not ugv.task_completed_this_step:
-                curr_dist = self.all_shortest_path_lengths[ugv.position][ugv.task_list[0]]
-                prev_dist = self.all_shortest_path_lengths[ugv.last_position][ugv.task_list[0]]
-                ugv_reward += 5.0*(prev_dist-curr_dist)
+            # if ugv.status!=2 and not ugv.task_completed_this_step:
+            #     curr_dist = self.all_shortest_path_lengths[ugv.position][ugv.task_list[0]]
+            #     prev_dist = self.all_shortest_path_lengths[ugv.last_position][ugv.task_list[0]]
+            #     ugv_reward += 5.0*(prev_dist-curr_dist)
             
             total_reward += ugv_reward
         

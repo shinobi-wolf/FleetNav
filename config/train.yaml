@@ -5,11 +5,12 @@ fleet:
   range: 100000000
   max_speed: 1
 net:
-  net_path: data/grid/grid.sumocfg
+  net_path: data/pedestrian_grid/ped_grid.sumocfg
   warehouse: random
+  max_degree: 4
 simulation:
-  max_time: 5000
-  max_steps: 1000
+  max_time: 10000
+  max_steps: 10000
   render_mode: quiet
   render_fps: 30
   step_length: 1

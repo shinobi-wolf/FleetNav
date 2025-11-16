@@ -12,12 +12,12 @@ net:
   warehouse: random
   max_degree: 4
 simulation:
-  max_steps: 1000
-  max_time: 5000
+  max_steps: 2000
+  max_time: 10000
   render_fps: 30
   render_mode: quiet
   step_length: 1
   train: false
 task:
-  demand_per: 40
+  demand_per: 10
 traffic: p:default b:default

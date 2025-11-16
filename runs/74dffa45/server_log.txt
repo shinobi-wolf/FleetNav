@@ -1,0 +1,4001 @@
+Config: runs/74dffa45//config.yaml
+Step 0:
+UGV 0: Position=E0, Active Task=B0, Status=1
+Step 1:
+UGV 0: Position=D0, Active Task=B0, Status=1
+Step 2:
+UGV 0: Position=C0, Active Task=B0, Status=1
+Step 3:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 4:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 5:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 6:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 7:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 8:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 9:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 10:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 11:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 12:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 13:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 14:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 15:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 16:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 17:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 18:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 19:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 20:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 21:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 22:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 23:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 24:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 25:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 26:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 27:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 28:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 29:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 30:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 31:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 32:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 33:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 34:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 35:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 36:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 37:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 38:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 39:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 40:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 41:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 42:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 43:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 44:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 45:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 46:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 47:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 48:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 49:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 50:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 51:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 52:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 53:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 54:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 55:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 56:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 57:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 58:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 59:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 60:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 61:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 62:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 63:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 64:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 65:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 66:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 67:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 68:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 69:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 70:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 71:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 72:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 73:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 74:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 75:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 76:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 77:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 78:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 79:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 80:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 81:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 82:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 83:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 84:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 85:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 86:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 87:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 88:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 89:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 90:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 91:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 92:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 93:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 94:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 95:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 96:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 97:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 98:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 99:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 100:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 101:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 102:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 103:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 104:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 105:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 106:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 107:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 108:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 109:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 110:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 111:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 112:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 113:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 114:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 115:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 116:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 117:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 118:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 119:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 120:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 121:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 122:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 123:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 124:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 125:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 126:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 127:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 128:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 129:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 130:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 131:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 132:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 133:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 134:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 135:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 136:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 137:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 138:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 139:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 140:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 141:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 142:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 143:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 144:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 145:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 146:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 147:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 148:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 149:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 150:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 151:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 152:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 153:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 154:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 155:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 156:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 157:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 158:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 159:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 160:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 161:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 162:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 163:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 164:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 165:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 166:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 167:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 168:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 169:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 170:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 171:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 172:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 173:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 174:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 175:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 176:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 177:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 178:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 179:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 180:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 181:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 182:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 183:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 184:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 185:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 186:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 187:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 188:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 189:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 190:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 191:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 192:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 193:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 194:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 195:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 196:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 197:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 198:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 199:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 200:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 201:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 202:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 203:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 204:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 205:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 206:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 207:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 208:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 209:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 210:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 211:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 212:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 213:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 214:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 215:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 216:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 217:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 218:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 219:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 220:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 221:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 222:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 223:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 224:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 225:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 226:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 227:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 228:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 229:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 230:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 231:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 232:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 233:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 234:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 235:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 236:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 237:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 238:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 239:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 240:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 241:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 242:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 243:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 244:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 245:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 246:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 247:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 248:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 249:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 250:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 251:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 252:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 253:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 254:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 255:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 256:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 257:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 258:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 259:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 260:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 261:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 262:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 263:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 264:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 265:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 266:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 267:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 268:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 269:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 270:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 271:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 272:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 273:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 274:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 275:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 276:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 277:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 278:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 279:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 280:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 281:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 282:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 283:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 284:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 285:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 286:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 287:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 288:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 289:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 290:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 291:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 292:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 293:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 294:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 295:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 296:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 297:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 298:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 299:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 300:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 301:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 302:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 303:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 304:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 305:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 306:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 307:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 308:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 309:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 310:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 311:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 312:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 313:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 314:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 315:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 316:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 317:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 318:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 319:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 320:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 321:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 322:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 323:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 324:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 325:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 326:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 327:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 328:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 329:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 330:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 331:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 332:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 333:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 334:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 335:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 336:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 337:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 338:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 339:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 340:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 341:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 342:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 343:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 344:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 345:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 346:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 347:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 348:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 349:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 350:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 351:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 352:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 353:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 354:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 355:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 356:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 357:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 358:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 359:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 360:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 361:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 362:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 363:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 364:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 365:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 366:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 367:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 368:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 369:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 370:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 371:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 372:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 373:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 374:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 375:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 376:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 377:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 378:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 379:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 380:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 381:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 382:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 383:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 384:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 385:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 386:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 387:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 388:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 389:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 390:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 391:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 392:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 393:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 394:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 395:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 396:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 397:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 398:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 399:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 400:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 401:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 402:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 403:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 404:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 405:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 406:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 407:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 408:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 409:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 410:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 411:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 412:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 413:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 414:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 415:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 416:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 417:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 418:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 419:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 420:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 421:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 422:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 423:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 424:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 425:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 426:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 427:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 428:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 429:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 430:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 431:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 432:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 433:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 434:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 435:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 436:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 437:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 438:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 439:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 440:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 441:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 442:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 443:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 444:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 445:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 446:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 447:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 448:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 449:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 450:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 451:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 452:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 453:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 454:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 455:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 456:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 457:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 458:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 459:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 460:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 461:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 462:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 463:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 464:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 465:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 466:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 467:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 468:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 469:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 470:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 471:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 472:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 473:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 474:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 475:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 476:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 477:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 478:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 479:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 480:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 481:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 482:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 483:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 484:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 485:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 486:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 487:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 488:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 489:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 490:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 491:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 492:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 493:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 494:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 495:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 496:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 497:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 498:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 499:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 500:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 501:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 502:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 503:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 504:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 505:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 506:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 507:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 508:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 509:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 510:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 511:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 512:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 513:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 514:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 515:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 516:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 517:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 518:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 519:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 520:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 521:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 522:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 523:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 524:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 525:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 526:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 527:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 528:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 529:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 530:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 531:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 532:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 533:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 534:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 535:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 536:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 537:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 538:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 539:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 540:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 541:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 542:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 543:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 544:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 545:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 546:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 547:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 548:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 549:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 550:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 551:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 552:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 553:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 554:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 555:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 556:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 557:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 558:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 559:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 560:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 561:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 562:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 563:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 564:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 565:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 566:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 567:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 568:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 569:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 570:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 571:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 572:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 573:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 574:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 575:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 576:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 577:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 578:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 579:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 580:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 581:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 582:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 583:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 584:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 585:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 586:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 587:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 588:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 589:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 590:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 591:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 592:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 593:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 594:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 595:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 596:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 597:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 598:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 599:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 600:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 601:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 602:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 603:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 604:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 605:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 606:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 607:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 608:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 609:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 610:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 611:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 612:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 613:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 614:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 615:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 616:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 617:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 618:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 619:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 620:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 621:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 622:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 623:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 624:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 625:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 626:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 627:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 628:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 629:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 630:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 631:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 632:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 633:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 634:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 635:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 636:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 637:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 638:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 639:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 640:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 641:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 642:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 643:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 644:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 645:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 646:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 647:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 648:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 649:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 650:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 651:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 652:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 653:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 654:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 655:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 656:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 657:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 658:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 659:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 660:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 661:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 662:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 663:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 664:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 665:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 666:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 667:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 668:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 669:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 670:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 671:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 672:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 673:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 674:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 675:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 676:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 677:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 678:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 679:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 680:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 681:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 682:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 683:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 684:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 685:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 686:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 687:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 688:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 689:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 690:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 691:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 692:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 693:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 694:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 695:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 696:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 697:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 698:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 699:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 700:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 701:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 702:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 703:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 704:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 705:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 706:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 707:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 708:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 709:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 710:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 711:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 712:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 713:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 714:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 715:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 716:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 717:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 718:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 719:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 720:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 721:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 722:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 723:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 724:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 725:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 726:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 727:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 728:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 729:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 730:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 731:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 732:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 733:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 734:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 735:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 736:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 737:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 738:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 739:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 740:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 741:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 742:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 743:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 744:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 745:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 746:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 747:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 748:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 749:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 750:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 751:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 752:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 753:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 754:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 755:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 756:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 757:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 758:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 759:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 760:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 761:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 762:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 763:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 764:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 765:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 766:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 767:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 768:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 769:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 770:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 771:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 772:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 773:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 774:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 775:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 776:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 777:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 778:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 779:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 780:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 781:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 782:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 783:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 784:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 785:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 786:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 787:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 788:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 789:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 790:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 791:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 792:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 793:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 794:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 795:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 796:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 797:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 798:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 799:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 800:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 801:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 802:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 803:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 804:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 805:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 806:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 807:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 808:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 809:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 810:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 811:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 812:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 813:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 814:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 815:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 816:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 817:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 818:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 819:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 820:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 821:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 822:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 823:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 824:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 825:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 826:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 827:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 828:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 829:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 830:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 831:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 832:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 833:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 834:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 835:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 836:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 837:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 838:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 839:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 840:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 841:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 842:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 843:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 844:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 845:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 846:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 847:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 848:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 849:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 850:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 851:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 852:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 853:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 854:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 855:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 856:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 857:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 858:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 859:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 860:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 861:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 862:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 863:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 864:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 865:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 866:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 867:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 868:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 869:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 870:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 871:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 872:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 873:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 874:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 875:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 876:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 877:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 878:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 879:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 880:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 881:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 882:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 883:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 884:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 885:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 886:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 887:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 888:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 889:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 890:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 891:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 892:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 893:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 894:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 895:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 896:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 897:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 898:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 899:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 900:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 901:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 902:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 903:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 904:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 905:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 906:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 907:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 908:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 909:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 910:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 911:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 912:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 913:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 914:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 915:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 916:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 917:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 918:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 919:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 920:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 921:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 922:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 923:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 924:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 925:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 926:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 927:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 928:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 929:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 930:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 931:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 932:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 933:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 934:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 935:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 936:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 937:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 938:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 939:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 940:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 941:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 942:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 943:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 944:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 945:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 946:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 947:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 948:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 949:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 950:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 951:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 952:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 953:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 954:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 955:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 956:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 957:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 958:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 959:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 960:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 961:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 962:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 963:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 964:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 965:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 966:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 967:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 968:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 969:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 970:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 971:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 972:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 973:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 974:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 975:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 976:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 977:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 978:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 979:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 980:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 981:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 982:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 983:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 984:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 985:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 986:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 987:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 988:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 989:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 990:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 991:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 992:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 993:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 994:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 995:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 996:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 997:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 998:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 999:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1000:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1001:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1002:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1003:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1004:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1005:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1006:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1007:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1008:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1009:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1010:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1011:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1012:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1013:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1014:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1015:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1016:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1017:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1018:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1019:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1020:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1021:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1022:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1023:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1024:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1025:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1026:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1027:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1028:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1029:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1030:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1031:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1032:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1033:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1034:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1035:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1036:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1037:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1038:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1039:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1040:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1041:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1042:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1043:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1044:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1045:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1046:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1047:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1048:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1049:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1050:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1051:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1052:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1053:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1054:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1055:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1056:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1057:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1058:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1059:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1060:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1061:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1062:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1063:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1064:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1065:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1066:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1067:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1068:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1069:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1070:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1071:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1072:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1073:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1074:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1075:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1076:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1077:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1078:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1079:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1080:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1081:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1082:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1083:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1084:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1085:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1086:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1087:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1088:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1089:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1090:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1091:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1092:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1093:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1094:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1095:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1096:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1097:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1098:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1099:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1100:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1101:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1102:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1103:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1104:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1105:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1106:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1107:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1108:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1109:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1110:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1111:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1112:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1113:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1114:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1115:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1116:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1117:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1118:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1119:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1120:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1121:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1122:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1123:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1124:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1125:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1126:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1127:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1128:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1129:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1130:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1131:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1132:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1133:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1134:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1135:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1136:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1137:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1138:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1139:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1140:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1141:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1142:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1143:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1144:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1145:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1146:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1147:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1148:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1149:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1150:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1151:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1152:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1153:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1154:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1155:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1156:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1157:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1158:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1159:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1160:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1161:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1162:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1163:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1164:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1165:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1166:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1167:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1168:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1169:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1170:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1171:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1172:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1173:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1174:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1175:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1176:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1177:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1178:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1179:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1180:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1181:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1182:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1183:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1184:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1185:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1186:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1187:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1188:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1189:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1190:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1191:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1192:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1193:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1194:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1195:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1196:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1197:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1198:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1199:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1200:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1201:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1202:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1203:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1204:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1205:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1206:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1207:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1208:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1209:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1210:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1211:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1212:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1213:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1214:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1215:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1216:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1217:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1218:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1219:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1220:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1221:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1222:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1223:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1224:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1225:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1226:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1227:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1228:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1229:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1230:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1231:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1232:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1233:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1234:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1235:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1236:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1237:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1238:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1239:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1240:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1241:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1242:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1243:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1244:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1245:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1246:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1247:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1248:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1249:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1250:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1251:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1252:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1253:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1254:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1255:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1256:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1257:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1258:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1259:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1260:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1261:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1262:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1263:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1264:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1265:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1266:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1267:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1268:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1269:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1270:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1271:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1272:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1273:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1274:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1275:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1276:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1277:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1278:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1279:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1280:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1281:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1282:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1283:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1284:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1285:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1286:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1287:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1288:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1289:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1290:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1291:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1292:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1293:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1294:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1295:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1296:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1297:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1298:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1299:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1300:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1301:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1302:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1303:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1304:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1305:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1306:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1307:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1308:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1309:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1310:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1311:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1312:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1313:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1314:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1315:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1316:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1317:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1318:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1319:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1320:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1321:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1322:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1323:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1324:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1325:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1326:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1327:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1328:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1329:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1330:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1331:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1332:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1333:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1334:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1335:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1336:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1337:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1338:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1339:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1340:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1341:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1342:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1343:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1344:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1345:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1346:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1347:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1348:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1349:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1350:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1351:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1352:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1353:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1354:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1355:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1356:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1357:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1358:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1359:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1360:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1361:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1362:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1363:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1364:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1365:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1366:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1367:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1368:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1369:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1370:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1371:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1372:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1373:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1374:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1375:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1376:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1377:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1378:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1379:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1380:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1381:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1382:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1383:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1384:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1385:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1386:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1387:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1388:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1389:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1390:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1391:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1392:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1393:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1394:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1395:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1396:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1397:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1398:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1399:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1400:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1401:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1402:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1403:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1404:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1405:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1406:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1407:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1408:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1409:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1410:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1411:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1412:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1413:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1414:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1415:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1416:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1417:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1418:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1419:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1420:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1421:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1422:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1423:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1424:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1425:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1426:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1427:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1428:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1429:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1430:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1431:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1432:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1433:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1434:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1435:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1436:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1437:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1438:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1439:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1440:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1441:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1442:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1443:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1444:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1445:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1446:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1447:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1448:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1449:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1450:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1451:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1452:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1453:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1454:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1455:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1456:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1457:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1458:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1459:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1460:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1461:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1462:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1463:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1464:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1465:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1466:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1467:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1468:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1469:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1470:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1471:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1472:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1473:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1474:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1475:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1476:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1477:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1478:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1479:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1480:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1481:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1482:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1483:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1484:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1485:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1486:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1487:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1488:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1489:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1490:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1491:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1492:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1493:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1494:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1495:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1496:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1497:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1498:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1499:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1500:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1501:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1502:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1503:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1504:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1505:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1506:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1507:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1508:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1509:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1510:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1511:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1512:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1513:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1514:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1515:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1516:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1517:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1518:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1519:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1520:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1521:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1522:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1523:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1524:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1525:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1526:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1527:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1528:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1529:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1530:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1531:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1532:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1533:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1534:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1535:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1536:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1537:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1538:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1539:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1540:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1541:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1542:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1543:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1544:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1545:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1546:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1547:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1548:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1549:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1550:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1551:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1552:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1553:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1554:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1555:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1556:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1557:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1558:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1559:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1560:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1561:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1562:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1563:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1564:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1565:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1566:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1567:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1568:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1569:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1570:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1571:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1572:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1573:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1574:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1575:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1576:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1577:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1578:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1579:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1580:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1581:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1582:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1583:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1584:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1585:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1586:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1587:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1588:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1589:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1590:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1591:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1592:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1593:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1594:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1595:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1596:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1597:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1598:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1599:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1600:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1601:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1602:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1603:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1604:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1605:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1606:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1607:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1608:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1609:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1610:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1611:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1612:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1613:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1614:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1615:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1616:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1617:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1618:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1619:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1620:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1621:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1622:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1623:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1624:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1625:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1626:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1627:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1628:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1629:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1630:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1631:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1632:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1633:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1634:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1635:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1636:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1637:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1638:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1639:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1640:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1641:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1642:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1643:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1644:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1645:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1646:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1647:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1648:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1649:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1650:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1651:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1652:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1653:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1654:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1655:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1656:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1657:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1658:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1659:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1660:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1661:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1662:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1663:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1664:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1665:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1666:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1667:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1668:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1669:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1670:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1671:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1672:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1673:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1674:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1675:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1676:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1677:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1678:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1679:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1680:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1681:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1682:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1683:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1684:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1685:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1686:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1687:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1688:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1689:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1690:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1691:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1692:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1693:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1694:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1695:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1696:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1697:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1698:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1699:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1700:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1701:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1702:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1703:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1704:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1705:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1706:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1707:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1708:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1709:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1710:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1711:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1712:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1713:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1714:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1715:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1716:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1717:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1718:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1719:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1720:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1721:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1722:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1723:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1724:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1725:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1726:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1727:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1728:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1729:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1730:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1731:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1732:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1733:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1734:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1735:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1736:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1737:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1738:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1739:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1740:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1741:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1742:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1743:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1744:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1745:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1746:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1747:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1748:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1749:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1750:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1751:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1752:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1753:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1754:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1755:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1756:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1757:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1758:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1759:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1760:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1761:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1762:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1763:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1764:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1765:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1766:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1767:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1768:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1769:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1770:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1771:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1772:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1773:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1774:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1775:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1776:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1777:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1778:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1779:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1780:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1781:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1782:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1783:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1784:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1785:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1786:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1787:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1788:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1789:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1790:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1791:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1792:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1793:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1794:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1795:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1796:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1797:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1798:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1799:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1800:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1801:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1802:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1803:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1804:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1805:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1806:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1807:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1808:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1809:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1810:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1811:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1812:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1813:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1814:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1815:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1816:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1817:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1818:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1819:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1820:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1821:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1822:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1823:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1824:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1825:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1826:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1827:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1828:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1829:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1830:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1831:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1832:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1833:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1834:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1835:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1836:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1837:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1838:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1839:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1840:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1841:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1842:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1843:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1844:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1845:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1846:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1847:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1848:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1849:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1850:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1851:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1852:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1853:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1854:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1855:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1856:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1857:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1858:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1859:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1860:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1861:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1862:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1863:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1864:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1865:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1866:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1867:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1868:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1869:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1870:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1871:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1872:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1873:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1874:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1875:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1876:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1877:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1878:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1879:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1880:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1881:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1882:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1883:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1884:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1885:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1886:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1887:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1888:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1889:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1890:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1891:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1892:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1893:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1894:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1895:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1896:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1897:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1898:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1899:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1900:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1901:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1902:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1903:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1904:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1905:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1906:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1907:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1908:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1909:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1910:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1911:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1912:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1913:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1914:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1915:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1916:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1917:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1918:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1919:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1920:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1921:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1922:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1923:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1924:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1925:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1926:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1927:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1928:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1929:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1930:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1931:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1932:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1933:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1934:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1935:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1936:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1937:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1938:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1939:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1940:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1941:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1942:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1943:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1944:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1945:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1946:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1947:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1948:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1949:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1950:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1951:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1952:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1953:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1954:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1955:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1956:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1957:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1958:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1959:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1960:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1961:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1962:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1963:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1964:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1965:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1966:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1967:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1968:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1969:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1970:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1971:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1972:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1973:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1974:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1975:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1976:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1977:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1978:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1979:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1980:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1981:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1982:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1983:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1984:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1985:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1986:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1987:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1988:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1989:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1990:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1991:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1992:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1993:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1994:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1995:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1996:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1997:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 1998:
+UGV 0: Position=A0, Active Task=D3, Status=1
+Step 1999:
+UGV 0: Position=B0, Active Task=D3, Status=1
