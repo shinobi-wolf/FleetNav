@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["-p", "74dffa45"],
+            "args": ["-p", "41a26d4d"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }

@@ -25,7 +25,7 @@ if __name__ == '__main__':
         lmd_trainer(config, policy_dir)
 
         config_file = os.path.join(policy_dir, "config.yaml")
-        config['policy'] = policy_name
+        config['agent']['policy'] = policy_name
         config['simulation']['train'] = False
         with open(config_file, 'w') as f:
             yaml.dump(config, f)

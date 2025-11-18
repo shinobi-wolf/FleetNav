@@ -1,5 +1,6 @@
 debug:
   fast_forward: 100
+  delay: 0
 fleet:
   count: 1
   range: 100000000
@@ -9,8 +10,9 @@ net:
   warehouse: random
   max_degree: 4
 simulation:
-  max_time: 10000
-  max_steps: 10000
+  max_time: 4000
+  max_steps: 1000
+  traffic_scale: 1
   render_mode: quiet
   render_fps: 30
   step_length: 1

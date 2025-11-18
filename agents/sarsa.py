@@ -49,8 +49,10 @@ class SARSAAgent(Agent):
         """
         G = self.env.unwrapped.G
         state = self._observation_to_state(observation)
+        print("State:", state)
         if state not in self.Q:
-            return random.randint(0, 4)
+            print("State not in Q-table, selecting random action.")
+            return random.randint(0, 3)
         curr_node = sorted(list(G.nodes))[int(state[0])]
         num_neib = len(list(G.neighbors(curr_node)))
         q = self.Q[state][:num_neib]
@@ -74,13 +76,14 @@ class SARSAAgent(Agent):
 
         policy_path = policy_dir + '/policy.pkl'
         training_config = training_config['sarsa']
+        results = []
+
         num_episodes = training_config.get('num_episodes')
         gamma = training_config.get('gamma')
         alpha = training_config.get('alpha')
         epsilon = training_config.get('epsilon')
         epsilon_decay = training_config.get('epsilon_decay')
 
-        results = []
         obs, info = self.env.reset()
         state = self._observation_to_state(obs)
         if state not in self.Q:

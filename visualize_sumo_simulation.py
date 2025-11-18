@@ -396,14 +396,14 @@ def visualize_simulation(policy_name, compare_policy=None):
         print("\nCreating SUMO routes and vehicles for Policy 1 (BLUE)...")
         for ugv_id, edge_path in ugv_routes1.items():
             if edge_path:  # Only create route if there are edges
-                route_id = f"p1_ugv_{ugv_id}_route"
-                traci.route.add(route_id, edge_path)
-                
                 veh_id = f"p1_ugv_{ugv_id}"
-                traci.vehicle.add(veh_id, route_id)
+                first_edge = edge_path[0]
+                traci.person.add(veh_id, first_edge, 0.0)
+                traci.person.setColor(veh_id, (255, 0, 0, 255))
                 
-                # Color vehicles blue for policy 1
-                traci.vehicle.setColor(veh_id, (0, 0, 255, 255))
+                traci.person.appendWalkingStage(veh_id, edge_path, 
+                                                arrivalPos=-1, speed=3.0)
+
                 
                 if not compare_policy:
                     print(f"  Created route for UGV {ugv_id}: {len(edge_path)} edges")
@@ -413,14 +413,13 @@ def visualize_simulation(policy_name, compare_policy=None):
             print("\nCreating SUMO routes and vehicles for Policy 2 (RED/ORANGE)...")
             for ugv_id, edge_path in ugv_routes2.items():
                 if edge_path:  # Only create route if there are edges
-                    route_id = f"p2_ugv_{ugv_id}_route"
-                    traci.route.add(route_id, edge_path)
-                    
                     veh_id = f"p2_ugv_{ugv_id}"
-                    traci.vehicle.add(veh_id, route_id)
-                    
-                    # Color vehicles red/orange for policy 2
-                    traci.vehicle.setColor(veh_id, (255, 100, 0, 255))
+                    first_edge = edge_path[0]  
+                    traci.person.add(veh_id, first_edge, 0.0)
+                    traci.person.setColor(veh_id, (255, 255, 0, 255))
+
+                    traci.person.appendWalkingStage(veh_id, edge_path, 
+                                                    arrivalPos=-1, speed=3.0)
         
         # Update active vehicles set
         active_vehicles = set(ugv_routes1.keys())
@@ -450,7 +449,7 @@ def visualize_simulation(policy_name, compare_policy=None):
             current_vehicles = set()
             for ugv_id in ugv_routes1.keys():
                 veh_id = f"p1_ugv_{ugv_id}"
-                if veh_id in traci.vehicle.getIDList():
+                if veh_id in traci.person.getIDList():
                     current_vehicles.add(ugv_id)
                 elif ugv_id not in completed_p1:
                     completed_p1.add(ugv_id)
@@ -459,7 +458,7 @@ def visualize_simulation(policy_name, compare_policy=None):
             if compare_policy and ugv_routes2:
                 for ugv_id in ugv_routes2.keys():
                     veh_id = f"p2_ugv_{ugv_id}"
-                    if veh_id in traci.vehicle.getIDList():
+                    if veh_id in traci.person.getIDList():
                         current_vehicles.add(ugv_id)
                     elif ugv_id not in completed_p2:
                         completed_p2.add(ugv_id)

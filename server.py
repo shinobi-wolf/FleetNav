@@ -106,6 +106,7 @@ def lmd_simulator(config):
             # Get action from policy
             if step_idx % 1 == 0:
                 action = agent.predict(obs)
+                print(f"Agent {i} selected action: {action}")
             else:
                 steps2dest = obs['steps2dest']
                 action = np.argmin(steps2dest)

@@ -40,7 +40,9 @@ class SumoLMDEnv(gym.Env):
         self.render_fps = config['simulation'].get('render_fps', 30)  # Default to 30 if not specified
         self.step_length = config['simulation']['step_length']
         self.train_mode = config['simulation']['train']
+        self.traffic_scale = config['simulation'].get('traffic_scale', 1)
         self.ff = config['debug']['fast_forward']
+        self.delay = config['debug'].get('delay', 0)
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
         self.action_space = spaces.MultiDiscrete([self.num_actions]*self.num_ugvs)
@@ -76,9 +78,11 @@ class SumoLMDEnv(gym.Env):
             from_node = traci.edge.getFromJunction(eid)
             to_node = traci.edge.getToJunction(eid)
 
-            lid = f"{eid}_0"  # Assume single lane per edge for simplicity
-            length = traci.lane.getLength(lid)
-            speed = traci.edge.getLastStepMeanSpeed(eid)
+            for lane_idx in range(traci.edge.getLaneNumber(eid)):
+                lid = f"{eid}_{lane_idx}"
+                if 'pedestrian' in traci.lane.getAllowed(lid):
+                    length = traci.lane.getLength(lid)
+                    break
 
             # Add nodes (junctions)
             fx, fy = traci.junction.getPosition(from_node)
@@ -92,8 +96,6 @@ class SumoLMDEnv(gym.Env):
                 to_node,
                 id=eid,
                 length=length,
-                speed=speed,
-                weight=length / speed if speed > 0 else float("inf")
             )
 
         all_shortest_path_lengths = dict(nx.all_pairs_shortest_path_length(G))
@@ -115,12 +117,14 @@ class SumoLMDEnv(gym.Env):
         self.clock = None
         self.render_mode = getattr(self, 'render_mode', None)
 
+        sumo_mode = 'sumo-gui' if self.render_mode == 'human' else 'sumo'
         Sumo_config = [
-            'sumo-gui',
+            sumo_mode,
             '-c', self.net_path,
             '--step-length', str(self.step_length),
-            '--delay', '500',
-            # '--scale', '5'
+            '--delay', str(self.delay),
+            '--scale', str(self.traffic_scale),
+            '--start'
         ]
         traci.start(Sumo_config)
 
@@ -245,10 +249,7 @@ class SumoLMDEnv(gym.Env):
             return None, None, self.terminated, None, self.info # Return None if already terminated
         
         self.ugv_handler(action)
-        truncated = self.task_handler() # Handle task completion and updates
-        
         self.current_timestep += 1
-        # if self.train_mode:
         traci.simulationStep()
         self.time_elapsed = traci.simulation.getTime()
         reached_flag = False
@@ -259,9 +260,8 @@ class SumoLMDEnv(gym.Env):
                     reached_flag = True
             traci.simulationStep()
             self.time_elapsed = traci.simulation.getTime()
-        # else:
-        #     traci.simulationStep()
-        #     self.time_elapsed = traci.simulation.getTime()
+        truncated = self.task_handler() # Handle task completion and updates
+        
         reward = self._get_reward()
 
         self._check_termination_condition() # Check termination based on new state
@@ -324,7 +324,7 @@ class SumoLMDEnv(gym.Env):
         # Reward constants
         COMPLETION_REWARD = 50.0  # High positive reward for task completion
         INVALID_ACTION_PENALTY = -15.0  # High negative reward for invalid actions
-        MOVE_TIME_PENALTY_SCALE = -5.0  # Low negative reward per unit time (proportional to move time)
+        MOVE_TIME_PENALTY_SCALE = -0.8  # Low negative reward per unit time (proportional to move time)
         
         for ugv in self.ugv_states:
             ugv_reward = 0.0

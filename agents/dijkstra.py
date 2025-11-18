@@ -14,6 +14,7 @@ class DijkstraAgent(Agent):
         
     def predict(self, observation):
         steps2dest = observation['steps2dest']
+        print("DijkstraAgent steps2dest:", steps2dest)
         best_action = np.argmin(steps2dest)
         return int(best_action)
         
