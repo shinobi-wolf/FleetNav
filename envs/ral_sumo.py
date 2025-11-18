@@ -124,7 +124,8 @@ class SumoLMDEnv(gym.Env):
             '--step-length', str(self.step_length),
             '--delay', str(self.delay),
             '--scale', str(self.traffic_scale),
-            '--start'
+            '--start',
+            "--no-warnings"
         ]
         traci.start(Sumo_config)
 
@@ -443,7 +444,7 @@ class SumoLMDEnv(gym.Env):
             
             # Transform coordinate function
             def transform(x, y):
-                return (int(margin + (x - min_x) * scale), int(margin + (y - min_y) * scale))
+                return (int(margin + (x - min_x) * scale), int(margin + (max_y - y) * scale))
             
             # Draw edges (roads)
             for u, v in self.G.edges():

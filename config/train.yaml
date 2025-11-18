@@ -6,16 +6,16 @@ fleet:
   range: 100000000
   max_speed: 1
 net:
-  net_path: data/pedestrian_grid/ped_grid.sumocfg
+  net_path: data/grid/grid.sumocfg
   warehouse: random
   max_degree: 4
 simulation:
-  max_time: 4000
+  max_time: 10000
   max_steps: 1000
   traffic_scale: 1
   render_mode: quiet
   render_fps: 30
-  step_length: 1
+  step_length: 8
   train: true
 task:
   demand_per: 60
@@ -26,7 +26,7 @@ agent:
   algo: sarsa
 training:
   sarsa:
-    num_episodes: 2000
+    num_episodes: 3000
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2
