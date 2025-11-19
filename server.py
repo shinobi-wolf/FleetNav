@@ -44,7 +44,7 @@ def extract_observations(observation, num_agents):
     steps2dest = observation['steps2dest'].reshape(num_agents, 4)
     target_node = observation['target_node'].reshape(num_agents, 1)
     graph_node = observation['graph_node'].reshape(num_agents, 1)
-    # nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
+    nb_traffic = observation['nb_traffic'].reshape(num_agents, 4)
 
     all_obs = []
     for i in range(num_agents):
@@ -53,7 +53,7 @@ def extract_observations(observation, num_agents):
             'steps2dest': steps2dest[i],
             'target_node': target_node[i],
             'graph_node': graph_node[i],
-            # 'nb_traffic': nb_traffic[i],
+            'nb_traffic': nb_traffic[i],
         }
         all_obs.append(obs)
     return all_obs

@@ -4,6 +4,8 @@ import os
 import random
 import networkx as nx
 from scipy.stats import rankdata
+from scipy.stats import rankdata
+from collections import defaultdict
 
 from agents.agent import Agent
 class SARSAAgent(Agent):
@@ -32,14 +34,21 @@ class SARSAAgent(Agent):
                 self.Q = pickle.load(f)
             print(f"Policy loaded from {policy_path}")
 
+        # Metrics / diagnostics (initialized/overwritten in learn())
+        self.state_visits = defaultdict(int)       # counts per state
+        self.sa_visits = defaultdict(int)          # counts per (state, action)
+        self.exploration_steps = 0
+        self.exploitation_steps = 0
+        self.all_td_errors = []
+        self.episode_summaries = []
+        self.last_action_was_exploratory = False
+
     def _observation_to_state(self, observation):
         graph_node = int(observation['graph_node'][0])
         target_node = int(observation['target_node'][0])
-        return (graph_node, target_node)
-        # steps2dest = observation['steps2dest'].tolist()
-        # nb_traffic = observation['nb_traffic'].tolist()
-        # obs = tuple(steps2dest + nb_traffic)
-        # return obs
+        # return (graph_node, target_node)
+        nb_traffic = observation['nb_traffic'].tolist()
+        return (graph_node, target_node, *nb_traffic)
 
     def predict(self, observation):
         """
@@ -64,9 +73,9 @@ class SARSAAgent(Agent):
         If the state is not in the Q-table, initialize its Q-values to zeros.
         """
         if random.random() < epsilon:
-            return [random.choice(self.action_list)]
+            return random.choice(self.action_list)
         else:
-            return [int(np.argmax(self.Q[state]))]
+            return int(np.argmax(self.Q[state]))
 
     def learn(self, training_config, policy_dir=None, log_path=None):
         """
@@ -91,29 +100,35 @@ class SARSAAgent(Agent):
         action = self.choose_action(state, epsilon)
         total_reward = 0.0
         episode_idx = 0
+        num_steps = 0
         while episode_idx < num_episodes:
-            next_obs, reward, done, trunc, info = self.env.step(action)
+            next_obs, reward, done, trunc, info = self.env.step([action])
+            num_steps += 1
             next_state = self._observation_to_state(next_obs)
             if next_state not in self.Q:
                 self.Q[next_state] = np.zeros(len(self.action_list))
             next_action = self.choose_action(next_state, epsilon)
+            self.state_visits[state] += 1
+            self.sa_visits[(state, action)] += 1
 
             # SARSA update rule:
             if not trunc:
                 td_target = reward + gamma * self.Q[next_state][next_action]
+                td_error = td_target - self.Q[state][action]
+                self.Q[state][action] += alpha * td_error
             else:
                 td_target = reward
+                td_error = td_target - self.Q[state][action]
+                self.Q[state][action] += alpha * td_error
                 print(f"Episode {episode_idx+1}/{num_episodes}  Total Reward: {total_reward:.2f}  Epsilon: {epsilon:.4f}")
                 results.append((total_reward, epsilon))
                 episode_idx += 1
                 epsilon *= epsilon_decay
                 total_reward = 0.0
+                reward = 0.0
                 if episode_idx%1000 == 0:
                     with open(policy_path, 'wb') as f:
                         pickle.dump(self.Q, f)
-                
-            td_error = td_target - self.Q[state][action]
-            self.Q[state][action] += alpha * td_error
 
             if done:
                 if not trunc:
@@ -131,6 +146,7 @@ class SARSAAgent(Agent):
                     self.Q[state] = np.zeros(len(self.action_list))
                 action = self.choose_action(state, epsilon)
                 total_reward = 0.0
+                reward = 0.0
             else:
                 state = next_state
                 action = next_action
@@ -146,3 +162,10 @@ class SARSAAgent(Agent):
         with open(policy_path, 'wb') as f:
             pickle.dump(self.Q, f)
         print(f"Policy saved to {policy_path}")
+
+        results = {
+            'state_visits': dict(self.state_visits),
+            'sa_visits': dict(self.sa_visits),
+        }
+        with open(f"{policy_dir}/training_results.pkl", 'wb') as f:
+            pickle.dump(results, f)

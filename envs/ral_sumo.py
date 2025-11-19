@@ -51,13 +51,13 @@ class SumoLMDEnv(gym.Env):
         max_moves = 100
         steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_actions*self.num_ugvs))
         graph_node_space = spaces.MultiDiscrete([1000]*self.num_ugvs)
-        # nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
+        nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]*self.num_ugvs))
         self.observation_space = spaces.Dict({
             'ugv_status': ugv_status_space,
             'steps2dest': steps2dest_space,
             'graph_node': graph_node_space,
             'target_node': graph_node_space,
-            # 'nb_traffic': nb_traffic_space,
+            'nb_traffic': nb_traffic_space,
         })
         
 
@@ -175,7 +175,7 @@ class SumoLMDEnv(gym.Env):
     
     def _get_observation(self):
         steps2dest = []
-        # nb_traffic = []
+        nb_traffic = []
         ugv_status = []
         graph_node = []
         target_node = []
@@ -196,8 +196,8 @@ class SumoLMDEnv(gym.Env):
                 steps2dest_ = [100] * self.num_actions
             steps2dest.append(steps2dest_)
 
-            # # Neighbor Traffic
-            # nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
+            # Neighbor Traffic
+            nb_traffic.append(self._get_nb_traffic(ugv_pos, nb_nodes))
 
             ugv_status.append(ugv.status)
             graph_node.append(sorted(list(self.G.nodes)).index(ugv.position))
@@ -208,13 +208,13 @@ class SumoLMDEnv(gym.Env):
 
 
         steps2dest_flat = np.array(steps2dest, dtype=np.float32).flatten()
-        # nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
+        nb_traffic_flat = np.array(nb_traffic, dtype=np.int32).flatten()
         ugv_status_flat = np.array(ugv_status, dtype=np.int32).flatten()
         graph_node_flat = np.array(graph_node, dtype=np.int32).flatten()
         target_node_flat = np.array(target_node, dtype=np.int32).flatten()
         obs_dict = {
             'steps2dest': steps2dest_flat,
-            # 'nb_traffic': nb_traffic_flat,
+            'nb_traffic': nb_traffic_flat,
             'ugv_status': ugv_status_flat,
             'graph_node': graph_node_flat,
             'target_node': target_node_flat,
@@ -325,7 +325,7 @@ class SumoLMDEnv(gym.Env):
         # Reward constants
         COMPLETION_REWARD = 50.0  # High positive reward for task completion
         INVALID_ACTION_PENALTY = -15.0  # High negative reward for invalid actions
-        MOVE_TIME_PENALTY_SCALE = -0.8  # Low negative reward per unit time (proportional to move time)
+        MOVE_TIME_PENALTY_SCALE = -0.1  # Low negative reward per unit time (proportional to move time)
         
         for ugv in self.ugv_states:
             ugv_reward = 0.0
@@ -454,10 +454,20 @@ class SumoLMDEnv(gym.Env):
                 pygame.draw.line(self.screen, (150, 150, 150), (start_x, start_y), (end_x, end_y), 2)
             
             # Draw nodes (junctions)
-            node_radius = 4
+            node_radius = 12
+            sorted_nodes = sorted(self.G.nodes)
+            node_to_index = {node: idx for idx, node in enumerate(sorted_nodes)}
+            
             for node in self.G.nodes:
                 x, y = transform(self.G.nodes[node]['x'], self.G.nodes[node]['y'])
                 pygame.draw.circle(self.screen, (80, 80, 80), (x, y), node_radius)
+                
+                # Draw node index inside the circle
+                if pygame.font:
+                    font_node = pygame.font.Font(None, 16)
+                    node_idx_text = font_node.render(str(node_to_index[node]), True, (255, 255, 255))
+                    text_rect = node_idx_text.get_rect(center=(x, y))
+                    self.screen.blit(node_idx_text, text_rect)
             
             # Draw warehouse (base station) - blue
             wx, wy = transform(self.G.nodes[self.warehouse_node]['x'], self.G.nodes[self.warehouse_node]['y'])
@@ -468,11 +478,14 @@ class SumoLMDEnv(gym.Env):
             ugv_radius = 9
             for i, ugv in enumerate(self.ugv_states):
                 if ugv.position is not None:
-                    # Draw active task location (red)
+                    # Draw active task location (transparent red)
                     if ugv.task_list:
                         active_task = ugv.task_list[0]
                         task_x, task_y = transform(self.G.nodes[active_task]['x'], self.G.nodes[active_task]['y'])
-                        pygame.draw.circle(self.screen, (255, 0, 0), (task_x, task_y), task_radius)
+                        # Create a transparent surface for the task
+                        task_surface = pygame.Surface((task_radius*2, task_radius*2), pygame.SRCALPHA)
+                        pygame.draw.circle(task_surface, (255, 0, 0, 100), (task_radius, task_radius), task_radius)
+                        self.screen.blit(task_surface, (task_x - task_radius, task_y - task_radius))
                     
                     # Draw UGV
                     ugv_x, ugv_y = transform(self.G.nodes[ugv.position]['x'], self.G.nodes[ugv.position]['y'])
@@ -483,29 +496,43 @@ class SumoLMDEnv(gym.Env):
                         color = (128, 128, 128)  # Gray - charging
                     else:
                         color = (255, 200, 0)  # Yellow - idle
-                    pygame.draw.circle(self.screen, color, (ugv_x, ugv_y), ugv_radius)
-                    # Draw UGV ID
-                    if pygame.font:
-                        font = pygame.font.Font(None, 18)
-                        text = font.render(str(i), True, (255, 255, 255))
-                        text_rect = text.get_rect(center=(ugv_x, ugv_y))
-                        self.screen.blit(text, text_rect)
+                    
+                    # Create a transparent surface for the UGV
+                    ugv_surface = pygame.Surface((ugv_radius*2, ugv_radius*2), pygame.SRCALPHA)
+                    pygame.draw.circle(ugv_surface, (*color, 150), (ugv_radius, ugv_radius), ugv_radius)
+                    self.screen.blit(ugv_surface, (ugv_x - ugv_radius, ugv_y - ugv_radius))
 
-            # Draw info panel
+            # Draw info panel on the right side
             if pygame.font:
                 font = pygame.font.Font(None, 28)
                 y_offset = 10
+                x_offset = self.screen_width - 350  # Position on the right
+                
                 # Time and tasks
                 text = font.render(f"Time: {self.time_elapsed:.1f}s | Step: {self.current_timestep}", True, (0, 0, 0))
-                self.screen.blit(text, (10, y_offset))
+                self.screen.blit(text, (x_offset, y_offset))
                 y_offset += 30
                 text = font.render(f"Tasks: {self.num_tasks_completed}/{self.num_tasks}", True, (0, 0, 0))
-                self.screen.blit(text, (10, y_offset))
+                self.screen.blit(text, (x_offset, y_offset))
                 y_offset += 30
                 text = font.render(f"Distance: {self.total_ev_distance:.1f}m", True, (0, 0, 0))
-                self.screen.blit(text, (10, y_offset))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 30
                 
-                # Legend
+                # Draw agent status
+                font_small = pygame.font.Font(None, 20)
+                text = font_small.render("AGENT STATUS:", True, (0, 0, 0))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 25
+                
+                for i, ugv in enumerate(self.ugv_states):
+                    status_text = "Moving" if ugv.status == 1 else ("Charging" if ugv.status == 2 else "Idle")
+                    range_text = f"UGV {i}: {status_text} | Range: {ugv.current_range:.1f}/{self.max_ugv_range}m"
+                    text = font_small.render(range_text, True, (0, 0, 0))
+                    self.screen.blit(text, (x_offset + 5, y_offset))
+                    y_offset += 22
+                
+                # Legend on the bottom left
                 legend_y = self.screen_height - 100
                 font_small = pygame.font.Font(None, 22)
                 pygame.draw.circle(self.screen, (0, 0, 255), (20, legend_y), 8)

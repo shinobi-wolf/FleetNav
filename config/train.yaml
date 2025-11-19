@@ -6,7 +6,7 @@ fleet:
   range: 100000000
   max_speed: 1
 net:
-  net_path: data/grid/grid.sumocfg
+  net_path: data/rand_grid_small/rand_grid_small.sumocfg
   warehouse: random
   max_degree: 4
 simulation:
@@ -26,7 +26,7 @@ agent:
   algo: sarsa
 training:
   sarsa:
-    num_episodes: 3000
+    num_episodes: 10000
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2

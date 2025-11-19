@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["-p", "38de89a9"],
+            "args": ["-p", "sarsa_nb"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -40,6 +40,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/visualize_sumo_simulation.py",
             "console": "integratedTerminal",
+            // "args": ["dijkstra", "--compare", "sarsa"],
             "args": ["dijkstra"],
             "env": {
                 "PYTHONWARNINGS": "ignore"

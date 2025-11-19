@@ -1,0 +1,17 @@
+Config: runs/sarsa_nb//config.yaml
+Step 0:
+UGV 0: Position=E0, Active Task=B0, Status=1
+Step 1:
+UGV 0: Position=D0, Active Task=B0, Status=1
+Step 2:
+UGV 0: Position=C0, Active Task=B0, Status=1
+Step 3:
+UGV 0: Position=B0, Active Task=D3, Status=1
+Step 4:
+UGV 0: Position=B1, Active Task=D3, Status=1
+Step 5:
+UGV 0: Position=C1, Active Task=D3, Status=1
+Step 6:
+UGV 0: Position=C0, Active Task=D3, Status=1
+Step 7:
+UGV 0: Position=D0, Active Task=D3, Status=1

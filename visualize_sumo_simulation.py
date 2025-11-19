@@ -332,7 +332,7 @@ def visualize_simulation(policy_name, compare_policy=None):
         'sumo-gui',  # Use GUI for visualization
         '-c', net_path,
         '--step-length', str(step_length),
-        '--delay', '500',
+        '--delay', '200',
         '--quit-on-end',  # Close when done
     ]
     
