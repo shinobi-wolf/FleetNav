@@ -16,19 +16,24 @@ if __name__ == '__main__':
         if args.config:
             config_path = args.config
         else:
-            config_path = f"config/train.yaml"
-        config = yaml.safe_load(open(config_path, 'r'))
+            train_config_path = f"config/train.yaml"
+            inf_config_path = f"config/sumo_lmd.yaml"
+        train_config = yaml.safe_load(open(train_config_path, 'r'))
+        inf_config = yaml.safe_load(open(inf_config_path, 'r'))
         
         policy_name = os.urandom(4).hex()
         policy_dir = os.path.join(f"runs/{policy_name}")
         os.makedirs(policy_dir, exist_ok=True)
-        lmd_trainer(config, policy_dir)
-
+        # train_config['agent']['policy'] = policy_name
         config_file = os.path.join(policy_dir, "config.yaml")
-        config['agent']['policy'] = policy_name
-        config['simulation']['train'] = False
+        inf_config['agent']['policy'] = policy_name
+        inf_config['agent']['algo'] = train_config['agent']['algo']
+        inf_config['net']['net_path'] = train_config['net']['net_path']
         with open(config_file, 'w') as f:
-            yaml.dump(config, f)
+            yaml.dump(inf_config, f)
+
+        lmd_trainer(train_config, policy_dir)
+
             
     else:
         if args.config:

@@ -39,7 +39,6 @@ class SumoLMDEnv(gym.Env):
         self.render_mode = config['simulation']['render_mode']  # Render mode from config
         self.render_fps = config['simulation'].get('render_fps', 30)  # Default to 30 if not specified
         self.step_length = config['simulation']['step_length']
-        self.train_mode = config['simulation']['train']
         self.traffic_scale = config['simulation'].get('traffic_scale', 1)
         self.ff = config['debug']['fast_forward']
         self.delay = config['debug'].get('delay', 0)

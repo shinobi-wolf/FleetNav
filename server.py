@@ -52,8 +52,8 @@ def extract_observations(observation, num_agents):
             'ugv_status': ugv_status[i],
             'steps2dest': steps2dest[i],
             'target_node': target_node[i],
-            'graph_node': graph_node[i],
-            'nb_traffic': nb_traffic[i],
+            'graph_node': graph_node[i][0],
+            'nb_traffic': nb_traffic[i][0],
         }
         all_obs.append(obs)
     return all_obs

@@ -1,4 +1,6 @@
 Policy Name,Algorithm,Experiment Description
 dijkstra,dijkstra,working on 5x5 maze
 sarsa,sarsa,working on 5x5 maze
-dqn,dqn,working on 5x5 maze
+sarsa_nb,sarsa,dfsfsf
+sarsa_rand,sarsa,dfsfsf
+sarsa_rand_lt,sarsa,dfsfsf

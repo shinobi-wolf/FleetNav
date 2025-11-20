@@ -17,9 +17,7 @@ def lmd_trainer(config, policy_dir):
         config (dict): Configuration dictionary containing simulation parameters.
         policy_dir (str): Directory where the policy and model will be saved.
     """
-    config['fleet']['count'] = 1
-    config['fleet']['range'] = 100000000
-    env = gym.make('SumoLMDEnv-v0', config=config)
+    env = gym.make('SumoTrainEnv-v0', config=config)
     
     agent = get_agent(env, config['agent'], 0)
 

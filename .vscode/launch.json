@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["-p", "sarsa_nb"],
+            "args": ["-p", "7ebb2cb7"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -29,7 +29,29 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["-c", "config/train.yaml", "-t"],
+            "args": ["-t"],
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            }
+        },
+        {
+            "name": "Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal",
+            "args": ["-p", "1c18c5f4"],
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            }
+        },
+        {
+            "name": "Inference",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/inference.py",
+            "console": "integratedTerminal",
+            "args": ["-p", "1c18c5f4"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }

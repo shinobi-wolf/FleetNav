@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 
 class UGVSumo:
-    def __init__(self,ugv_id, base_position, max_range, max_speed, G):
+    def __init__(self,ugv_id, base_position, G, max_range=1000000, max_speed=1):
         super().__init__()
         self.agent_id = ugv_id
         self.position = base_position  # e.g., (row, col) or (x, y)

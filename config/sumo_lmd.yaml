@@ -1,21 +1,23 @@
-net:
-  net_path: data/grid/grid.sumocfg
-  warehouse: random
-
-task:
-  demand_per: 10
-
-fleet:
-  count: 1
-  range: 100000000
-  max_speed: 1
-
-simulation:
-  max_time: 500000000
-  max_steps: 10000000
-  render_mode: human
-  render_fps: 30
-  step_length: 10
-
 agent:
   algo: dijkstra
+debug:
+  delay: 0
+  fast_forward: 0
+fleet:
+  count: 1
+  max_speed: 3
+  range: 100000000
+net:
+  max_degree: 4
+  net_path: data/rand_grid_small/rand_grid_small.sumocfg
+  # net_path: data/grid/grid.sumocfg
+  warehouse: random
+simulation:
+  max_steps: 500
+  max_time: 10000
+  render_fps: 30
+  render_mode: human
+  step_length: 1
+  traffic_scale: 3
+task:
+  demand_per: 40

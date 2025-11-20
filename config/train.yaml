@@ -1,32 +1,18 @@
-debug:
-  fast_forward: 100
-  delay: 0
 fleet:
-  count: 1
-  range: 100000000
-  max_speed: 1
+  max_speed: 5
 net:
   net_path: data/rand_grid_small/rand_grid_small.sumocfg
-  warehouse: random
   max_degree: 4
 simulation:
   max_time: 10000
-  max_steps: 1000
+  max_steps: 25
   traffic_scale: 1
-  render_mode: quiet
-  render_fps: 30
-  step_length: 8
-  train: true
-task:
-  demand_per: 60
-traffic:
-  p:default
-  b:default
+  step_length: 100
 agent:
   algo: sarsa
 training:
   sarsa:
-    num_episodes: 10000
+    num_episodes: 5000
     gamma: 0.99
     alpha: 0.1
     epsilon: 0.2
