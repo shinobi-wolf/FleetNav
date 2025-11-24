@@ -5,11 +5,16 @@ import gymnasium as gym
 import numpy as np
 import time
 import networkx as nx
+import random
+import pandas as pd
 
 import traci
 
 import envs
 from agents import get_agent
+
+random.seed(42)
+np.random.seed(42)
 
 def main():
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")
@@ -19,9 +24,9 @@ def main():
     config_path = f"runs/{args.policy}/config.yaml"
     config = yaml.safe_load(open(config_path, 'r'))
 
-    results_path = f"runs/{args.policy}/simulation_results_dij.csv"
+    results_path = f"runs/{args.policy}/simulation_results.csv"
     with open(results_path, 'w') as f:
-        f.write("start_idx,target_idx,start_node,target_node,total_time_taken\n")
+        f.write("start_idx,target_idx,start_node,target_node,tour_start_time,total_time_taken\n")
     
     env = gym.make('SumoTrainEnv-v0', config=config)
     env.reset(seed=42)
@@ -33,7 +38,7 @@ def main():
     num_nodes = len(nodes)
     # num_nodes = 2
     max_steps = 25
-    max_time = 10000
+    max_time = 15000
     step_length = 50
     traffic_scale = 1
     num_actions = 4
@@ -48,15 +53,16 @@ def main():
         "--no-warnings"
     ]
     traci.close()
-    traci.start(Sumo_config)
 
-    sim_time = 0.0
     curr_step = 0
+    warmup_time_idx = 0
+    warm_up_times = [random.randint(0, 1000) for _ in range(num_nodes*(num_nodes-1))]
 
     for start_idx in range(num_nodes):
         for target_idx in range(num_nodes):
             if start_idx == target_idx:
                 continue
+
             curr_step = 0
             curr_pos = start_idx
             route_edges = []
@@ -72,14 +78,21 @@ def main():
                     'target_node': target_idx,
                     'best_dir': best_dir
                 }
-                # action = agent.predict(obs)
-                action = best_dir
+                action = agent.predict(obs)
+                # action = best_dir
                 next_pos = nb_nodes[action]
                 route_edges.append(G.edges[nodes[curr_pos], next_pos]['id'])
                 curr_step += 1
                 curr_pos = nodes.index(next_pos)
             print(f"Start: {start_idx}, Target: {target_idx}, Route: {route_edges}")
             if curr_pos == target_idx:
+                traci.start(Sumo_config)
+                sim_warmup_time = warm_up_times[warmup_time_idx]
+                sim_time = 0.0
+                while sim_time < sim_warmup_time:
+                    traci.simulationStep()
+                    sim_time = traci.simulation.getTime()
+
                 veh_id = f"ugv_{start_idx}_{target_idx}"
                 traci.person.add(veh_id, route_edges[0], 0.0)
                 traci.person.setColor(veh_id, (255, 0, 0, 255))
@@ -93,16 +106,14 @@ def main():
                     sim_time = traci.simulation.getTime()
                 total_time_taken = sim_time - sim_start_time
                 with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},{total_time_taken}\n")
-                if sim_time >= max_time:
-                    traci.close()
-                    traci.start(Sumo_config)
-                    sim_time = 0.0
+                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},{sim_start_time},{total_time_taken}\n")
+                traci.close()
             else:
                 with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},-1\n")
+                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},-1,-1\n")
+            warmup_time_idx += 1
 
-    env.close()
+    # env.close()
     # traci.close()
 
 if __name__ == '__main__':

@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal",
-            "args": ["-p", "1c18c5f4"],
+            "args": ["-p", "sarsa_rand_sdir"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -51,7 +51,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/inference.py",
             "console": "integratedTerminal",
-            "args": ["-p", "1c18c5f4"],
+            "args": ["-p", "sarsa_rand_dyn_act"],
+            // "args": ["-p", "dijkstra"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }

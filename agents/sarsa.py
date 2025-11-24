@@ -44,9 +44,9 @@ class SARSAAgent(Agent):
     def _observation_to_state(self, observation):
         graph_node = int(observation['graph_node'])
         target_node = int(observation['target_node'])
-        # return (graph_node, target_node)
         best_dir = int(observation['best_dir'])
-        return (graph_node, best_dir)
+        return (graph_node, target_node)
+        # return (graph_node, best_dir)
         # nb_traffic = observation['nb_traffic'].tolist()
         # return (graph_node, target_node, *nb_traffic)
 

@@ -1,6 +1,6 @@
 agent:
   algo: sarsa
-  policy: c81c6570
+  policy: sarsa_rand_dyn_act
 debug:
   delay: 0
   fast_forward: 0
@@ -17,7 +17,7 @@ simulation:
   max_time: 10000
   render_fps: 30
   render_mode: human
-  step_length: 1
+  step_length: 3
   traffic_scale: 3
 task:
   demand_per: 40

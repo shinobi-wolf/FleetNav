@@ -20,6 +20,9 @@ def main():
     agent = get_agent(env, config['agent'], 0)
 
     obs, world_state = env.reset(seed=42)
+    G, all_shortest_path_lengths = env.unwrapped.G, env.unwrapped.all_shortest_path_lengths
+    sorted_nodes = sorted(list(G.nodes))
+
     print("Step 0:")
     print(f"Position={world_state['ugv_position']}, Active Task={world_state['ugv_target']}")
     env.render()
@@ -33,7 +36,12 @@ def main():
         step_start_time = time.time()
         print(f"Step {step_idx+1}:")
         
-        action = agent.predict(obs)
+        if config['agent']['algo'] == 'dijkstra':
+            nb_nodes = sorted(G.neighbors(world_state['ugv_position']))
+            nb_steps = [all_shortest_path_lengths[nb_node][world_state['ugv_target']] for nb_node in nb_nodes]
+            action = np.argmin(nb_steps)
+        else:
+            action = agent.predict(obs)
         print(f"Agent selected action: {action}")
         # Execute step
         obs, reward, terminated, truncated, world_state = env.step(action)

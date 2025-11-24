@@ -110,11 +110,17 @@ class SumoTrainEnv(gym.Env):
         ]
         traci.start(Sumo_config)
 
+        while self.time_elapsed < 450:
+            traci.simulationStep()
+            self.time_elapsed = traci.simulation.getTime()
+
         # Maze State
         self.G, self.all_shortest_path_lengths = self.build_graph() # Rebuild graph with new maze
 
         # UGV States
-        init_node, target_node = random.sample(list(self.G.nodes), 2)
+        # init_node, target_node = random.sample(list(self.G.nodes), 2)
+        sorted_nodes = sorted(list(self.G.nodes))
+        init_node, target_node = sorted_nodes[5], sorted_nodes[23]  # For consistent testing
         self.ugv = UGVSumo(ugv_id=0, base_position=init_node, max_speed=self.ugv_speed, G=self.G)
         self.ugv.task_list = [target_node]
 

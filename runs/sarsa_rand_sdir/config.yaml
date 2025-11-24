@@ -14,10 +14,10 @@ net:
   warehouse: random
 simulation:
   max_steps: 500
-  max_time: 10000
+  max_time: 15000
   render_fps: 30
   render_mode: human
-  step_length: 1
-  traffic_scale: 3
+  step_length: 3
+  traffic_scale: 1
 task:
   demand_per: 40
