@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal",
-            "args": ["-p", "sarsa_rand_sdir"],
+            "args": ["-p", "sarsa_rand_dyn_act"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }

@@ -7,14 +7,13 @@ import time
 import networkx as nx
 import random
 import pandas as pd
+from tqdm import tqdm
+from datetime import timedelta
 
 import traci
 
 import envs
 from agents import get_agent
-
-random.seed(42)
-np.random.seed(42)
 
 def main():
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")
@@ -24,24 +23,24 @@ def main():
     config_path = f"runs/{args.policy}/config.yaml"
     config = yaml.safe_load(open(config_path, 'r'))
 
-    results_path = f"runs/{args.policy}/simulation_results.csv"
+    results_path = f"runs/{args.policy}/simulation_results_dij.csv"
     with open(results_path, 'w') as f:
-        f.write("start_idx,target_idx,start_node,target_node,tour_start_time,total_time_taken\n")
+        f.write("start_idx,target_idx,start_node,target_node,warm_up_time,tour_start_time,total_time_taken\n")
     
     env = gym.make('SumoTrainEnv-v0', config=config)
     env.reset(seed=42)
-    agent = get_agent(env, config['agent'], 0)
-
     G = env.unwrapped.G
     all_shortest_path_lengths = env.unwrapped.all_shortest_path_lengths
+    agent = get_agent(env, config['agent'], 0)
+
     nodes = sorted(list(G.nodes))
     num_nodes = len(nodes)
     # num_nodes = 2
-    max_steps = 25
-    max_time = 15000
-    step_length = 50
+    max_steps = 80
+    max_time = 20000
+    step_length = 500
     traffic_scale = 1
-    num_actions = 4
+    num_actions = config['net']['max_degree']
 
     Sumo_config = [
         'sumo',
@@ -50,19 +49,34 @@ def main():
         '--scale', str(traffic_scale),
         # '--delay', '200',
         '--start',
-        "--no-warnings"
+        "--no-warnings",
+        "--no-step-log",
+        "--no-duration-log",
     ]
     traci.close()
 
     curr_step = 0
     warmup_time_idx = 0
-    warm_up_times = [random.randint(0, 1000) for _ in range(num_nodes*(num_nodes-1))]
+    warm_up_times = [1000,5000,9000]
 
-    for start_idx in range(num_nodes):
-        for target_idx in range(num_nodes):
+    # Timing statistics
+    route_times = []
+    sim_times = []
+    total_routes = num_nodes * (num_nodes - 1)
+    total_simulations = total_routes * len(warm_up_times)
+    
+    print(f"\nStarting simulation with {num_nodes} nodes")
+    print(f"Total routes to test: {total_routes}")
+    print(f"Total simulations (with warmup variations): {total_simulations}\n")
+    
+    overall_start_time = time.time()
+    
+    for start_idx in tqdm(range(num_nodes), desc="Start Nodes", position=0):
+        for target_idx in tqdm(range(num_nodes), desc=f"  Targets (Start={start_idx})", position=1, leave=False):
             if start_idx == target_idx:
                 continue
 
+            route_start_time = time.time()
             curr_step = 0
             curr_pos = start_idx
             route_edges = []
@@ -78,40 +92,80 @@ def main():
                     'target_node': target_idx,
                     'best_dir': best_dir
                 }
-                action = agent.predict(obs)
-                # action = best_dir
+                # action = agent.predict(obs)
+                action = best_dir
                 next_pos = nb_nodes[action]
                 route_edges.append(G.edges[nodes[curr_pos], next_pos]['id'])
                 curr_step += 1
                 curr_pos = nodes.index(next_pos)
-            print(f"Start: {start_idx}, Target: {target_idx}, Route: {route_edges}")
+            
+            route_calc_time = time.time() - route_start_time
+            route_times.append(route_calc_time)
+            
             if curr_pos == target_idx:
-                traci.start(Sumo_config)
-                sim_warmup_time = warm_up_times[warmup_time_idx]
-                sim_time = 0.0
-                while sim_time < sim_warmup_time:
-                    traci.simulationStep()
-                    sim_time = traci.simulation.getTime()
+                for warmup_time in tqdm(warm_up_times, desc=f"    Warmup times", position=2, leave=False):
+                    sim_start_time_real = time.time()
+                    traci.start(Sumo_config)
+                    sim_warmup_time = warmup_time
+                    sim_time = 0.0
+                    while sim_time < sim_warmup_time:
+                        traci.simulationStep()
+                        sim_time = traci.simulation.getTime()
 
-                veh_id = f"ugv_{start_idx}_{target_idx}"
-                traci.person.add(veh_id, route_edges[0], 0.0)
-                traci.person.setColor(veh_id, (255, 0, 0, 255))
-                traci.person.appendWalkingStage(veh_id, route_edges, 
-                                                arrivalPos=-1, speed=3.0)
-                traci.simulationStep()
-                sim_time = traci.simulation.getTime()
-                sim_start_time = sim_time
-                while veh_id in traci.person.getIDList() and sim_time < max_time:
+                    veh_id = f"ugv_{start_idx}_{target_idx}"
+                    traci.person.add(veh_id, route_edges[0], 0.0)
+                    traci.person.setColor(veh_id, (255, 0, 0, 255))
+                    traci.person.appendWalkingStage(veh_id, route_edges, 
+                                                    arrivalPos=-1, speed=3.0)
                     traci.simulationStep()
                     sim_time = traci.simulation.getTime()
-                total_time_taken = sim_time - sim_start_time
-                with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},{sim_start_time},{total_time_taken}\n")
-                traci.close()
+                    sim_start_time = sim_time
+                    while veh_id in traci.person.getIDList() and sim_time < max_time:
+                        traci.simulationStep()
+                        sim_time = traci.simulation.getTime()
+                    # if veh_id in traci.person.getIDList():
+                    #     total_time_taken = -1
+                    # else:
+                    total_time_taken = sim_time - sim_start_time
+                    
+                    sim_elapsed_time = time.time() - sim_start_time_real
+                    sim_times.append(sim_elapsed_time)
+                    
+                    with open(results_path, 'a') as f:
+                        f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},{sim_warmup_time},{sim_start_time},{total_time_taken}\n")
+                    traci.close()
             else:
                 with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},-1,-1\n")
+                    f.write(f"{start_idx},{target_idx},{nodes[start_idx]},{nodes[target_idx]},-1,-1,-1\n")
             warmup_time_idx += 1
+
+    # Calculate and display final statistics
+    overall_elapsed_time = time.time() - overall_start_time
+    
+    print("\n" + "="*60)
+    print("SIMULATION COMPLETE - Performance Statistics")
+    print("="*60)
+    print(f"Total elapsed time: {timedelta(seconds=int(overall_elapsed_time))}")
+    print(f"Total elapsed time (seconds): {overall_elapsed_time:.2f}s")
+    
+    if route_times:
+        avg_route_time = np.mean(route_times)
+        print(f"\nRoute Calculation:")
+        print(f"  Average time per route: {avg_route_time*1000:.2f}ms")
+        print(f"  Total routes calculated: {len(route_times)}")
+        print(f"  Total route calc time: {sum(route_times):.2f}s")
+    
+    if sim_times:
+        avg_sim_time = np.mean(sim_times)
+        print(f"\nSUMO Simulations:")
+        print(f"  Average time per simulation: {avg_sim_time:.2f}s")
+        print(f"  Total simulations run: {len(sim_times)}")
+        print(f"  Total simulation time: {sum(sim_times):.2f}s")
+        print(f"  Min simulation time: {min(sim_times):.2f}s")
+        print(f"  Max simulation time: {max(sim_times):.2f}s")
+    
+    print(f"\nResults saved to: {results_path}")
+    print("="*60)
 
     # env.close()
     # traci.close()

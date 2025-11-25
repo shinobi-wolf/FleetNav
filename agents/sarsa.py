@@ -58,9 +58,9 @@ class SARSAAgent(Agent):
         """
         G = self.env.unwrapped.G
         state = self._observation_to_state(observation)
-        print("State:", state)
+        # print("State:", state)
         if state not in self.Q:
-            print("State not in Q-table, selecting random action.")
+            # print("State not in Q-table, selecting random action.")
             return random.randint(0, 3)
         curr_node = sorted(list(G.nodes))[int(state[0])]
         num_neib = len(list(G.neighbors(curr_node)))

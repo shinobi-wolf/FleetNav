@@ -10,7 +10,7 @@ fleet:
   range: 100000000
 net:
   max_degree: 4
-  net_path: data/rand_grid_small/rand_grid_small.sumocfg
+  net_path: data/rand_grid/rand_grid.sumocfg
   warehouse: random
 simulation:
   max_steps: 500
