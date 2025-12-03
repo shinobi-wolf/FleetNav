@@ -17,7 +17,7 @@ class SARSAAgent(Agent):
       
     It uses the environment's reward function.
     """
-    def __init__(self, env, policy_path=None, *args, **kwargs):
+    def __init__(self, env=None, policy_path=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.Q = {}
         self.env = env
@@ -50,20 +50,24 @@ class SARSAAgent(Agent):
         # nb_traffic = observation['nb_traffic'].tolist()
         # return (graph_node, target_node, *nb_traffic)
 
-    def predict(self, observation):
+    def predict(self, observation, G=None, idx2node=None, node2idx=None):
         """
         For inference, return the best action (greedy with respect to Q-values)
         for the given observation.
         Also returns the number of neighbors at the current node.
         """
-        G = self.env.unwrapped.G
+        if G is None:
+            G = self.env.unwrapped.G
+            idx2node = self.env.unwrapped.idx2node
+            node2idx = self.env.unwrapped.node2idx
         state = self._observation_to_state(observation)
         # print("State:", state)
         if state not in self.Q:
             # print("State not in Q-table, selecting random action.")
             return random.randint(0, 3)
-        curr_node = sorted(list(G.nodes))[int(state[0])]
-        num_neib = len(list(G.neighbors(curr_node)))
+        sn = state[0]
+        ugv_node = idx2node[int(sn)]
+        num_neib = len(list(G.neighbors(ugv_node)))
         q = self.Q[state][:num_neib]
         return int(np.argmax(q))
     
@@ -73,12 +77,14 @@ class SARSAAgent(Agent):
         If the state is not in the Q-table, initialize its Q-values to zeros.
         """
         sn = state[0]
-        num_nbs = len(list(self.G.neighbors(sorted(list(self.G.nodes))[int(sn)])))
-        q = self.Q[state][:num_nbs]
+        ugv_node = self.idx2node[int(sn)]
+        nb_nodes = list(self.G.neighbors(ugv_node))  # Get up to num_actions neighbors
+        num_nbs = len(nb_nodes)
+        self.Q[state] = self.Q[state][:num_nbs]
         if random.random() < epsilon:
             return random.choice(self.action_list[:num_nbs])
         else:
-            return int(np.argmax(q))
+            return int(np.argmax(self.Q[state]))
 
     def learn(self, training_config, policy_dir=None, log_path=None):
         """
@@ -104,6 +110,8 @@ class SARSAAgent(Agent):
 
         obs, info = self.env.reset()
         self.G = self.env.unwrapped.G
+        self.node2idx = self.env.unwrapped.node2idx
+        self.idx2node = self.env.unwrapped.idx2node
         state = self._observation_to_state(obs)
         if state not in self.Q:
             self.Q[state] = np.zeros(len(self.action_list))

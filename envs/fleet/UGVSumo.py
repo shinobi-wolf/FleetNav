@@ -2,13 +2,12 @@ import networkx as nx
 import numpy as np
 
 class UGVSumo:
-    def __init__(self,ugv_id, base_position, G, max_range=1000000, max_speed=1):
+    def __init__(self,ugv_id, base_position, max_range=1000000, max_speed=1):
         super().__init__()
         self.agent_id = ugv_id
         self.position = base_position  # e.g., (row, col) or (x, y)
         self.base_point = base_position  # Base station position
         self.max_range = max_range       # maximum battery capacity or range
-        self.G = G
         self.max_speed = max_speed
 
         self.current_range = self.max_range    # start fully charged
@@ -27,37 +26,44 @@ class UGVSumo:
         self.last_move_time = None  # Start time of the last move
         self.last_position = None
         
-    def move(self, action, current_time, graph):
+    def move(self, action, current_time, graph, graph_dir, node2idx, idx2node):
         self.task_completed_this_step = False
         self.invalid_action_this_step = False
         if self.status != 1:
             # Not in moving state, action is invalid
             self.last_move_time = None
-            return False, None
+            return False, None, None
 
         self.last_move_time = current_time
         
-        current_node = self.position
-        neighbors = sorted(list(graph.neighbors(current_node)))
+        current_node = idx2node[self.position]
+        nb_nodes = list(graph.neighbors(current_node))
+        neighbors = sorted([node2idx[nb] for nb in nb_nodes])
 
         if action >= len(neighbors):
             # Action out of bounds
             self.invalid_action_this_step = True
-            return False, None
+            return False, None, None
 
-        next_node = neighbors[action]
+        next_node = idx2node[neighbors[action]]
         edge_id = graph.edges[(current_node, next_node)]['id']
+        edge_dir = 0
+        if (current_node, next_node) not in graph_dir.edges:
+            edge_dir = 1  # reverse direction
         edge_length = graph.edges[(current_node, next_node)]['length']
+        edge_type = graph.edges[(current_node, next_node)]['type']
+        # if edge_type =='crossing':
+        #     self.last_move_time = -1
         self.current_range -= edge_length
         self.current_range_percent = self.current_range / self.max_range
         if self.current_range_percent <= 0:
             self.invalid_action_this_step = True
             self.status = 2
-            return False, None
+            return False, None, None
         self.distance_traveled += edge_length
-        self.position = next_node
+        self.position = node2idx[next_node]
         self.edge_route.append(edge_id)
-        return True, edge_id
+        return True, edge_id, edge_dir
 
     def recharge(self):
         """

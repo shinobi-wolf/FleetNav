@@ -1,13 +1,18 @@
 fleet:
   max_speed: 5
+debug:
+  delay: 200
+  fast_forward: 0
 net:
-  net_path: data/rand_grid_small/rand_grid_small.sumocfg
+  net_path: data/grid/grid.sumocfg
   max_degree: 4
 simulation:
   max_time: 10000
-  max_steps: 25
+  max_steps: 50
   traffic_scale: 1
-  step_length: 100
+  step_length: 3
+  render_mode: quiet
+  render_fps: 30
 agent:
   algo: sarsa
 training:

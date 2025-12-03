@@ -7,7 +7,7 @@
 
     <input>
         <net-file value="grid.net.xml"/>
-        <route-files value="ped.trips.xml"/>
+        <route-files value="ped.trips.xml,car.trips.xml"/>
     </input>
 
 </sumoConfiguration>

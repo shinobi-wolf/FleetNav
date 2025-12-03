@@ -12,11 +12,9 @@ class DijkstraAgent(Agent):
         super().__init__(*args, **kwargs)
         self.agent_id = agent_id
         
-    def predict(self, observation):
-        steps2dest = observation['steps2dest']
-        print("DijkstraAgent steps2dest:", steps2dest)
-        best_action = np.argmin(steps2dest)
-        return int(best_action)
+    def predict(self, observation, *args, **kwargs):
+        best_dir = observation['best_dir']
+        return int(best_dir)
         
     def learn(self):
         """

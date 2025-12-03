@@ -1,0 +1,5 @@
+Config: runs/2e058a65//config.yaml
+Step 0:
+UGV: Position=0, Task=15, Task Junction=1
+Step 1:
+UGV: Position=20, Task=13, Task Junction=18

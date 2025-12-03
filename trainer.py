@@ -9,7 +9,7 @@ import logging
 import envs
 from agents import get_agent
 
-def lmd_trainer(config, policy_dir):
+def lmd_trainer(config, policy_dir, resume=False):
     """
     Function to train the drone simulation model based on the provided configuration.
     
@@ -17,7 +17,7 @@ def lmd_trainer(config, policy_dir):
         config (dict): Configuration dictionary containing simulation parameters.
         policy_dir (str): Directory where the policy and model will be saved.
     """
-    env = gym.make('SumoTrainEnv-v0', config=config)
+    env = gym.make('SumoTRSPEnv-v0', config=config)
     
     agent = get_agent(env, config['agent'], 0)
 
