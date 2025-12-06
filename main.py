@@ -1,66 +1,117 @@
 import argparse
-from server_trsp import lmd_simulator
-from trainer import lmd_trainer
 import yaml
-import os
+import numpy as np
+import time # Added time for potential delay
+import logging
 
+import gymnasium as gym
+
+import envs
+from agents import get_agent
+
+def setup_logging(mode, log_file="simulation_log.txt"):
+    """
+    Configures logging based on the mode.
+    :param mode: 'logging.info' for both console and file logging, 'quiet' for file logging only.
+    :param log_file: Path to the log file.
+    """
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)  # Set the base logging level
+
+    # Clear existing handlers
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    formatter = logging.Formatter('%(message)s')
+
+    # File handler (always enabled)
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)  # Log everything to the file
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    # Console handler (only if mode is 'logging.info')
+    if mode != 'quiet':
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)  # Adjust console log level
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
+def lmd_simulator(config):
+    policy_name = config['agent']["policy"]
+    policy_dir = f"runs/{policy_name}/"
+    log_file = f"{policy_dir}/server_log.txt"
+    render_mode = config['simulation']['render_mode']
+    open(log_file, "w").close()
+    setup_logging(render_mode, log_file=log_file)
+    env = gym.make("SumoTRSPEnv-v0", config=config)
+
+    agent = get_agent(env, config['agent'], 0)
+
+    # Enhanced simulation startup logging
+    logging.info(f"Config: {policy_dir}/config.yaml")
+    
+    obs, world_state = env.reset(seed=42)
+    
+    # Log initial state
+    logging.info("Step 0:")
+    logging.info(f"UGV: Position={world_state['ugv_position_idx']}, Task={world_state['ugv_target_idx']}, Task Junction={world_state['ugv_target_junction']}")
+    
+    env.render()
+
+    terminated = False
+    total_reward = 0.0
+    step_idx = 0
+    start_time = time.time()
+    
+    while not terminated:
+        logging.info(f"Step {step_idx+1}:")
+        
+        action = agent.predict(obs)
+        print(f"Agent selected action: {action}")
+
+        # Execute step
+        obs, reward, terminated, truncated, world_state = env.step(action)
+        total_reward += reward
+        print("Reward:", reward)
+        
+        logging.info(f"UGV: Position={world_state['ugv_position_idx']}, Task={world_state['ugv_target_idx']}, Task Junction={world_state['ugv_target_junction']}")
+        
+        env.render()
+        if truncated:
+            step_idx=0
+        else:
+            step_idx += 1
+        
+    # Calculate final metrics
+    simulation_wall_time = time.time() - start_time
+    total_time_taken = world_state.get("time_elapsed", 0)
+    
+    
+    env.close() # Ensure pygame resources are cleaned up
+    return {
+        'time_taken': total_time_taken,
+    }
 
 def main():
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")
 
-    # mutually exclusive top-level modes
-    mode_group = parser.add_mutually_exclusive_group(required=True)
-    mode_group.add_argument('--train', action='store_true', help='Run training mode')
-    mode_group.add_argument('--eval', action='store_true', help='Run evaluation mode')
-    mode_group.add_argument('--run', action='store_true', help='Run simulation/serve mode')
-
-    # shared/conditional args
-    parser.add_argument('-c', '--config', type=str,
-                        help='Configuration file path (train: optional, eval/run: optional overrides)')
     parser.add_argument('-p', '--policy', type=str,
                         help="Policy name (required for --eval and --run), e.g. '0d318b44'")
 
     args = parser.parse_args()
 
-    if args.train:
-        # train: config optional (defaults to config/train.yaml)
-        train_config_path = args.config if args.config else 'config/train.yaml'
-        resume = False
-        if not args.policy:
-            inf_config_path = 'config/sumo_lmd.yaml'
+    # eval or run: policy is mandatory
+    if not args.policy:
+        parser.error('--policy (-p) is required for --eval and --run')
 
-            train_config = yaml.safe_load(open(train_config_path, 'r'))
-            inf_config = yaml.safe_load(open(inf_config_path, 'r'))
+    policy = args.policy
+    # config can override default run config path
+    config_path = args.config if args.config else f"runs/{policy}/config.yaml"
+    config = yaml.safe_load(open(config_path, 'r'))
 
-            policy_name = os.urandom(4).hex()
-            policy_dir = os.path.join(f"runs/{policy_name}")
-            os.makedirs(policy_dir, exist_ok=True)
-
-            config_file = os.path.join(policy_dir, "config.yaml")
-            inf_config['agent']['policy'] = policy_name
-            inf_config['agent']['algo'] = train_config['agent']['algo']
-            inf_config['net']['net_path'] = train_config['net']['net_path']
-            with open(config_file, 'w') as f:
-                yaml.dump(inf_config, f)
-        else:
-            policy_name = args.policy
-            policy_dir = os.path.join(f"runs/{policy_name}")
-            resume = True
-
-        lmd_trainer(train_config, policy_dir, resume=resume)
-
-    elif args.run:
-        # eval or run: policy is mandatory
-        if not args.policy:
-            parser.error('--policy (-p) is required for --eval and --run')
-
-        policy = args.policy
-        # config can override default run config path
-        config_path = args.config if args.config else f"runs/{policy}/config.yaml"
-        config = yaml.safe_load(open(config_path, 'r'))
-
-        metrics = lmd_simulator(config)
-        print("Metrics:", metrics)
+    metrics = lmd_simulator(config)
+    print("Metrics:", metrics)
 
 
 if __name__ == '__main__':

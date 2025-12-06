@@ -7,7 +7,7 @@
 
     <input>
         <net-file value="rand_grid_small.net.xml"/>
-        <route-files value="ped.trips.xml,cars.trips.xml"/>
+        <route-files value="ped.trips.xml,car.trips.xml"/>
     </input>
 
 </sumoConfiguration>

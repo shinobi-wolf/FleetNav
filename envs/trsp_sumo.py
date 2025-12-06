@@ -25,30 +25,38 @@ def get_centroid(shape):
     return np.mean(x_coords), np.mean(y_coords)
 
 class SumoTRSPEnv(gym.Env):
-    metadata = {'render_modes': ['human', 'print', 'quiet'], "render_fps": 30} # Adjusted FPS
+    metadata = {'render_modes': ['human', 'print', 'quiet']}
 
     def __init__(self, config, render_mode=None): # Default render_mode is None
         super(SumoTRSPEnv, self).__init__()
 
         '''LOADING THE CONFIGURATION VARIABLES'''
+        print(config)
         self.net_path = config["net"]["net_path"]
 
         # Agent vars
         self.ugv_speed = config["fleet"]['max_speed']
         self.num_actions = config['net']['max_degree']
 
+        # Sumo vars
+        self.step_length = config['sumo']['step_length']
+        self.traffic_scale = config['sumo'].get('traffic_scale', 1)
+        self.delay = config['sumo'].get('delay', 0)
+
         # Simulation vars
         self.max_time = config['simulation']['max_time']
         self.max_steps = config['simulation']['max_steps']
-        self.step_length = config['simulation']['step_length']
-        self.traffic_scale = config['simulation'].get('traffic_scale', 1)
-        self.delay = config['debug'].get('delay', 0)
         self.render_mode = config['simulation'].get('render_mode')
+        self.warmup_time = config['simulation']['warm_up_time']
+        self.random_sg_pair = config['simulation']['sg_pair']
+
+        if not self.random_sg_pair:
+            self.start_idx = config['simulation']['start_node_idx']
+            self.target_junc_id = config['simulation']['target_junc_id']
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
         self.action_space = spaces.Discrete(self.num_actions)
         
-        max_moves = 100
         # steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_actions))
         graph_node_space = spaces.Discrete(1000)
         # nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]))
@@ -156,6 +164,10 @@ class SumoTRSPEnv(gym.Env):
         ]
         traci.start(Sumo_config)
 
+        while self.time_elapsed < self.warmup_time:
+            traci.simulationStep()
+            self.time_elapsed = traci.simulation.getTime()
+
         # Maze State
         self.G, self.G_dir, self.all_shortest_path_lengths, self.junc2nodes_map = self.build_graph() # Rebuild graph with new maze
         self.num_junctions = len(self.junc2nodes_map)
@@ -165,12 +177,14 @@ class SumoTRSPEnv(gym.Env):
         print(f"Graph built with {len(self.G.nodes)} nodes and {len(self.G.edges)} edges.")
 
         # UGV States
-        # init_node = random.choice(list(self.G.nodes))
-        # target_junction_id = random.choice(list(self.junction_list - {self.G.nodes[init_node]['junc_id']}))
-        # init_node_idx = self.node2idx[init_node]
-        init_node_idx = 0
-        init_node = self.idx2node[init_node_idx]
-        target_junction_id = '1'
+        if self.random_sg_pair:
+            init_node = random.choice(list(self.G.nodes))
+            target_junction_id = random.choice(list(self.junction_list - {self.G.nodes[init_node]['junc_id']}))
+            init_node_idx = self.node2idx[init_node]
+        else:
+            init_node_idx = self.start_idx
+            init_node = self.idx2node[init_node_idx]
+            target_junction_id = self.target_junc_id
         self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.ugv_speed)
         target_nodes = self.junc2nodes_map[target_junction_id]
         target_node = target_nodes[np.argmin([self.all_shortest_path_lengths[init_node][tn] for tn in target_nodes])]

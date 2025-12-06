@@ -1,5 +1,3 @@
 Config: runs/dijkstra//config.yaml
 Step 0:
-UGV: Position=0, Task=15, Task Junction=1
-Step 1:
-UGV: Position=20, Task=31, Task Junction=8
+UGV: Position=0, Task=33, Task Junction=1

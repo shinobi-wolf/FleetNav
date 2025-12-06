@@ -97,13 +97,24 @@ def main():
     config_path = f"runs/{args.policy}/config.yaml"
     config = yaml.safe_load(open(config_path, 'r'))
 
-    results_path = f"runs/{args.policy}/simulation_results.csv"
+    test_counter = 0
+    while os.path.exists(f"runs/{args.policy}/test_{test_counter}"):
+        test_counter += 1
+    os.makedirs(f"runs/{args.policy}/test_{test_counter}", exist_ok=True)
+    test_dir = f"runs/{args.policy}/test_{test_counter}"
+
+    test_config = config.copy()
+    test_config['test'] = {
+        'mode': 'smooth'
+    }
+    with open(f"{test_dir}/config.yaml", 'w') as f:
+        yaml.dump(test_config, f)
+
+    results_path = f"{test_dir}/simulation_results.csv"
     with open(results_path, 'w') as f:
-        f.write("start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length\n")
+        f.write("start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges\n")
     
-    env = gym.make('SumoTRSPEnv-v0', config=config)
-    # env.reset(seed=42)
-    agent = get_agent(env, config['agent'], 0)
+    agent = get_agent(None, config['agent'], 0)
 
     net_path = config['net']['net_path']
     G, G_dir, all_shortest_path_lengths, junc2nodes_map = build_graph(net_path,)
@@ -113,11 +124,10 @@ def main():
 
     nodes = sorted(list(G.nodes))
     num_nodes = len(nodes)
-    # num_nodes = 2
     max_steps = config['simulation']['max_steps']
-    max_time = 20000
-    step_length = 3
-    traffic_scale = 1
+    max_time = config['simulation']['max_time']
+    step_length = config['sumo']['step_length']
+    traffic_scale = config['sumo'].get('traffic_scale', 1.0)
     num_actions = config['net']['max_degree']
 
     Sumo_config = [
@@ -133,7 +143,7 @@ def main():
     ]
     # traci.close()
 
-    warm_up_times = [1000]#,5000,9000]
+    warm_up_times = [1000,]
 
     # Timing statistics
     route_times = []
@@ -224,12 +234,13 @@ def main():
                     sim_elapsed_time = time.time() - sim_start_time_real
                     sim_times.append(sim_elapsed_time)
                     
+                    route_edges_str = ";".join(route_edges)
                     with open(results_path, 'a') as f:
-                        f.write(f"{start_idx},{junc_id},{sim_warmup_time},{sim_start_time},{total_time_taken},{curr_step}\n")
+                        f.write(f"{start_idx},{junc_id},{sim_warmup_time},{sim_start_time},{total_time_taken},{curr_step},{route_edges_str}\n")
                     traci.close()
             else:
                 with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{junc_id},-1,-1,-1,-1\n")
+                    f.write(f"{start_idx},{junc_id},-1,-1,-1,-1,-1\n")
 
     # Calculate and display final statistics
     overall_elapsed_time = time.time() - overall_start_time

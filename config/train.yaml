@@ -1,20 +1,23 @@
-fleet:
-  max_speed: 5
-debug:
-  delay: 200
-  fast_forward: 0
-net:
-  net_path: data/grid/grid.sumocfg
-  max_degree: 4
-simulation:
-  max_time: 10000
-  max_steps: 50
-  traffic_scale: 1
-  step_length: 3
-  render_mode: quiet
-  render_fps: 30
 agent:
   algo: sarsa
+sumo:
+  delay: 0
+  traffic_scale: 1
+  step_length: 3
+fleet:
+  max_speed: 5
+  range: 100000000
+net:
+  max_degree: 4
+  net_path: data/rand_grid/rand_grid.sumocfg
+simulation:
+  max_time: 15000
+  max_steps: 100
+  render_mode: quiet
+  warm_up_time: 0
+  random_sg_pair: true
+  start_node_idx: 0
+  target_junc_id: '1'
 training:
   sarsa:
     num_episodes: 5000

@@ -1,33 +1,11 @@
-Config: runs/sarsa//config.yaml
+Config: runs/c75c5609//config.yaml
 Step 0:
-UGV 0: Position=E0, Active Task=B0, Status=1
+UGV: Position=0, Task=33, Task Junction=1
 Step 1:
-UGV 0: Position=D0, Active Task=B0, Status=1
+UGV: Position=1, Task=33, Task Junction=1
 Step 2:
-UGV 0: Position=C0, Active Task=B0, Status=1
+UGV: Position=9, Task=33, Task Junction=1
 Step 3:
-UGV 0: Position=B0, Active Task=D3, Status=1
+UGV: Position=8, Task=33, Task Junction=1
 Step 4:
-UGV 0: Position=B1, Active Task=D3, Status=1
-Step 5:
-UGV 0: Position=C1, Active Task=D3, Status=1
-Step 6:
-UGV 0: Position=D1, Active Task=D3, Status=1
-Step 7:
-UGV 0: Position=D2, Active Task=D3, Status=1
-Step 8:
-UGV 0: Position=D3, Active Task=B2, Status=1
-Step 9:
-UGV 0: Position=D2, Active Task=B2, Status=1
-Step 10:
-UGV 0: Position=C2, Active Task=B2, Status=1
-Step 11:
-UGV 0: Position=B2, Active Task=A2, Status=1
-Step 12:
-UGV 0: Position=A2, Active Task=B0, Status=1
-Step 13:
-UGV 0: Position=B2, Active Task=B0, Status=1
-Step 14:
-UGV 0: Position=B1, Active Task=B0, Status=1
-Step 15:
-UGV 0: Position=B0, Active Task=D3, Status=1
+UGV: Position=14, Task=33, Task Junction=1

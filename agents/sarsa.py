@@ -56,7 +56,7 @@ class SARSAAgent(Agent):
         for the given observation.
         Also returns the number of neighbors at the current node.
         """
-        if G is None:
+        if self.env:
             G = self.env.unwrapped.G
             idx2node = self.env.unwrapped.idx2node
             node2idx = self.env.unwrapped.node2idx

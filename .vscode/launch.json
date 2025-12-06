@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["--run", "-p", "dijkstra"],
+            "args": ["-p", "dijkstra"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["--run", "-p", "2e058a65"],
+            "args": ["-p", "c75c5609"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -27,10 +27,9 @@
             "name": "Train",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/train.py",
             "console": "integratedTerminal",
-            "args": ["--train"],
-            // "args": ["--train", "-p", "dijkstra"],
+            // "args": ["-p", "dijkstra"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -41,8 +40,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal",
-            // "args": ["-p", "dijkstra"],
-            "args": ["-p", "2e058a65"],
+            "args": ["-p", "dijkstra"],
+            // "args": ["-p", "c75c5609"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
