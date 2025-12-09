@@ -4,6 +4,7 @@ import os
 import numpy as np
 import time # Added time for potential delay
 import logging
+import copy
 
 import gymnasium as gym
 
@@ -44,7 +45,7 @@ if __name__ == "__main__":
         os.makedirs(policy_dir, exist_ok=True)
 
         config_file = os.path.join(policy_dir, "config.yaml")
-        inf_config = train_config.copy()
+        inf_config = copy.deepcopy(train_config)
         inf_config['agent']['policy'] = policy_name
         inf_config['simulation']['render_mode'] = 'human'  # Set render mode for inference
         inf_config.pop('training', None)  # Remove training section for inference config

@@ -107,7 +107,7 @@ def main():
 
     policy = args.policy
     # config can override default run config path
-    config_path = args.config if args.config else f"runs/{policy}/config.yaml"
+    config_path = f"runs/{policy}/config.yaml"
     config = yaml.safe_load(open(config_path, 'r'))
 
     metrics = lmd_simulator(config)

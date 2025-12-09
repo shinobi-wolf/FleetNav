@@ -4,7 +4,7 @@ agent:
 sumo:
   delay: 0
   traffic_scale: 1
-  step_length: 1
+  step_length: 3
 fleet:
   max_speed: 5
   range: 100000000
@@ -16,6 +16,6 @@ simulation:
   max_steps: 100
   render_mode: human
   warm_up_time: 1000
-  random_sg_pair: false
+  random_sg_pair: true
   start_node_idx: 0
   target_junc_id: '1'

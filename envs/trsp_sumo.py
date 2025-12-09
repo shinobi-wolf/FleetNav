@@ -31,7 +31,6 @@ class SumoTRSPEnv(gym.Env):
         super(SumoTRSPEnv, self).__init__()
 
         '''LOADING THE CONFIGURATION VARIABLES'''
-        print(config)
         self.net_path = config["net"]["net_path"]
 
         # Agent vars
@@ -48,7 +47,7 @@ class SumoTRSPEnv(gym.Env):
         self.max_steps = config['simulation']['max_steps']
         self.render_mode = config['simulation'].get('render_mode')
         self.warmup_time = config['simulation']['warm_up_time']
-        self.random_sg_pair = config['simulation']['sg_pair']
+        self.random_sg_pair = config['simulation']['random_sg_pair']
 
         if not self.random_sg_pair:
             self.start_idx = config['simulation']['start_node_idx']
@@ -144,6 +143,7 @@ class SumoTRSPEnv(gym.Env):
         self.terminated = False
         self.truncated = False
         self.time_elapsed = 0.0
+        self.last_move_time = 0.0
 
         # Initialize pygame display if not already done
         self.screen = None
@@ -281,6 +281,7 @@ class SumoTRSPEnv(gym.Env):
         if act == self.num_actions:
             return
         move_flag, edge_id, edge_dir = self.ugv.move(act, self.time_elapsed, self.G, self.G_dir, self.node2idx, self.idx2node)
+        self.last_move_time = self.time_elapsed
         
         if move_flag:
             # Only track move time if move was successful
@@ -333,9 +334,11 @@ class SumoTRSPEnv(gym.Env):
         
         # Reward constants
         COMPLETION_REWARD = 50.0  # High positive reward for task completion
-        INVALID_ACTION_PENALTY = -15.0  # High negative reward for invalid actions
-        MOVE_TIME_PENALTY_SCALE = -0.1  # Low negative reward per unit time (proportional to move time)
+        INCOMPLETE_PENALTY = 0.0  # High negative reward for invalid actions
+        MOVE_TIME_PENALTY_FAC = -0.1  # Low negative reward per unit time (proportional to move time)
         
+        move_time = self.time_elapsed - self.last_move_time
+        total_reward += MOVE_TIME_PENALTY_FAC * move_time
         # 1. Completion reward: High positive reward if task was completed
         if self.truncated:
             self.truncated = False  # Reset truncated flag after rewarding
@@ -343,17 +346,11 @@ class SumoTRSPEnv(gym.Env):
                 total_reward += COMPLETION_REWARD
                 self.ugv.task_completed_this_step = False  # Reset task completion flag after rewarding
             else:
-                total_reward -= 10  # Partial penalty if terminated early without task completion
-        else:
-            if self.ugv.last_move_time == -1:
-                total_reward += -1
-            else:
-                move_time = self.time_elapsed - self.ugv.last_move_time
-                total_reward += MOVE_TIME_PENALTY_SCALE * move_time
-        
-        # 2. Invalid action reward: High negative reward if invalid action was performed
-        if self.ugv.invalid_action_this_step:
-            total_reward += INVALID_ACTION_PENALTY
+                total_reward += INCOMPLETE_PENALTY
+        # else:
+            # if self.ugv.last_move_time == -1:
+            #     total_reward += -1
+            # else:
         
         return total_reward
 

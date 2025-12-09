@@ -12,7 +12,7 @@ net:
   net_path: data/rand_grid/rand_grid.sumocfg
 simulation:
   max_time: 15000
-  max_steps: 100
+  max_steps: 50
   render_mode: quiet
   warm_up_time: 0
   random_sg_pair: true
