@@ -16,6 +16,9 @@ import sumolib
 
 import envs
 from agents import get_agent
+from agents.dqn import DQNAgent
+
+INF = 100000
 
 def get_centroid(shape):
     """Calculates the center point of a shape (list of x,y tuples)."""
@@ -26,68 +29,88 @@ def get_centroid(shape):
     return np.mean(x_coords), np.mean(y_coords)
 
 def build_graph(net_path,):
-    net_path = net_path.replace('.sumocfg', '.net.xml')
-    net = sumolib.net.readNet(net_path, withPedestrianConnections=True)
-    junctions = net.getNodes()
-    edge_eps = {}
-    junc2nodes_map = defaultdict(list)
-    
-    for junction in junctions:
-        connections = junction.getConnections()
-        for connection in connections:
-            # 1. Inspect the source of the connection
-            ep = None
-            edge = None
-            dir = None
-            if connection._from.getFunction() == 'walkingarea':
-                ep = connection._from
-                edge = connection._to
-                dir = 0
-            elif connection._to.getFunction() == 'walkingarea':
-                ep = connection._to
-                edge = connection._from
-                dir = 1
-            if ep and edge:
-                edge_id = edge.getID()
-                eps = [None, None]
-                eps[dir] = ep
-                if edge_id not in edge_eps:
-                    edge_eps[edge_id] = {
-                        "edge": edge,
-                        "eps": eps
-                    }
-                else:
-                    edge_eps[edge_id]["eps"][dir] = ep
-                    if len([ep for ep in edge_eps[edge_id]["eps"] if ep is not None]) > 2:
-                        print("More than 2 entry points for edge ", edge_id)
-                        raise ValueError("More than 2 entry points for edge ", edge_id)
+        net_path = net_path.replace('.sumocfg', '.net.xml')
+        net = sumolib.net.readNet(net_path, withPedestrianConnections=True)
+        junctions = net.getNodes()
+        edge_eps = {}
+        junc2nodes_map = defaultdict(list)
+        
+        for junction in junctions:
+            connections = junction.getConnections()
+            for connection in connections:
+                # 1. Inspect the source of the connection
+                ep = None
+                edge = None
+                dir = None
+                if connection._from.getFunction() == 'walkingarea':
+                    ep = connection._from
+                    edge = connection._to
+                    dir = 0
+                elif connection._to.getFunction() == 'walkingarea':
+                    ep = connection._to
+                    edge = connection._from
+                    dir = 1
+                if ep and edge:
+                    edge_id = edge.getID()
+                    eps = [None, None]
+                    eps[dir] = ep
+                    if edge_id not in edge_eps:
+                        edge_eps[edge_id] = {
+                            "edge": edge,
+                            "eps": eps
+                        }
+                    else:
+                        edge_eps[edge_id]["eps"][dir] = ep
+                        if len([ep for ep in edge_eps[edge_id]["eps"] if ep is not None]) > 2:
+                            print("More than 2 entry points for edge ", edge_id)
+                            raise ValueError("More than 2 entry points for edge ", edge_id)
 
-    G = nx.DiGraph()
-    for edge_id, edge_data in edge_eps.items():
-        entry_points = edge_data["eps"]
-        for ep in entry_points:
-            shape = ep.getShape()
-            cx, cy = get_centroid(shape)
-            G.add_node(ep._id, junc_id=ep._from._id,junc_coord=ep._from._coord, x=cx, y=cy)
-            junc2nodes_map[ep._from._id].append(ep._id)
-        edge_obj = edge_data["edge"]
-        edge_length = None
-        edge_type = edge_obj.getFunction()
-        if edge_type == 'crossing':
-            edge_length = 5.0
-            G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
-            # G.add_edge(entry_points[1]._id, entry_points[0]._id, edge=edge_obj._id, length=edge_length, type=edge_type)
-        else:
-            edge_length = edge_obj.getLength()
-            edge_type = 'sidewalk'
-            G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
-    
-    G_und = G.to_undirected()
+        G = nx.DiGraph()
+        for edge_id, edge_data in edge_eps.items():
+            entry_points = edge_data["eps"]
+            for ep in entry_points:
+                shape = ep.getShape()
+                cx, cy = get_centroid(shape)
+                G.add_node(ep._id, junc_id=ep._from._id,junc_coord=ep._from._coord, x=cx, y=cy)
+                junc2nodes_map[ep._from._id].append(ep._id)
+            edge_obj = edge_data["edge"]
+            edge_length = None
+            edge_type = edge_obj.getFunction()
+            if edge_type == 'crossing':
+                edge_length = 5.0
+                G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
+                # G.add_edge(entry_points[1]._id, entry_points[0]._id, edge=edge_obj._id, length=edge_length, type=edge_type)
+            else:
+                edge_length = edge_obj.getLength()
+                edge_type = 'sidewalk'
+                G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
+        
+        G_und = G.to_undirected()
 
+        all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='length'))
+        num_junctions = len(junc2nodes_map)
+        junction_list = junc2nodes_map.keys()
+        node2idx = {node: idx for idx, node in enumerate(sorted(G.nodes))}
+        idx2node = {idx: node for node, idx in node2idx.items()}
+        sg_pairs = []
+        for node_idx in range(len(idx2node)):
+            for junc_id in junction_list:
+                node = idx2node[node_idx]
+                if G.nodes[node]['junc_id'] != junc_id:
+                    sg_pairs.append((node_idx, junc_id))
+        graph_info = {
+            'G': G_und,
+            'G_dir': G,
+            'all_shortest_path_lengths': all_shortest_path_lengths,
+            'junc2nodes_map': junc2nodes_map,
+            'num_junctions': num_junctions,
+            'junction_list': junction_list,
+            'node2idx': node2idx,
+            'idx2node': idx2node,
+            'sg_pairs': sg_pairs
+        }
+        return graph_info
 
-
-    all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='length'))
-    return G_und, G, all_shortest_path_lengths, junc2nodes_map
 
 def main():
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")
@@ -114,13 +137,21 @@ def main():
     with open(results_path, 'w') as f:
         f.write("start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges\n")
     
-    agent = get_agent(None, config['agent'], 0)
+    if config['agent']['algo'] == 'dqn':
+        agent = DQNAgent(config)
+    else:
+        agent = get_agent(None, config['agent'], 0)
 
     net_path = config['net']['net_path']
-    G, G_dir, all_shortest_path_lengths, junc2nodes_map = build_graph(net_path,)
-    junction_list = list(junc2nodes_map.keys())
-    node2idx = {node: idx for idx, node in enumerate(sorted(G.nodes))}
-    idx2node = {idx: node for node, idx in node2idx.items()}
+    graph_info = build_graph(net_path,)
+    G = graph_info['G']
+    G_dir = graph_info['G_dir']
+    all_shortest_path_lengths = graph_info['all_shortest_path_lengths']
+    junc2nodes_map = graph_info['junc2nodes_map']
+    junction_list = graph_info['junction_list']
+    node2idx = graph_info['node2idx']
+    idx2node = graph_info['idx2node']
+    sg_pairs = graph_info['sg_pairs']
 
     nodes = sorted(list(G.nodes))
     num_nodes = len(nodes)
@@ -175,11 +206,16 @@ def main():
                 nb_node_idxs = sorted([node2idx[nb] for nb in nb_nodes])[:num_actions]
                 for nb_node_idx in nb_node_idxs:
                     steps2dest.append(all_shortest_path_lengths[idx2node[nb_node_idx]][target_node])
-                best_dir = np.argmin(steps2dest) if steps2dest else 4
+                steps2dest += [INF] * (num_actions - len(steps2dest))
+                junction_idx = G.nodes[target_node]['junc_id']
+                sg_idx = sg_pairs.index((curr_pos, junction_idx))
+                best_dir = np.argmin(steps2dest)
                 obs = {
                     'graph_node': curr_pos,
                     'target_node': int(G.nodes[target_node]['junc_id']),
-                    'best_dir': best_dir
+                    'best_dir': best_dir,
+                    'steps2dest': np.array(steps2dest, dtype=np.float32),
+                    'sg_pair_idx': sg_idx
                 }
                 action = agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx)
                 # print("Action",action)
@@ -197,7 +233,7 @@ def main():
             
             route_calc_time = time.time() - route_start_time
             route_times.append(route_calc_time)
-            
+
             if G.nodes[curr_node]['junc_id'] == G.nodes[target_node]['junc_id']:
                 for warmup_time in tqdm(warm_up_times, desc=f"    Warmup times", position=2, leave=False):
                     sim_start_time_real = time.time()

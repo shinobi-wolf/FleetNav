@@ -1,7 +1,6 @@
 import numpy as np
 import random
 import time
-from scipy.stats import rankdata
 
 import torch
 import torch.nn as nn
@@ -13,17 +12,22 @@ import gymnasium as gym
 from gymnasium import spaces
 from stable_baselines3.common.buffers import ReplayBuffer
 
-from agents.agent import Agent
+import envs
 
 class QNetwork(nn.Module):
     def __init__(self, env):
         super().__init__()
+        self.num_actions = env.single_action_space.n
         self.network = nn.Sequential(
-            nn.Linear(np.array(env.single_observation_space.shape).prod(), 16),
+            nn.Linear(np.array(env.single_observation_space.shape).prod(), 512),
             nn.ReLU(),
-            nn.Linear(16, 9),
+            nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(9, 5),
+            nn.Linear(256, 64),
+            nn.ReLU(),
+            nn.Linear(64, 16),
+            nn.ReLU(),
+            nn.Linear(16, self.num_actions),
         )
 
     def forward(self, x):
@@ -41,10 +45,12 @@ class DQNWrapper(gym.Wrapper):
     """
     def __init__(self, env):
         super().__init__(env)
+        self.max_deg = env.unwrapped.num_actions
+        self.num_sg_pairs = env.unwrapped.num_sg_pairs
         self.observation_space = spaces.Box(
             low=-np.inf, 
             high=np.inf,
-            shape=(9,), 
+            shape=(self.max_deg + self.num_sg_pairs,), 
             dtype=np.float32
         )
         
@@ -57,8 +63,9 @@ class DQNWrapper(gym.Wrapper):
     def _transform_obs(self, obs_dict):
         """Convert dictionary observation to flattened array."""
         steps2dest = obs_dict['steps2dest']
-        nb_traffic = obs_dict['nb_traffic']
-        return np.concatenate((steps2dest, nb_traffic), axis=0).astype(np.float32)
+        sg_pair_idx = obs_dict['sg_pair_idx']
+        flat_obs = np.concatenate((steps2dest, np.eye(self.num_sg_pairs)[sg_pair_idx]), axis=0)
+        return flat_obs
     
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -66,37 +73,48 @@ class DQNWrapper(gym.Wrapper):
     
     def step(self, action):
         # Convert single action to the format expected by the vectorized environment
-        action_array = np.array([action])
-        
-        obs, reward, terminated, truncated, info = self.env.step(action_array)
+        obs, reward, terminated, truncated, info = self.env.step(action)
         
         return self._transform_obs(obs), reward, terminated, truncated, info
 
-class DQNAgent(Agent):
-    def __init__(self, env, config=None, policy_path=None):
-        super().__init__(env, config, policy_path)
-        self.env = DQNWrapper(self.env)
-        self.env = gym.wrappers.RecordEpisodeStatistics(self.env)
-        self.env = gym.vector.SyncVectorEnv([lambda: self.env])
-        self.epsilon = config['training']['dqn']['pred_epsilon']
-        self.num_primitives = config['fleet']['ugv']['num_primitives']
+def make_env(config,):
+    def thunk():
+        env = gym.make("SumoTRSPEnv-v0", config=config)
+        env = DQNWrapper(env)
+        env = gym.wrappers.RecordEpisodeStatistics(env)
+
+        return env
+
+    return thunk
+
+class DQNAgent():
+    def __init__(self, config):
+        self.config = config
+        tmp = gym.make("SumoTRSPEnv-v0", config=config)
+        self.num_sg_pairs = tmp.unwrapped.num_sg_pairs
+        self.env = gym.vector.SyncVectorEnv(
+            [make_env(config)]
+        )
         self.model = QNetwork(self.env).to('cuda')
-        if policy_path:
+        policy_name = config['agent'].get("policy", None)
+        if policy_name:
+            policy_path = f"runs/{policy_name}/dqn.cleanrl_model"
             self.model.load_state_dict(torch.load(policy_path, map_location='cuda'))
             self.model.eval()
             print(self.model)
 
     def obs_converter(self, obs):
-        assert isinstance(obs, dict), "Observation must be a dictionary"
+        print(obs)
         steps2dest = obs['steps2dest']
-        nb_traffic = obs['nb_traffic']
-        new_obs = np.concatenate((steps2dest, nb_traffic), axis=0)
-        return new_obs
+        sg_pair_idx = obs['sg_pair_idx']
+        flat_obs = np.concatenate((steps2dest, np.eye(self.num_sg_pairs)[sg_pair_idx]), axis=0)
+        return flat_obs
 
-    def learn(self, config, policy_path, log_path):
+    def learn(self, policy_path):
         writer = SummaryWriter(policy_path)
         policy_path += "/dqn.cleanrl_model"
         device = 'cuda'
+        config = self.config['training']
         
         random.seed(47)
         np.random.seed(47)
@@ -180,8 +198,9 @@ class DQNAgent(Agent):
                         )
                     torch.save(q_network.state_dict(), policy_path)
 
-            if terminations.any():
-                obs, _ = self.env.reset()
+            # if terminations.any():
+            #     self.env.close()
+            #     obs, _ = self.env.reset()
 
         torch.save(q_network.state_dict(), policy_path)
         print(f"model saved to {policy_path}")
@@ -189,14 +208,13 @@ class DQNAgent(Agent):
         self.env.close()
         writer.close()
 
-    def predict(self, obs):
+    def predict(self, obs, G=None, idx2node=None, node2idx=None):
         obs = self.obs_converter(obs)
-        print("State:", obs)
-        if random.random() < self.epsilon:
+        if random.random() < 0:
             action = self.env.action_space.sample()
             action = int(action[0])
         else:
             q_values = self.model(torch.Tensor(obs).to('cuda'))
             q_values = q_values.cpu().detach().numpy().flatten()
-            action = np.argmax(q_values[:self.num_primitives])
+            action = np.argmax(q_values)
         return action

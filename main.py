@@ -8,6 +8,7 @@ import gymnasium as gym
 
 import envs
 from agents import get_agent
+from agents.dqn import DQNAgent
 
 def setup_logging(mode, log_file="simulation_log.txt"):
     """
@@ -46,7 +47,11 @@ def lmd_simulator(config):
     setup_logging(render_mode, log_file=log_file)
     env = gym.make("SumoTRSPEnv-v0", config=config)
 
-    agent = get_agent(env, config['agent'], 0)
+    if config['agent']['algo'] == 'dqn':
+        agent = DQNAgent(config)
+    else:
+        agent = get_agent(env, config['agent'], 0)
+
 
     # Enhanced simulation startup logging
     logging.info(f"Config: {policy_dir}/config.yaml")

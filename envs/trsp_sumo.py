@@ -16,6 +16,8 @@ import sumolib
 from envs.fleet.UGVSumo import UGVSumo
 import numpy as np
 
+INF = 100000
+
 def get_centroid(shape):
     """Calculates the center point of a shape (list of x,y tuples)."""
     if not shape:
@@ -32,6 +34,9 @@ class SumoTRSPEnv(gym.Env):
 
         '''LOADING THE CONFIGURATION VARIABLES'''
         self.net_path = config["net"]["net_path"]
+        self.build_graph()
+        print(f"Graph built with {len(self.G.nodes)} nodes and {len(self.G.edges)} edges.")
+        self.num_sg_pairs = len(self.sg_pairs)
 
         # Agent vars
         self.ugv_speed = config["fleet"]['max_speed']
@@ -56,15 +61,21 @@ class SumoTRSPEnv(gym.Env):
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
         self.action_space = spaces.Discrete(self.num_actions)
         
-        # steps2dest_space = spaces.MultiDiscrete(np.array([max_moves]*self.num_actions))
+        steps2dest_space = spaces.Box(
+            low=0,
+            high=INF,
+            shape=(self.num_actions,),
+            dtype=np.float32
+        )
         graph_node_space = spaces.Discrete(1000)
-        # nb_traffic_space = spaces.MultiDiscrete(np.array([3,3,3,3]))
         best_dir_space = spaces.Discrete(self.num_actions)
+        sg_pair_idx_space = spaces.Discrete(self.num_sg_pairs)
         self.observation_space = spaces.Dict({
-            # 'steps2dest': steps2dest_space,
+            'steps2dest': steps2dest_space,
             'graph_node': graph_node_space,
             'target_node': graph_node_space,
             'best_dir': best_dir_space,
+            'sg_pair_idx': sg_pair_idx_space,
         })
         
     def build_graph(self,):
@@ -126,17 +137,32 @@ class SumoTRSPEnv(gym.Env):
         
         G_und = G.to_undirected()
 
-
-
         all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='length'))
-        return G_und, G, all_shortest_path_lengths, junc2nodes_map
+        self.G, self.G_dir, self.all_shortest_path_lengths, self.junc2nodes_map = G_und, G, all_shortest_path_lengths, junc2nodes_map
 
+        self.num_junctions = len(self.junc2nodes_map)
+        self.junction_list = self.junc2nodes_map.keys()
+        self.node2idx = {node: idx for idx, node in enumerate(sorted(self.G.nodes))}
+        self.idx2node = {idx: node for node, idx in self.node2idx.items()}
+        self.sg_pairs = []
+        for node_idx in range(len(self.idx2node)):
+            for junc_id in self.junction_list:
+                node = self.idx2node[node_idx]
+                if self.G.nodes[node]['junc_id'] != junc_id:
+                    self.sg_pairs.append((node_idx, junc_id))
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed) # Call parent reset for seeding RNG
         if seed: # Seeding is handled by super().reset()
             random.seed(seed)
             np.random.seed(seed) # Also seed numpy for consistent sampling if used
+
+        try:
+            if traci.isLoaded():
+                traci.close(False)  # or traci.close(); False = don't wait
+        except traci.TraCIException:
+            # If no active connection or already closed, just ignore
+            pass
 
         # Simulation State
         self.current_timestep = 0
@@ -167,14 +193,6 @@ class SumoTRSPEnv(gym.Env):
         while self.time_elapsed < self.warmup_time:
             traci.simulationStep()
             self.time_elapsed = traci.simulation.getTime()
-
-        # Maze State
-        self.G, self.G_dir, self.all_shortest_path_lengths, self.junc2nodes_map = self.build_graph() # Rebuild graph with new maze
-        self.num_junctions = len(self.junc2nodes_map)
-        self.junction_list = self.junc2nodes_map.keys()
-        self.node2idx = {node: idx for idx, node in enumerate(sorted(self.G.nodes))}
-        self.idx2node = {idx: node for node, idx in self.node2idx.items()}
-        print(f"Graph built with {len(self.G.nodes)} nodes and {len(self.G.edges)} edges.")
 
         # UGV States
         if self.random_sg_pair:
@@ -208,14 +226,21 @@ class SumoTRSPEnv(gym.Env):
             nb_node_idxs = sorted([self.node2idx[nb] for nb in nb_nodes])[:self.num_actions]
             for nb_node_idx in nb_node_idxs:
                 steps2dest.append(self.all_shortest_path_lengths[self.idx2node[nb_node_idx]][task_node])
-            junction_idx = int(self.G.nodes[task_node]['junc_id'])
+            steps2dest += [INF] * (self.num_actions - len(steps2dest))
+            junction_idx = self.G.nodes[task_node]['junc_id']
+            sg_idx = self.sg_pairs.index((ugv_node_idx, junction_idx))
+            best_dir = np.argmin(steps2dest)
         else:
-            steps2dest = []
-        best_dir = np.argmin(steps2dest) if steps2dest else 4
+            junction_idx = -1
+            steps2dest = [INF] * self.num_actions
+            sg_idx = -1
+            best_dir = 4
         obs_dict = {
             'graph_node': ugv_node_idx,
-            'target_node': junction_idx,
-            'best_dir': best_dir
+            'target_node': int(junction_idx),
+            'best_dir': best_dir,
+            'steps2dest': np.array(steps2dest, dtype=np.float32),
+            'sg_pair_idx': sg_idx
         }
 
         return obs_dict
@@ -247,17 +272,8 @@ class SumoTRSPEnv(gym.Env):
             action = self.next_action
             self.next_action_manual = False
         
-        self.ugv_handler(action)
+        self.ugv_handler(action)   
         self.current_timestep += 1
-        traci.simulationStep()
-        self.time_elapsed = traci.simulation.getTime()
-        reached_flag = False
-        while not reached_flag and self.time_elapsed < self.max_time:
-            if self.ugv.veh_id and self.ugv.veh_id not in traci.person.getIDList():
-                self.ugv.status = 1
-                reached_flag = True
-            traci.simulationStep()
-            self.time_elapsed = traci.simulation.getTime()
         truncated = self.task_handler() # Handle task completion and updates
         
         reward = self._get_reward()
@@ -296,6 +312,15 @@ class SumoTRSPEnv(gym.Env):
                 traci.person.add(self.ugv.veh_id, edge_id, -1)
                 traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
                 traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=0, speed=self.ugv.max_speed)
+            traci.simulationStep()
+            self.time_elapsed = traci.simulation.getTime()
+            reached_flag = False
+            while not reached_flag and self.time_elapsed < self.max_time:
+                if self.ugv.veh_id and self.ugv.veh_id not in traci.person.getIDList():
+                    self.ugv.status = 1
+                    reached_flag = True
+                traci.simulationStep()
+                self.time_elapsed = traci.simulation.getTime()
             
     def task_handler(self):
         self.truncated = False
@@ -335,22 +360,23 @@ class SumoTRSPEnv(gym.Env):
         # Reward constants
         COMPLETION_REWARD = 50.0  # High positive reward for task completion
         INCOMPLETE_PENALTY = 0.0  # High negative reward for invalid actions
+        INVALID_ACTION_PENALTY = -10.0  # High negative reward for invalid actions
         MOVE_TIME_PENALTY_FAC = -0.1  # Low negative reward per unit time (proportional to move time)
         
-        move_time = self.time_elapsed - self.last_move_time
-        total_reward += MOVE_TIME_PENALTY_FAC * move_time
-        # 1. Completion reward: High positive reward if task was completed
-        if self.truncated:
-            self.truncated = False  # Reset truncated flag after rewarding
-            if self.ugv.task_completed_this_step:
-                total_reward += COMPLETION_REWARD
-                self.ugv.task_completed_this_step = False  # Reset task completion flag after rewarding
-            else:
-                total_reward += INCOMPLETE_PENALTY
-        # else:
-            # if self.ugv.last_move_time == -1:
-            #     total_reward += -1
-            # else:
+        if self.ugv.invalid_action_this_step:
+            total_reward += INVALID_ACTION_PENALTY
+            self.ugv.invalid_action_this_step = False  # Reset invalid action flag after rewarding
+
+        else:
+            move_time = self.time_elapsed - self.last_move_time
+            total_reward += MOVE_TIME_PENALTY_FAC * move_time
+            if self.truncated:
+                self.truncated = False  # Reset truncated flag after rewarding
+                if self.ugv.task_completed_this_step:
+                    total_reward += COMPLETION_REWARD
+                    self.ugv.task_completed_this_step = False  # Reset task completion flag after rewarding
+                else:
+                    total_reward += INCOMPLETE_PENALTY
         
         return total_reward
 

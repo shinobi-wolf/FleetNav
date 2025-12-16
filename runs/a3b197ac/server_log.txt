@@ -1,0 +1,61 @@
+Config: runs/a3b197ac//config.yaml
+Step 0:
+UGV: Position=2, Task=15, Task Junction=14
+Step 1:
+UGV: Position=17, Task=40, Task Junction=228
+Step 1:
+UGV: Position=11, Task=40, Task Junction=228
+Step 2:
+UGV: Position=23, Task=40, Task Junction=228
+Step 3:
+UGV: Position=27, Task=40, Task Junction=228
+Step 4:
+UGV: Position=26, Task=40, Task Junction=228
+Step 5:
+UGV: Position=5, Task=15, Task Junction=14
+Step 1:
+UGV: Position=2, Task=15, Task Junction=14
+Step 2:
+UGV: Position=70, Task=16, Task Junction=14
+Step 1:
+UGV: Position=73, Task=16, Task Junction=14
+Step 2:
+UGV: Position=74, Task=16, Task Junction=14
+Step 3:
+UGV: Position=0, Task=16, Task Junction=14
+Step 4:
+UGV: Position=1, Task=16, Task Junction=14
+Step 5:
+UGV: Position=21, Task=28, Task Junction=195
+Step 1:
+UGV: Position=9, Task=41, Task Junction=22
+Step 1:
+UGV: Position=1, Task=41, Task Junction=22
+Step 2:
+UGV: Position=0, Task=41, Task Junction=22
+Step 3:
+UGV: Position=1, Task=41, Task Junction=22
+Step 4:
+UGV: Position=0, Task=41, Task Junction=22
+Step 5:
+UGV: Position=1, Task=41, Task Junction=22
+Step 6:
+UGV: Position=0, Task=41, Task Junction=22
+Step 7:
+UGV: Position=1, Task=41, Task Junction=22
+Step 8:
+UGV: Position=0, Task=41, Task Junction=22
+Step 9:
+UGV: Position=1, Task=41, Task Junction=22
+Step 10:
+UGV: Position=0, Task=41, Task Junction=22
+Step 11:
+UGV: Position=1, Task=41, Task Junction=22
+Step 12:
+UGV: Position=0, Task=41, Task Junction=22
+Step 13:
+UGV: Position=1, Task=41, Task Junction=22
+Step 14:
+UGV: Position=0, Task=41, Task Junction=22
+Step 15:
+UGV: Position=1, Task=41, Task Junction=22

@@ -9,7 +9,8 @@ import copy
 import gymnasium as gym
 
 import envs
-from agents import get_agent
+# from agents import get_agent
+from agents.dqn import DQNAgent
 
 def lmd_trainer(config, policy_dir, resume=False):
     """
@@ -19,13 +20,10 @@ def lmd_trainer(config, policy_dir, resume=False):
         config (dict): Configuration dictionary containing simulation parameters.
         policy_dir (str): Directory where the policy and model will be saved.
     """
-    env = gym.make('SumoTRSPEnv-v0', config=config)
     
-    agent = get_agent(env, config['agent'], 0)
+    agent = DQNAgent(config)
 
-    agent.learn(config['training'], policy_dir,
-                   log_path=os.path.join(policy_dir, "train_log.txt"))
-    env.close()
+    agent.learn(policy_dir,)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training Configuration")

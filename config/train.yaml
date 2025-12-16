@@ -1,5 +1,5 @@
 agent:
-  algo: sarsa
+  algo: dqn
 sumo:
   delay: 0
   traffic_scale: 1
