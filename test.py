@@ -73,21 +73,28 @@ def build_graph(net_path,):
         edge_obj = edge_data["edge"]
         edge_length = None
         edge_type = edge_obj.getFunction()
+        edge_est_tt = None
+        edge_mean_speed = None
+        for lane_obj in edge_obj.getLanes():
+            if "pedestrian" in lane_obj._allowed:
+                edge_est_tt = traci.lane.getTraveltime(lane_obj.getID())
+                edge_mean_speed = traci.lane.getLastStepMeanSpeed(lane_obj.getID())
         if edge_type == 'crossing':
             edge_length = 5.0
-            G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
+            G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type,
+                        est_tt=edge_est_tt, mean_speed = edge_mean_speed)
             # G.add_edge(entry_points[1]._id, entry_points[0]._id, edge=edge_obj._id, length=edge_length, type=edge_type)
         else:
             edge_length = edge_obj.getLength()
             edge_type = 'sidewalk'
-            G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
+            G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type, 
+                       est_tt=edge_est_tt, mean_speed=edge_mean_speed)
     
     G_und = G.to_undirected()
 
-
-
     all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='length'))
-    return G_und, G, all_shortest_path_lengths, junc2nodes_map
+    all_shortest_path_times = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='est_tt'))
+    return G_und, G, all_shortest_path_lengths, all_shortest_path_times, junc2nodes_map
 
 def main():
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")
@@ -110,20 +117,12 @@ def main():
     with open(f"{test_dir}/config.yaml", 'w') as f:
         yaml.dump(test_config, f)
 
-    results_path = f"{test_dir}/simulation_results.csv"
+    results_path = f"{test_dir}/simulation_results_est_tt.csv"
     with open(results_path, 'w') as f:
         f.write("start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges\n")
     
     agent = get_agent(None, config['agent'], 0)
 
-    net_path = config['net']['net_path']
-    G, G_dir, all_shortest_path_lengths, junc2nodes_map = build_graph(net_path,)
-    junction_list = list(junc2nodes_map.keys())
-    node2idx = {node: idx for idx, node in enumerate(sorted(G.nodes))}
-    idx2node = {idx: node for node, idx in node2idx.items()}
-
-    nodes = sorted(list(G.nodes))
-    num_nodes = len(nodes)
     max_steps = config['simulation']['max_steps']
     max_time = config['simulation']['max_time']
     step_length = config['sumo']['step_length']
@@ -141,7 +140,24 @@ def main():
         "--no-step-log",
         "--no-duration-log",
     ]
-    # traci.close()
+
+    traci.start(Sumo_config)
+
+    init_time_elapsed = 0
+    while init_time_elapsed < max_time:
+        traci.simulationStep()
+        init_time_elapsed = traci.simulation.getTime()
+
+    net_path = config['net']['net_path']
+    G, G_dir, all_shortest_path_lengths, all_shortest_path_times, junc2nodes_map = build_graph(net_path,)
+    junction_list = list(junc2nodes_map.keys())
+    node2idx = {node: idx for idx, node in enumerate(sorted(G.nodes))}
+    idx2node = {idx: node for node, idx in node2idx.items()}
+
+    nodes = sorted(list(G.nodes))
+    num_nodes = len(nodes)
+    
+    traci.close()
 
     warm_up_times = [1000,]
 
@@ -165,7 +181,7 @@ def main():
             curr_pos = start_idx
             curr_node = start_node
             target_nodes = junc2nodes_map[junc_id]
-            target_node = target_nodes[np.argmin([all_shortest_path_lengths[start_node][tn] for tn in target_nodes])]
+            target_node = target_nodes[np.argmin([all_shortest_path_times[start_node][tn] for tn in target_nodes])]
             target_idx = node2idx[target_node]
             route_edges = []
             route_dirs = []
@@ -174,7 +190,7 @@ def main():
                 nb_nodes = list(G.neighbors(curr_node))  # Get up to num_actions neighbors
                 nb_node_idxs = sorted([node2idx[nb] for nb in nb_nodes])[:num_actions]
                 for nb_node_idx in nb_node_idxs:
-                    steps2dest.append(all_shortest_path_lengths[idx2node[nb_node_idx]][target_node])
+                    steps2dest.append(all_shortest_path_times[idx2node[nb_node_idx]][target_node])
                 best_dir = np.argmin(steps2dest) if steps2dest else 4
                 obs = {
                     'graph_node': curr_pos,
