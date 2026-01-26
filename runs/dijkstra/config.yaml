@@ -1,10 +1,6 @@
 agent:
   algo: dijkstra
   policy: dijkstra
-sumo:
-  delay: 0
-  traffic_scale: 1
-  step_length: 3
 fleet:
   max_speed: 5
   range: 100000000
@@ -12,10 +8,14 @@ net:
   max_degree: 4
   net_path: data/rand_grid/rand_grid.sumocfg
 simulation:
-  max_time: 15000
   max_steps: 50
-  render_mode: quiet
-  warm_up_time: 1000
+  max_time: 15000
   random_sg_pair: true
+  render_mode: human
   start_node_idx: 0
   target_junc_id: '1'
+  warm_up_time: 0
+sumo:
+  delay: 0
+  step_length: 3
+  traffic_scale: 1
