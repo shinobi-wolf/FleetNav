@@ -11,6 +11,7 @@ import gymnasium as gym
 import envs
 # from agents import get_agent
 from agents.dqn import DQNAgent
+from agents.ppo import PPOAgent
 
 def lmd_trainer(config, policy_dir, resume=False):
     """
@@ -21,7 +22,7 @@ def lmd_trainer(config, policy_dir, resume=False):
         policy_dir (str): Directory where the policy and model will be saved.
     """
     
-    agent = DQNAgent(config)
+    agent = PPOAgent(config)
 
     agent.learn(policy_dir,)
 

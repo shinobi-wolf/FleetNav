@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["-p", "a3b197ac"],
+            "args": ["-p", "c58b2299"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal",
-            "args": ["-p", "dijkstra"],
+            "args": ["-p", "c58b2299"],
             // "args": ["-p", "c75c5609"],
             "env": {
                 "PYTHONWARNINGS": "ignore"

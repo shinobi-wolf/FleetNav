@@ -1,6 +1,7 @@
 from agents.sarsa import SARSAAgent
 from agents.dijkstra import DijkstraAgent
 from agents.dqn import DQNAgent
+from agents.ppo import PPOAgent
 
 def get_agent(env, config, agent_id, **kwargs):
     """
@@ -9,7 +10,7 @@ def get_agent(env, config, agent_id, **kwargs):
     :param env: The environment instance.
     :return: An agent instance or a list of agents for multi-agent environments.
     """
-    algo = config['algo']
+    algo = config['agent']['algo']
     if algo == 'dijkstra':
         return DijkstraAgent(agent_id)
     
@@ -21,4 +22,6 @@ def get_agent(env, config, agent_id, **kwargs):
         return SARSAAgent(env, policy_path=policy_path)
     elif algo == 'dqn':
         return DQNAgent(env, policy_path=policy_path, **kwargs)
+    elif algo == 'ppo':
+        return PPOAgent(config)
         

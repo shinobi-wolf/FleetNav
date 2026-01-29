@@ -9,6 +9,7 @@ import gymnasium as gym
 import envs
 from agents import get_agent
 from agents.dqn import DQNAgent
+from agents.ppo import PPOAgent
 
 def setup_logging(mode, log_file="simulation_log.txt"):
     """
@@ -49,6 +50,8 @@ def lmd_simulator(config):
 
     if config['agent']['algo'] == 'dqn':
         agent = DQNAgent(config)
+    elif config['agent']['algo'] == 'ppo':
+        agent = PPOAgent(config)
     else:
         agent = get_agent(env, config['agent'], 0)
 

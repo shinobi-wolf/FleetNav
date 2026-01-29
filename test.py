@@ -16,9 +16,6 @@ import sumolib
 
 import envs
 from agents import get_agent
-from agents.dqn import DQNAgent
-
-INF = 100000
 
 def get_centroid(shape):
     """Calculates the center point of a shape (list of x,y tuples)."""
@@ -29,41 +26,41 @@ def get_centroid(shape):
     return np.mean(x_coords), np.mean(y_coords)
 
 def build_graph(net_path,):
-        net_path = net_path.replace('.sumocfg', '.net.xml')
-        net = sumolib.net.readNet(net_path, withPedestrianConnections=True)
-        junctions = net.getNodes()
-        edge_eps = {}
-        junc2nodes_map = defaultdict(list)
-        
-        for junction in junctions:
-            connections = junction.getConnections()
-            for connection in connections:
-                # 1. Inspect the source of the connection
-                ep = None
-                edge = None
-                dir = None
-                if connection._from.getFunction() == 'walkingarea':
-                    ep = connection._from
-                    edge = connection._to
-                    dir = 0
-                elif connection._to.getFunction() == 'walkingarea':
-                    ep = connection._to
-                    edge = connection._from
-                    dir = 1
-                if ep and edge:
-                    edge_id = edge.getID()
-                    eps = [None, None]
-                    eps[dir] = ep
-                    if edge_id not in edge_eps:
-                        edge_eps[edge_id] = {
-                            "edge": edge,
-                            "eps": eps
-                        }
-                    else:
-                        edge_eps[edge_id]["eps"][dir] = ep
-                        if len([ep for ep in edge_eps[edge_id]["eps"] if ep is not None]) > 2:
-                            print("More than 2 entry points for edge ", edge_id)
-                            raise ValueError("More than 2 entry points for edge ", edge_id)
+    net_path = net_path.replace('.sumocfg', '.net.xml')
+    net = sumolib.net.readNet(net_path, withPedestrianConnections=True)
+    junctions = net.getNodes()
+    edge_eps = {}
+    junc2nodes_map = defaultdict(list)
+    
+    for junction in junctions:
+        connections = junction.getConnections()
+        for connection in connections:
+            # 1. Inspect the source of the connection
+            ep = None
+            edge = None
+            dir = None
+            if connection._from.getFunction() == 'walkingarea':
+                ep = connection._from
+                edge = connection._to
+                dir = 0
+            elif connection._to.getFunction() == 'walkingarea':
+                ep = connection._to
+                edge = connection._from
+                dir = 1
+            if ep and edge:
+                edge_id = edge.getID()
+                eps = [None, None]
+                eps[dir] = ep
+                if edge_id not in edge_eps:
+                    edge_eps[edge_id] = {
+                        "edge": edge,
+                        "eps": eps
+                    }
+                else:
+                    edge_eps[edge_id]["eps"][dir] = ep
+                    if len([ep for ep in edge_eps[edge_id]["eps"] if ep is not None]) > 2:
+                        print("More than 2 entry points for edge ", edge_id)
+                        raise ValueError("More than 2 entry points for edge ", edge_id)
 
     G = nx.DiGraph()
     for edge_id, edge_data in edge_eps.items():
@@ -124,10 +121,7 @@ def main():
     with open(results_path, 'w') as f:
         f.write("start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges\n")
     
-    if config['agent']['algo'] == 'dqn':
-        agent = DQNAgent(config)
-    else:
-        agent = get_agent(None, config['agent'], 0)
+    agent = get_agent(None, config, 0)
 
     max_steps = config['simulation']['max_steps']
     max_time = config['simulation']['max_time']
@@ -202,8 +196,8 @@ def main():
                     'graph_node': curr_pos,
                     'target_node': int(G.nodes[target_node]['junc_id']),
                     'best_dir': best_dir,
-                    'steps2dest': np.array(steps2dest, dtype=np.float32),
-                    'sg_pair_idx': sg_idx
+                    'steps2dest': steps2dest,
+                    ''
                 }
                 action = agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx)
                 # print("Action",action)
@@ -221,7 +215,7 @@ def main():
             
             route_calc_time = time.time() - route_start_time
             route_times.append(route_calc_time)
-
+            
             if G.nodes[curr_node]['junc_id'] == G.nodes[target_node]['junc_id']:
                 for warmup_time in tqdm(warm_up_times, desc=f"    Warmup times", position=2, leave=False):
                     sim_start_time_real = time.time()
