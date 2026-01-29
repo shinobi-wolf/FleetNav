@@ -121,7 +121,6 @@ class PPOAgent():
             print(self.agent)
 
     def obs_converter(self, obs):
-        print(obs)
         steps2dest = obs['steps2dest']
         sg_pair_idx = obs['sg_pair_idx']
         flat_obs = np.concatenate((steps2dest, np.eye(self.num_sg_pairs)[sg_pair_idx]), axis=0)
