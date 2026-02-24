@@ -24,7 +24,7 @@ last_ending_params = [INF, INF]
 # Fixed static window size
 WINDOW_SIZE = 7
 
-OUTPUT_FILE = f"runs/scenario_2/results_range.csv"
+OUTPUT_FILE = f"runs/scenario_2/results_ev_1.csv"
 with open(OUTPUT_FILE, 'w') as f:
     f.write("num_evs,num_tasks,ev_range,maze_loop_percentage,maze_size,bms,timesteps,num_tasks_finished,ev_distance,drone_distance\n")
 
@@ -99,26 +99,26 @@ def main():
 
     '''SCENARIO 2'''
     jobs = []
-    for ev_range in EV_RANGE_RANGE:
-        if ev_range > last_ending_params[0]:
+    for num_evs in NUM_EVS_RANGE:
+        if num_evs > last_ending_params[0]:
             continue
         for loop_per in MAZE_LOOP_PERCENT_OPTIONS:
-            if ev_range == last_ending_params[0] and loop_per > last_ending_params[1]:
+            if num_evs == last_ending_params[0] and loop_per > last_ending_params[1]:
                 continue
             for _ in range(EPOCHS_PER_COMBO):
                 job_params = {
-                    'num_evs': random.choice(NUM_EVS_RANGE),
-                    'num_tasks': random.choice(EV_RANGE_RANGE),
-                    'ev_range': ev_range,
+                    'num_evs': num_evs,
+                    'num_tasks': random.choice(NUM_TASKS_RANGE),
+                    'ev_range': random.choice(EV_RANGE_RANGE),
                     'maze_size': random.choice(MAZE_SIZE_OPTIONS),
                     'maze_loop_percentage': loop_per,
                     'bms': False
                 }
                 jobs.append(job_params)
                 job_params = {
-                    'num_evs': random.choice(NUM_EVS_RANGE),
-                    'num_tasks': random.choice(EV_RANGE_RANGE),
-                    'ev_range': ev_range,
+                    'num_evs': num_evs,
+                    'num_tasks': random.choice(NUM_TASKS_RANGE),
+                    'ev_range': random.choice(EV_RANGE_RANGE),
                     'maze_size': random.choice(MAZE_SIZE_OPTIONS),
                     'maze_loop_percentage': loop_per,
                     'bms': True
