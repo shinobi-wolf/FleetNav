@@ -524,7 +524,7 @@ class Window(QMainWindow):
                 time.sleep(1)
         
         with open("runs/results.csv", 'a') as f:
-            f.write(f"{self.config["world"]["num_evs"]},{self.config["world"]["num_tasks"]},{self.config["ev"]["range"]},{final_frame}\n")
+            f.write(f"{self.config['world']['num_evs']},{self.config['world']['num_tasks']},{self.config['ev']['range']},{final_frame}\n")
 
 def get_color(v):
     x = v % 8

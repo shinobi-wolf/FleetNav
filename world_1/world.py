@@ -1,10 +1,10 @@
 import pandas as pd
 import networkx as nx
-from sklearn.cluster import KMeans
 import random
 import math
 from pyamaze import maze
 import tkinter as tk
+from world_1.planner import evrp_planner, mtsp_planner
 
 # Monkey-patch the 'zoomed' state to 'normal'
 tk.Tk.state = lambda self, s=None: self.wm_state('normal' if s == 'zoomed' else s)
@@ -129,50 +129,28 @@ class World:
         for t in tasks_df.values.tolist():
             task_list.append( (int(t[0]), int(t[1])) )
         self.all_tasks = task_list
-        kmeans = KMeans(n_clusters=self.num_patrols).fit(self.all_tasks)
-        task_clusters = kmeans.labels_
 
         self.completed_tasks = 0
         self.patrol_positions = [self.warehouse_pos for _ in range(self.num_patrols)]
         self.patrol_colors = [i for i in range(self.num_patrols)]
-        self.patrol_tasks = [[] for _ in range(self.num_patrols)]
-        self.active_tasks = []
         self.R_D = [self.R] * self.num_patrols
         self.R_P = [i/self.R for i in self.R_D]
-        self.patrol_paths = [[] for _ in range(self.num_patrols)]
-        self.backcost = [[] for _ in range(self.num_patrols)]
 
         # NEW: Reset distances on init
         self.total_ev_distance = 0.0
         self.total_drone_distance = 0.0
 
-        for i, t in enumerate(self.all_tasks):
-            cluster_idx = task_clusters[i]
-            self.patrol_tasks[cluster_idx].append(t)
-
-        # Assign initial paths
-        for i in range(self.num_patrols):
-            current_pos = self.patrol_positions[i]
-            closest_dist = float('inf')
-            closest_task = None
-
-            for task in self.patrol_tasks[i]:
-                try:
-                    dist = nx.shortest_path_length(self.G, source=current_pos, target=(task[0], task[1]))
-                    self.backcost[i].append(dist)
-                    if dist < closest_dist:
-                        closest_dist = dist
-                        closest_task = (task[0], task[1])
-                except nx.NetworkXNoPath:
-                    continue
-
-            self.active_tasks.append(closest_task)
-            if closest_task is not None and 2*(closest_dist * edge_weight) <= self.R:
-                self.patrol_paths[i] = nx.shortest_path(
-                    self.G, source=current_pos, target=closest_task
-                )[1:]
-            else:
-                self.patrol_paths[i] = []
+        # Task assignment & sequencing (delegated to planner)
+        self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = (
+            # mtsp_planner(
+            #     self.all_tasks, self.num_patrols, self.patrol_positions,
+            #     self.G, edge_weight, self.R
+            # )
+            evrp_planner(
+                self.all_tasks, self.num_patrols, self.patrol_positions,
+                self.G, edge_weight, self.R, self.warehouse_pos
+            )
+        )
 
         self.drone_positions = []
         self.drone_bases = []

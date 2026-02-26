@@ -6,9 +6,10 @@ world:
   num_base_stations: 4
   maze_loop_percentage: 10
   maze_size: 10
+  bms: true
 
 ev:
-  range: 30000
+  range: 7000
 
 uav:
   range: 3000
