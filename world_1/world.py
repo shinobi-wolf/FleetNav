@@ -1,10 +1,11 @@
+import numpy as np
 import pandas as pd
 import networkx as nx
 import random
 import math
 from pyamaze import maze
 import tkinter as tk
-from world_1.planner import evrp_planner, mtsp_planner
+from world_1.planner import evrp_planner, mtsp_planner, mtsp_planner_recorded, evrp_planner_recorded
 
 # Monkey-patch the 'zoomed' state to 'normal'
 tk.Tk.state = lambda self, s=None: self.wm_state('normal' if s == 'zoomed' else s)
@@ -14,6 +15,8 @@ def _distance(p1, p2):
 
 def generate_df_maze(rows=20, cols=20, lp=80):
     # Create a Pyamaze maze
+    random.seed(42)
+    np.random.seed(42)
     m = maze(rows, cols)
     m.CreateMaze(loopPercent=lp)  # No loops to match a grid-like maze
 
@@ -57,6 +60,8 @@ class World:
 
         self.max_row = self.df_maze['row'].max()
         self.max_col = self.df_maze['col'].max()
+        self.maze_loop_percentage = config["world"]["maze_loop_percentage"]
+        self.maze_size = config["world"]["maze_size"]
         self.G = self._build_graph()
 
         self.num_tasks = config["world"]["num_tasks"]
@@ -141,16 +146,23 @@ class World:
         self.total_drone_distance = 0.0
 
         # Task assignment & sequencing (delegated to planner)
-        self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = (
-            # mtsp_planner(
-            #     self.all_tasks, self.num_patrols, self.patrol_positions,
-            #     self.G, edge_weight, self.R
-            # )
-            evrp_planner(
-                self.all_tasks, self.num_patrols, self.patrol_positions,
-                self.G, edge_weight, self.R, self.warehouse_pos
-            )
-        )
+        # self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = (
+        #     # mtsp_planner(
+        #     #     self.all_tasks, self.num_patrols, self.patrol_positions,
+        #     #     self.G, edge_weight, self.R
+        #     # )
+        #     evrp_planner(
+        #         self.all_tasks, self.num_patrols, self.patrol_positions,
+        #         self.G, edge_weight, self.R, self.warehouse_pos
+        #     )
+        # )
+        # self.all_tasks, self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = mtsp_planner_recorded(
+        #         self.num_patrols, self.num_tasks, self.R, self.maze_loop_percentage, self.maze_size, self.G, self.warehouse_pos,
+        #         edge_weight)
+        self.all_tasks, self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = evrp_planner_recorded(
+                self.num_patrols, self.num_tasks, self.R, self.maze_loop_percentage, self.maze_size, self.G, self.warehouse_pos,
+                edge_weight)
+        
 
         self.drone_positions = []
         self.drone_bases = []
@@ -361,15 +373,12 @@ class World:
                     closest_task = None
                     closest_task_idx = None
                     current_pos = self.patrol_positions[i]
-                    for idx, task in enumerate(self.patrol_tasks[i]):
-                        try:
-                            dist = nx.shortest_path_length(self.G, source=current_pos, target=(task[0], task[1]))
-                            if dist < closest_dist:
-                                closest_dist = dist
-                                closest_task = (task[0], task[1])
-                                closest_task_idx = idx
-                        except nx.NetworkXNoPath:
-                            continue
+                    if self.patrol_tasks[i]:
+                        task = self.patrol_tasks[i][0]
+                        dist = nx.shortest_path_length(self.G, source=current_pos, target=(task[0], task[1]))
+                        closest_dist = dist
+                        closest_task = (task[0], task[1])
+                        closest_task_idx = 0
 
                     if closest_task is not None and (closest_dist*edge_weight)+(self.backcost[i][closest_task_idx]*edge_weight) <= self.R_D[i]:
                         self.patrol_paths[i] = nx.shortest_path(self.G, source=current_pos, target=closest_task)[1:]

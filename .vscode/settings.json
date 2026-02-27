@@ -1,0 +1,10 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "chat.tools.terminal.autoApprove": {
+        "/^python3 -c \"\nimport pandas as pd\ndf1 = pd\\.read_csv\\('/home/shinobi-owl/PhD/battery/IROS_2026/DroneSim/runs/iros_26/results_mtsp_v_evrp\\.csv', sep=';'\\)\nprint\\('Non-BMS cols:', df1\\.columns\\.tolist\\(\\)\\)\nprint\\('Non-BMS planners:', df1\\['planner'\\]\\.unique\\(\\)\\)\nprint\\('Non-BMS num_evs:', sorted\\(df1\\['num_evs'\\]\\.unique\\(\\)\\)\\)\nprint\\('Non-BMS maze_loop_percentage:', sorted\\(df1\\['maze_loop_percentage'\\]\\.unique\\(\\)\\)\\)\n\"\n$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

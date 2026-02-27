@@ -9,6 +9,8 @@ sys.path = [p for p in sys.path if not p.endswith('RoutingBlocks')]
 import networkx as nx
 import routingblocks as rb
 from sklearn.cluster import KMeans
+import pandas as pd
+import numpy as np
 
 
 def mtsp_planner(all_tasks, num_patrols, patrol_positions, G, edge_weight, R):
@@ -83,167 +85,7 @@ def mtsp_planner(all_tasks, num_patrols, patrol_positions, G, edge_weight, R):
 
     return patrol_tasks, backcost, active_tasks, patrol_paths
 
-# def mtsp_planner_1(all_tasks, num_patrols, patrol_positions, G, edge_weight, R, warehouse_pos):
-#     """
-#     EVRP planner that assigns and sequences tasks while respecting battery
-#     constraints and using the warehouse as the sole charging station.
 
-#     Tasks are first partitioned among patrols via KMeans clustering (same as
-#     mtsp_planner).  Within each patrol the tasks are then ordered using a
-#     greedy nearest-neighbour heuristic:
-
-#         while unvisited tasks remain:
-#             1. Among all unvisited tasks, find the nearest one from the
-#                current position such that the EV can reach it AND still
-#                return to the warehouse on its remaining battery.
-#             2. If such a task exists  -> visit it (update position & battery).
-#             3. If no feasible task    -> return to warehouse, recharge to
-#                full, and retry from step 1.
-#             4. If after a fresh recharge no task is feasible, the remaining
-#                tasks are unreachable within range and are dropped.
-
-#     The ordered task list is returned so that the parallel ``backcost`` array
-#     (warehouse-to-task distance for each task) is aligned with the visit
-#     sequence, giving the runtime ``lmd_simulate`` the best ordering to work
-#     with.
-
-#     Parameters
-#     ----------
-#     all_tasks : list of (int, int)
-#         All task positions sampled from the maze.
-#     num_patrols : int
-#         Number of patrol vehicles (EVs).
-#     patrol_positions : list of (int, int)
-#         Current position of each patrol (typically the warehouse at init).
-#     G : nx.Graph
-#         The maze graph.
-#     edge_weight : float
-#         Cost multiplier per graph edge.
-#     R : float
-#         Full battery range of an EV.
-#     warehouse_pos : (int, int)
-#         The warehouse / depot position used as the charging station.
-
-#     Returns
-#     -------
-#     patrol_tasks : list of list of (int, int)
-#         Tasks assigned to each patrol, ordered in the planned visit sequence.
-#     backcost : list of list of float
-#         For each task in patrol_tasks[i], the shortest-path distance from the
-#         warehouse to that task (= return cost on an undirected graph).
-#     active_tasks : list of (int, int) or None
-#         The first target task selected for each patrol.
-#     patrol_paths : list of list of (int, int)
-#         The initial shortest path (excluding start node) for each patrol.
-#     """
-
-#     # --- 1. Cluster tasks among patrols (spatial partitioning) -------------
-#     kmeans = KMeans(n_clusters=num_patrols).fit(all_tasks)
-#     task_clusters = kmeans.labels_
-
-#     raw_tasks = [[] for _ in range(num_patrols)]
-#     for i, t in enumerate(all_tasks):
-#         raw_tasks[task_clusters[i]].append(t)
-
-#     # --- 2. Pre-compute warehouse ↔ task distances -------------------------
-#     #     Cache shortest-path lengths to avoid redundant computations.
-#     _dist_cache = {}
-
-#     def _sp_length(src, dst):
-#         key = (src, dst)
-#         if key not in _dist_cache:
-#             try:
-#                 _dist_cache[key] = nx.shortest_path_length(G, source=src, target=dst)
-#             except nx.NetworkXNoPath:
-#                 _dist_cache[key] = float('inf')
-#         return _dist_cache[key]
-
-#     # --- 3. Greedy nearest-neighbour sequencing per patrol ------------------
-#     patrol_tasks = [[] for _ in range(num_patrols)]
-#     backcost = [[] for _ in range(num_patrols)]
-#     active_tasks = []
-#     patrol_paths = [[] for _ in range(num_patrols)]
-
-#     for i in range(num_patrols):
-#         remaining = list(raw_tasks[i])
-#         current_pos = patrol_positions[i]  # starts at warehouse
-#         remaining_battery = R
-#         ordered_tasks = []
-#         ordered_backcost = []
-
-#         while remaining:
-#             # Find the nearest feasible task:
-#             #   feasible = can reach task AND return to warehouse afterwards
-#             best_task = None
-#             best_dist = float('inf')
-#             best_return = 0.0
-
-#             for task in remaining:
-#                 d_to_task = _sp_length(current_pos, (task[0], task[1]))
-#                 d_task_to_wh = _sp_length((task[0], task[1]), warehouse_pos)
-
-#                 total_cost = (d_to_task + d_task_to_wh) * edge_weight
-#                 if total_cost <= remaining_battery and d_to_task < best_dist:
-#                     best_dist = d_to_task
-#                     best_task = task
-#                     best_return = d_task_to_wh
-
-#             if best_task is not None:
-#                 # Visit this task
-#                 ordered_tasks.append(best_task)
-#                 ordered_backcost.append(best_return)  # warehouse ↔ task
-#                 remaining_battery -= best_dist * edge_weight
-#                 current_pos = (best_task[0], best_task[1])
-#                 remaining.remove(best_task)
-#             else:
-#                 # No feasible task from current position – return to warehouse
-#                 # and recharge.
-#                 d_to_wh = _sp_length(current_pos, warehouse_pos)
-#                 if d_to_wh * edge_weight > remaining_battery:
-#                     # Cannot even reach the warehouse – drop remaining tasks
-#                     break
-
-#                 current_pos = warehouse_pos
-#                 remaining_battery = R
-
-#                 # After recharging, check if ANY remaining task is reachable
-#                 any_feasible = False
-#                 for task in remaining:
-#                     d_to_task = _sp_length(warehouse_pos, (task[0], task[1]))
-#                     d_task_to_wh = _sp_length((task[0], task[1]), warehouse_pos)
-#                     if (d_to_task + d_task_to_wh) * edge_weight <= R:
-#                         any_feasible = True
-#                         break
-
-#                 if not any_feasible:
-#                     # Remaining tasks are unreachable within range – drop them
-#                     break
-
-#         patrol_tasks[i] = ordered_tasks
-#         backcost[i] = ordered_backcost
-
-#         # --- 4. Set the initial active task and path -----------------------
-#         if ordered_tasks:
-#             first_task = ordered_tasks[0]
-#             start_pos = patrol_positions[i]
-#             d = _sp_length(start_pos, (first_task[0], first_task[1]))
-#             d_ret = _sp_length((first_task[0], first_task[1]), warehouse_pos)
-
-#             if (d + d_ret) * edge_weight <= R:
-#                 try:
-#                     patrol_paths[i] = nx.shortest_path(
-#                         G, source=start_pos, target=(first_task[0], first_task[1])
-#                     )[1:]
-#                 except nx.NetworkXNoPath:
-#                     patrol_paths[i] = []
-#                 active_tasks.append((first_task[0], first_task[1]))
-#             else:
-#                 patrol_paths[i] = []
-#                 active_tasks.append(None)
-#         else:
-#             active_tasks.append(None)
-
-#     return patrol_tasks, backcost, active_tasks, patrol_paths
 
 def evrp_planner(all_tasks, num_patrols, patrol_positions, G, edge_weight, R, warehouse_pos,
                  alns_iterations=200):
@@ -638,3 +480,190 @@ def evrp_planner(all_tasks, num_patrols, patrol_positions, G, edge_weight, R, wa
     # print("="*60 + "\n")
 
     return patrol_tasks, backcost_out, active_tasks, patrol_paths
+
+def mtsp_planner_recorded(num_patrols, num_tasks, R, maze_loop_percentage, maze_size, G, warehouse_pos, edge_weight=50):
+    """
+    Replay a previously-recorded MTSP solution from the CSV instead of
+    re-running the planner.  Reads ``task_order`` from
+    ``runs/iros_26/results_mtsp_v_evrp.csv``, filters out warehouse
+    visits, and recomputes backcost / active_tasks / patrol_paths so
+    that ``lmd_simulate`` works identically to a live planner call.
+
+    Returns
+    -------
+    all_tasks, patrol_tasks, backcost, active_tasks, patrol_paths
+        Same 5-tuple that ``world.py`` expects.
+    """
+    mtsp_df = pd.read_csv("runs/iros_26/results_mtsp_v_evrp_reachable.csv", sep=";")
+    row = mtsp_df[
+        (mtsp_df['maze_loop_percentage'] == maze_loop_percentage) &
+        (mtsp_df['maze_size'] == maze_size) &
+        (mtsp_df['num_tasks'] == num_tasks) &
+        (mtsp_df['num_evs'] == num_patrols) &
+        (mtsp_df['ev_range'] == R) &
+        (mtsp_df['planner'] == 'mtsp')
+    ].iloc[0]
+
+    recorded_routes = eval(row['task_order'])
+
+    # ----- Build patrol_tasks (real tasks only, no warehouse) -----
+    patrol_tasks = [[] for _ in range(num_patrols)]
+    all_tasks_set = set()
+
+    for i in range(min(len(recorded_routes), num_patrols)):
+        for task in recorded_routes[i]:
+            t = (int(task[0]), int(task[1]))
+            if t != warehouse_pos:
+                patrol_tasks[i].append(t)
+                all_tasks_set.add(t)
+
+    # Merge any surplus routes into the smallest patrol bucket
+    for i in range(num_patrols, len(recorded_routes)):
+        min_idx = min(range(num_patrols), key=lambda x: len(patrol_tasks[x]))
+        for task in recorded_routes[i]:
+            t = (int(task[0]), int(task[1]))
+            if t != warehouse_pos:
+                patrol_tasks[min_idx].append(t)
+                all_tasks_set.add(t)
+
+    all_tasks = list(all_tasks_set)
+
+    # ----- Compute backcost (hops from each task back to warehouse) -----
+    backcost = [[] for _ in range(num_patrols)]
+    active_tasks = []
+    patrol_paths = [[] for _ in range(num_patrols)]
+    patrol_positions = [warehouse_pos] * num_patrols
+
+    for i in range(num_patrols):
+        bc = []
+        for task in patrol_tasks[i]:
+            try:
+                raw = nx.shortest_path_length(G, source=task, target=warehouse_pos)
+            except nx.NetworkXNoPath:
+                raw = 10**9
+            bc.append(raw)
+        backcost[i] = bc
+
+        # ----- First target + initial path (same logic as mtsp_planner) -----
+        if patrol_tasks[i]:
+            first_task = patrol_tasks[i][0]
+            current_pos = patrol_positions[i]
+            try:
+                dist_to_task = nx.shortest_path_length(
+                    G, source=current_pos, target=first_task
+                )
+            except nx.NetworkXNoPath:
+                dist_to_task = 10**9
+
+            dist_back = bc[0] if bc else 10**9
+
+            if (dist_to_task + dist_back) * edge_weight <= R:
+                try:
+                    patrol_paths[i] = nx.shortest_path(
+                        G, source=current_pos, target=first_task
+                    )[1:]
+                except nx.NetworkXNoPath:
+                    patrol_paths[i] = []
+                active_tasks.append(first_task)
+            else:
+                active_tasks.append(None)
+                patrol_paths[i] = []
+        else:
+            active_tasks.append(None)
+            patrol_paths[i] = []
+
+    return all_tasks, patrol_tasks, backcost, active_tasks, patrol_paths
+
+def evrp_planner_recorded(num_patrols, num_tasks, R, maze_loop_percentage, maze_size, G, warehouse_pos, edge_weight=50):
+    """
+    Replay a previously-recorded MTSP solution from the CSV instead of
+    re-running the planner.  Reads ``task_order`` from
+    ``runs/iros_26/results_mtsp_v_evrp.csv``, filters out warehouse
+    visits, and recomputes backcost / active_tasks / patrol_paths so
+    that ``lmd_simulate`` works identically to a live planner call.
+
+    Returns
+    -------
+    all_tasks, patrol_tasks, backcost, active_tasks, patrol_paths
+        Same 5-tuple that ``world.py`` expects.
+    """
+    mtsp_df = pd.read_csv("runs/iros_26/results_mtsp_v_evrp_reachable.csv", sep=";")
+    row = mtsp_df[
+        (mtsp_df['maze_loop_percentage'] == maze_loop_percentage) &
+        (mtsp_df['maze_size'] == maze_size) &
+        (mtsp_df['num_tasks'] == num_tasks) &
+        (mtsp_df['num_evs'] == num_patrols) &
+        (mtsp_df['ev_range'] == R) &
+        (mtsp_df['planner'] == 'evrp')
+    ].iloc[0]
+
+    recorded_routes = eval(row['task_order'])
+
+    # ----- Build patrol_tasks (real tasks only, no warehouse) -----
+    patrol_tasks = [[] for _ in range(num_patrols)]
+    all_tasks_set = set()
+
+    for i in range(min(len(recorded_routes), num_patrols)):
+        for task in recorded_routes[i]:
+            t = (int(task[0]), int(task[1]))
+            if t != warehouse_pos:
+                patrol_tasks[i].append(t)
+                all_tasks_set.add(t)
+
+    # Merge any surplus routes into the smallest patrol bucket
+    for i in range(num_patrols, len(recorded_routes)):
+        min_idx = min(range(num_patrols), key=lambda x: len(patrol_tasks[x]))
+        for task in recorded_routes[i]:
+            t = (int(task[0]), int(task[1]))
+            if t != warehouse_pos:
+                patrol_tasks[min_idx].append(t)
+                all_tasks_set.add(t)
+
+    all_tasks = list(all_tasks_set)
+
+    # ----- Compute backcost (hops from each task back to warehouse) -----
+    backcost = [[] for _ in range(num_patrols)]
+    active_tasks = []
+    patrol_paths = [[] for _ in range(num_patrols)]
+    patrol_positions = [warehouse_pos] * num_patrols
+
+    for i in range(num_patrols):
+        bc = []
+        for task in patrol_tasks[i]:
+            try:
+                raw = nx.shortest_path_length(G, source=task, target=warehouse_pos)
+            except nx.NetworkXNoPath:
+                raw = 10**9
+            bc.append(raw)
+        backcost[i] = bc
+
+        # ----- First target + initial path (same logic as mtsp_planner) -----
+        if patrol_tasks[i]:
+            first_task = patrol_tasks[i][0]
+            current_pos = patrol_positions[i]
+            try:
+                dist_to_task = nx.shortest_path_length(
+                    G, source=current_pos, target=first_task
+                )
+            except nx.NetworkXNoPath:
+                dist_to_task = 10**9
+
+            dist_back = bc[0] if bc else 10**9
+
+            if (dist_to_task + dist_back) * edge_weight <= R:
+                try:
+                    patrol_paths[i] = nx.shortest_path(
+                        G, source=current_pos, target=first_task
+                    )[1:]
+                except nx.NetworkXNoPath:
+                    patrol_paths[i] = []
+                active_tasks.append(first_task)
+            else:
+                active_tasks.append(None)
+                patrol_paths[i] = []
+        else:
+            active_tasks.append(None)
+            patrol_paths[i] = []
+
+    return all_tasks, patrol_tasks, backcost, active_tasks, patrol_paths
+
