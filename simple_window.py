@@ -24,7 +24,7 @@ last_ending_params = [INF, INF]
 # Fixed static window size
 WINDOW_SIZE = 7
 
-OUTPUT_FILE = f"runs/iros_26/results_evrp_reachable_bms.csv"
+OUTPUT_FILE = f"runs/iros_26/results_mtsp_latest.csv"
 with open(OUTPUT_FILE, 'w') as f:
     f.write("num_evs,num_tasks,ev_range,maze_loop_percentage,maze_size,bms,timesteps,num_tasks_finished,ev_distance,drone_distance\n")
 
@@ -67,6 +67,15 @@ def main():
     for loop_per in MAZE_LOOP_PERCENT_OPTIONS:
         for ev_range in EV_RANGE_RANGE:
             for num_tasks in NUM_TASKS_RANGE:
+                job_params = {
+                    'num_evs': 4,
+                    'num_tasks': num_tasks,
+                    'ev_range': ev_range,
+                    'maze_size': 35,
+                    'maze_loop_percentage': loop_per,
+                    'bms': False
+                }
+                jobs.append(job_params)
                 job_params = {
                     'num_evs': 4,
                     'num_tasks': num_tasks,

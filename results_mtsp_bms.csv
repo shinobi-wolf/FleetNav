@@ -1,0 +1,2 @@
+num_evs,num_tasks,ev_range,maze_loop_percentage,maze_size,bms_enabled,final_frame,num_tasks_completed,ev_distance_traveled,drone_distance_traveled
+3,15,800,60,10,1,43,15,94.0,113.96508501505154

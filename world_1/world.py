@@ -129,11 +129,16 @@ class World:
 
     def initialize(self, edge_weight):
         self.edge_weight = edge_weight
-        tasks_df = self.df_maze.sample(self.num_tasks)[['row', 'col']]
-        task_list = []
-        for t in tasks_df.values.tolist():
-            task_list.append( (int(t[0]), int(t[1])) )
-        self.all_tasks = task_list
+        task_candidates = []
+        nodes = list(self.G.nodes())
+        for n in nodes:
+            if n == self.warehouse_pos:
+                continue
+            if nx.shortest_path_length(self.G, source=self.warehouse_pos, target=n) * edge_weight * 2 <= self.R:
+                task_candidates.append(n)
+        if len(task_candidates) < self.num_tasks:
+            self.num_tasks = len(task_candidates)
+        self.all_tasks = random.sample(task_candidates, self.num_tasks)
 
         self.completed_tasks = 0
         self.patrol_positions = [self.warehouse_pos for _ in range(self.num_patrols)]
@@ -146,23 +151,30 @@ class World:
         self.total_drone_distance = 0.0
 
         # Task assignment & sequencing (delegated to planner)
-        # self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = (
-        #     # mtsp_planner(
-        #     #     self.all_tasks, self.num_patrols, self.patrol_positions,
-        #     #     self.G, edge_weight, self.R
-        #     # )
-        #     evrp_planner(
-        #         self.all_tasks, self.num_patrols, self.patrol_positions,
-        #         self.G, edge_weight, self.R, self.warehouse_pos
-        #     )
-        # )
+        self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = (
+            mtsp_planner(
+                self.all_tasks, self.num_patrols, self.patrol_positions,
+                self.G, edge_weight, self.R
+            )
+            # evrp_planner(
+            #     self.all_tasks, self.num_patrols, self.patrol_positions,
+            #     self.G, edge_weight, self.R, self.warehouse_pos
+            # )
+        )
         # self.all_tasks, self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = mtsp_planner_recorded(
         #         self.num_patrols, self.num_tasks, self.R, self.maze_loop_percentage, self.maze_size, self.G, self.warehouse_pos,
         #         edge_weight)
-        self.all_tasks, self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = evrp_planner_recorded(
-                self.num_patrols, self.num_tasks, self.R, self.maze_loop_percentage, self.maze_size, self.G, self.warehouse_pos,
-                edge_weight)
-        
+        # self.all_tasks, self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = evrp_planner_recorded(
+        #         self.num_patrols, self.num_tasks, self.R, self.maze_loop_percentage, self.maze_size, self.G, self.warehouse_pos,
+        #         edge_weight)
+
+        # If bms is enabled, remove warehouse from tasks
+        if self.bms:
+            for i in range(len(self.patrol_tasks)):
+                if self.warehouse_pos in self.patrol_tasks[i]:
+                    idx = self.patrol_tasks[i].index(self.warehouse_pos)
+                    self.patrol_tasks[i].pop(idx)
+                    self.backcost[i].pop(idx)      
 
         self.drone_positions = []
         self.drone_bases = []
@@ -182,7 +194,7 @@ class World:
         self.tasks_completed_flag = False
         self.world_state["tasks_completed_flag"] = self.tasks_completed_flag
 
-        self._update_world_state()
+        # self._update_world_state()
         # print("-----------------------------------------\n\n")
         # print("Clusters", self.patrol_tasks)
         # self.print_world_state()
@@ -328,7 +340,7 @@ class World:
     def lmd_simulate(self):
         edge_weight = self.edge_weight
         for i in range(self.num_patrols):
-            if not self.patrol_paths[i] or self.R_D[i] <= 0:
+            if not self.patrol_paths[i] or self.R_D[i] <= 0 or self.recharge_request[i] == 1:
                 continue
 
             # Keep old position for distance calc
@@ -360,8 +372,8 @@ class World:
                         final_task_idx = self.patrol_tasks[i].index(final_task)
                         self.patrol_tasks[i].remove(final_task)
                         self.backcost[i].pop(final_task_idx)
-                        if random.random() < 0.9:
-                            self.recharge_request[i] = 1
+                        # if random.random() < 0.9:
+                        #     self.recharge_request[i] = 1
                     elif final_task == self.warehouse_pos:
                         self.R_D[i] = self.R
                         self.R_P[i] = 1
@@ -380,11 +392,23 @@ class World:
                         closest_task = (task[0], task[1])
                         closest_task_idx = 0
 
-                    if closest_task is not None and (closest_dist*edge_weight)+(self.backcost[i][closest_task_idx]*edge_weight) <= self.R_D[i]:
-                        self.patrol_paths[i] = nx.shortest_path(self.G, source=current_pos, target=closest_task)[1:]
-                        self.active_tasks[i] = closest_task
-                        continue
-
+                    if self.bms:
+                        idle_drone_flag = False
+                        for d_idx in range(len(self.drone_positions)):
+                            if self.drone_status[d_idx] == 0 and self.drone_battery[d_idx] > 0:
+                                self.recharge_request[i] = 1
+                                idle_drone_flag = True
+                                break
+                        if closest_task is not None and ((closest_dist*edge_weight)+(self.backcost[i][closest_task_idx]*edge_weight) <= self.R_D[i] or idle_drone_flag):
+                            self.patrol_paths[i] = nx.shortest_path(self.G, source=current_pos, target=closest_task)[1:]
+                            self.active_tasks[i] = closest_task
+                            continue
+                    else:
+                        if closest_task is not None and (closest_dist*edge_weight)+(self.backcost[i][closest_task_idx]*edge_weight) <= self.R_D[i]:
+                            self.patrol_paths[i] = nx.shortest_path(self.G, source=current_pos, target=closest_task)[1:]
+                            self.active_tasks[i] = closest_task
+                            continue
+                    
                     # Otherwise try warehouse
                     try:
                         dist_to_wh = nx.shortest_path_length(self.G, source=current_pos, target=self.warehouse_pos)
