@@ -6,6 +6,7 @@ world:
   maze_loop_percentage: 50
   maze_size: 35
   bms: true
+  algo: "mtsp"
 
 ev:
   range: 3000

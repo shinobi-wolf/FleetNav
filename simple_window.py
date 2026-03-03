@@ -14,7 +14,7 @@ NUM_TASKS_RANGE     = list(range(20, 31))        # e.g., 20 to 100
 EV_RANGE_RANGE      = range(3000, 4501, 100)  # e.g., 500 to 3000 in steps of 10
 
 # Maze parameters (randomized each epoch)
-MAZE_SIZE_OPTIONS         = [35]#list(range(35, 51))
+MAZE_SIZE_OPTIONS         = list(range(35, 51))
 MAZE_LOOP_PERCENT_OPTIONS = list(range(50, 91, 5))
 
 EPOCHS_PER_COMBO = 50
@@ -24,9 +24,9 @@ last_ending_params = [INF, INF]
 # Fixed static window size
 WINDOW_SIZE = 7
 
-OUTPUT_FILE = f"runs/iros_26/results_mtsp_latest.csv"
+OUTPUT_FILE = f"runs/iros_26/results_nrlp.csv"
 with open(OUTPUT_FILE, 'w') as f:
-    f.write("num_evs,num_tasks,ev_range,maze_loop_percentage,maze_size,bms,timesteps,num_tasks_finished,ev_distance,drone_distance\n")
+    f.write("algo,num_evs,num_tasks,ev_range,maze_loop_percentage,maze_size,bms,timesteps,num_tasks_finished,ev_distance,drone_distance\n")
 
 # ------------------ JOB WRAPPER ------------------
 
@@ -46,7 +46,8 @@ def run_simulation_job(params):
             "num_tasks": params['num_tasks'],
             "num_uavs_per_bs": 2,
             "num_base_stations": 4,
-            "bms": params['bms']
+            "bms": params['bms'],
+            "algo": params['algo']
         },
         "ev": {
             "range": params['ev_range']
@@ -64,25 +65,49 @@ def run_simulation_job(params):
 
 def main():
     jobs = []
+
     for loop_per in MAZE_LOOP_PERCENT_OPTIONS:
         for ev_range in EV_RANGE_RANGE:
-            for num_tasks in NUM_TASKS_RANGE:
+            for num_evs in NUM_EVS_RANGE:
+            # for num_tasks in NUM_TASKS_RANGE:
                 job_params = {
-                    'num_evs': 4,
-                    'num_tasks': num_tasks,
+                    'num_evs': num_evs,
+                    'num_tasks': 20,
                     'ev_range': ev_range,
-                    'maze_size': 35,
+                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
                     'maze_loop_percentage': loop_per,
-                    'bms': False
+                    'bms': False,
+                    'algo': "mtsp"
                 }
                 jobs.append(job_params)
                 job_params = {
-                    'num_evs': 4,
-                    'num_tasks': num_tasks,
+                    'num_evs': num_evs,
+                    'num_tasks': 20,
                     'ev_range': ev_range,
-                    'maze_size': 35,
+                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
                     'maze_loop_percentage': loop_per,
-                    'bms': True
+                    'bms': True,
+                    'algo': "mtsp"
+                }
+                jobs.append(job_params)
+                job_params = {
+                    'num_evs': num_evs,
+                    'num_tasks': 20,
+                    'ev_range': ev_range,
+                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
+                    'maze_loop_percentage': loop_per,
+                    'bms': False,
+                    'algo': "evrp"
+                }
+                jobs.append(job_params)
+                job_params = {
+                    'num_evs': num_evs,
+                    'num_tasks': 20,
+                    'ev_range': ev_range,
+                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
+                    'maze_loop_percentage': loop_per,
+                    'bms': True,
+                    'algo': "evrp"
                 }
                 jobs.append(job_params)
 

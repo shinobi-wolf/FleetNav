@@ -48,6 +48,7 @@ def startup(config, output_file):
 
     with open(output_file, "a") as f:
         f.write(
+            f"{config['world']['algo']},"
             f"{config['world']['num_evs']},"
             f"{config['world']['num_tasks']},"
             f"{config['ev']['range']},"

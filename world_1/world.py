@@ -63,6 +63,7 @@ class World:
         self.maze_loop_percentage = config["world"]["maze_loop_percentage"]
         self.maze_size = config["world"]["maze_size"]
         self.G = self._build_graph()
+        self.algo = config["world"].get("algo", "mtsp")
 
         self.num_tasks = config["world"]["num_tasks"]
         self.num_patrols = config['world']['num_evs']
@@ -151,16 +152,16 @@ class World:
         self.total_drone_distance = 0.0
 
         # Task assignment & sequencing (delegated to planner)
-        self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = (
-            mtsp_planner(
+        if self.algo == "mtsp":
+            self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = mtsp_planner(
+                    self.all_tasks, self.num_patrols, self.patrol_positions,
+                    self.G, edge_weight, self.R
+                )
+        else:
+            self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = evrp_planner(
                 self.all_tasks, self.num_patrols, self.patrol_positions,
-                self.G, edge_weight, self.R
+                self.G, edge_weight, self.R, self.warehouse_pos
             )
-            # evrp_planner(
-            #     self.all_tasks, self.num_patrols, self.patrol_positions,
-            #     self.G, edge_weight, self.R, self.warehouse_pos
-            # )
-        )
         # self.all_tasks, self.patrol_tasks, self.backcost, self.active_tasks, self.patrol_paths = mtsp_planner_recorded(
         #         self.num_patrols, self.num_tasks, self.R, self.maze_loop_percentage, self.maze_size, self.G, self.warehouse_pos,
         #         edge_weight)

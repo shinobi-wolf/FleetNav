@@ -8,9 +8,112 @@ sys.path = [p for p in sys.path if not p.endswith('RoutingBlocks')]
 
 import networkx as nx
 import routingblocks as rb
+from ortools.constraint_solver import routing_enums_pb2, pywrapcp
 from sklearn.cluster import KMeans
 import pandas as pd
 import numpy as np
+
+
+def _nearest_neighbor_tsp(start, tasks, G):
+    """
+    Order *tasks* by a nearest-neighbour heuristic starting from *start*.
+
+    Uses shortest-path lengths on *G* as distances.  Returns a new list
+    with the same elements as *tasks* but in visit order.
+    """
+    if len(tasks) <= 1:
+        return list(tasks)
+
+    # Pre-compute all pairwise distances we'll need
+    nodes = [start] + list(tasks)
+    dist = {}
+    for src in nodes:
+        lengths = nx.single_source_shortest_path_length(G, src)
+        for dst in nodes:
+            dist[(src, dst)] = lengths.get(dst, 10**9)
+
+    ordered = []
+    remaining = set(range(len(tasks)))
+    current = start
+    for _ in range(len(tasks)):
+        best_idx = min(remaining, key=lambda j: dist[(current, tasks[j])])
+        ordered.append(tasks[best_idx])
+        current = tasks[best_idx]
+        remaining.remove(best_idx)
+    return ordered
+
+def or_tsp(start, tasks, G):
+    """
+    Order *tasks* optimally using Google OR-Tools TSP solver, starting
+    from *start*.
+
+    Builds a distance matrix from shortest-path lengths on *G*, solves
+    an open TSP (Hamiltonian path from a fixed depot), and returns the
+    tasks in visit order.
+
+    Falls back to ``_nearest_neighbor_tsp`` if OR-Tools finds no solution.
+    """
+    if len(tasks) <= 1:
+        return list(tasks)
+
+    # --- Build distance matrix ---
+    # Index 0 = start (depot), indices 1..n = tasks
+    nodes = [start] + list(tasks)
+    n = len(nodes)
+
+    # Pre-compute shortest-path lengths from each node
+    sp_lengths = {}
+    for src in nodes:
+        sp_lengths[src] = nx.single_source_shortest_path_length(G, src)
+
+    dist_matrix = []
+    for i in range(n):
+        row = []
+        for j in range(n):
+            if i == j:
+                row.append(0)
+            else:
+                row.append(sp_lengths[nodes[i]].get(nodes[j], 10**9))
+        dist_matrix.append(row)
+
+    # --- OR-Tools routing model ---
+    manager = pywrapcp.RoutingIndexManager(n, 1, 0)  # 1 vehicle, depot=0
+    routing = pywrapcp.RoutingModel(manager)
+
+    def distance_callback(from_index, to_index):
+        from_node = manager.IndexToNode(from_index)
+        to_node = manager.IndexToNode(to_index)
+        return dist_matrix[from_node][to_node]
+
+    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+
+    # Search parameters
+    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+    search_parameters.first_solution_strategy = (
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+    )
+    search_parameters.local_search_metaheuristic = (
+        routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+    )
+    search_parameters.time_limit.FromSeconds(2)
+
+    solution = routing.SolveWithParameters(search_parameters)
+
+    if solution is None:
+        # Fallback to nearest-neighbour
+        return _nearest_neighbor_tsp(start, tasks, G)
+
+    # --- Extract visit order (skip depot at index 0) ---
+    ordered = []
+    index = routing.Start(0)
+    while not routing.IsEnd(index):
+        node = manager.IndexToNode(index)
+        if node != 0:  # skip depot
+            ordered.append(tasks[node - 1])
+        index = solution.Value(routing.NextVar(index))
+
+    return ordered
 
 
 def mtsp_planner(all_tasks, num_patrols, patrol_positions, G, edge_weight, R):
@@ -57,28 +160,29 @@ def mtsp_planner(all_tasks, num_patrols, patrol_positions, G, edge_weight, R):
         cluster_idx = task_clusters[i]
         patrol_tasks[cluster_idx].append(t)
 
-    # For each patrol, find the closest task and build the initial path
+    # Apply nearest-neighbour TSP on each cluster
+    for i in range(num_patrols):
+        if patrol_tasks[i]:
+            patrol_tasks[i] = _nearest_neighbor_tsp(
+                patrol_positions[i], patrol_tasks[i], G
+            )
+
     for i in range(num_patrols):
         current_pos = patrol_positions[i]
-        closest_dist = float('inf')
-        closest_task = None
-
-        for task in patrol_tasks[i]:
-            try:
-                dist = nx.shortest_path_length(
-                    G, source=current_pos, target=(task[0], task[1])
+        next_task = patrol_tasks[i][0] if patrol_tasks[i] else None
+        next_dist = nx.shortest_path_length(
+                    G, source=current_pos, target=(next_task[0], next_task[1])
                 )
-                backcost[i].append(dist)
-                if dist < closest_dist:
-                    closest_dist = dist
-                    closest_task = (task[0], task[1])
-            except nx.NetworkXNoPath:
-                continue
+        for task in patrol_tasks[i]:
+            dist = nx.shortest_path_length(
+                G, source=current_pos, target=(task[0], task[1])
+            )
+            backcost[i].append(dist)
 
-        active_tasks.append(closest_task)
-        if closest_task is not None and 2 * (closest_dist * edge_weight) <= R:
+        active_tasks.append(next_task)
+        if next_task is not None and 2 * (next_dist * edge_weight) <= R:
             patrol_paths[i] = nx.shortest_path(
-                G, source=current_pos, target=closest_task
+                G, source=current_pos, target=next_task
             )[1:]
         else:
             patrol_paths[i] = []
