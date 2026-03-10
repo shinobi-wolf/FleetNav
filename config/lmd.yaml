@@ -1,0 +1,23 @@
+agent:
+  algo: dijkstra
+fleet:
+  count: 4
+  max_speed: 5
+  range: 1000
+net:
+  max_degree: 4
+  net_path: data/rand_grid/rand_grid.sumocfg
+  depot: random
+task:
+  demand_per: 0.5
+simulation:
+  max_time: 15000
+  max_steps: 150
+  render_mode: human
+  warm_up_time: 0
+  fast_forward: 0
+  sumo:
+    delay: 0
+    traffic_scale: 0
+    step_length: 3
+bms: false

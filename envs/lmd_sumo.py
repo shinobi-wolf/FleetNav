@@ -22,7 +22,7 @@ class SumoLMDEnv(gym.Env):
 
         '''LOADING THE CONFIGURATION VARIABLES'''
         self.net_path = config["net"]["net_path"]
-        self.warehouse_choice = config["net"]["warehouse"]
+        self.warehouse_choice = config["net"]["depot"]
 
         # Task vars
         self.demand_per = config['task']['demand_per']
@@ -37,11 +37,10 @@ class SumoLMDEnv(gym.Env):
         self.max_time = config['simulation']['max_time']
         self.max_steps = config['simulation']['max_steps']
         self.render_mode = config['simulation']['render_mode']  # Render mode from config
-        self.render_fps = config['simulation'].get('render_fps', 30)  # Default to 30 if not specified
-        self.step_length = config['simulation']['step_length']
-        self.traffic_scale = config['simulation'].get('traffic_scale', 1)
-        self.ff = config['debug']['fast_forward']
-        self.delay = config['debug'].get('delay', 0)
+        self.step_length = config['simulation']['sumo']['step_length']
+        self.traffic_scale = config['simulation']['sumo'].get('traffic_scale', 1)
+        self.ff = config['simulation']['fast_forward']
+        self.delay = config['simulation']['sumo'].get('delay', 0)
 
         '''SETUP YOUR OBSERVATION SPACE, ACTION SPACE, ENVIRONMENT-SPECIFIC VARIABLES'''
         self.action_space = spaces.MultiDiscrete([self.num_actions]*self.num_ugvs)
