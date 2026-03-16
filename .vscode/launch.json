@@ -44,7 +44,7 @@
             "program": "${workspaceFolder}/test_road.py",
             "console": "integratedTerminal",
             "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "dijkstra"],
+            "args": ["-p", "sarsa"],
             // "args": ["-p", "c75c5609"],
             "env": {
                 "PYTHONWARNINGS": "ignore"

@@ -1,6 +1,6 @@
 agent:
-  algo: dijkstra
-  policy: dijkstra
+  algo: sarsa
+  policy: sarsa
 fleet:
   max_speed: 5
   range: 100000000
@@ -19,6 +19,6 @@ simulation:
 sumo:
   delay: 0
   step_length: 1
-  traffic_scale: 3
+  traffic_scale: 1
 test:
   mode: road_vehicle

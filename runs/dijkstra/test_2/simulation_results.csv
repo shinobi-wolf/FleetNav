@@ -1,5 +1,0 @@
-start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges,failed_error
-0,1,1000,1005.0,12.0,1,A0A1,NA
-0,2,1000,1005.0,18.0,2,A0A1;A1A2,NA
-0,3,1000,1005.0,24.0,3,A0A1;A1A2;A2A3,NA
-0,4,1000,1005.0,33.0,4,A0A1;A1A2;A2A3;A3A4,NA

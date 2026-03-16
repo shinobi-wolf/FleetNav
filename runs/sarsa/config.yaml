@@ -19,4 +19,4 @@ simulation:
 sumo:
   delay: 0
   step_length: 1
-  traffic_scale: 3
+  traffic_scale: 1

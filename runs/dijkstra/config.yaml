@@ -14,7 +14,7 @@ simulation:
   render_mode: human
   start_node_idx: 0
   target_junc_id: '1'
-  vehicle_type: car
+  vehicle_type: ugv
   warm_up_time: 2000
 sumo:
   delay: 0
