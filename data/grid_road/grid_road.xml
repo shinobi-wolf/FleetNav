@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-03-13T17:12:42.496973-06:00 by Eclipse SUMO GUI 1.26.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="/home/shinobi-owl/PhD/battery/DroneSim/data/grid_road/grid_road.net.xml"/>
+        <route-files value="/home/shinobi-owl/PhD/battery/DroneSim/data/grid_road/grid_road.rou.xml"/>
+    </input>
+
+</sumoConfiguration>
+-->
+
+<snapshot type="micro" version="1.26.0" time="545.00" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/state_file.xsd">
+    <route id="r_0" state="1" edges="A3B3 B3C3 C3D3 D3E3"/>
+    <route id="r_1" state="1" edges="A2B2 B2C2 C2D2 D2E2"/>
+    <route id="r_10" state="1" edges="C4C3 C3C2 C2C1 C1C0"/>
+    <route id="r_11" state="1" edges="B4B3 B3B2 B2B1 B1B0"/>
+    <route id="r_2" state="1" edges="A1B1 B1C1 C1D1 D1E1"/>
+    <route id="r_3" state="1" edges="B0B1 B1B2 B2B3 B3B4"/>
+    <route id="r_4" state="1" edges="C0C1 C1C2 C2C3 C3C4"/>
+    <route id="r_5" state="1" edges="D0D1 D1D2 D2D3 D3D4"/>
+    <route id="r_6" state="1" edges="E1D1 D1C1 C1B1 B1A1"/>
+    <route id="r_7" state="1" edges="E2D2 D2C2 C2B2 B2A2"/>
+    <route id="r_8" state="1" edges="E3D3 D3C3 C3B3 B3A3"/>
+    <route id="r_9" state="1" edges="D4D3 D3D2 D2D1 D1D0"/>
+    <delay number="14" begin="192" end="178" depart="63.00" time="6321.00"/>
+    <vType id="DEFAULT_VEHTYPE"/>
+    <vehicle id="f_2.14" depart="504.00" route="r_2" distance="300 0" speedFactor="0.8929" state="2336 506000 3 5.10 0 11.61 544000 0 0" pos="32.45 27.45 12.13" speed="12.13 11.70" angle="90.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_6.14" depart="504.00" route="r_6" distance="300 0" speedFactor="1.0897" state="2336 504000 3 5.10 0 17.27 544000 0 0" pos="49.15 44.15 14.36" speed="14.36 14.35" angle="270.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_0.15" depart="540.00" route="r_0" distance="0 0" speedFactor="1.0998" state="2336 540000 0 5.10 0 2.79 544000 0 0" pos="23.59 18.59 6.96" speed="6.96 5.27" angle="90.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_1.15" depart="540.00" route="r_1" distance="0 0" speedFactor="1.0262" state="2336 542000 0 5.10 0 1.60 544000 0 0" pos="10.86 5.86 3.66" speed="3.66 2.10" angle="90.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_10.15" depart="540.00" route="r_10" distance="0 0" speedFactor="1.0297" state="2336 540000 0 5.10 0 2.44 544000 0 0" pos="27.44 22.44 8.79" speed="8.79 7.00" angle="180.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_11.15" depart="540.00" route="r_11" distance="0 0" speedFactor="1.0820" state="2336 540000 0 5.10 0 2.52 544000 0 0" pos="27.37 22.37 9.08" speed="9.08 6.68" angle="180.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_2.15" depart="540.00" route="r_2" distance="0 0" speedFactor="0.9418" state="2336 540000 0 5.10 0 2.80 544000 0 0" pos="20.85 15.85 6.56" speed="6.56 5.04" angle="90.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_3.15" depart="540.00" route="r_3" distance="0 0" speedFactor="0.9160" state="2336 540000 0 5.10 0 2.20 544000 0 0" pos="28.00 23.00 9.05" speed="9.05 6.96" angle="0.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_4.15" depart="540.00" route="r_4" distance="0 0" speedFactor="1.0790" state="2336 540000 0 5.10 0 2.67 544000 0 0" pos="25.06 20.06 7.45" speed="7.45 6.00" angle="0.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_5.15" depart="540.00" route="r_5" distance="0 0" speedFactor="0.8914" state="2336 540000 0 5.10 0 2.38 544000 0 0" pos="25.10 20.10 8.48" speed="8.48 6.33" angle="0.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_6.15" depart="540.00" route="r_6" distance="0 0" speedFactor="0.9715" state="2336 540000 0 5.10 0 2.68 544000 0 0" pos="22.91 17.91 7.58" speed="7.58 5.50" angle="270.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_7.15" depart="540.00" route="r_7" distance="0 0" speedFactor="0.9712" state="2336 540000 0 5.10 0 2.50 544000 0 0" pos="25.40 20.40 8.53" speed="8.53 5.97" angle="270.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_8.15" depart="540.00" route="r_8" distance="0 0" speedFactor="0.9015" state="2336 540000 0 5.10 0 2.58 544000 0 0" pos="22.94 17.94 6.84" speed="6.84 5.46" angle="270.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="f_9.15" depart="540.00" route="r_9" distance="0 0" speedFactor="0.9279" state="2336 540000 0 5.10 0 2.33 544000 0 0" pos="26.62 21.62 8.49" speed="8.49 6.09" angle="180.00" posLat="0.00" waitingTime="100000 0"/>
+    <flowState id="f_0" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_0" done="16" index="16"/>
+    <flowState id="f_1" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_1" done="16" index="16"/>
+    <flowState id="f_10" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_10" done="16" index="16"/>
+    <flowState id="f_11" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_11" done="16" index="16"/>
+    <flowState id="f_2" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_2" done="16" index="16"/>
+    <flowState id="f_3" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_3" done="16" index="16"/>
+    <flowState id="f_4" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_4" done="16" index="16"/>
+    <flowState id="f_5" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_5" done="16" index="16"/>
+    <flowState id="f_6" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_6" done="16" index="16"/>
+    <flowState id="f_7" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_7" done="16" index="16"/>
+    <flowState id="f_8" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_8" done="16" index="16"/>
+    <flowState id="f_9" begin="0.00" end="100000.00" perHour="100.00" next="576.00" route="r_9" done="16" index="16"/>
+    <lane id="A1B1_0">
+        <vehicles value="f_2.15"/>
+    </lane>
+    <lane id="A2B2_0">
+        <vehicles value="f_1.15"/>
+    </lane>
+    <lane id="A3B3_0">
+        <vehicles value="f_0.15"/>
+    </lane>
+    <lane id="B0B1_0">
+        <vehicles value="f_3.15"/>
+    </lane>
+    <lane id="B1A1_0">
+        <vehicles value="f_6.14"/>
+    </lane>
+    <lane id="B4B3_0">
+        <vehicles value="f_11.15"/>
+    </lane>
+    <lane id="C0C1_0">
+        <vehicles value="f_4.15"/>
+    </lane>
+    <lane id="C4C3_0">
+        <vehicles value="f_10.15"/>
+    </lane>
+    <lane id="D0D1_0">
+        <vehicles value="f_5.15"/>
+    </lane>
+    <lane id="D1E1_0">
+        <vehicles value="f_2.14"/>
+    </lane>
+    <lane id="D4D3_0">
+        <vehicles value="f_9.15"/>
+    </lane>
+    <lane id="E1D1_0">
+        <vehicles value="f_6.15"/>
+    </lane>
+    <lane id="E2D2_0">
+        <vehicles value="f_7.15"/>
+    </lane>
+    <lane id="E3D3_0">
+        <vehicles value="f_8.15"/>
+    </lane>
+</snapshot>

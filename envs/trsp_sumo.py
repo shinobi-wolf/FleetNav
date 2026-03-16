@@ -77,79 +77,127 @@ class SumoTRSPEnv(gym.Env):
             'best_dir': best_dir_space,
             'sg_pair_idx': sg_pair_idx_space,
         })
+
+    # # Crosswalk graph       
+    # def build_graph(self,):
+    #     net_path = self.net_path.replace('.sumocfg', '.net.xml')
+    #     net = sumolib.net.readNet(net_path, withPedestrianConnections=True)
+    #     junctions = net.getNodes()
+    #     edge_eps = {}
+    #     junc2nodes_map = defaultdict(list)
         
+    #     for junction in junctions:
+    #         connections = junction.getConnections()
+    #         for connection in connections:
+    #             # 1. Inspect the source of the connection
+    #             ep = None
+    #             edge = None
+    #             dir = None
+    #             if connection._from.getFunction() == 'walkingarea':
+    #                 ep = connection._from
+    #                 edge = connection._to
+    #                 dir = 0
+    #             elif connection._to.getFunction() == 'walkingarea':
+    #                 ep = connection._to
+    #                 edge = connection._from
+    #                 dir = 1
+    #             if ep and edge:
+    #                 edge_id = edge.getID()
+    #                 eps = [None, None]
+    #                 eps[dir] = ep
+    #                 if edge_id not in edge_eps:
+    #                     edge_eps[edge_id] = {
+    #                         "edge": edge,
+    #                         "eps": eps
+    #                     }
+    #                 else:
+    #                     edge_eps[edge_id]["eps"][dir] = ep
+    #                     if len([ep for ep in edge_eps[edge_id]["eps"] if ep is not None]) > 2:
+    #                         print("More than 2 entry points for edge ", edge_id)
+    #                         raise ValueError("More than 2 entry points for edge ", edge_id)
+
+    #     G = nx.DiGraph()
+    #     for edge_id, edge_data in edge_eps.items():
+    #         entry_points = edge_data["eps"]
+    #         for ep in entry_points:
+    #             shape = ep.getShape()
+    #             cx, cy = get_centroid(shape)
+    #             G.add_node(ep._id, junc_id=ep._from._id,junc_coord=ep._from._coord, x=cx, y=cy)
+    #             junc2nodes_map[ep._from._id].append(ep._id)
+    #         edge_obj = edge_data["edge"]
+    #         edge_length = None
+    #         edge_type = edge_obj.getFunction()
+    #         if edge_type == 'crossing':
+    #             edge_length = 5.0
+    #             G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
+    #             # G.add_edge(entry_points[1]._id, entry_points[0]._id, edge=edge_obj._id, length=edge_length, type=edge_type)
+    #         else:
+    #             edge_length = edge_obj.getLength()
+    #             edge_type = 'sidewalk'
+    #             G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
+        
+    #     G_und = G.to_undirected()
+
+    #     all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='length'))
+    #     self.G, self.G_dir, self.all_shortest_path_lengths, self.junc2nodes_map = G_und, G, all_shortest_path_lengths, junc2nodes_map
+
+    #     self.num_junctions = len(self.junc2nodes_map)
+    #     self.junction_list = self.junc2nodes_map.keys()
+    #     self.node2idx = {node: idx for idx, node in enumerate(sorted(self.G.nodes))}
+    #     self.idx2node = {idx: node for node, idx in self.node2idx.items()}
+    #     self.sg_pairs = []
+    #     for node_idx in range(len(self.idx2node)):
+    #         for junc_id in self.junction_list:
+    #             node = self.idx2node[node_idx]
+    #             if self.G.nodes[node]['junc_id'] != junc_id:
+    #                 self.sg_pairs.append((node_idx, junc_id))
+
     def build_graph(self,):
         net_path = self.net_path.replace('.sumocfg', '.net.xml')
-        net = sumolib.net.readNet(net_path, withPedestrianConnections=True)
-        junctions = net.getNodes()
-        edge_eps = {}
-        junc2nodes_map = defaultdict(list)
-        
-        for junction in junctions:
-            connections = junction.getConnections()
-            for connection in connections:
-                # 1. Inspect the source of the connection
-                ep = None
-                edge = None
-                dir = None
-                if connection._from.getFunction() == 'walkingarea':
-                    ep = connection._from
-                    edge = connection._to
-                    dir = 0
-                elif connection._to.getFunction() == 'walkingarea':
-                    ep = connection._to
-                    edge = connection._from
-                    dir = 1
-                if ep and edge:
-                    edge_id = edge.getID()
-                    eps = [None, None]
-                    eps[dir] = ep
-                    if edge_id not in edge_eps:
-                        edge_eps[edge_id] = {
-                            "edge": edge,
-                            "eps": eps
-                        }
-                    else:
-                        edge_eps[edge_id]["eps"][dir] = ep
-                        if len([ep for ep in edge_eps[edge_id]["eps"] if ep is not None]) > 2:
-                            print("More than 2 entry points for edge ", edge_id)
-                            raise ValueError("More than 2 entry points for edge ", edge_id)
+        net = sumolib.net.readNet(net_path, withPedestrianConnections=False)
 
         G = nx.DiGraph()
-        for edge_id, edge_data in edge_eps.items():
-            entry_points = edge_data["eps"]
-            for ep in entry_points:
-                shape = ep.getShape()
-                cx, cy = get_centroid(shape)
-                G.add_node(ep._id, junc_id=ep._from._id,junc_coord=ep._from._coord, x=cx, y=cy)
-                junc2nodes_map[ep._from._id].append(ep._id)
-            edge_obj = edge_data["edge"]
-            edge_length = None
-            edge_type = edge_obj.getFunction()
-            if edge_type == 'crossing':
-                edge_length = 5.0
-                G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
-                # G.add_edge(entry_points[1]._id, entry_points[0]._id, edge=edge_obj._id, length=edge_length, type=edge_type)
-            else:
-                edge_length = edge_obj.getLength()
-                edge_type = 'sidewalk'
-                G.add_edge(entry_points[0]._id, entry_points[1]._id, id=edge_obj._id, length=edge_length, type=edge_type)
-        
+        junc2nodes_map = {}
+        for edge in net.getEdges():
+            eid = edge.getID()
+            if eid.startswith(':'):
+                continue
+            n1 = edge.getToNode()
+            shape = n1.getShape()
+            if not shape:
+                continue
+            cx, cy = get_centroid(shape)
+            G.add_node(n1.getID(), junc_id=n1.getID(), x=cx, y=cy)
+            junc2nodes_map[n1.getID()] = [n1.getID()]
+            n2 = edge.getFromNode()
+            shape2 = n2.getShape()
+            if not shape2:
+                continue
+            cx2, cy2 = get_centroid(shape2)
+            G.add_node(n2.getID(), junc_id=n2.getID(), x=cx2, y=cy2)
+            junc2nodes_map[n2.getID()] = [n2.getID()]
+            
+            edge_est_tt = None
+            edge_mean_speed = None
+            # for lane_obj in edge.getLanes():
+            #     edge_est_tt = traci.lane.getTraveltime(lane_obj.getID())
+            #     edge_mean_speed = traci.lane.getLastStepMeanSpeed(lane_obj.getID())
+            G.add_edge(n2.getID(), n1.getID(), length=edge.getLength(), id=eid)
+
         G_und = G.to_undirected()
+        all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
 
-        all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G_und, weight='length'))
         self.G, self.G_dir, self.all_shortest_path_lengths, self.junc2nodes_map = G_und, G, all_shortest_path_lengths, junc2nodes_map
-
-        self.num_junctions = len(self.junc2nodes_map)
         self.junction_list = self.junc2nodes_map.keys()
+        self.junc2idx = {junc: idx for idx, junc in enumerate(sorted(self.junction_list))}
+        self.idx2junc = {idx: junc for junc, idx in self.junc2idx.items()}
         self.node2idx = {node: idx for idx, node in enumerate(sorted(self.G.nodes))}
         self.idx2node = {idx: node for node, idx in self.node2idx.items()}
         self.sg_pairs = []
-        for node_idx in range(len(self.idx2node)):
+        for node in self.G.nodes:
             for junc_id in self.junction_list:
-                node = self.idx2node[node_idx]
                 if self.G.nodes[node]['junc_id'] != junc_id:
-                    self.sg_pairs.append((node_idx, junc_id))
+                    self.sg_pairs.append((self.node2idx[node], self.junc2idx[junc_id]))
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed) # Call parent reset for seeding RNG
@@ -197,12 +245,14 @@ class SumoTRSPEnv(gym.Env):
         # UGV States
         if self.random_sg_pair:
             init_node = random.choice(list(self.G.nodes))
-            target_junction_id = random.choice(list(self.junction_list - {self.G.nodes[init_node]['junc_id']}))
             init_node_idx = self.node2idx[init_node]
+            target_junction_id = random.choice(list(self.junction_list - {self.G.nodes[init_node]['junc_id']}))
+            target_junc_idx = self.junc2idx[target_junction_id]
         else:
             init_node_idx = self.start_idx
             init_node = self.idx2node[init_node_idx]
             target_junction_id = self.target_junc_id
+            target_junc_idx = self.junc2idx[target_junction_id]
         self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.ugv_speed)
         target_nodes = self.junc2nodes_map[target_junction_id]
         target_node = target_nodes[np.argmin([self.all_shortest_path_lengths[init_node][tn] for tn in target_nodes])]
@@ -215,31 +265,36 @@ class SumoTRSPEnv(gym.Env):
         return obs, info
  
     def _get_observation(self):
-        steps2dest = []
         ugv_node = self.idx2node[self.ugv.position]
         ugv_node_idx = self.ugv.position
+
         task_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
         task_node_idx = self.ugv.task_list[0] if self.ugv.task_list else None
-        junction_idx = None
+        
+        junction_idx = -1
+        steps2dest = [INF] * self.num_actions
+        best_dir = 4
+        sg_idx = -1
+
         if task_node:
+            junction_idx = self.junc2idx[self.G.nodes[task_node]['junc_id']]
+
             nb_nodes = list(self.G.neighbors(ugv_node))  # Get up to num_actions neighbors
-            nb_node_idxs = sorted([self.node2idx[nb] for nb in nb_nodes])[:self.num_actions]
-            for nb_node_idx in nb_node_idxs:
-                steps2dest.append(self.all_shortest_path_lengths[self.idx2node[nb_node_idx]][task_node])
+            steps2dest = []
+            for nb_node in nb_nodes:
+                steps2dest.append(self.all_shortest_path_lengths[nb_node][task_node])
             steps2dest += [INF] * (self.num_actions - len(steps2dest))
-            junction_idx = self.G.nodes[task_node]['junc_id']
-            sg_idx = self.sg_pairs.index((ugv_node_idx, junction_idx))
+            
             best_dir = np.argmin(steps2dest)
-        else:
-            junction_idx = -1
-            steps2dest = [INF] * self.num_actions
-            sg_idx = -1
-            best_dir = 4
+
+            sg_idx = self.sg_pairs.index((ugv_node_idx, junction_idx))
+            
+            
         obs_dict = {
             'graph_node': ugv_node_idx,
-            'target_node': int(junction_idx),
-            'best_dir': best_dir,
+            'target_node': junction_idx,
             'steps2dest': np.array(steps2dest, dtype=np.float32),
+            'best_dir': best_dir,
             'sg_pair_idx': sg_idx
         }
 
@@ -251,7 +306,7 @@ class SumoTRSPEnv(gym.Env):
 
         ugv_pos_node = self.idx2node[self.ugv.position] if self.ugv.position is not None else None
         task_pos_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
-        junction_idx = int(self.G.nodes[task_pos_node]['junc_id']) if task_pos_node else None
+        junction_id = self.G.nodes[task_pos_node]['junc_id'] if task_pos_node else None
         info = {
             'time_elapsed': self.time_elapsed,
             'current_timestep': self.current_timestep,
@@ -260,7 +315,7 @@ class SumoTRSPEnv(gym.Env):
             'ugv_target': task_pos_node,
             'ugv_position_idx': self.ugv.position,
             'ugv_target_idx': self.ugv.task_list[0] if self.ugv.task_list else None,
-            'ugv_target_junction': junction_idx,
+            'ugv_target_junction': junction_id,
         }
         return info
     
@@ -300,27 +355,39 @@ class SumoTRSPEnv(gym.Env):
         self.last_move_time = self.time_elapsed
         
         if move_flag:
-            # Only track move time if move was successful
-            route_id = f"ugv_{self.ugv.agent_id}_{self.current_timestep}_route"
-            self.ugv.veh_id = f"ugv_{self.ugv.agent_id}_{self.current_timestep}"
-            # add person and set a visible color based on UGV id
-            if edge_dir==0:
-                traci.person.add(self.ugv.veh_id, edge_id, 0.0)
-                traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
-                traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=-1, speed=self.ugv.max_speed)
-            else:
-                traci.person.add(self.ugv.veh_id, edge_id, -1)
-                traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
-                traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=0, speed=self.ugv.max_speed)
-            traci.simulationStep()
-            self.time_elapsed = traci.simulation.getTime()
-            reached_flag = False
-            while not reached_flag and self.time_elapsed < self.max_time:
-                if self.ugv.veh_id and self.ugv.veh_id not in traci.person.getIDList():
-                    self.ugv.status = 1
-                    reached_flag = True
+            # # Only track move time if move was successful
+            # route_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}_route"
+            # self.ugv.veh_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}"
+            # # # add person and set a visible color based on UGV id
+            # # if edge_dir==0:
+            # #     traci.person.add(self.ugv.veh_id, edge_id, 0.0)
+            # #     traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
+            # #     traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=-1, speed=self.ugv.max_speed)
+            # # else:
+            # #     traci.person.add(self.ugv.veh_id, edge_id, -1)
+            # #     traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
+            # #     traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=0, speed=self.ugv.max_speed)
+            # # add a vehicle
+            # traci.route.add(route_id, [edge_id])
+            # traci.vehicle.add(self.ugv.veh_id, route_id)
+            # traci.vehicle.setColor(self.ugv.veh_id, (255,0,0,255))
+            # traci.simulationStep()
+            # self.time_elapsed = traci.simulation.getTime()
+            # reached_flag = False
+            # while not reached_flag and self.time_elapsed < self.max_time:
+            #     # if self.ugv.veh_id and self.ugv.veh_id not in traci.person.getIDList():
+            #     if self.ugv.veh_id and self.ugv.veh_id not in traci.vehicle.getIDList():
+            #         self.ugv.status = 1
+            #         reached_flag = True
+            #     traci.simulationStep()
+            #     self.time_elapsed = traci.simulation.getTime()
+            
+            travel_time = min(traci.edge.getTraveltime(edge_id), 25.0)
+            eta = self.time_elapsed + travel_time
+            while self.time_elapsed < eta and self.time_elapsed < self.max_time:
                 traci.simulationStep()
                 self.time_elapsed = traci.simulation.getTime()
+            self.ugv.status = 1
             
     def task_handler(self):
         self.truncated = False
@@ -361,7 +428,7 @@ class SumoTRSPEnv(gym.Env):
         COMPLETION_REWARD = 50.0  # High positive reward for task completion
         INCOMPLETE_PENALTY = 0.0  # High negative reward for invalid actions
         INVALID_ACTION_PENALTY = -10.0  # High negative reward for invalid actions
-        MOVE_TIME_PENALTY_FAC = -0.1  # Low negative reward per unit time (proportional to move time)
+        MOVE_TIME_PENALTY_FAC = -1  # Low negative reward per unit time (proportional to move time)
         
         if self.ugv.invalid_action_this_step:
             total_reward += INVALID_ACTION_PENALTY

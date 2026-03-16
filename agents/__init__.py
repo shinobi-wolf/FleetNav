@@ -10,7 +10,7 @@ def get_agent(env, config, agent_id, **kwargs):
     :param env: The environment instance.
     :return: An agent instance or a list of agents for multi-agent environments.
     """
-    algo = config['agent']['algo']
+    algo = config['algo']
     if algo == 'dijkstra':
         return DijkstraAgent(agent_id)
     

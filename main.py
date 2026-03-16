@@ -10,6 +10,7 @@ import envs
 from agents import get_agent
 from agents.dqn import DQNAgent
 from agents.ppo import PPOAgent
+from agents.sarsa import SARSAAgent
 
 def setup_logging(mode, log_file="simulation_log.txt"):
     """
@@ -52,6 +53,8 @@ def lmd_simulator(config):
         agent = DQNAgent(config)
     elif config['agent']['algo'] == 'ppo':
         agent = PPOAgent(config)
+    elif config['agent']['algo'] == 'sarsa':
+        agent = SARSAAgent(config)
     else:
         agent = get_agent(env, config['agent'], 0)
 

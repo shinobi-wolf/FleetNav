@@ -46,12 +46,12 @@ class UGVSumo:
             return False, None, None
 
         next_node = idx2node[neighbors[action]]
-        edge_id = graph.edges[(current_node, next_node)]['id']
+        edge_id = graph_dir.edges[(current_node, next_node)]['id']
         edge_dir = 0
         if (current_node, next_node) not in graph_dir.edges:
             edge_dir = 1  # reverse direction
-        edge_length = graph.edges[(current_node, next_node)]['length']
-        edge_type = graph.edges[(current_node, next_node)]['type']
+        edge_length = graph_dir.edges[(current_node, next_node)]['length']
+        # edge_type = graph.edges[(current_node, next_node)]['type']
         # if edge_type =='crossing':
         #     self.last_move_time = -1
         self.current_range -= edge_length

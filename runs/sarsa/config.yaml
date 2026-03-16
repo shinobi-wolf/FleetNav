@@ -1,23 +1,22 @@
 agent:
   algo: sarsa
-  policy: c75c5609
-debug:
-  delay: 0
-  fast_forward: 0
+  policy: sarsa
 fleet:
   max_speed: 5
   range: 100000000
 net:
   max_degree: 4
-  net_path: data/rand_grid/rand_grid.sumocfg
+  net_path: data/grid_road/grid_road.sumocfg
 simulation:
-  max_steps: 100
+  max_steps: 50
   max_time: 15000
-  render_fps: 30
+  random_sg_pair: true
   render_mode: human
-  step_length: 1
-  traffic_scale: 1
-test:
-  warm_up_time: 1000
   start_node_idx: 0
   target_junc_id: '1'
+  vehicle_type: car
+  warm_up_time: 2000
+sumo:
+  delay: 0
+  step_length: 1
+  traffic_scale: 3

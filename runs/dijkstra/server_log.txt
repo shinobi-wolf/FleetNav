@@ -1,89 +1,41 @@
 Config: runs/dijkstra//config.yaml
 Step 0:
-UGV: Position=77, Task=24, Task Junction=183
+UGV: Position=20, Task=7, Task Junction=B2
 Step 1:
-UGV: Position=77, Task=24, Task Junction=183
+UGV: Position=15, Task=7, Task Junction=B2
 Step 2:
-UGV: Position=77, Task=24, Task Junction=183
+UGV: Position=10, Task=7, Task Junction=B2
 Step 3:
-UGV: Position=69, Task=24, Task Junction=183
+UGV: Position=5, Task=7, Task Junction=B2
 Step 4:
-UGV: Position=70, Task=24, Task Junction=183
+UGV: Position=6, Task=7, Task Junction=B2
 Step 5:
-UGV: Position=73, Task=24, Task Junction=183
-Step 6:
-UGV: Position=17, Task=24, Task Junction=183
-Step 7:
-UGV: Position=11, Task=24, Task Junction=183
-Step 8:
-UGV: Position=23, Task=24, Task Junction=183
-Step 9:
-UGV: Position=22, Task=24, Task Junction=183
-Step 10:
-UGV: Position=2, Task=40, Task Junction=228
+UGV: Position=1, Task=18, Task Junction=D3
 Step 1:
-UGV: Position=15, Task=40, Task Junction=228
+UGV: Position=2, Task=18, Task Junction=D3
 Step 2:
-UGV: Position=14, Task=40, Task Junction=228
+UGV: Position=3, Task=18, Task Junction=D3
 Step 3:
-UGV: Position=8, Task=40, Task Junction=228
+UGV: Position=8, Task=18, Task Junction=D3
 Step 4:
-UGV: Position=12, Task=40, Task Junction=228
+UGV: Position=13, Task=18, Task Junction=D3
 Step 5:
-UGV: Position=22, Task=40, Task Junction=228
-Step 6:
-UGV: Position=21, Task=40, Task Junction=228
-Step 7:
-UGV: Position=20, Task=40, Task Junction=228
-Step 8:
-UGV: Position=26, Task=40, Task Junction=228
-Step 9:
-UGV: Position=21, Task=49, Task Junction=2
+UGV: Position=8, Task=15, Task Junction=D0
 Step 1:
-UGV: Position=22, Task=49, Task Junction=2
+UGV: Position=7, Task=15, Task Junction=D0
 Step 2:
-UGV: Position=12, Task=49, Task Junction=2
+UGV: Position=6, Task=15, Task Junction=D0
 Step 3:
-UGV: Position=8, Task=49, Task Junction=2
+UGV: Position=5, Task=15, Task Junction=D0
 Step 4:
-UGV: Position=14, Task=49, Task Junction=2
+UGV: Position=10, Task=15, Task Junction=D0
 Step 5:
-UGV: Position=34, Task=49, Task Junction=2
-Step 6:
-UGV: Position=35, Task=49, Task Junction=2
-Step 7:
-UGV: Position=13, Task=62, Task Junction=44
+UGV: Position=4, Task=8, Task Junction=B3
 Step 1:
-UGV: Position=7, Task=62, Task Junction=44
+UGV: Position=3, Task=8, Task Junction=B3
 Step 2:
-UGV: Position=8, Task=62, Task Junction=44
-Step 3:
-UGV: Position=14, Task=62, Task Junction=44
-Step 4:
-UGV: Position=34, Task=62, Task Junction=44
-Step 5:
-UGV: Position=33, Task=62, Task Junction=44
-Step 6:
-UGV: Position=36, Task=62, Task Junction=44
-Step 7:
-UGV: Position=48, Task=62, Task Junction=44
-Step 8:
-UGV: Position=44, Task=62, Task Junction=44
-Step 9:
-UGV: Position=41, Task=10, Task Junction=130
+UGV: Position=23, Task=7, Task Junction=B2
 Step 1:
-UGV: Position=4, Task=10, Task Junction=130
+UGV: Position=18, Task=7, Task Junction=B2
 Step 2:
-UGV: Position=3, Task=10, Task Junction=130
-Step 3:
-UGV: Position=0, Task=10, Task Junction=130
-Step 4:
-UGV: Position=62, Task=44, Task Junction=26
-Step 1:
-UGV: Position=62, Task=44, Task Junction=26
-Step 2:
-UGV: Position=62, Task=44, Task Junction=26
-Step 3:
-UGV: Position=62, Task=44, Task Junction=26
-Step 4:
-UGV: Position=72, Task=28, Task Junction=195
+UGV: Position=13, Task=7, Task Junction=B2
