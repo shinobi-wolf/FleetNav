@@ -1,4 +1,0 @@
-maze.csv
-num_evs = 7,8
-num_tasks = 40
-num_range=3000

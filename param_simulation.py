@@ -69,47 +69,47 @@ def main():
     for loop_per in MAZE_LOOP_PERCENT_OPTIONS:
         for ev_range in EV_RANGE_RANGE:
             for num_evs in NUM_EVS_RANGE:
-            # for num_tasks in NUM_TASKS_RANGE:
-                job_params = {
-                    'num_evs': num_evs,
-                    'num_tasks': 20,
-                    'ev_range': ev_range,
-                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
-                    'maze_loop_percentage': loop_per,
-                    'bms': False,
-                    'algo': "mtsp"
-                }
-                jobs.append(job_params)
-                job_params = {
-                    'num_evs': num_evs,
-                    'num_tasks': 20,
-                    'ev_range': ev_range,
-                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
-                    'maze_loop_percentage': loop_per,
-                    'bms': True,
-                    'algo': "mtsp"
-                }
-                jobs.append(job_params)
-                job_params = {
-                    'num_evs': num_evs,
-                    'num_tasks': 20,
-                    'ev_range': ev_range,
-                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
-                    'maze_loop_percentage': loop_per,
-                    'bms': False,
-                    'algo': "evrp"
-                }
-                jobs.append(job_params)
-                job_params = {
-                    'num_evs': num_evs,
-                    'num_tasks': 20,
-                    'ev_range': ev_range,
-                    'maze_size': random.choice(MAZE_SIZE_OPTIONS),
-                    'maze_loop_percentage': loop_per,
-                    'bms': True,
-                    'algo': "evrp"
-                }
-                jobs.append(job_params)
+                for num_tasks in NUM_TASKS_RANGE:
+                    job_params = {
+                        'num_evs': num_evs,
+                        'num_tasks': num_tasks,
+                        'ev_range': ev_range,
+                        'maze_size': random.choice(MAZE_SIZE_OPTIONS),
+                        'maze_loop_percentage': loop_per,
+                        'bms': False,
+                        'algo': "mtsp"
+                    }
+                    jobs.append(job_params)
+                    job_params = {
+                        'num_evs': num_evs,
+                        'num_tasks': num_tasks,
+                        'ev_range': ev_range,
+                        'maze_size': random.choice(MAZE_SIZE_OPTIONS),
+                        'maze_loop_percentage': loop_per,
+                        'bms': True,
+                        'algo': "mtsp"
+                    }
+                    jobs.append(job_params)
+                    job_params = {
+                        'num_evs': num_evs,
+                        'num_tasks': num_tasks,
+                        'ev_range': ev_range,
+                        'maze_size': random.choice(MAZE_SIZE_OPTIONS),
+                        'maze_loop_percentage': loop_per,
+                        'bms': False,
+                        'algo': "evrp"
+                    }
+                    jobs.append(job_params)
+                    job_params = {
+                        'num_evs': num_evs,
+                        'num_tasks': num_tasks,
+                        'ev_range': ev_range,
+                        'maze_size': random.choice(MAZE_SIZE_OPTIONS),
+                        'maze_loop_percentage': loop_per,
+                        'bms': True,
+                        'algo': "evrp"
+                    }
+                    jobs.append(job_params)
 
     total_jobs = len(jobs)
     completed_jobs = 0
