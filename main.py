@@ -84,6 +84,7 @@ def lmd_simulator(config):
         # Execute step
         obs, reward, terminated, truncated, world_state = env.step(action)
         total_reward += reward
+        print("Observation:", obs)
         print("Reward:", reward)
         
         logging.info(f"UGV: Position={world_state['ugv_position_idx']}, Task={world_state['ugv_target_idx']}, Task Junction={world_state['ugv_target_junction']}")

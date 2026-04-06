@@ -1,0 +1,28 @@
+model:
+  upper: mtsp
+  lower: dijkstra
+sumo:
+  delay: 100
+  step_length: 1
+  traffic_scale: 0
+fleet:
+  size: 5
+  max_speed: 110 # km/h
+  range: 6 # kms
+net:
+  max_degree: 4
+  net_path: data/grid_road/grid_road.sumocfg
+  warehouse: center
+tasks:
+  task_density: 30
+simulation:
+  max_steps: 250
+  max_time: 5 # hrs
+  render_mode: human
+  vehicle_type: car
+  warm_up_time: 0
+traffic:
+  speed_limits: [40, 100] # km/h
+  speed_step: 10 # km/h
+  seg_duration: 1 # min
+  seed: 42

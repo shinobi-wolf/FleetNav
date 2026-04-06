@@ -34,12 +34,9 @@ class SumoTRSPEnv(gym.Env):
 
         '''LOADING THE CONFIGURATION VARIABLES'''
         self.net_path = config["net"]["net_path"]
-        self.build_graph()
-        print(f"Graph built with {len(self.G.nodes)} nodes and {len(self.G.edges)} edges.")
-        self.num_sg_pairs = len(self.sg_pairs)
 
         # Agent vars
-        self.ugv_speed = config["fleet"]['max_speed']
+        self.ugv_speed = config["fleet"]['max_speed'] * 1000 / 3600 # in m/s
         self.num_actions = config['net']['max_degree']
 
         # Sumo vars
@@ -48,11 +45,52 @@ class SumoTRSPEnv(gym.Env):
         self.delay = config['sumo'].get('delay', 0)
 
         # Simulation vars
-        self.max_time = config['simulation']['max_time']
+        self.max_time = config['simulation']['max_time']*3600 # in seconds
         self.max_steps = config['simulation']['max_steps']
         self.render_mode = config['simulation'].get('render_mode')
         self.warmup_time = config['simulation']['warm_up_time']
         self.random_sg_pair = config['simulation']['random_sg_pair']
+
+        # Traffic vars
+        self.traffic_speed_limits = tuple(np.array(config['traffic']['speed_limits']) * 1000 / 3600) # in m/s
+        self.traffic_speed_step = config['traffic']['speed_step'] * 1000 / 3600 # in m/s
+        self.traffic_seg_duration = config['traffic']['seg_duration'] * 60 # in seconds
+        self.traffic_seed = config['traffic']['seed']
+
+        min_speed, max_speed = self.traffic_speed_limits
+        self.traffic_speed_range = np.arange(
+            min_speed, 
+            max_speed + 1e-9, 
+            self.traffic_speed_step
+        )
+        segment_duration = self.traffic_seg_duration 
+        num_segments = int(np.ceil(self.max_time / segment_duration))
+        random.seed(self.traffic_seed)
+        np.random.seed(self.traffic_seed)
+        self.traffic_speed_segments = np.random.choice(self.traffic_speed_range, size=num_segments)
+
+        print(
+            f"Traffic segment duration: {self.traffic_seg_duration:.0f} s "
+            f"({self.traffic_seg_duration / 60.0:.1f} min)"
+            f"Number of segments: {num_segments}"
+        )
+        print("First 10 traffic speed segments:")
+        for seg_idx, speed_ms in enumerate(self.traffic_speed_segments[:10]):
+            print(
+                f"  seg {seg_idx}: {speed_ms:.2f} m/s "
+                f"({self.ms_to_kmh(speed_ms):.1f} km/h)"
+            )
+
+        self.speed_changed_this_step = False
+        self.last_speed_change_time = None
+        self.last_speed_change_from = None
+        self.last_speed_change_to = None
+        self.last_speed_change_segment_from = None
+        self.last_speed_change_segment_to = None
+
+        self.build_graph()
+        print(f"Graph built with {len(self.G.nodes)} nodes and {len(self.G.edges)} edges.")
+        self.num_sg_pairs = len(self.sg_pairs)
 
         if not self.random_sg_pair:
             self.start_idx = config['simulation']['start_node_idx']
@@ -70,12 +108,14 @@ class SumoTRSPEnv(gym.Env):
         graph_node_space = spaces.Discrete(1000)
         best_dir_space = spaces.Discrete(self.num_actions)
         sg_pair_idx_space = spaces.Discrete(self.num_sg_pairs)
+        time_slot_space = spaces.Discrete(len(self.traffic_speed_segments))
         self.observation_space = spaces.Dict({
             'steps2dest': steps2dest_space,
             'graph_node': graph_node_space,
             'target_node': graph_node_space,
             'best_dir': best_dir_space,
             'sg_pair_idx': sg_pair_idx_space,
+            'time_slot': time_slot_space,
         })
 
     # # Crosswalk graph       
@@ -177,12 +217,10 @@ class SumoTRSPEnv(gym.Env):
             G.add_node(n2.getID(), junc_id=n2.getID(), x=cx2, y=cy2)
             junc2nodes_map[n2.getID()] = [n2.getID()]
             
-            edge_est_tt = None
-            edge_mean_speed = None
-            # for lane_obj in edge.getLanes():
-            #     edge_est_tt = traci.lane.getTraveltime(lane_obj.getID())
-            #     edge_mean_speed = traci.lane.getLastStepMeanSpeed(lane_obj.getID())
-            G.add_edge(n2.getID(), n1.getID(), length=edge.getLength(), id=eid)
+            edge_speed = self.traffic_speed_range[0]
+            edge_length = edge.getLength()
+            edge_tt = edge_length / edge_speed
+            G.add_edge(n2.getID(), n1.getID(), length=edge_length, id=eid, edge_speed=edge_speed, edge_tt=edge_tt)
 
         G_und = G.to_undirected()
         all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
@@ -198,6 +236,53 @@ class SumoTRSPEnv(gym.Env):
             for junc_id in self.junction_list:
                 if self.G.nodes[node]['junc_id'] != junc_id:
                     self.sg_pairs.append((self.node2idx[node], self.junc2idx[junc_id]))
+    
+    def get_current_speed(self):
+        """
+        Returns the target traffic speed for a given current_time.
+        """
+        current_time = self.time_elapsed
+        # 1. Handle edge case: time hasn't started yet
+        if current_time < 0:
+            return self.traffic_speed_segments[0]
+
+        # 2. Calculate the corresponding index for the current time
+        segment_index = int(current_time / self.traffic_seg_duration)
+        
+        # 3. Handle edge case: current_time exceeds the pre-calculated segments (max_time)
+        if segment_index >= len(self.traffic_speed_segments):
+            # Clamp to the final generated segment to avoid an IndexError
+            segment_index = len(self.traffic_speed_segments) - 1
+            
+        return self.traffic_speed_segments[segment_index]
+
+    def ms_to_kmh(self, speed_ms):
+        if speed_ms is None:
+            return None
+        return speed_ms * 3.6
+
+    def format_speed(self, speed_ms):
+        if speed_ms is None:
+            return "N/A"
+        return f"{speed_ms:.2f} m/s ({self.ms_to_kmh(speed_ms):.1f} km/h)"
+
+    def get_current_segment_index(self):
+        if len(self.traffic_speed_segments) == 0:
+            return -1
+        current_time = max(0.0, self.time_elapsed)
+        segment_index = int(current_time / self.traffic_seg_duration)
+        return min(segment_index, len(self.traffic_speed_segments) - 1)
+
+    def get_actual_vehicle_speed(self):
+        veh_id = getattr(self.ugv, 'veh_id', None) if hasattr(self, 'ugv') else None
+        if not veh_id:
+            return None
+        try:
+            if veh_id in traci.vehicle.getIDList():
+                return traci.vehicle.getSpeed(veh_id)
+        except traci.TraCIException:
+            return None
+        return None
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed) # Call parent reset for seeding RNG
@@ -218,6 +303,12 @@ class SumoTRSPEnv(gym.Env):
         self.truncated = False
         self.time_elapsed = 0.0
         self.last_move_time = 0.0
+        self.speed_changed_this_step = False
+        self.last_speed_change_time = None
+        self.last_speed_change_from = None
+        self.last_speed_change_to = None
+        self.last_speed_change_segment_from = None
+        self.last_speed_change_segment_to = None
 
         # Initialize pygame display if not already done
         self.screen = None
@@ -253,7 +344,10 @@ class SumoTRSPEnv(gym.Env):
             init_node = self.idx2node[init_node_idx]
             target_junction_id = self.target_junc_id
             target_junc_idx = self.junc2idx[target_junction_id]
-        self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.ugv_speed)
+
+        self.current_speed = self.get_current_speed()
+
+        self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.current_speed)
         target_nodes = self.junc2nodes_map[target_junction_id]
         target_node = target_nodes[np.argmin([self.all_shortest_path_lengths[init_node][tn] for tn in target_nodes])]
         self.ugv.task_list = [self.node2idx[target_node]]
@@ -275,6 +369,7 @@ class SumoTRSPEnv(gym.Env):
         steps2dest = [INF] * self.num_actions
         best_dir = 4
         sg_idx = -1
+        time_slot = self.get_current_segment_index()
 
         if task_node:
             junction_idx = self.junc2idx[self.G.nodes[task_node]['junc_id']]
@@ -295,7 +390,8 @@ class SumoTRSPEnv(gym.Env):
             'target_node': junction_idx,
             'steps2dest': np.array(steps2dest, dtype=np.float32),
             'best_dir': best_dir,
-            'sg_pair_idx': sg_idx
+            'sg_pair_idx': sg_idx,
+            'time_slot': time_slot,
         }
 
         return obs_dict
@@ -307,6 +403,8 @@ class SumoTRSPEnv(gym.Env):
         ugv_pos_node = self.idx2node[self.ugv.position] if self.ugv.position is not None else None
         task_pos_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
         junction_id = self.G.nodes[task_pos_node]['junc_id'] if task_pos_node else None
+        traffic_speed_cmd_ms = self.current_speed if hasattr(self, 'current_speed') else self.get_current_speed()
+        vehicle_speed_actual_ms = self.get_actual_vehicle_speed()
         info = {
             'time_elapsed': self.time_elapsed,
             'current_timestep': self.current_timestep,
@@ -316,12 +414,25 @@ class SumoTRSPEnv(gym.Env):
             'ugv_position_idx': self.ugv.position,
             'ugv_target_idx': self.ugv.task_list[0] if self.ugv.task_list else None,
             'ugv_target_junction': junction_id,
+            'current_traffic_segment_idx': self.get_current_segment_index(),
+            'traffic_speed_cmd_ms': traffic_speed_cmd_ms,
+            'traffic_speed_cmd_kmh': self.ms_to_kmh(traffic_speed_cmd_ms),
+            'vehicle_speed_actual_ms': vehicle_speed_actual_ms,
+            'vehicle_speed_actual_kmh': self.ms_to_kmh(vehicle_speed_actual_ms),
+            'speed_changed_this_step': self.speed_changed_this_step,
+            'last_speed_change_time': self.last_speed_change_time,
+            'last_speed_change_from': self.last_speed_change_from,
+            'last_speed_change_to': self.last_speed_change_to,
+            'last_speed_change_segment_from': self.last_speed_change_segment_from,
+            'last_speed_change_segment_to': self.last_speed_change_segment_to,
         }
         return info
     
     def step(self, action):
         if self.terminated:
             return None, None, self.terminated, None, self.info # Return None if already terminated
+
+        self.speed_changed_this_step = False
         
         if self.next_action_manual:
             action = self.next_action
@@ -343,7 +454,7 @@ class SumoTRSPEnv(gym.Env):
     def ugv_handler(self, action):
         if self.ugv.status==2:
             return
-        if self.ugv.veh_id and self.ugv.veh_id in traci.person.getIDList():
+        if self.ugv.veh_id and self.ugv.veh_id in traci.vehicle.getIDList():
             self.ugv.status = 0
             return
         self.ugv.status = 1
@@ -353,41 +464,71 @@ class SumoTRSPEnv(gym.Env):
             return
         move_flag, edge_id, edge_dir = self.ugv.move(act, self.time_elapsed, self.G, self.G_dir, self.node2idx, self.idx2node)
         self.last_move_time = self.time_elapsed
+        self.current_speed = self.get_current_speed()
         
         if move_flag:
-            # # Only track move time if move was successful
-            # route_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}_route"
-            # self.ugv.veh_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}"
-            # # # add person and set a visible color based on UGV id
-            # # if edge_dir==0:
-            # #     traci.person.add(self.ugv.veh_id, edge_id, 0.0)
-            # #     traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
-            # #     traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=-1, speed=self.ugv.max_speed)
-            # # else:
-            # #     traci.person.add(self.ugv.veh_id, edge_id, -1)
-            # #     traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
-            # #     traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=0, speed=self.ugv.max_speed)
-            # # add a vehicle
-            # traci.route.add(route_id, [edge_id])
-            # traci.vehicle.add(self.ugv.veh_id, route_id)
-            # traci.vehicle.setColor(self.ugv.veh_id, (255,0,0,255))
-            # traci.simulationStep()
-            # self.time_elapsed = traci.simulation.getTime()
-            # reached_flag = False
-            # while not reached_flag and self.time_elapsed < self.max_time:
-            #     # if self.ugv.veh_id and self.ugv.veh_id not in traci.person.getIDList():
-            #     if self.ugv.veh_id and self.ugv.veh_id not in traci.vehicle.getIDList():
-            #         self.ugv.status = 1
-            #         reached_flag = True
-            #     traci.simulationStep()
-            #     self.time_elapsed = traci.simulation.getTime()
-            
-            travel_time = min(traci.edge.getTraveltime(edge_id), 25.0)
-            eta = self.time_elapsed + travel_time
-            while self.time_elapsed < eta and self.time_elapsed < self.max_time:
+            # Only track move time if move was successful
+            route_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}_route"
+            self.ugv.veh_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}"
+            # # add person and set a visible color based on UGV id
+            # if edge_dir==0:
+            #     traci.person.add(self.ugv.veh_id, edge_id, 0.0)
+            #     traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
+            #     traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=-1, speed=self.ugv.max_speed)
+            # else:
+            #     traci.person.add(self.ugv.veh_id, edge_id, -1)
+            #     traci.person.setColor(self.ugv.veh_id, (255,0,0,255))
+            #     traci.person.appendWalkingStage(self.ugv.veh_id, [edge_id], arrivalPos=0, speed=self.ugv.max_speed)
+            # add a vehicle
+            traci.route.add(route_id, [edge_id])
+            traci.vehicle.add(self.ugv.veh_id, route_id, departSpeed=self.current_speed)
+            traci.vehicle.setSpeed(self.ugv.veh_id, self.current_speed)
+            traci.vehicle.setColor(self.ugv.veh_id, (255,0,0,255))
+            traci.simulationStep()
+            self.time_elapsed = traci.simulation.getTime()
+            reached_flag = False
+            while not reached_flag and self.time_elapsed < self.max_time:
+                prev_segment_idx = self.get_current_segment_index()
+                prev_speed = self.current_speed
+                # if self.ugv.veh_id and self.ugv.veh_id not in traci.person.getIDList():
+                if self.ugv.veh_id and self.ugv.veh_id not in traci.vehicle.getIDList():
+                    self.ugv.status = 1
+                    reached_flag = True
                 traci.simulationStep()
                 self.time_elapsed = traci.simulation.getTime()
-            self.ugv.status = 1
+                next_speed = self.get_current_speed()
+
+                # veh_sim_speed = traci.vehicle.getSpeed(self.ugv.veh_id) if self.ugv.veh_id and self.ugv.veh_id in traci.vehicle.getIDList() else None
+                # print(
+                #     f"Sim time: {self.time_elapsed:.1f} s | "
+                #     f"UGV speed: {self.format_speed(veh_sim_speed)} | "
+                # )
+                # next_segment_idx = self.get_current_segment_index()
+                # if next_segment_idx != prev_segment_idx:
+                #     self.speed_changed_this_step = True
+                #     self.last_speed_change_time = self.time_elapsed
+                #     self.last_speed_change_from = prev_speed
+                #     self.last_speed_change_to = next_speed
+                #     self.last_speed_change_segment_from = prev_segment_idx
+                #     self.last_speed_change_segment_to = next_segment_idx
+                #     print(
+                #         "[TRAFFIC SPEED CHANGE] "
+                #         f"t={self.time_elapsed:.1f} s | "
+                #         f"segment {prev_segment_idx} -> {next_segment_idx} | "
+                #         f"{self.format_speed(prev_speed)} -> {self.format_speed(next_speed)}"
+                #     )
+
+                if abs(next_speed - self.current_speed) > 1e-3:
+                    self.current_speed = next_speed
+                    if self.ugv.veh_id and self.ugv.veh_id in traci.vehicle.getIDList():
+                        traci.vehicle.setSpeed(self.ugv.veh_id, self.current_speed)
+            
+            # travel_time = min(traci.edge.getTraveltime(edge_id), 25.0)
+            # eta = self.time_elapsed + travel_time
+            # while self.time_elapsed < eta and self.time_elapsed < self.max_time:
+            #     traci.simulationStep()
+            #     self.time_elapsed = traci.simulation.getTime()
+            # self.ugv.status = 1
             
     def task_handler(self):
         self.truncated = False
@@ -397,7 +538,7 @@ class SumoTRSPEnv(gym.Env):
                 self.current_timestep = 0
                 init_node = random.choice(list(self.G.nodes))
                 init_node_idx = self.node2idx[init_node]
-                self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.ugv_speed)
+                self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.current_speed)
                 target_junction_id = random.choice(list(self.junction_list - {self.G.nodes[init_node]['junc_id']}))
                 target_nodes = self.junc2nodes_map[target_junction_id]
                 target_node = target_nodes[np.argmin([self.all_shortest_path_lengths[init_node][tn] for tn in target_nodes])]
@@ -407,7 +548,7 @@ class SumoTRSPEnv(gym.Env):
                 self.current_timestep = 0
                 init_node = random.choice(list(self.G.nodes))
                 init_node_idx = self.node2idx[init_node]
-                self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.ugv_speed)
+                self.ugv = UGVSumo(ugv_id=0, base_position=init_node_idx, max_speed=self.current_speed)
                 target_junction_id = random.choice(list(self.junction_list - {self.G.nodes[init_node]['junc_id']}))
                 target_nodes = self.junc2nodes_map[target_junction_id]
                 target_node = target_nodes[np.argmin([self.all_shortest_path_lengths[init_node][tn] for tn in target_nodes])]
@@ -436,7 +577,7 @@ class SumoTRSPEnv(gym.Env):
 
         else:
             move_time = self.time_elapsed - self.last_move_time
-            total_reward += MOVE_TIME_PENALTY_FAC * move_time
+            total_reward += MOVE_TIME_PENALTY_FAC# * move_time
             if self.truncated:
                 self.truncated = False  # Reset truncated flag after rewarding
                 if self.ugv.task_completed_this_step:
@@ -461,29 +602,41 @@ class SumoTRSPEnv(gym.Env):
         - 'print': print relevant environment information
         - 'quiet': no rendering
         """
-        print("\n" + "="*80)
-        print(f"RENDER - Time: {self.time_elapsed:.2f}s | Timestep: {self.current_timestep}/{self.max_steps}")
-        print(f"Terminated: {self.terminated}")
-        print("-"*80)
-        print("DETAILED UGV STATUS:")
-        print(f"  UGV : Position: {self.ugv.position}m")
-        if self.ugv.task_list:
-            print(f"         Active Task: {self.ugv.task_list[0]} | Tasks Remaining: {len(self.ugv.task_list)}")
-            print(f"         Active Task Junction: {self.G.nodes[self.idx2node[self.ugv.task_list[0]]]['junc_id']}")
-            print(f"         Full Task List: {self.ugv.task_list}")
-        else:
-            print(f"         No tasks remaining")
-        # Check if vehicle exists in SUMO
-        print("-"*80)
-        print(f"ENVIRONMENT STATE:")
-        print(f"  Graph Nodes: {len(self.G.nodes)}, Edges: {len(self.G.edges)}")
-        print(f"  Max Time: {self.max_time}s, Max Steps: {self.max_steps}")
-        print(f"  Step Length: {self.step_length}s")
-        print("="*80)
-        # return
-        
+        if self.render_mode in ['human', 'print']:
+            segment_idx = self.get_current_segment_index()
+            actual_speed_ms = self.get_actual_vehicle_speed()
+            ugv_pos_node = self.idx2node[self.ugv.position] if self.ugv.position is not None else None
+            task_pos_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
+
+            print("\n" + "=" * 80)
+            print(f"Time elapsed: {self.time_elapsed:.2f} s")
+            print(f"Timestep: {self.current_timestep}/{self.max_steps}")
+            print(f"Current traffic segment: {segment_idx}")
+            print(f"Commanded traffic speed: {self.format_speed(self.current_speed)}")
+            print(f"Actual vehicle speed: {self.format_speed(actual_speed_ms)}")
+            print(f"Speed changed this step: {'YES' if self.speed_changed_this_step else 'NO'}")
+            if self.last_speed_change_time is not None:
+                print(
+                    "Last speed change: "
+                    f"t={self.last_speed_change_time:.1f} s | "
+                    f"segment {self.last_speed_change_segment_from} -> {self.last_speed_change_segment_to} | "
+                    f"{self.format_speed(self.last_speed_change_from)} -> "
+                    f"{self.format_speed(self.last_speed_change_to)}"
+                )
+            print(f"Vehicle node: {ugv_pos_node} (idx={self.ugv.position})")
+            print(
+                f"Target node: {task_pos_node} "
+                f"(idx={self.ugv.task_list[0] if self.ugv.task_list else None})"
+            )
+            print(f"Distance traveled: {self.total_ev_distance:.1f} m")
+            print(f"Terminated: {self.terminated} | Truncated: {self.truncated}")
+            print("=" * 80)
+
+        if self.render_mode == 'quiet':
+            return
+
         # Human mode: pygame visualization
-        if True:
+        if self.render_mode == 'human':
             # Initialize pygame display if not already done
             if self.screen is None:
                 pygame.init()
@@ -569,29 +722,63 @@ class SumoTRSPEnv(gym.Env):
                 font = pygame.font.Font(None, 28)
                 y_offset = 10
                 x_offset = self.screen_width - 350  # Position on the right
+                segment_idx = self.get_current_segment_index()
+                actual_speed_ms = self.get_actual_vehicle_speed()
                 
-                # Time and tasks
-                text = font.render(f"Time: {self.time_elapsed:.1f}s | Step: {self.current_timestep}", True, (0, 0, 0))
+                text = font.render(f"Time: {self.time_elapsed:.1f}s", True, (0, 0, 0))
                 self.screen.blit(text, (x_offset, y_offset))
                 y_offset += 30
+                text = font.render(f"Step: {self.current_timestep}/{self.max_steps}", True, (0, 0, 0))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 30
+                text = font.render(f"Seg: {segment_idx}", True, (0, 0, 0))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 30
+                text = font.render(f"Cmd: {self.format_speed(self.current_speed)}", True, (0, 0, 0))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 30
+                text = font.render(f"Actual: {self.format_speed(actual_speed_ms)}", True, (0, 0, 0))
                 self.screen.blit(text, (x_offset, y_offset))
                 y_offset += 30
                 text = font.render(f"Distance: {self.total_ev_distance:.1f}m", True, (0, 0, 0))
                 self.screen.blit(text, (x_offset, y_offset))
                 y_offset += 30
-                
-                # Draw agent status
+
                 font_small = pygame.font.Font(None, 20)
-                text = font_small.render("AGENT STATUS:", True, (0, 0, 0))
+                text = font_small.render(
+                    f"Speed changed this step: {'YES' if self.speed_changed_this_step else 'NO'}",
+                    True,
+                    (0, 0, 0)
+                )
                 self.screen.blit(text, (x_offset, y_offset))
                 y_offset += 25
-                
-                # for i, ugv in enumerate(self.ugv_states):
-                #     status_text = "Moving" if ugv.status == 1 else ("Charging" if ugv.status == 2 else "Idle")
-                #     range_text = f"UGV {i}: {status_text} | Range: {ugv.current_range:.1f}/{self.max_ugv_range}m"
-                #     text = font_small.render(range_text, True, (0, 0, 0))
-                #     self.screen.blit(text, (x_offset + 5, y_offset))
-                #     y_offset += 22
+
+                if self.last_speed_change_time is not None:
+                    last_change_text = (
+                        f"Last change: seg {self.last_speed_change_segment_from}"
+                        f"->{self.last_speed_change_segment_to} @ {self.last_speed_change_time:.1f}s"
+                    )
+                else:
+                    last_change_text = "Last change: N/A"
+                text = font_small.render(last_change_text, True, (0, 0, 0))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 22
+
+                text = font_small.render("Upcoming segments:", True, (0, 0, 0))
+                self.screen.blit(text, (x_offset, y_offset))
+                y_offset += 20
+                for i in range(1, 4):
+                    future_idx = segment_idx + i
+                    if future_idx >= len(self.traffic_speed_segments):
+                        break
+                    future_speed = self.traffic_speed_segments[future_idx]
+                    text = font_small.render(
+                        f"+{i} seg {future_idx}: {self.format_speed(future_speed)}",
+                        True,
+                        (0, 0, 0)
+                    )
+                    self.screen.blit(text, (x_offset, y_offset))
+                    y_offset += 18
                 
                 # Legend on the bottom left
                 legend_y = self.screen_height - 100
