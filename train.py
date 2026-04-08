@@ -43,7 +43,8 @@ if __name__ == "__main__":
     if not args.policy:
         train_config = yaml.safe_load(open(train_config_path, 'r'))
 
-        policy_name = train_config['agent']['algo']
+        # policy_name = train_config['agent']['algo']
+        policy_name = os.urandom(4).hex()
         policy_dir = os.path.join(f"runs/{policy_name}")
         os.makedirs(policy_dir, exist_ok=True)
 

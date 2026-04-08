@@ -50,8 +50,8 @@ class SARSAAgent:
         target_node = int(observation['target_node'])
         # best_dir = int(observation['best_dir'])
         time_slot = int(observation['time_slot'])
-        return (graph_node, target_node, time_slot)
-        # return (graph_node, target_node)
+        # return (graph_node, target_node, time_slot)
+        return (graph_node, target_node)
 
     def predict(self, observation, G=None, idx2node=None, node2idx=None):
         """
@@ -64,7 +64,7 @@ class SARSAAgent:
             idx2node = self.env.unwrapped.idx2node
             node2idx = self.env.unwrapped.node2idx
         state = self._observation_to_state(observation)
-        print("State:", state)
+        # print("State:", state)
         if state not in self.Q:
             # print("State not in Q-table, selecting random action.")
             return random.randint(0, 3)

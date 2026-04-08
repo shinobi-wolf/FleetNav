@@ -96,6 +96,94 @@ def build_graph(net_path):
     return graph_info
 
 
+def build_traffic_model(config, max_time):
+    traffic_cfg = config.get('traffic')
+    if traffic_cfg is None:
+        raise ValueError("Missing 'traffic' section in config")
+
+    required_keys = ['speed_limits', 'speed_step', 'seg_duration', 'seed']
+    missing = [key for key in required_keys if key not in traffic_cfg]
+    if missing:
+        raise ValueError(f"Missing traffic config keys: {missing}")
+
+    speed_limits = traffic_cfg['speed_limits']
+    if not isinstance(speed_limits, (list, tuple)) or len(speed_limits) != 2:
+        raise ValueError("traffic.speed_limits must be [min_kmh, max_kmh]")
+
+    min_speed_kmh = float(speed_limits[0])
+    max_speed_kmh = float(speed_limits[1])
+    speed_step_kmh = float(traffic_cfg['speed_step'])
+    seg_duration_min = float(traffic_cfg['seg_duration'])
+    traffic_seed = int(traffic_cfg['seed'])
+
+    if speed_step_kmh <= 0:
+        raise ValueError("traffic.speed_step must be > 0")
+    if seg_duration_min <= 0:
+        raise ValueError("traffic.seg_duration must be > 0")
+    if max_speed_kmh < min_speed_kmh:
+        raise ValueError("traffic.speed_limits must satisfy min <= max")
+
+    min_speed_ms = min_speed_kmh * 1000.0 / 3600.0
+    max_speed_ms = max_speed_kmh * 1000.0 / 3600.0
+    speed_step_ms = speed_step_kmh * 1000.0 / 3600.0
+    seg_duration_s = seg_duration_min * 60.0
+
+    traffic_speed_range = np.arange(min_speed_ms, max_speed_ms + 1e-9, speed_step_ms, dtype=np.float32)
+    if traffic_speed_range.size == 0:
+        raise ValueError("traffic speed range is empty; check speed limits and speed step")
+
+    num_segments = max(1, int(np.ceil(max_time / seg_duration_s)))
+    rng = np.random.RandomState(traffic_seed)
+    traffic_speed_segments = rng.choice(traffic_speed_range, size=num_segments)
+
+    return {
+        'speed_limits_ms': (float(min_speed_ms), float(max_speed_ms)),
+        'seg_duration_s': float(seg_duration_s),
+        'speed_segments_ms': traffic_speed_segments,
+        'num_segments': num_segments,
+    }
+
+
+def get_current_traffic_segment(current_time, traffic_seg_duration, traffic_speed_segments):
+    if len(traffic_speed_segments) == 0:
+        return -1
+    if current_time < 0:
+        return 0
+
+    segment_index = int(current_time / traffic_seg_duration)
+    return min(segment_index, len(traffic_speed_segments) - 1)
+
+
+def get_current_traffic_speed(current_time, traffic_seg_duration, traffic_speed_segments):
+    segment_index = get_current_traffic_segment(current_time, traffic_seg_duration, traffic_speed_segments)
+    if segment_index < 0:
+        return 0.0
+    return float(traffic_speed_segments[segment_index])
+
+
+def append_result_row(
+    results_path,
+    start_idx,
+    target_idx,
+    warm_up_time,
+    tour_start_time,
+    total_time_taken,
+    path_length,
+    path_edges,
+    traffic_segment_start,
+    traffic_segment_end,
+    traffic_speed_start_ms,
+    traffic_speed_end_ms,
+    failed_error,
+):
+    with open(results_path, 'a') as f:
+        f.write(
+            f"{start_idx},{target_idx},{warm_up_time},{tour_start_time},{total_time_taken},"
+            f"{path_length},{path_edges},{traffic_segment_start},{traffic_segment_end},"
+            f"{traffic_speed_start_ms},{traffic_speed_end_ms},{failed_error}\n"
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description="Road Vehicle Simulation Configuration")
     parser.add_argument('-p', '--policy', type=str, required=False, help="Policy name (e.g., '0d318b44')")
@@ -105,7 +193,8 @@ def main():
         raise ValueError("Please provide a policy ID with -p/--policy")
 
     config_path = f"runs/{args.policy}/config.yaml"
-    config = yaml.safe_load(open(config_path, 'r'))
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
 
     test_counter = 0
     while os.path.exists(f"runs/{args.policy}/test_{test_counter}"):
@@ -120,7 +209,10 @@ def main():
 
     results_path = f"{test_dir}/simulation_results.csv"
     with open(results_path, 'w') as f:
-        f.write("start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges,failed_error\n")
+        f.write(
+            "start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges,"
+            "traffic_segment_start,traffic_segment_end,traffic_speed_start_ms,traffic_speed_end_ms,failed_error\n"
+        )
 
     if config['agent']['algo'] == 'dqn':
         agent = DQNAgent(config)
@@ -147,10 +239,23 @@ def main():
     nodes = sorted(list(G.nodes))
     num_nodes = len(nodes)
     max_steps = config['simulation']['max_steps']
-    max_time = config['simulation']['max_time']
+    max_time = float(config['simulation']['max_time']) * 3600.0
     step_length = config['sumo']['step_length']
     traffic_scale = config['sumo'].get('traffic_scale', 1.0)
     num_actions = config['net']['max_degree']
+    warm_up_time = float(config['simulation'].get('warm_up_time', 1000))
+
+    traffic_model = build_traffic_model(config, max_time)
+    traffic_seg_duration = traffic_model['seg_duration_s']
+    traffic_speed_segments = traffic_model['speed_segments_ms']
+    speed_min_ms, speed_max_ms = traffic_model['speed_limits_ms']
+
+    print(
+        "Traffic model:",
+        f"segment_duration={traffic_seg_duration:.1f}s",
+        f"segments={traffic_model['num_segments']}",
+        f"speed_limits={speed_min_ms:.2f}-{speed_max_ms:.2f}m/s",
+    )
 
     sumo_config = [
         'sumo',
@@ -163,7 +268,7 @@ def main():
         '--no-duration-log',
     ]
 
-    warm_up_times = [1000]
+    warm_up_times = [warm_up_time]
 
     route_times = []
     sim_times = []
@@ -211,6 +316,8 @@ def main():
                         'best_dir': best_dir,
                         'steps2dest': np.array(steps2dest, dtype=np.float32),
                         'sg_pair_idx': sg_idx,
+                        # SARSAAgent reads time_slot from observation.
+                        'time_slot': get_current_traffic_segment(0.0, traffic_seg_duration, traffic_speed_segments),
                     }
                     action = int(agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx))
 
@@ -230,8 +337,21 @@ def main():
                     curr_pos = node2idx[next_pos]
                     curr_node = next_pos
             except KeyError:
-                with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{target_idx},-1,-1,-1,-1,-1,KeyError\n")
+                append_result_row(
+                    results_path,
+                    start_idx,
+                    target_idx,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    'KeyError',
+                )
                 continue
 
             route_calc_time = time.time() - route_start_time
@@ -250,16 +370,40 @@ def main():
 
                     veh_id = f"ugv_{start_idx}_{target_idx}_{int(sim_warmup_time)}"
                     route_id = f"{veh_id}_route"
+                    traffic_segment_start = get_current_traffic_segment(
+                        sim_time,
+                        traffic_seg_duration,
+                        traffic_speed_segments,
+                    )
+                    traffic_speed_start = get_current_traffic_speed(
+                        sim_time,
+                        traffic_seg_duration,
+                        traffic_speed_segments,
+                    )
 
                     try:
                         traci.route.add(route_id, route_edges)
-                        traci.vehicle.add(veh_id, route_id)
+                        traci.vehicle.add(veh_id, route_id, departSpeed=traffic_speed_start)
                     except traci.TraCIException:
                         print(f"Error adding vehicle for route {start_node} -> {target_node} with warmup {sim_warmup_time}s. Skipping simulation.")
-                        with open(results_path, 'a') as f:
-                            f.write(f"{start_idx},{target_idx},-1,-1,-1,-1,-1,Route can't be added\n")
+                        append_result_row(
+                            results_path,
+                            start_idx,
+                            target_idx,
+                            -1,
+                            -1,
+                            -1,
+                            -1,
+                            -1,
+                            -1,
+                            -1,
+                            -1,
+                            -1,
+                            "Route can't be added",
+                        )
                         traci.close()
                         continue
+                    traci.vehicle.setSpeed(veh_id, traffic_speed_start)
                     traci.vehicle.setColor(veh_id, (255, 0, 0, 255))
 
                     traci.simulationStep()
@@ -267,8 +411,25 @@ def main():
                     sim_start_time = sim_time
 
                     while veh_id in traci.vehicle.getIDList() and sim_time < max_time:
+                        curr_speed = get_current_traffic_speed(
+                            sim_time,
+                            traffic_seg_duration,
+                            traffic_speed_segments,
+                        )
+                        traci.vehicle.setSpeed(veh_id, curr_speed)
                         traci.simulationStep()
                         sim_time = traci.simulation.getTime()
+
+                    traffic_segment_end = get_current_traffic_segment(
+                        sim_time,
+                        traffic_seg_duration,
+                        traffic_speed_segments,
+                    )
+                    traffic_speed_end = get_current_traffic_speed(
+                        sim_time,
+                        traffic_seg_duration,
+                        traffic_speed_segments,
+                    )
 
                     total_time_taken = sim_time - sim_start_time
 
@@ -276,14 +437,38 @@ def main():
                     sim_times.append(sim_elapsed_time)
 
                     route_edges_str = ';'.join(route_edges)
-                    with open(results_path, 'a') as f:
-                        f.write(
-                            f"{start_idx},{target_idx},{sim_warmup_time},{sim_start_time},{total_time_taken},{curr_step},{route_edges_str},NA\n"
-                        )
+                    append_result_row(
+                        results_path,
+                        start_idx,
+                        target_idx,
+                        sim_warmup_time,
+                        sim_start_time,
+                        total_time_taken,
+                        curr_step,
+                        route_edges_str,
+                        traffic_segment_start,
+                        traffic_segment_end,
+                        traffic_speed_start,
+                        traffic_speed_end,
+                        'NA',
+                    )
                     traci.close()
             else:
-                with open(results_path, 'a') as f:
-                    f.write(f"{start_idx},{target_idx},-1,-1,-1,-1,-1,No Path\n")
+                append_result_row(
+                    results_path,
+                    start_idx,
+                    target_idx,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    'No Path',
+                )
 
     overall_elapsed_time = time.time() - overall_start_time
 

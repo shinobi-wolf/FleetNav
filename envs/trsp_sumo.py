@@ -374,7 +374,8 @@ class SumoTRSPEnv(gym.Env):
         if task_node:
             junction_idx = self.junc2idx[self.G.nodes[task_node]['junc_id']]
 
-            nb_nodes = list(self.G.neighbors(ugv_node))  # Get up to num_actions neighbors
+            nb_nodes_idx = sorted([self.node2idx[nb] for nb in list(self.G.neighbors(ugv_node))])
+            nb_nodes = [self.idx2node[idx] for idx in nb_nodes_idx]
             steps2dest = []
             for nb_node in nb_nodes:
                 steps2dest.append(self.all_shortest_path_lengths[nb_node][task_node])
@@ -577,7 +578,7 @@ class SumoTRSPEnv(gym.Env):
 
         else:
             move_time = self.time_elapsed - self.last_move_time
-            total_reward += MOVE_TIME_PENALTY_FAC# * move_time
+            total_reward += MOVE_TIME_PENALTY_FAC * move_time
             if self.truncated:
                 self.truncated = False  # Reset truncated flag after rewarding
                 if self.ugv.task_completed_this_step:

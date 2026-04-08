@@ -20,7 +20,7 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "sarsa"],
+            "args": ["-p", "4c64d680"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -44,7 +44,7 @@
             "program": "${workspaceFolder}/test_road.py",
             "console": "integratedTerminal",
             "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "sarsa"],
+            "args": ["-p", "4c64d680"],
             // "args": ["-p", "c75c5609"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
