@@ -1,0 +1,47 @@
+generation_seed: 42
+
+net:
+  net_path: data/grid_road/grid_road.sumocfg
+  warehouse: center
+
+tasks:
+  # Used when gvrp.customer_sampling is density
+  task_density: 30
+  # Optional when gvrp.customer_sampling is count
+  customer_count: 10
+
+fleet:
+  size: 3
+
+gvrp:
+  # customer_sampling: density | count
+  customer_sampling: count
+  customer_count: 10
+  afs_count: 3
+
+  # Units and physical model
+  distance_unit: meters
+  fuel_capacity: 2
+  consumption_rate: 1 # gallons per mile
+  speed_mph: 40.0
+  max_duration_hours: 11.0
+  customer_service_time_hours: 0.5
+  refuel_time_hours: 0.25
+
+  # Dummy node expansion
+  afs_dummy_copies: 3
+  depot_dummy_copies: 3
+
+  # Runtime options
+  plot: true
+  run_single_vehicle_benchmark: false
+  benchmark_target_distance_miles: 354.0
+  benchmark_tolerance: 1e-3
+
+solver:
+  time_limit_seconds: 300
+  output_flag: 1
+  mip_gap: 0.0
+
+output:
+  save_instance_json: generated_gvrp_instance.json

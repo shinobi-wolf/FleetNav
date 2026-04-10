@@ -6,8 +6,10 @@ import networkx as nx
 # from scipy.stats import rankdata
 from collections import defaultdict
 
+import gymnasium as gym
+
 from agents.agent import Agent
-class SARSAAgent(Agent):
+class SARSAAgent:
     """
     SARSA (State-Action-Reward-State-Action) Learning Agent.
     
@@ -16,10 +18,11 @@ class SARSAAgent(Agent):
       
     It uses the environment's reward function.
     """
-    def __init__(self, env=None, policy_path=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self,config):
+        self.config = config
         self.Q = {}
-        self.env = env
+        self.env = gym.make("SumoTRSPEnv-v0", config=config)
+        env = self.env
 
         if hasattr(env.action_space, 'n'):
             self.action_list = list(range(env.action_space.n))
@@ -28,7 +31,9 @@ class SARSAAgent(Agent):
         else:
             raise ValueError("Unsupported action space type.")
 
-        if policy_path is not None:
+        policy_name = config['agent'].get("policy", None)
+        if policy_name:
+            policy_path = os.path.join("runs/sarsa/policy.pkl")
             with open(policy_path, 'rb') as f:
                 self.Q = pickle.load(f)
             print(f"Policy loaded from {policy_path}")
@@ -43,11 +48,10 @@ class SARSAAgent(Agent):
     def _observation_to_state(self, observation):
         graph_node = int(observation['graph_node'])
         target_node = int(observation['target_node'])
-        best_dir = int(observation['best_dir'])
+        # best_dir = int(observation['best_dir'])
+        time_slot = int(observation['time_slot'])
+        # return (graph_node, target_node, time_slot)
         return (graph_node, target_node)
-        # return (graph_node, best_dir)
-        # nb_traffic = observation['nb_traffic'].tolist()
-        # return (graph_node, target_node, *nb_traffic)
 
     def predict(self, observation, G=None, idx2node=None, node2idx=None):
         """
@@ -85,13 +89,14 @@ class SARSAAgent(Agent):
         else:
             return int(np.argmax(self.Q[state]))
 
-    def learn(self, training_config, policy_dir=None, log_path=None):
+    def learn(self, policy_dir):
         """
         Run SARSA learning over multiple episodes. Each episode starts with an env.reset()
         and runs until done or a max number of steps is reached.
         """
-
+        training_config = self.config['training']
         policy_path = policy_dir + '/policy.pkl'
+        log_path = policy_dir + '/train_log.csv'
         training_config = training_config['sarsa']
         results = []
         state_visits = defaultdict(int)       # counts per state

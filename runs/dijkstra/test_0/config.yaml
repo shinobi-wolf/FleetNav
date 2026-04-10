@@ -6,7 +6,7 @@ fleet:
   range: 100000000
 net:
   max_degree: 4
-  net_path: data/rand_grid/rand_grid.sumocfg
+  net_path: data/grid_road/grid_road.sumocfg
 simulation:
   max_steps: 50
   max_time: 15000
@@ -14,10 +14,11 @@ simulation:
   render_mode: human
   start_node_idx: 0
   target_junc_id: '1'
-  warm_up_time: 0
+  vehicle_type: ugv
+  warm_up_time: 2000
 sumo:
   delay: 0
-  step_length: 3
+  step_length: 1
   traffic_scale: 1
 test:
-  mode: smooth
+  mode: road_vehicle

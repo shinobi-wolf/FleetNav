@@ -10,6 +10,7 @@ import gymnasium as gym
 
 import envs
 # from agents import get_agent
+from agents.sarsa import SARSAAgent
 from agents.dqn import DQNAgent
 from agents.ppo import PPOAgent
 
@@ -22,11 +23,13 @@ def lmd_trainer(config, policy_dir, resume=False):
         policy_dir (str): Directory where the policy and model will be saved.
     """
     
-    agent = PPOAgent(config)
+    # agent = PPOAgent(config)
+    agent = SARSAAgent(config)
 
     agent.learn(policy_dir,)
 
 if __name__ == "__main__":
+    # Parse Args
     parser = argparse.ArgumentParser(description="Training Configuration")
     parser.add_argument('-c', '--config', type=str,
                         help='Configuration file path (train: optional, eval/run: optional overrides)')
@@ -34,11 +37,13 @@ if __name__ == "__main__":
                         help="Policy name (required for --eval and --run), e.g. '0d318b44'")
     args = parser.parse_args()
 
+    # Load training configuration
     train_config_path = args.config if args.config else 'config/train.yaml'
     resume = False
     if not args.policy:
         train_config = yaml.safe_load(open(train_config_path, 'r'))
 
+        # policy_name = train_config['agent']['algo']
         policy_name = os.urandom(4).hex()
         policy_dir = os.path.join(f"runs/{policy_name}")
         os.makedirs(policy_dir, exist_ok=True)
