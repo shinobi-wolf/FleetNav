@@ -11,10 +11,10 @@ import sumolib
 import yaml
 from tqdm import tqdm
 
-from agents import get_agent
-from agents.dqn import DQNAgent
-from agents.ppo import PPOAgent
-from agents.sarsa import SARSAAgent
+from dronesim.agents import get_agent
+from dronesim.agents.dqn import DQNAgent
+from dronesim.agents.ppo import PPOAgent
+from dronesim.agents.sarsa import SARSAAgent
 
 INF = 100000
 

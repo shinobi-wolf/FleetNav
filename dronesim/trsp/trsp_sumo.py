@@ -13,7 +13,7 @@ from gymnasium import spaces
 import traci
 import sumolib
 
-from envs.fleet.UGVSumo import UGVSumo
+from dronesim.envs.fleet.UGVSumo import UGVSumo
 import numpy as np
 
 INF = 100000

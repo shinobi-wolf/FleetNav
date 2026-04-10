@@ -6,8 +6,8 @@ import numpy as np
 import time # Added time for potential delay
 import logging
 
-import envs
-from agents import get_agent
+import dronesim.envs as envs
+from dronesim.agents import get_agent
 
 def lmd_trainer(config, policy_dir, resume=False):
     """

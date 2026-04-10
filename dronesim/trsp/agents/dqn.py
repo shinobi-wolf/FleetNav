@@ -12,7 +12,7 @@ import gymnasium as gym
 from gymnasium import spaces
 from stable_baselines3.common.buffers import ReplayBuffer
 
-import envs
+import dronesim.envs as envs
 
 class QNetwork(nn.Module):
     def __init__(self, env):

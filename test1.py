@@ -14,8 +14,8 @@ from collections import defaultdict
 import traci
 import sumolib
 
-import envs
-from agents import get_agent
+import dronesim.envs as envs
+from dronesim.agents import get_agent
 
 def get_centroid(shape):
     """Calculates the center point of a shape (list of x,y tuples)."""

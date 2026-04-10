@@ -3,7 +3,7 @@ import numpy as np
 from stable_baselines3 import A2C
 from stable_baselines3.common.callbacks import BaseCallback
 
-from agents.agent import Agent
+from dronesim.agents.agent import Agent
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     # ...existing code similar to dqn.py...

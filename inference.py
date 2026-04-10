@@ -5,8 +5,8 @@ import gymnasium as gym
 import numpy as np
 import time
 
-import envs
-from agents import get_agent
+import dronesim.envs as envs
+from dronesim.agents import get_agent
 
 def main():
     parser = argparse.ArgumentParser(description="Drone Simulation Configuration")

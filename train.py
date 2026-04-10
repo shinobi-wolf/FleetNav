@@ -8,11 +8,11 @@ import copy
 
 import gymnasium as gym
 
-import envs
+import dronesim.envs as envs
 # from agents import get_agent
-from agents.sarsa import SARSAAgent
-from agents.dqn import DQNAgent
-from agents.ppo import PPOAgent
+from dronesim.agents.sarsa import SARSAAgent
+from dronesim.agents.dqn import DQNAgent
+from dronesim.agents.ppo import PPOAgent
 
 def lmd_trainer(config, policy_dir, resume=False):
     """

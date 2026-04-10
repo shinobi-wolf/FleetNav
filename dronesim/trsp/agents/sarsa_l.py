@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import os
 import random
-from agents.agent import Agent
+from dronesim.agents.agent import Agent
 import networkx as nx
 from scipy.stats import rankdata
 

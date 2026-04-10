@@ -9,7 +9,7 @@ import pygame
 import sumolib
 import traci
 
-from envs.fleet.UGVSumo import UGVSumo
+from dronesim.envs.fleet.UGVSumo import UGVSumo
 
 INF = 100000.0
 

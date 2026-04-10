@@ -8,7 +8,7 @@ from collections import defaultdict
 
 import gymnasium as gym
 
-from agents.agent import Agent
+from dronesim.agents.agent import Agent
 class SARSAAgent:
     """
     SARSA (State-Action-Reward-State-Action) Learning Agent.

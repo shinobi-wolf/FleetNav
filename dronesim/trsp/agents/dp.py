@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import os
 
-from agents.agent import Agent
+from dronesim.agents.agent import Agent
 
 class DPAgent(Agent):
     """

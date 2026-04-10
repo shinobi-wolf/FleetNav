@@ -6,11 +6,11 @@ import logging
 
 import gymnasium as gym
 
-import envs
-from agents import get_agent
-from agents.dqn import DQNAgent
-from agents.ppo import PPOAgent
-from agents.sarsa import SARSAAgent
+import dronesim.envs as envs
+from dronesim.agents import get_agent
+from dronesim.agents.dqn import DQNAgent
+from dronesim.agents.ppo import PPOAgent
+from dronesim.agents.sarsa import SARSAAgent
 
 def setup_logging(mode, log_file="simulation_log.txt"):
     """

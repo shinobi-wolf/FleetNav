@@ -29,7 +29,7 @@ def main():
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
-    from envs.lmd_sumo import SumoLMDEnv
+    from dronesim.evrp.lmd_sumo import SumoLMDEnv
 
     config_path = _resolve_config_path(project_root, args.config)
 

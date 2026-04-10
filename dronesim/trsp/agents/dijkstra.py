@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from agents.agent import Agent
+from dronesim.agents.agent import Agent
 
 class DijkstraAgent(Agent):
     """
