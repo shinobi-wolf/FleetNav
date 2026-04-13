@@ -1,0 +1,14 @@
+# =============================================================================
+# heuristic.yaml  —  RoutingBlocks ALNS heuristic EVRP planner
+# =============================================================================
+# Usage:  python run_sim.py -c config/heuristic.yaml --planner heuristic
+#
+# Inherits all shared settings from base.yaml.
+# Trade-off: no optimality guarantee, but runs in seconds vs minutes for MILP.
+
+base: config/base.yaml
+
+# ── ALNS solver ───────────────────────────────────────────────────────────────
+heuristic:
+  alns_iterations: 300   # more = better quality, longer runtime
+  seed: 42               # set to null for a different solution each run

@@ -1,0 +1,65 @@
+# =============================================================================
+# base.yaml  —  shared parameters inherited by all planner configs
+# =============================================================================
+# Do not run this file directly. Use a planner config that sets `base: config/base.yaml`.
+# Any key in the planner config overrides the corresponding key here.
+
+generation_seed: 42   # node sampling seed; same seed = same instance
+
+# ── Road network ──────────────────────────────────────────────────────────────
+net:
+  net_path: data/rand_grid_road/rand_grid_road.sumocfg  # .sumocfg or .net.xml
+  warehouse: center   # depot: center | random | <explicit SUMO node id>
+
+# ── Problem size ──────────────────────────────────────────────────────────────
+fleet:
+  size: 3
+
+gvrp:
+  customer_sampling: count   # count | density
+  customer_count: 10
+  task_density: 30           # % of nodes; used when customer_sampling: density
+  afs_count: 3
+
+  # Vehicle physics
+  distance_unit: meters      # meters | kilometers | miles
+  fuel_capacity: 7           # gallons
+  consumption_rate: 1        # gallons per mile (converted to distance_unit internally)
+  speed_mph: 40.0            # free-flow planning speed; also simulator speed when traffic disabled
+  max_duration_hours: 11.0   # hard route time limit (MILP constraint)
+  customer_service_time_hours: 0.5
+  refuel_time_hours: 0.25
+
+  # MILP dummy node expansion
+  afs_dummy_copies: 3        # copies of each AFS node in the LP graph
+  depot_dummy_copies: 3      # copies of the depot node in the LP graph
+
+  # Output
+  plot: true
+  run_single_vehicle_benchmark: false
+  benchmark_target_distance_miles: 354.0
+  benchmark_tolerance: 1e-3
+
+# ── Output files ──────────────────────────────────────────────────────────────
+output:
+  save_instance_json: generated_gvrp_instance.json
+  save_metrics_json: sim_metrics.json
+
+# ── SUMO process ──────────────────────────────────────────────────────────────
+sumo:
+  step_length: 1.0    # seconds per TraCI step
+  traffic_scale: 0.0  # background vehicle density; 0 = empty roads
+  delay: 10           # ms GUI delay (render_mode: human only)
+
+# ── Traffic model ─────────────────────────────────────────────────────────────
+traffic:
+  enabled: true
+  speed_limits: [20, 50]  # km/h  [min, max]
+  speed_step: 10          # km/h
+  seg_duration: 5         # minutes per segment
+  seed: 42
+
+# ── Simulation runtime ────────────────────────────────────────────────────────
+simulation:
+  max_time: 12         # hours
+  render_mode: human   # quiet | print | pygame | human

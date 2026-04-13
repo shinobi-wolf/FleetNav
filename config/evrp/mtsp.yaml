@@ -1,0 +1,18 @@
+# =============================================================================
+# mtsp.yaml  —  MTSP baseline (KMeans clustering + nearest-neighbour TSP)
+# =============================================================================
+# Usage:  python run_sim.py -c config/mtsp.yaml --planner mtsp
+#
+# Inherits all shared settings from base.yaml.
+# MTSP ignores fuel constraints — use as a fast distance/makespan baseline.
+
+base: config/base.yaml
+
+# MTSP has no planner-specific parameters.
+# Override shared settings below if needed, e.g.:
+#
+# fleet:
+#   size: 5
+#
+# simulation:
+#   render_mode: pygame

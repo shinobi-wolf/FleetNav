@@ -1,0 +1,39 @@
+      # =============================================================================
+# grid_road_milp.yaml  —  Multi-vehicle MILP instance on the 5x5 grid_road net
+# =============================================================================
+# Usage:  python run_sim.py -c config/grid_road_milp.yaml --planner milp
+#
+# Designed to produce a genuine multi-vehicle solution.
+# Key constraints that force vehicle splitting:
+#   - max_duration_hours: 3.5  (tight; one vehicle can serve ~6 customers max)
+#   - customer_service_time_hours: 0.5  (realistic dwell time)
+#   - 10 customers across the 5x5 grid → at least 2 vehicles required
+
+base: config/base.yaml
+
+generation_seed: 7   # different seed from base for a more spread-out instance
+
+fleet:
+  size: 3            # allow up to 3 vehicles; solver picks the minimum needed
+
+gvrp:
+  customer_count: 10
+  afs_count: 3
+
+  max_duration_hours: 3.5          # tight: forces vehicle splitting
+  customer_service_time_hours: 0.5 # 0.5h per customer → max ~6 per vehicle
+  refuel_time_hours: 0.25
+
+  afs_dummy_copies: 3
+  depot_dummy_copies: 3
+
+  plot: true
+
+solver:
+  time_limit_seconds: 300
+  output_flag: 1     # verbose so you can see the solve progress
+  mip_gap: 0.0
+
+simulation:
+  max_time: 12
+  render_mode: pygame

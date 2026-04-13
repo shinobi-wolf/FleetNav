@@ -1,0 +1,15 @@
+# =============================================================================
+# milp.yaml  —  Exact MILP planner (Erdogan & Miller-Hooks G-VRP)
+# =============================================================================
+# Usage:  python run_sim.py -c config/milp.yaml --planner milp
+#
+# Inherits all shared settings from base.yaml.
+# Only override what differs for this planner.
+
+base: config/base.yaml
+
+# ── MILP solver ───────────────────────────────────────────────────────────────
+solver:
+  time_limit_seconds: 300   # Gurobi wall-clock limit; returns best incumbent if hit
+  output_flag: 0            # 0 = silent, 1 = verbose Gurobi log
+  mip_gap: 0.0              # 0.0 = proven optimal; 0.05 = stop at 5% gap (faster)
