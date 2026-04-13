@@ -6,7 +6,7 @@
 # Inherits all shared settings from base.yaml.
 # Only override what differs for this planner.
 
-base: config/base.yaml
+base: config/evrp/base.yaml
 
 # ── MILP solver ───────────────────────────────────────────────────────────────
 solver:

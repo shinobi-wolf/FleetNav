@@ -70,4 +70,4 @@ traffic:
 # ── Simulation runtime ────────────────────────────────────────────────────────
 simulation:
   max_time: 2             # hours (keep short for sanity checks)
-  render_mode: quiet      # quiet | print | pygame | human
+  render_mode: quiet      # quiet | print | human

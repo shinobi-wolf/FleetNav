@@ -1,9 +1,0 @@
-numpy
-pandas
-networkx
-scikit-learn
-pyyaml
-pyamaze
-matplotlib
-sumolib
-gurobipy

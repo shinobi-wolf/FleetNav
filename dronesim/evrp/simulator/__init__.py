@@ -1,2 +1,2 @@
 """SUMO-based EVRP simulator."""
-from simulator.evrp_sim import EVRPSimulator
+from .evrp_sim import EVRPSimulator

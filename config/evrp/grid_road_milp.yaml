@@ -36,4 +36,4 @@ solver:
 
 simulation:
   max_time: 12
-  render_mode: pygame
+  render_mode: human

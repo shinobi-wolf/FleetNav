@@ -9,8 +9,10 @@ Key differences from the MILP planner
 --------------------------------------
 - No optimality guarantee; quality depends on iteration budget.
 - Runs in seconds (vs minutes for the MILP on large instances).
+- Objective follows the tmp.py heuristic: minimise route makespan with a
+    fixed penalty when fewer than fleet.size routes are used.
 - AFS stations are passed as RoutingBlocks "stations"; the solver inserts
-  them automatically — you don't need dummy copies.
+    them automatically — you don't need dummy copies.
 
 Config keys used (same section as gvrp.yaml)
 ---------------------------------------------
@@ -25,18 +27,14 @@ from __future__ import annotations
 
 import copy
 import random
-import sys
-import os
 import time
 from typing import Any
 
 import numpy as np
 import routingblocks as rb
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from evrp_exact import build_problem_instance_from_config
-from planners.base import BasePlanner, Route, Stop
+from ..evrp_exact import build_problem_instance_from_config
+from .base import BasePlanner, Route, Stop
 
 
 # ---------------------------------------------------------------------------
@@ -100,6 +98,23 @@ class EVRPHeuristicPlanner(BasePlanner):
 
         BIG = 1e9
         BIG_TIME = 1e9
+
+        def makespan(solution: rb.Solution) -> float:
+            """Return max route cost across all routes."""
+            costs = [route.cost for route in solution]
+            return max(costs) if costs else 0.0
+
+        def objective_with_fleet_penalty(
+            solution: rb.Solution,
+            fleet_count: int,
+            penalty: float = 1e6,
+        ) -> float:
+            """Tmp-parity objective: makespan + underused-fleet penalty."""
+            non_empty = sum(1 for route in solution if len(route) > 2)
+            obj = makespan(solution)
+            if non_empty < fleet_count:
+                obj += penalty * (fleet_count - non_empty)
+            return obj
 
         # ── Node ID strings for RoutingBlocks ─────────────────────────────
         # rb needs unique string IDs; we suffix by role to avoid collisions
@@ -223,7 +238,7 @@ class EVRPHeuristicPlanner(BasePlanner):
             rb.create_route(evaluation, instance, b) for b in buckets if b
         ]
         best_sol = rb.Solution(evaluation, instance, init_routes)
-        best_cost = best_sol.cost
+        best_objective = objective_with_fleet_penalty(best_sol, num_vehicles)
 
         # ── Main ALNS loop ─────────────────────────────────────────────────
         for it in range(1, alns_iterations + 1):
@@ -250,15 +265,23 @@ class EVRPHeuristicPlanner(BasePlanner):
                         evaluation, instance,
                         [r for r in opt_routes if not r.empty],
                     )
-                    if fpo_sol.cost < best_cost:
+                    fpo_objective = objective_with_fleet_penalty(
+                        fpo_sol,
+                        num_vehicles,
+                    )
+                    if fpo_objective < best_objective:
                         best_sol = fpo_sol
-                        best_cost = fpo_sol.cost
+                        best_objective = fpo_objective
                 except Exception:
                     pass
 
-            if current.cost < best_cost:
+            current_objective = objective_with_fleet_penalty(
+                current,
+                num_vehicles,
+            )
+            if current_objective < best_objective:
                 best_sol = current
-                best_cost = current.cost
+                best_objective = current_objective
                 alns.collect_score(*picked, 4)
             else:
                 alns.collect_score(*picked, 0)

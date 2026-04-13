@@ -15,7 +15,6 @@ Workflow:
 
 from __future__ import annotations
 
-import argparse
 import json
 import math
 from collections import defaultdict
@@ -25,7 +24,6 @@ from typing import Any
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-import yaml
 from sklearn.manifold import MDS
 
 try:
@@ -47,22 +45,7 @@ else:
     SUMOLIB_IMPORT_ERROR = None
 
 
-DEFAULT_CONFIG_PATH = "config/gvrp.yaml"
 INF = 1e15
-
-
-def load_yaml_config(config_path: str) -> dict[str, Any]:
-    path = Path(config_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Config file not found: {config_path}")
-
-    with path.open("r", encoding="utf-8") as handle:
-        config = yaml.safe_load(handle)
-
-    if not isinstance(config, dict):
-        raise ValueError("Config must be a YAML mapping")
-
-    return config
 
 
 def _resolve_net_xml_path(net_path: str) -> str:
@@ -779,7 +762,7 @@ def _build_plot_coordinates(
     return node_coords
 
 
-def plot_routes(routes: list[dict[str, Any]], coords: np.ndarray, node_types: list[str]) -> None:
+def plot_routes(routes: list[dict[str, Any]], coords: np.ndarray, node_types: list[str], out_path: str | None = None) -> None:
     """Visualize node classes and routes in 2D."""
     if len(routes) == 0:
         print("No routes to plot.")
@@ -860,7 +843,7 @@ def plot_routes(routes: list[dict[str, Any]], coords: np.ndarray, node_types: li
     plt.tight_layout()
 
     if "agg" in plt.get_backend().lower():
-        out_file = "gvrp_routes.png"
+        out_file = out_path or "gvrp_routes.png"
         plt.savefig(out_file, dpi=200)
         print(f"Plot saved to {out_file} (non-GUI backend detected).")
         plt.close(fig)
@@ -936,63 +919,3 @@ def run_single_vehicle_check(
             )
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Build and solve config-driven SUMO G-VRP instance")
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default=DEFAULT_CONFIG_PATH,
-        help="Path to G-VRP YAML config",
-    )
-    parser.add_argument(
-        "--no-plot",
-        action="store_true",
-        help="Disable plotting even when config enables it",
-    )
-    args = parser.parse_args()
-
-    if gp is None:
-        print("gurobipy is required but could not be imported.")
-        print(f"Import error: {GUROBI_IMPORT_ERROR}")
-        return
-
-    if sumolib is None:
-        print("sumolib is required but could not be imported.")
-        print(f"Import error: {SUMOLIB_IMPORT_ERROR}")
-        return
-
-    config = load_yaml_config(args.config)
-    physical_dist, params, physical_meta, generation_info = build_problem_instance_from_config(config)
-
-    params["_physical_meta"] = physical_meta
-    if args.no_plot:
-        params["plot"] = False
-
-    print("\nGenerated SUMO-driven G-VRP physical instance:")
-    print(f"  net: {generation_info['net_xml_path']}")
-    print(f"  seed: {generation_info['seed']}")
-    print(f"  depot: {generation_info['depot_sumo_id']}")
-    print(f"  customers ({len(generation_info['customer_sumo_ids'])}): {generation_info['customer_sumo_ids']}")
-    print(f"  afss ({len(generation_info['afs_sumo_ids'])}): {generation_info['afs_sumo_ids']}")
-    print(f"  distance unit: {params['distance_unit']}")
-
-    maybe_save_instance_json(config, physical_dist, physical_meta, generation_info)
-
-    print("\nSolving generated case...")
-    model = build_gvrp_model(physical_dist, params, physical_meta)
-    result = solve_and_extract(model, physical_dist, params)
-
-    if result["has_solution"] and bool(params.get("plot", True)):
-        coords = _build_plot_coordinates(
-            physical_dist,
-            result["instance"],
-            generation_info["physical_coords"],
-        )
-        plot_routes(result["routes"], coords, result["instance"]["node_types"])
-
-    run_single_vehicle_check(config, physical_dist, params, physical_meta)
-
-
-if __name__ == "__main__":
-    main()

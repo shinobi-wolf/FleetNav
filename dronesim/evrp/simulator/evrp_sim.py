@@ -12,8 +12,14 @@ Workflow
 4. Apply global piecewise traffic model every seg_duration minutes.
 5. Collect metrics and return them.
 
-Traffic model (mirrors lmd_sumo.py)
-------------------------------------
+Render modes
+------------
+  quiet  — no output beyond final metrics.
+  print  — log each vehicle event (customer served, refuel, traffic change).
+  human  — sumo-gui + pygame window; sumo.delay is applied between steps.
+
+Traffic model
+-------------
   - A seeded RNG draws one speed value per time segment from the range
     [speed_min_kmh, speed_max_kmh] in steps of speed_step_kmh.
   - Every seg_duration simulated minutes the commanded speed is updated
@@ -36,8 +42,8 @@ try:
 except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
-from planners.base import Route
-from simulator.pygame_renderer import PygameRenderer
+from ..planners.base import Route
+from .pygame_renderer import PygameRenderer
 
 
 # ---------------------------------------------------------------------------
@@ -225,7 +231,7 @@ class EVRPSimulator:
         self.service_time_s = float(self._gvrp_cfg.get("customer_service_time_hours", 0.5)) * 3600.0
 
         self.render_mode = str(self._sim_cfg.get("render_mode", "quiet")).strip().lower()
-        valid_render_modes = {"quiet", "print", "pygame", "human"}
+        valid_render_modes = {"quiet", "print", "human"}
         if self.render_mode not in valid_render_modes:
             valid_modes_text = ", ".join(sorted(valid_render_modes))
             raise ValueError(
@@ -265,9 +271,9 @@ class EVRPSimulator:
         if self.render_mode == "human":
             sumo_cmd += ["--delay", str(self.gui_delay)]
 
-        # Build pygame renderer if visualization is requested
+        # human mode: sumo-gui + pygame window both active
         renderer: PygameRenderer | None = None
-        if self.render_mode == "pygame":
+        if self.render_mode == "human":
             node_roles = self._collect_node_roles(routes)
             vehicle_ids = [r.vehicle_id for r in routes]
             renderer = PygameRenderer(self._net, node_roles, vehicle_ids)
@@ -310,7 +316,7 @@ class EVRPSimulator:
         sim_time_s = float(traci.simulation.getTime())
         traffic.update(sim_time_s)
 
-        # Render once up front so the pygame window appears immediately in human mode.
+        # Initial draw so the pygame window appears before any vehicle moves.
         if renderer is not None:
             renderer.draw(
                 sim_time_s=sim_time_s,

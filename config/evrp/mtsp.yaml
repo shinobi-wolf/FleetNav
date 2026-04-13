@@ -6,7 +6,7 @@
 # Inherits all shared settings from base.yaml.
 # MTSP ignores fuel constraints — use as a fast distance/makespan baseline.
 
-base: config/base.yaml
+base: config/evrp/base.yaml
 
 # MTSP has no planner-specific parameters.
 # Override shared settings below if needed, e.g.:
@@ -15,4 +15,4 @@ base: config/base.yaml
 #   size: 5
 #
 # simulation:
-#   render_mode: pygame
+#   render_mode: human

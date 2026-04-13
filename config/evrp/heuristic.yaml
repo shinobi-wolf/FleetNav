@@ -6,7 +6,7 @@
 # Inherits all shared settings from base.yaml.
 # Trade-off: no optimality guarantee, but runs in seconds vs minutes for MILP.
 
-base: config/base.yaml
+base: config/evrp/base.yaml
 
 # ── ALNS solver ───────────────────────────────────────────────────────────────
 heuristic:

@@ -1,11 +1,11 @@
-"""Main entry point: plan → simulate → report metrics.
+"""EVRP entry point: plan → simulate → report metrics.
 
 Usage
 -----
-  python run_sim.py -c config/milp.yaml      [--planner milp]
-  python run_sim.py -c config/mtsp.yaml      --planner mtsp
-  python run_sim.py -c config/heuristic.yaml --planner heuristic
-  python run_sim.py -c config/gvrp.yaml      --no-sim   # legacy / sanity-check config
+  python run_sim.py -c config/evrp/milp.yaml      [--planner milp]
+  python run_sim.py -c config/evrp/mtsp.yaml      --planner mtsp
+  python run_sim.py -c config/evrp/heuristic.yaml --planner heuristic
+  python run_sim.py -c config/evrp/milp.yaml      --no-sim
 
 Flags
 -----
@@ -18,6 +18,13 @@ Config inheritance
   A config file may declare `base: path/to/base.yaml`.
   The base is loaded first; the child config deep-merges on top.
   Nested dicts are merged recursively; scalar values are overridden.
+
+Outputs
+-------
+  All result files are written under runs/evrp/:
+    gvrp_routes.png          route visualisation
+    sim_metrics.json         simulation metrics
+    generated_gvrp_instance.json  problem instance (if enabled in config)
 """
 from __future__ import annotations
 
@@ -31,12 +38,14 @@ matplotlib.use("Agg")  # force non-interactive backend so plots always save to P
 
 import yaml
 
-# ── project root on path ──────────────────────────────────────────────────────
+# ── make dronesim importable without an installed package ────────────────────
 sys.path.insert(0, str(Path(__file__).parent))
 
-from evrp_exact import _build_plot_coordinates, plot_routes
-from planners import get_planner
-from planners.gvrp_milp import GVRPMILPPlanner
+from dronesim.evrp.evrp_exact import _build_plot_coordinates, plot_routes, maybe_save_instance_json
+from dronesim.evrp.planners import get_planner
+from dronesim.evrp.planners.gvrp_milp import GVRPMILPPlanner
+
+RUNS_DIR = Path("runs/evrp")
 
 
 # ---------------------------------------------------------------------------
@@ -76,8 +85,12 @@ def load_config(config_path: str) -> dict:
     return _deep_merge(base, child)
 
 
-def _plot_routes(planner, routes) -> None:
-    """Save gvrp_routes.png for any planner that stored physical instance data."""
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _plot_routes(planner, routes, out_path: str) -> None:
+    """Save route plot for any planner that stored physical instance data."""
     if not hasattr(planner, "_last_generation_info"):
         print("  [plot] planner did not store instance data; skipping plot.")
         return
@@ -86,15 +99,13 @@ def _plot_routes(planner, routes) -> None:
     physical_coords = gen_info.get("physical_coords")
 
     if isinstance(planner, GVRPMILPPlanner):
-        # MILP: use the expanded (dummy-node) instance for full fidelity
         coords = _build_plot_coordinates(
             planner._last_physical_dist,
             planner._last_instance,
             physical_coords,
         )
-        plot_routes(planner._last_raw_routes, coords, planner._last_instance["node_types"])
+        plot_routes(planner._last_raw_routes, coords, planner._last_instance["node_types"], out_path=out_path)
     else:
-        # MTSP / heuristic: no dummy expansion — plot physical nodes directly
         meta = planner._last_physical_meta
         sumo_ids: list[str] = meta["physical_sumo_ids"]
         node_types: list[str] = meta["physical_node_types"]
@@ -113,7 +124,7 @@ def _plot_routes(planner, routes) -> None:
             ))
             raw_routes.append({"vehicle": route.vehicle_id, "nodes": nodes, "distance": dist})
 
-        plot_routes(raw_routes, physical_coords, node_types)
+        plot_routes(raw_routes, physical_coords, node_types, out_path=out_path)
 
 
 def _print_routes(routes) -> None:
@@ -144,15 +155,28 @@ def _print_metrics(metrics: dict) -> None:
         )
 
 
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="EVRP planner + SUMO simulator")
-    parser.add_argument("-c", "--config", default="config/gvrp.yaml")
+    parser.add_argument("-c", "--config", default="config/evrp/milp.yaml")
     parser.add_argument("--planner", default="milp", help="Planner name (default: milp)")
     parser.add_argument("--no-sim", action="store_true", help="Skip SUMO simulation")
     parser.add_argument("--no-plot", action="store_true", help="Suppress route plot")
     args = parser.parse_args()
 
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+
     config = load_config(args.config)
+
+    # Redirect output paths in config to runs/evrp/
+    config.setdefault("output", {})
+    if config["output"].get("save_instance_json"):
+        config["output"]["save_instance_json"] = str(RUNS_DIR / Path(config["output"]["save_instance_json"]).name)
+    if config["output"].get("save_metrics_json"):
+        config["output"]["save_metrics_json"] = str(RUNS_DIR / Path(config["output"]["save_metrics_json"]).name)
 
     # ── Plan ─────────────────────────────────────────────────────────────────
     print(f"\n[1/3] Planning with '{args.planner}' planner...")
@@ -160,10 +184,18 @@ def main() -> None:
     routes = planner.plan(config)
     _print_routes(routes)
 
+    maybe_save_instance_json(
+        config,
+        planner._last_physical_dist,
+        planner._last_physical_meta,
+        planner._last_generation_info,
+    )
+
     # ── Optional plot ─────────────────────────────────────────────────────────
     do_plot = bool(config.get("gvrp", {}).get("plot", True)) and not args.no_plot
     if do_plot:
-        _plot_routes(planner, routes)
+        plot_path = str(RUNS_DIR / "gvrp_routes.png")
+        _plot_routes(planner, routes, out_path=plot_path)
 
     # ── Simulate ─────────────────────────────────────────────────────────────
     if args.no_sim:
@@ -171,7 +203,7 @@ def main() -> None:
         return
 
     print("\n[2/3] Starting SUMO simulation...")
-    from simulator import EVRPSimulator
+    from dronesim.evrp.simulator import EVRPSimulator
     sim = EVRPSimulator(config)
     metrics = sim.run(routes)
 
@@ -179,12 +211,9 @@ def main() -> None:
     print("\n[3/3] Results:")
     _print_metrics(metrics)
 
-    out_cfg = config.get("output", {})
-    metrics_path = out_cfg.get("save_metrics_json", "sim_metrics.json")
+    metrics_path = config["output"].get("save_metrics_json", str(RUNS_DIR / "sim_metrics.json"))
     Path(metrics_path).write_text(json.dumps(metrics, indent=2))
     print(f"\n  Metrics saved to {metrics_path}")
-
-
 
 
 if __name__ == "__main__":

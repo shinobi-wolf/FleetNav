@@ -13,17 +13,13 @@ Algorithm
 """
 from __future__ import annotations
 
-import sys
-import os
 from typing import Any
 
 import numpy as np
 from sklearn.cluster import KMeans
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from evrp_exact import build_problem_instance_from_config
-from planners.base import BasePlanner, Route, Stop
+from ..evrp_exact import build_problem_instance_from_config
+from .base import BasePlanner, Route, Stop
 
 
 def _nearest_neighbour_order(

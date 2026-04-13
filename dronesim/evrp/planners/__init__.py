@@ -1,8 +1,8 @@
 """Planner registry for EVRP."""
-from planners.base import BasePlanner, Route, Stop
-from planners.gvrp_milp import GVRPMILPPlanner
-from planners.mtsp import MTSPPlanner
-from planners.evrp_heuristic import EVRPHeuristicPlanner
+from .base import BasePlanner, Route, Stop
+from .gvrp_milp import GVRPMILPPlanner
+from .mtsp import MTSPPlanner
+from .evrp_heuristic import EVRPHeuristicPlanner
 
 REGISTRY: dict[str, type[BasePlanner]] = {
     "milp": GVRPMILPPlanner,

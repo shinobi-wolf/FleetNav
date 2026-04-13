@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Important: Excluded Directories
 
-Do **not** explore, read, or reference any code in folders named `tmp` or files with `tmp` in their name. These include:
-- `tmp/` (top-level)
-- `dronesim/trsp/tmp.py`
-- `dronesim/trsp/tmp.ipynb`
+Do **not** explore, read, or reference any code in `tmp`
+<!-- . These include: -->
+<!-- - `tmp/` (top-level) -->
+<!-- - `dronesim/trsp/tmp.py`
+- `dronesim/trsp/tmp.ipynb` -->
 
 ## Project Overview
 
@@ -93,7 +94,7 @@ Key config sections:
 - `gvrp.*` — customer count, AFS count, fuel/battery capacity, consumption rate, distance unit
 - `solver.*` — MILP time limit, MIP gap (MILP planner only)
 - `traffic.*` — piecewise speed limit range, segment duration (default 5 min)
-- `simulation.render_mode` — `quiet | print | pygame | human`
+- `simulation.render_mode` — `quiet` (silent) | `print` (log events to stdout) | `human` (sumo-gui + pygame window; applies `sumo.delay`)
 
 ### Key Dependencies
 
