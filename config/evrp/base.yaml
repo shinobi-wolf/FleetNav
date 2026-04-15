@@ -49,7 +49,7 @@ output:
 sumo:
   step_length: 1.0    # seconds per TraCI step
   traffic_scale: 0.0  # background vehicle density; 0 = empty roads
-  delay: 2           # ms GUI delay (render_mode: human only)
+  delay: 0           # ms GUI delay (render_mode: human only)
 
 # ── Traffic model ─────────────────────────────────────────────────────────────
 traffic:
@@ -62,4 +62,4 @@ traffic:
 # ── Simulation runtime ────────────────────────────────────────────────────────
 simulation:
   max_time: 12         # hours
-  render_mode: human   # quiet | print | human
+  render_mode: print   # quiet | print | human

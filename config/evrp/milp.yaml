@@ -8,8 +8,10 @@
 
 base: config/evrp/base.yaml
 
+planner: milp
+
 # ── MILP solver ───────────────────────────────────────────────────────────────
 solver:
   time_limit_seconds: 300   # Gurobi wall-clock limit; returns best incumbent if hit
-  output_flag: 0            # 0 = silent, 1 = verbose Gurobi log
+  output_flag: 1            # 0 = silent, 1 = verbose Gurobi log
   mip_gap: 0.0              # 0.0 = proven optimal; 0.05 = stop at 5% gap (faster)

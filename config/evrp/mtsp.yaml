@@ -8,6 +8,8 @@
 
 base: config/evrp/base.yaml
 
+planner: mtsp
+
 # MTSP has no planner-specific parameters.
 # Override shared settings below if needed, e.g.:
 #

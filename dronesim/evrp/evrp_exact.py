@@ -121,6 +121,25 @@ def load_sumo_graph(net_path: str) -> dict[str, Any]:
         for node_id in g_dir.nodes
     }
 
+    # Canonical edges per node — mirrors _node_to_outgoing_edge / _node_to_incoming_edge
+    # in evrp_sim.py so planning distances can match simulation routing distances.
+    canonical_outgoing: dict[str, tuple[str, float]] = {}  # node_id → (to_node_id, length_m)
+    canonical_incoming: dict[str, tuple[str, float]] = {}  # node_id → (from_node_id, length_m)
+    for node in net.getNodes():
+        node_id = node.getID()
+        if node_id.startswith(":"):
+            continue
+        for e in node.getOutgoing():
+            if not e.getID().startswith(":"):
+                elen = float(e.getLength()) if e.getLength() > 0 else 0.0
+                canonical_outgoing[node_id] = (e.getToNode().getID(), elen)
+                break
+        for e in node.getIncoming():
+            if not e.getID().startswith(":"):
+                elen = float(e.getLength()) if e.getLength() > 0 else 0.0
+                canonical_incoming[node_id] = (e.getFromNode().getID(), elen)
+                break
+
     return {
         "net_xml_path": net_xml_path,
         "graph": g_dir,
@@ -128,6 +147,8 @@ def load_sumo_graph(net_path: str) -> dict[str, Any]:
         "node2idx": node2idx,
         "idx2node": idx2node,
         "node_positions": node_positions,
+        "canonical_outgoing": canonical_outgoing,
+        "canonical_incoming": canonical_incoming,
     }
 
 
@@ -259,6 +280,47 @@ def build_distance_matrix_from_shortest_paths(
             dij = dij_meters * factor
             dist[i, j] = dij
             dist[j, i] = dij
+
+    return dist
+
+
+def build_simulation_dist_matrix(
+    selected_node_ids: list[str],
+    graph_data: dict[str, Any],
+    distance_unit: str,
+) -> np.ndarray:
+    """Build directed distance matrix that matches simulation edge-to-edge routing.
+
+    The simulator routes via traci.simulation.findRoute(outgoing_edge(src),
+    incoming_edge(dst)), so the distance includes the full outgoing edge from
+    src and the full incoming edge into dst — not just the junction-to-junction
+    shortest path. This function computes:
+
+        dist[i, j] = out_edge(src).length
+                   + shortest_path(out_edge.to_node, in_edge.from_node)
+                   + in_edge(dst).length
+
+    using the same canonical edge selection as the simulator.
+    """
+    shortest_paths = graph_data["shortest_paths"]
+    canonical_outgoing = graph_data["canonical_outgoing"]
+    canonical_incoming = graph_data["canonical_incoming"]
+    factor = _distance_unit_factor(distance_unit)
+    n = len(selected_node_ids)
+    dist = np.full((n, n), float(INF))
+    np.fill_diagonal(dist, 0.0)
+
+    for i, src in enumerate(selected_node_ids):
+        for j, dst in enumerate(selected_node_ids):
+            if i == j:
+                continue
+            if src not in canonical_outgoing or dst not in canonical_incoming:
+                continue
+            out_to, out_len = canonical_outgoing[src]
+            in_from, in_len = canonical_incoming[dst]
+            mid = shortest_paths.get(out_to, {}).get(in_from, float(INF))
+            if mid < INF:
+                dist[i, j] = (out_len + mid + in_len) * factor
 
     return dist
 

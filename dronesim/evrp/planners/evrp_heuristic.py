@@ -33,7 +33,11 @@ from typing import Any
 import numpy as np
 import routingblocks as rb
 
-from ..evrp_exact import build_problem_instance_from_config
+from ..evrp_exact import (
+    build_problem_instance_from_config,
+    build_simulation_dist_matrix,
+    load_sumo_graph,
+)
 from .base import BasePlanner, Route, Stop
 
 
@@ -90,16 +94,21 @@ class EVRPHeuristicPlanner(BasePlanner):
         if not customer_indices:
             raise ValueError("No customer nodes in instance")
 
-        # Convert distance matrix to miles for consistent battery accounting
-        dist_miles = _scale_dist_to_miles(physical_dist, distance_unit)
-        # Battery consumed per unit distance (gal / mile * miles → gallons)
-        # rb uses cost = distance, battery consumed = r * distance
-        # We'll express all distances in miles so consumption = gal_per_mile
+        # Build simulation-consistent directed distance matrix (miles).
+        # The simulator routes edge-to-edge (outgoing_edge(src) → incoming_edge(dst))
+        # which adds the framing edge lengths on top of the node-to-node graph
+        # distance.  Using node-to-node distances here would make rb underestimate
+        # fuel consumption by ~2-3×, producing infeasible routes.
+        net_xml_path = generation_info["net_xml_path"]
+        graph_data = load_sumo_graph(net_xml_path)
+        # sim_dist is in distance_unit (meters); convert to miles for rb
+        sim_dist_m = build_simulation_dist_matrix(sumo_ids, graph_data, "meters")
+        dist_miles = sim_dist_m * 0.000621371
 
         BIG = 1e9
         BIG_TIME = 1e9
 
-        def makespan(solution: rb.Solution) -> float:
+        def makespan(solution: rb.Solution, fleet_count=0) -> float:
             """Return max route cost across all routes."""
             costs = [route.cost for route in solution]
             return max(costs) if costs else 0.0
@@ -181,7 +190,7 @@ class EVRPHeuristicPlanner(BasePlanner):
         for a_id in all_rb_ids:
             for b_id in all_rb_ids:
                 d = arc_dist(a_id, b_id)
-                builder.add_arc(a_id, b_id, rb.adptw.ArcData(d, d, d))
+                builder.add_arc(a_id, b_id, rb.adptw.ArcData(d, d, d * gal_per_mile))
 
         builder.fleet_size = num_vehicles
         instance = builder.build()
@@ -238,7 +247,7 @@ class EVRPHeuristicPlanner(BasePlanner):
             rb.create_route(evaluation, instance, b) for b in buckets if b
         ]
         best_sol = rb.Solution(evaluation, instance, init_routes)
-        best_objective = objective_with_fleet_penalty(best_sol, num_vehicles)
+        best_objective = makespan(best_sol, num_vehicles)
 
         # ── Main ALNS loop ─────────────────────────────────────────────────
         for it in range(1, alns_iterations + 1):
@@ -265,7 +274,7 @@ class EVRPHeuristicPlanner(BasePlanner):
                         evaluation, instance,
                         [r for r in opt_routes if not r.empty],
                     )
-                    fpo_objective = objective_with_fleet_penalty(
+                    fpo_objective = makespan(
                         fpo_sol,
                         num_vehicles,
                     )
@@ -275,7 +284,7 @@ class EVRPHeuristicPlanner(BasePlanner):
                 except Exception:
                     pass
 
-            current_objective = objective_with_fleet_penalty(
+            current_objective = makespan(
                 current,
                 num_vehicles,
             )
@@ -288,6 +297,13 @@ class EVRPHeuristicPlanner(BasePlanner):
 
             if it % 20 == 0:
                 alns.adapt_operator_weights()
+
+        final_routes = sum(1 for r in best_sol if len(r) > 2)
+        print(
+            f"ALNS complete: makespan={best_objective:.1f}, "
+            f"routes={final_routes}/{num_vehicles}, "
+            f"feasible={best_sol.feasible}"
+        )
 
         # ── Extract routes → list[Route] ───────────────────────────────────
         customer_rb_id_set = set(customer_rb_ids)

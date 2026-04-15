@@ -8,6 +8,8 @@
 
 base: config/evrp/base.yaml
 
+planner: heuristic
+
 # ── ALNS solver ───────────────────────────────────────────────────────────────
 heuristic:
   alns_iterations: 300   # more = better quality, longer runtime

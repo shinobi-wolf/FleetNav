@@ -162,7 +162,6 @@ def _print_metrics(metrics: dict) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="EVRP planner + SUMO simulator")
     parser.add_argument("-c", "--config", default="config/evrp/milp.yaml")
-    parser.add_argument("--planner", default="milp", help="Planner name (default: milp)")
     parser.add_argument("--no-sim", action="store_true", help="Skip SUMO simulation")
     parser.add_argument("--no-plot", action="store_true", help="Suppress route plot")
     args = parser.parse_args()
@@ -179,8 +178,8 @@ def main() -> None:
         config["output"]["save_metrics_json"] = str(RUNS_DIR / Path(config["output"]["save_metrics_json"]).name)
 
     # ── Plan ─────────────────────────────────────────────────────────────────
-    print(f"\n[1/3] Planning with '{args.planner}' planner...")
-    planner = get_planner(args.planner)
+    print(f"\n[1/3] Planning with '{config['planner']}' planner...")
+    planner = get_planner(config['planner'])
     routes = planner.plan(config)
     _print_routes(routes)
 

@@ -2,63 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Dijkstras",
+            "name": "Run Simulation",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/run_sim.py",
             "console": "integratedTerminal",
             "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "dijkstra"],
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            }
-        },
-        {
-            "name": "Run Custom",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "4c64d680"],
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            }
-        },
-        {
-            "name": "Train",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/train.py",
-            "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            // "args": ["-p", "dijkstra"],
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            }
-        },
-        {
-            "name": "Test",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/test_road.py",
-            "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "4c64d680"],
-            // "args": ["-p", "c75c5609"],
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            }
-        },
-        {
-            "name": "Visualize",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/visualize_sumo_simulation.py",
-            "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            // "args": ["dijkstra", "--compare", "sarsa"],
-            "args": ["dijkstra"],
+            "args": ["--config", "${workspaceFolder}/config/evrp/milp.yaml"],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
