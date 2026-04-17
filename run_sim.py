@@ -202,9 +202,10 @@ def main() -> None:
         print("\n[2/3] Simulation skipped (--no-sim).")
         return
 
-    print("\n[2/3] Starting SUMO simulation...")
-    from dronesim.evrp.simulator import EVRPSimulator
-    sim = EVRPSimulator(config)
+    sim_type = config.get("simulation", {}).get("simulator", "sequential")
+    print(f"\n[2/3] Starting SUMO simulation ({sim_type})...")
+    from dronesim.evrp.simulator import get_simulator
+    sim = get_simulator(config)
     metrics = sim.run(routes)
 
     # ── Report ────────────────────────────────────────────────────────────────

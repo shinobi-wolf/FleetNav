@@ -130,7 +130,7 @@ class PygameRenderer:
         self,
         sim_time_s: float,
         traffic_speed_ms: float,
-        vehicle_positions: dict[int, str],     # vehicle_id → sumo_node_id
+        vehicle_positions: dict[int, str | tuple[float, float]],  # node_id or (x, y)
         served_customers: set[str],            # sumo_node_ids already served
         vehicle_states: dict[int, Any],        # vehicle_id → _VehicleState
     ) -> None:
@@ -199,18 +199,22 @@ class PygameRenderer:
                 txt = font.render(label, True, (255, 255, 255))
                 surf.blit(txt, txt.get_rect(center=(px, py)))
 
-    def _draw_vehicles(self, surf: pygame.Surface, vehicle_positions: dict[int, str]) -> None:
+    def _draw_vehicles(
+        self,
+        surf: pygame.Surface,
+        vehicle_positions: dict[int, str | tuple[float, float]],
+    ) -> None:
         font = pygame.font.Font(None, 18)
-        for idx, (vid, nid) in enumerate(vehicle_positions.items()):
-            if nid not in self._node_pos:
-                continue
+        for idx, (vid, pos) in enumerate(vehicle_positions.items()):
             color = VEHICLE_COLORS[idx % len(VEHICLE_COLORS)]
-            px, py = self._transform(*self._node_pos[nid])
+            if isinstance(pos, tuple):
+                px, py = self._transform(pos[0], pos[1])
+            else:
+                if pos not in self._node_pos:
+                    continue
+                px, py = self._transform(*self._node_pos[pos])
 
-            # Slightly offset multiple vehicles at same node
-            offset = idx * 14
-            px += offset
-
+            px += idx * 14  # offset overlapping vehicles at the same location
             pygame.draw.circle(surf, color, (px, py - 18), 9)
             txt = font.render(str(vid), True, (255, 255, 255))
             surf.blit(txt, txt.get_rect(center=(px, py - 18)))
@@ -220,7 +224,7 @@ class PygameRenderer:
         surf: pygame.Surface,
         sim_time_s: float,
         traffic_speed_ms: float,
-        vehicle_positions: dict[int, str],
+        vehicle_positions: dict[int, str | tuple[float, float]],
         served_customers: set[str],
         vehicle_states: dict[int, Any],
     ) -> None:
@@ -259,8 +263,12 @@ class PygameRenderer:
         for idx, vid in enumerate(self._vehicle_ids):
             vs = vehicle_states.get(vid)
             color = VEHICLE_COLORS[idx % len(VEHICLE_COLORS)]
-            cur_node = vehicle_positions.get(vid, "?")
-            self._legend_dot(surf, x, y, color, f"V{vid}  @{cur_node}") ; y += 22
+            pos = vehicle_positions.get(vid, "?")
+            if isinstance(pos, tuple):
+                loc_label = "transit"
+            else:
+                loc_label = str(pos)
+            self._legend_dot(surf, x, y, color, f"V{vid}  @{loc_label}") ; y += 22
             if vs is not None:
                 line(f"  dist={vs.distance_m:.0f}m  fuel={vs.current_fuel:.2f}gal")
                 line(f"  served={vs.customers_served}  recharges={vs.num_recharges}")
