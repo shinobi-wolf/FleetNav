@@ -1,0 +1,31 @@
+# =============================================================================
+# ctvtt_ga.yaml  —  GA planner for Shao et al. 2017 EVRP-CTVTT
+# =============================================================================
+# Usage:  python run_sim.py -c config/evrp/ctvtt_ga.yaml
+#
+# Paper-faithful adaptation with the following simplifications:
+#   - Static travel time (no dynamic Dijkstra); t = d / v
+#   - No soft time windows (no Cp penalty)
+#   - No cargo weight constraints
+#   - T_Ok fixed at 0 (no depot-departure-time search)
+#   - No max_duration_hours constraint in GA (simulator still enforces max_time)
+
+base: config/evrp/base.yaml
+
+planner: ctvtt_ga
+
+# ── CTVTT cost coefficients (paper Table 3) ───────────────────────────────────
+ctvtt:
+  vehicle_fixed_cost: 100     # c_f (yuan per used vehicle)
+  travel_time_cost: 1         # c_t (yuan per minute)
+  charging_cost: 30           # c_c (yuan per recharge event)
+
+# ── GA hyperparameters (paper Table 2) ────────────────────────────────────────
+ga:
+  population_size: 50         # N
+  generations: 300            # T
+  elite_count: 20             # Ne
+  crossover_rate: 0.9         # Pc
+  mutation_rate: 0.1          # Pm
+  max_feasibility_retries: 20 # cap on infeasible crossover/mutation retries
+  seed: 42

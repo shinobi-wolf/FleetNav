@@ -27,7 +27,7 @@ gvrp:
   consumption_rate: 1        # gallons per mile (converted to distance_unit internally)
   speed_mph: 40.0            # free-flow planning speed; also simulator speed when traffic disabled
   max_duration_hours: 5.0   # hard route time limit (MILP constraint)
-  customer_service_time_hours: 0.5
+  customer_service_time_hours: 0
   refuel_time_hours: 0.25
 
   # MILP dummy node expansion
