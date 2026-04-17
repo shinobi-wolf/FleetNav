@@ -72,42 +72,37 @@ scaling constant could not fix it.
 
 ### Fix
 
-Two new pieces were added to `dronesim/evrp/evrp_exact.py`:
+The fix is in the simulator (`dronesim/evrp/simulator/evrp_sim.py`), not in the
+planner. Instead of adapting the planning distances to match a broken routing method,
+the simulator is made to route the same way the planner computes distances.
 
-**1. Canonical edge maps in `load_sumo_graph`**
+**`EVRPSimulator._build_routing_graph`** (new method)
 
-Using the same per-node edge-iteration logic as the simulator's
-`_node_to_outgoing_edge` / `_node_to_incoming_edge`, `load_sumo_graph` now computes:
-
-```
-canonical_outgoing[node_id] = (to_node_id, edge_length_m)
-canonical_incoming[node_id] = (from_node_id, edge_length_m)
-```
-
-These identify exactly which SUMO edge the simulator will depart from / arrive on for
-each junction.
-
-**2. `build_simulation_dist_matrix`**
-
-A new function computes a **directed** distance matrix that matches simulation routing:
-
-```
-dist[i, j] = out_edge(src).length
-           + node_to_node_shortest_path(out_edge.to_node, in_edge.from_node)
-           + in_edge(dst).length
-```
-
-This is the exact distance `traci.simulation.findRoute` will return for that leg.
-
-**In the heuristic planner**, the old symmetric node-to-node `dist_miles` matrix was
-replaced by this simulation-consistent directed matrix:
+Called once in `run()` after the SUMO net is loaded, this builds a `nx.DiGraph`
+from the same net — identical in structure to what `load_sumo_graph` builds in
+`evrp_exact.py`. Every non-internal SUMO edge becomes a directed graph edge with its
+SUMO edge ID stored as a `"id"` attribute and its length in metres as `"length"`:
 
 ```python
-graph_data = load_sumo_graph(net_xml_path)
-sim_dist_m  = build_simulation_dist_matrix(sumo_ids, graph_data, "meters")
-dist_miles  = sim_dist_m * 0.000621371
+for edge in self._net.getEdges():
+    if edge.getID().startswith(":"):
+        continue
+    g.add_edge(from_id, to_id, id=edge.getID(), length=edge.getLength())
 ```
 
-With realistic distances, rb's fuel budget is evaluated against the same distances the
-simulator will actually traverse, so the feasibility flag now reflects whether vehicles
-can complete their routes — including the return to depot — without running out of fuel.
+**`EVRPSimulator._find_edge_route`** (reimplemented)
+
+The old implementation called `traci.simulation.findRoute(outgoing_edge(src),
+incoming_edge(dst))`, which included the framing edges in the measured distance.
+The new implementation uses the nx graph directly:
+
+```python
+node_path = nx.shortest_path(self._routing_graph, src_node, dst_node, weight="length")
+edge_ids  = [graph[u][v]["id"] for u, v in zip(node_path[:-1], node_path[1:])]
+```
+
+`nx.shortest_path` with `weight="length"` finds the exact same minimum-cost node
+sequence that `build_distance_matrix_from_shortest_paths` uses in the planner, so the
+SUMO edges the simulator traverses sum to the same distance that rb used when deciding
+the route was feasible.  The planning–simulation distance gap is eliminated at its
+source.

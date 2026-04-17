@@ -33,11 +33,7 @@ from typing import Any
 import numpy as np
 import routingblocks as rb
 
-from ..evrp_exact import (
-    build_problem_instance_from_config,
-    build_simulation_dist_matrix,
-    load_sumo_graph,
-)
+from ..evrp_exact import build_problem_instance_from_config
 from .base import BasePlanner, Route, Stop
 
 
@@ -94,16 +90,8 @@ class EVRPHeuristicPlanner(BasePlanner):
         if not customer_indices:
             raise ValueError("No customer nodes in instance")
 
-        # Build simulation-consistent directed distance matrix (miles).
-        # The simulator routes edge-to-edge (outgoing_edge(src) → incoming_edge(dst))
-        # which adds the framing edge lengths on top of the node-to-node graph
-        # distance.  Using node-to-node distances here would make rb underestimate
-        # fuel consumption by ~2-3×, producing infeasible routes.
-        net_xml_path = generation_info["net_xml_path"]
-        graph_data = load_sumo_graph(net_xml_path)
-        # sim_dist is in distance_unit (meters); convert to miles for rb
-        sim_dist_m = build_simulation_dist_matrix(sumo_ids, graph_data, "meters")
-        dist_miles = sim_dist_m * 0.000621371
+        # Convert distance matrix to miles for consistent battery accounting
+        dist_miles = _scale_dist_to_miles(physical_dist, distance_unit)
 
         BIG = 1e9
         BIG_TIME = 1e9

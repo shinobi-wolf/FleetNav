@@ -8,7 +8,7 @@ generation_seed: 42   # node sampling seed; same seed = same instance
 
 # ── Road network ──────────────────────────────────────────────────────────────
 net:
-  net_path: data/grid_road/grid_road.sumocfg  # .sumocfg or .net.xml
+  net_path: data/rand_grid_road/rand_grid_road.sumocfg  # .sumocfg or .net.xml
   warehouse: center   # depot: center | random | <explicit SUMO node id>
 
 # ── Problem size ──────────────────────────────────────────────────────────────

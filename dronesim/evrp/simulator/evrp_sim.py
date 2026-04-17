@@ -34,6 +34,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import networkx as nx
 import numpy as np
 
 try:
@@ -251,6 +252,7 @@ class EVRPSimulator:
     def run(self, routes: list[Route]) -> dict[str, Any]:
         """Simulate routes and return metrics dict."""
         self._net = sumolib.net.readNet(self.net_xml_path, withInternal=False)
+        self._routing_graph = self._build_routing_graph()
 
         traffic = _build_traffic_model(
             self.config,
@@ -512,7 +514,7 @@ class EVRPSimulator:
             traffic.update(sim_time_s)
         return sim_time_s
 
-    def _find_edge_route(self, src_node: str, dst_node: str) -> list[str]:
+    def _find_sumo_edge_route(self, src_node: str, dst_node: str) -> list[str]:
         """Use TraCI's built-in router to get edge list from node to node."""
         src_edge = _node_to_outgoing_edge(self._net, src_node)
         dst_edge = _node_to_incoming_edge(self._net, dst_node)
@@ -528,6 +530,46 @@ class EVRPSimulator:
             return edges
         except traci.TraCIException:
             return []
+        
+    def _build_routing_graph(self) -> nx.DiGraph:
+        """Build directed graph from the loaded SUMO net (mirrors load_sumo_graph).
+
+        Each non-internal SUMO edge becomes a DiGraph edge weighted by its length
+        and labelled with its SUMO edge ID.  This graph is used by _find_edge_route
+        so that simulation distances match the planner's shortest-path distances.
+        """
+        g = nx.DiGraph()
+        for edge in self._net.getEdges():
+            edge_id = edge.getID()
+            if edge_id.startswith(":"):
+                continue
+            from_id = edge.getFromNode().getID()
+            to_id = edge.getToNode().getID()
+            length = float(edge.getLength())
+            if length <= 0.0:
+                length = 1.0
+            g.add_edge(from_id, to_id, id=edge_id, length=length)
+        return g
+
+    def _find_edge_route(self, src_node: str, dst_node: str) -> list[str]:
+        """Return SUMO edge ID list for the shortest path from src to dst.
+
+        Uses the nx routing graph (same graph / same weights as the planner)
+        so simulation distances are consistent with planning distances.
+        """
+        try:
+            node_path = nx.shortest_path(
+                self._routing_graph, src_node, dst_node, weight="length"
+            )
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            return []
+
+        edge_ids = []
+        for u, v in zip(node_path[:-1], node_path[1:]):
+            edge_data = self._routing_graph.get_edge_data(u, v)
+            if edge_data:
+                edge_ids.append(edge_data["id"])
+        return edge_ids
 
     @staticmethod
     def _collect_node_roles(routes: list[Route]) -> dict[str, str]:
