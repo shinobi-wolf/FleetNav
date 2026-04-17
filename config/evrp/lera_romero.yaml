@@ -1,0 +1,32 @@
+# =============================================================================
+# lera_romero.yaml  —  TD-EVRP exact solver (Lera-Romero et al. 2024)
+# =============================================================================
+# Usage:  python run_sim.py -c config/evrp/lera_romero.yaml --planner lera_romero
+#         python run_sim.py -c config/evrp/lera_romero.yaml --planner lera_romero --no-sim
+#
+# Formulation:
+#   Traffic is embedded in the MILP via period-indicator binary variables and
+#   Ichoua (2003) FIFO-precharacterized travel times τ_ij(t). Battery
+#   consumption is static (m_u = 0). Full constant-time recharging at AFS.
+#   No time windows. Requires Gurobi license.
+
+base: config/evrp/base.yaml
+
+planner: lera_romero
+
+# ── Traffic model ─────────────────────────────────────────────────────────────
+# Piecewise-constant speed (Ichoua 2003): segment speeds drawn uniformly from
+# [speed_limits[0], speed_limits[1]] in steps of speed_step (km/h).
+# K = ceil(Tmax / seg_duration) periods are precharacterized per arc.
+traffic:
+  enabled: true
+  speed_limits: [20, 50]  # km/h [min, max]
+  speed_step: 10          # km/h
+  seg_duration: 5         # minutes per period
+  seed: 42
+
+# ── Solver ────────────────────────────────────────────────────────────────────
+solver:
+  time_limit_seconds: 300
+  mip_gap: 0.0
+  output_flag: 1
