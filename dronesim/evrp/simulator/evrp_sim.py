@@ -43,7 +43,7 @@ try:
 except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
-from ..planners.base import Route
+from ..planners.base import Route, Stop
 from .pygame_renderer import PygameRenderer
 
 
@@ -121,6 +121,13 @@ class _VehicleState:
         self.current_fuel = max(0.0, self.current_fuel - used)
         self.distance_m += dist_m
         self.energy_kwh += used * self._GAL_TO_KWH
+
+    @property
+    def range_m(self) -> float:
+        """Remaining range in metres given current fuel."""
+        if self.consumption_rate <= 0:
+            return float("inf")
+        return self.current_fuel / self.consumption_rate
 
     def refuel(self) -> None:
         self.current_fuel = self.fuel_capacity
@@ -231,6 +238,7 @@ class EVRPSimulator:
         self.refuel_time_s = float(self._gvrp_cfg.get("refuel_time_hours", 0.25)) * 3600.0
         self.service_time_s = float(self._gvrp_cfg.get("customer_service_time_hours", 0.5)) * 3600.0
 
+        self.runtime_refuel = bool(self._sim_cfg.get("runtime_refuel", True))
         self.render_mode = str(self._sim_cfg.get("render_mode", "quiet")).strip().lower()
         valid_render_modes = {"quiet", "print", "human"}
         if self.render_mode not in valid_render_modes:
@@ -354,38 +362,129 @@ class EVRPSimulator:
         served_customers: set[str],
         vehicle_states: dict[int, _VehicleState],
     ) -> float:
-        """Drive one vehicle through its planned stops. Returns updated sim time."""
+        """Drive one vehicle through its planned stops. Returns updated sim time.
+
+        Fuel constraints enforced at runtime
+        -------------------------------------
+        Before driving to the next planned stop the simulator checks:
+
+        1. **Hard fuel gate** — is there enough fuel to physically reach the
+           next stop?  If not the vehicle's run ends where it is.
+        2. **Range callback** — is there enough fuel to reach the next stop
+           *and* return to the depot from there?  If not the vehicle drives
+           back to the depot first, refuels, then resumes its route.
+        3. **Depot recharge** — any depot visit (planned or unplanned
+           trackback) fully recharges the vehicle.
+        """
         stops = route.stops
         if len(stops) < 2:
             return sim_time_s
 
-        for leg_idx in range(len(stops) - 1):
+        # Identify the depot node from the first stop.
+        depot_node = stops[0].sumo_node_id
+
+        leg_idx = 0
+        while leg_idx < len(stops) - 1:
             src_stop = stops[leg_idx]
             dst_stop = stops[leg_idx + 1]
 
             src_node = src_stop.sumo_node_id
             dst_node = dst_stop.sumo_node_id
 
+            # ── Same-node dummy stops (AFS / depot copies) ────────────
             if src_node == dst_node:
-                # dummy copy of same physical node — no travel needed
                 sim_time_s = self._wait(sim_time_s, self.refuel_time_s, traffic)
                 vs.refuel()
+                leg_idx += 1
                 continue
 
-            # Find edge route between nodes
+            dist_to_next = self._route_distance_m(src_node, dst_node)
+
+            # ── Hard fuel gate ─────────────────────────────────────────
+            # Not enough fuel to even reach the next stop → end run.
+            if vs.range_m < dist_to_next:
+                if self.render_mode in ("print", "human"):
+                    print(
+                        f"  vehicle {vs.vehicle_id} stranded at {src_stop.node_name}: "
+                        f"range={vs.range_m:.1f}m < {dist_to_next:.1f}m to "
+                        f"{dst_stop.node_name}, ending run"
+                    )
+                break
+
+            # ── Range callback (optional) ──────────────────────────────
+            # Check: can the vehicle reach dst *and* still return to depot?
+            dist_dst_to_depot = self._route_distance_m(dst_node, depot_node)
+            if self.runtime_refuel and vs.range_m < dist_to_next + dist_dst_to_depot:
+                # Not enough range for the round-trip — trackback to depot.
+                dist_to_depot = self._route_distance_m(src_node, depot_node)
+
+                if vs.range_m < dist_to_depot:
+                    # Cannot even reach the depot from here → end run.
+                    if self.render_mode in ("print", "human"):
+                        print(
+                            f"  vehicle {vs.vehicle_id} stranded at "
+                            f"{src_stop.node_name}: cannot reach depot, ending run"
+                        )
+                    break
+
+                # Drive back to depot, refuel, then resume from this leg_idx.
+                edge_list = self._find_edge_route(src_node, depot_node)
+                if not edge_list:
+                    if self.render_mode in ("print", "human"):
+                        print(
+                            f"  [warn] vehicle {vs.vehicle_id}: no route to depot "
+                            f"from {src_node}, ending run"
+                        )
+                    break
+
+                dist_m, sim_time_s = self._drive(vs, edge_list, sim_time_s, traffic)
+                vs.consume(dist_m)
+                vehicle_positions[vs.vehicle_id] = depot_node
+
+                # Refuel at depot
+                sim_time_s = self._wait(sim_time_s, self.refuel_time_s, traffic)
+                vs.refuel()
+                if self.render_mode in ("print", "human"):
+                    print(
+                        f"  vehicle {vs.vehicle_id} trackback refuel at depot "
+                        f"t={sim_time_s:.1f}s  fuel={vs.current_fuel:.3f}gal"
+                    )
+
+                if renderer is not None:
+                    renderer.draw(
+                        sim_time_s=sim_time_s,
+                        traffic_speed_ms=traffic.commanded_speed_ms,
+                        vehicle_positions=vehicle_positions,
+                        served_customers=served_customers,
+                        vehicle_states=vehicle_states,
+                    )
+
+                # After refuel, update src to depot and retry this leg.
+                # Replace the source stop with the depot for the next
+                # iteration so _find_edge_route starts from depot.
+                stops[leg_idx] = Stop(
+                    sumo_node_id=depot_node,
+                    node_name="D",
+                    node_type="depot",
+                    planned_fuel=vs.current_fuel,
+                    planned_time=0.0,
+                )
+                continue  # retry leg_idx (now from depot)
+
+            # ── Drive to next stop ─────────────────────────────────────
             edge_list = self._find_edge_route(src_node, dst_node)
             if not edge_list:
-                print(
-                    f"  [warn] vehicle {vs.vehicle_id}: no SUMO route "
-                    f"{src_node} -> {dst_node}, skipping leg"
-                )
+                if self.render_mode in ("print", "human"):
+                    print(
+                        f"  [warn] vehicle {vs.vehicle_id}: no SUMO route "
+                        f"{src_node} -> {dst_node}, skipping leg"
+                    )
+                leg_idx += 1
                 continue
 
-            # Spawn vehicle and advance until it arrives
             dist_m, sim_time_s = self._drive(vs, edge_list, sim_time_s, traffic)
             vs.consume(dist_m)
 
-            # Update position and handle stop type
             vehicle_positions[vs.vehicle_id] = dst_node
             ntype = dst_stop.node_type
 
@@ -407,8 +506,15 @@ class EVRPSimulator:
                         f"  vehicle {vs.vehicle_id} refuelled at {dst_stop.node_name} "
                         f"t={sim_time_s:.1f}s"
                     )
+            elif ntype in ("depot", "depot_dummy"):
+                sim_time_s = self._wait(sim_time_s, self.refuel_time_s, traffic)
+                vs.refuel()
+                if self.render_mode in ("print", "human"):
+                    print(
+                        f"  vehicle {vs.vehicle_id} refuelled at depot "
+                        f"t={sim_time_s:.1f}s"
+                    )
 
-            # Redraw after every stop arrival
             if renderer is not None:
                 renderer.draw(
                     sim_time_s=sim_time_s,
@@ -417,6 +523,8 @@ class EVRPSimulator:
                     served_customers=served_customers,
                     vehicle_states=vehicle_states,
                 )
+
+            leg_idx += 1
 
         return sim_time_s
 
@@ -570,6 +678,17 @@ class EVRPSimulator:
             if edge_data:
                 edge_ids.append(edge_data["id"])
         return edge_ids
+
+    def _route_distance_m(self, src_node: str, dst_node: str) -> float:
+        """Shortest-path distance in metres between two nodes on the routing graph."""
+        try:
+            return float(
+                nx.shortest_path_length(
+                    self._routing_graph, src_node, dst_node, weight="length"
+                )
+            )
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            return float("inf")
 
     @staticmethod
     def _collect_node_roles(routes: list[Route]) -> dict[str, str]:

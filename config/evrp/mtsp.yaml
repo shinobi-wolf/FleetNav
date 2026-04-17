@@ -10,6 +10,14 @@ base: config/evrp/base.yaml
 
 planner: mtsp
 
+simulation:
+  max_time: 12         # hours
+  render_mode: print   # quiet | print | human
+  runtime_refuel: true # when true, vehicles that lack range to reach the next
+                       # stop AND return to depot will trackback to the depot,
+                       # refuel, and resume. Vehicles always strand if they
+                       # cannot reach the next stop regardless of this setting.
+
 # MTSP has no planner-specific parameters.
 # Override shared settings below if needed, e.g.:
 #
