@@ -1,14 +1,12 @@
-"""MILP-based G-VRP planner wrapping evrp_exact.py."""
+"""MILP-based G-VRP planner."""
 from __future__ import annotations
 
 from typing import Any
 
-from ..evrp_exact import (
-    build_problem_instance_from_config,
-    build_gvrp_model,
-    solve_and_extract,
-)
-from .base import BasePlanner, Route, Stop
+from ..instance.builder import build_problem_instance_from_config
+from ..milp.gvrp import build_gvrp_model, solve_and_extract
+from ..routes.base import Route, Stop
+from .base import BasePlanner
 
 
 class GVRPMILPPlanner(BasePlanner):

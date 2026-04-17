@@ -33,8 +33,9 @@ from typing import Any
 import numpy as np
 import routingblocks as rb
 
-from ..evrp_exact import build_problem_instance_from_config
-from .base import BasePlanner, Route, Stop
+from ..instance.builder import build_problem_instance_from_config
+from ..routes.base import Route, Stop
+from .base import BasePlanner
 
 
 # ---------------------------------------------------------------------------

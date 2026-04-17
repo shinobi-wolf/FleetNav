@@ -41,7 +41,8 @@ import yaml
 # ── make dronesim importable without an installed package ────────────────────
 sys.path.insert(0, str(Path(__file__).parent))
 
-from dronesim.evrp.evrp_exact import _build_plot_coordinates, plot_routes, maybe_save_instance_json
+from dronesim.evrp.io.plot import build_plot_coordinates, plot_routes
+from dronesim.evrp.io.instance_json import save_instance_json
 from dronesim.evrp.planners import get_planner
 from dronesim.evrp.planners.gvrp_milp import GVRPMILPPlanner
 
@@ -99,7 +100,7 @@ def _plot_routes(planner, routes, out_path: str) -> None:
     physical_coords = gen_info.get("physical_coords")
 
     if isinstance(planner, GVRPMILPPlanner):
-        coords = _build_plot_coordinates(
+        coords = build_plot_coordinates(
             planner._last_physical_dist,
             planner._last_instance,
             physical_coords,
@@ -183,7 +184,7 @@ def main() -> None:
     routes = planner.plan(config)
     _print_routes(routes)
 
-    maybe_save_instance_json(
+    save_instance_json(
         config,
         planner._last_physical_dist,
         planner._last_physical_meta,

@@ -18,8 +18,9 @@ from typing import Any
 import numpy as np
 from sklearn.cluster import KMeans
 
-from ..evrp_exact import build_problem_instance_from_config
-from .base import BasePlanner, Route, Stop
+from ..instance.builder import build_problem_instance_from_config
+from ..routes.base import Route, Stop
+from .base import BasePlanner
 
 
 def _nearest_neighbour_order(

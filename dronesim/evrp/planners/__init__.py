@@ -1,5 +1,6 @@
 """Planner registry for EVRP."""
-from .base import BasePlanner, Route, Stop
+from ..routes.base import Route, Stop
+from .base import BasePlanner
 from .gvrp_milp import GVRPMILPPlanner
 from .mtsp import MTSPPlanner
 from .evrp_heuristic import EVRPHeuristicPlanner

@@ -29,13 +29,11 @@ Traffic model
 """
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import networkx as nx
-import numpy as np
 
 try:
     import traci  # type: ignore[import-not-found]
@@ -43,20 +41,9 @@ try:
 except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
-from ..planners.base import Route, Stop
+from ..routes.base import Route, Stop
+from ..traffic.segmented import SegmentedSpeedModel, build_traffic_model, _mph_to_ms
 from .pygame_renderer import PygameRenderer
-
-
-# ---------------------------------------------------------------------------
-# Small helpers
-# ---------------------------------------------------------------------------
-
-def _kmh_to_ms(kmh: float) -> float:
-    return kmh / 3.6
-
-
-def _mph_to_ms(mph: float) -> float:
-    return mph * 0.44704
 
 
 def _resolve_net_xml(net_path: str) -> str:
@@ -135,75 +122,6 @@ class _VehicleState:
 
 
 # ---------------------------------------------------------------------------
-# Traffic model
-# ---------------------------------------------------------------------------
-
-@dataclass
-class _TrafficModel:
-    enabled: bool
-    free_flow_ms: float          # used when disabled
-    speed_segments: np.ndarray   # m/s per segment (length = num_segments)
-    seg_duration_s: float        # seconds per segment
-    current_segment: int = -1
-    current_speed_ms: float = 0.0
-
-    def update(self, sim_time_s: float) -> bool:
-        """Return True if speed changed."""
-        if not self.enabled:
-            return False
-        seg = int(sim_time_s / self.seg_duration_s)
-        seg = min(seg, len(self.speed_segments) - 1)
-        if seg != self.current_segment:
-            self.current_segment = seg
-            self.current_speed_ms = float(self.speed_segments[seg])
-            return True
-        return False
-
-    @property
-    def commanded_speed_ms(self) -> float:
-        if not self.enabled:
-            return self.free_flow_ms
-        if self.current_segment < 0:
-            return float(self.speed_segments[0]) if len(self.speed_segments) else self.free_flow_ms
-        return self.current_speed_ms
-
-
-def _build_traffic_model(config: dict[str, Any], free_flow_ms: float, max_time_s: float) -> _TrafficModel:
-    tcfg = config.get("traffic", {})
-    enabled = bool(tcfg.get("enabled", True))
-
-    if not enabled:
-        return _TrafficModel(
-            enabled=False,
-            free_flow_ms=free_flow_ms,
-            speed_segments=np.array([free_flow_ms]),
-            seg_duration_s=1e9,
-        )
-
-    speed_limits_kmh = tcfg.get("speed_limits", [20, 50])
-    speed_step_kmh = float(tcfg.get("speed_step", 5))
-    seg_duration_min = float(tcfg.get("seg_duration", 5))
-    seed = int(tcfg.get("seed", 42))
-
-    lo_ms = _kmh_to_ms(float(speed_limits_kmh[0]))
-    hi_ms = _kmh_to_ms(float(speed_limits_kmh[1]))
-    step_ms = _kmh_to_ms(speed_step_kmh)
-    seg_duration_s = seg_duration_min * 60.0
-
-    speed_range = np.arange(lo_ms, hi_ms + 1e-9, step_ms, dtype=np.float32)
-    num_segs = max(1, int(math.ceil(max_time_s / seg_duration_s)))
-    rng = np.random.default_rng(seed)
-    segments = rng.choice(speed_range, size=num_segs)
-
-    return _TrafficModel(
-        enabled=True,
-        free_flow_ms=free_flow_ms,
-        speed_segments=segments,
-        seg_duration_s=seg_duration_s,
-    )
-
-
-# ---------------------------------------------------------------------------
 # Main simulator class
 # ---------------------------------------------------------------------------
 
@@ -262,7 +180,7 @@ class EVRPSimulator:
         self._net = sumolib.net.readNet(self.net_xml_path, withInternal=False)
         self._routing_graph = self._build_routing_graph()
 
-        traffic = _build_traffic_model(
+        traffic = build_traffic_model(
             self.config,
             free_flow_ms=self.free_flow_ms,
             max_time_s=self.max_time_s,
@@ -305,7 +223,7 @@ class EVRPSimulator:
     # Internal execution
     # ------------------------------------------------------------------
 
-    def _execute(self, routes: list[Route], traffic: _TrafficModel, renderer: PygameRenderer | None) -> dict[str, Any]:
+    def _execute(self, routes: list[Route], traffic: SegmentedSpeedModel, renderer: PygameRenderer | None) -> dict[str, Any]:
         vehicle_states: dict[int, _VehicleState] = {}
         for route in routes:
             vs = _VehicleState(
@@ -354,7 +272,7 @@ class EVRPSimulator:
         self,
         route: Route,
         vs: _VehicleState,
-        traffic: _TrafficModel,
+        traffic: SegmentedSpeedModel,
         sim_time_s: float,
         customer_completion_times: list[float],
         renderer: PygameRenderer | None,
@@ -533,7 +451,7 @@ class EVRPSimulator:
         vs: _VehicleState,
         edge_list: list[str],
         sim_time_s: float,
-        traffic: _TrafficModel,
+        traffic: SegmentedSpeedModel,
     ) -> tuple[float, float]:
         """Add vehicle to SUMO, step until done. Returns (dist_m, new_sim_time_s)."""
         veh_id = f"{vs.veh_id}_leg{self._spawn_counter}"
@@ -612,7 +530,7 @@ class EVRPSimulator:
         return dist_m, sim_time_s
 
     def _wait(
-        self, sim_time_s: float, duration_s: float, traffic: _TrafficModel
+        self, sim_time_s: float, duration_s: float, traffic: SegmentedSpeedModel
     ) -> float:
         """Advance simulation by duration_s without spawning a vehicle."""
         target = sim_time_s + duration_s
