@@ -53,10 +53,10 @@ sumo:
 
 # ── Traffic model ─────────────────────────────────────────────────────────────
 traffic:
-  enabled: false
+  enabled: true
   speed_limits: [20, 50]  # km/h  [min, max]
   speed_step: 10          # km/h
-  seg_duration: 5         # minutes per segment
+  seg_duration: 1         # minutes per segment
   seed: 42
 
 # ── Simulation runtime ────────────────────────────────────────────────────────

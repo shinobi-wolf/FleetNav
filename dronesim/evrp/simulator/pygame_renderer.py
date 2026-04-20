@@ -73,7 +73,8 @@ class PygameRenderer:
 
         # Build node position lookup and edge list once
         self._node_pos: dict[str, tuple[float, float]] = {}
-        self._edges: list[tuple[str, str]] = []
+        self._edges: list[tuple[str, str]] = []   # (from_node, to_node)
+        self._edge_ids: list[str] = []            # parallel SUMO edge ID list
         self._build_graph_geometry()
 
         # Compute transform parameters
@@ -90,11 +91,13 @@ class PygameRenderer:
             self._node_pos[nid] = (float(coord[0]), float(coord[1]))
 
         for edge in self._net.getEdges():
-            if edge.getID().startswith(":"):
+            eid = edge.getID()
+            if eid.startswith(":"):
                 continue
             fn = edge.getFromNode().getID()
             tn = edge.getToNode().getID()
             self._edges.append((fn, tn))
+            self._edge_ids.append(eid)
 
     def _make_transform(self):
         xs = [p[0] for p in self._node_pos.values()]
@@ -133,12 +136,12 @@ class PygameRenderer:
         vehicle_positions: dict[int, str | tuple[float, float]],  # node_id or (x, y)
         served_customers: set[str],            # sumo_node_ids already served
         vehicle_states: dict[int, Any],        # vehicle_id → _VehicleState
+        edge_traffic: dict[str, float] | None = None,  # edge_id → [0, 1] load
     ) -> None:
-        """Redraw the window. Call after every stop arrival."""
+        """Redraw the window."""
         if self._screen is None:
             self._init_window()
 
-        # Pump events so the window stays responsive
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.close()
@@ -147,7 +150,7 @@ class PygameRenderer:
         surf = self._screen
         surf.fill(BG)
 
-        self._draw_edges(surf)
+        self._draw_edges(surf, edge_traffic)
         self._draw_nodes(surf, served_customers)
         self._draw_vehicles(surf, vehicle_positions)
         self._draw_panel(surf, sim_time_s, traffic_speed_ms, vehicle_positions, served_customers, vehicle_states)
@@ -165,13 +168,29 @@ class PygameRenderer:
     # Drawing helpers
     # ------------------------------------------------------------------
 
-    def _draw_edges(self, surf: pygame.Surface) -> None:
-        for fn, tn in self._edges:
+    @staticmethod
+    def _traffic_color(t: float) -> tuple[int, int, int]:
+        """Green (t=0) → yellow (t=0.5) → red (t=1)."""
+        t = max(0.0, min(1.0, t))
+        r = int(255 * min(1.0, 2.0 * t))
+        g = int(255 * min(1.0, 2.0 * (1.0 - t)))
+        return (r, g, 0)
+
+    def _draw_edges(
+        self, surf: pygame.Surface, edge_traffic: dict[str, float] | None
+    ) -> None:
+        for (fn, tn), eid in zip(self._edges, self._edge_ids):
             if fn not in self._node_pos or tn not in self._node_pos:
                 continue
+            if edge_traffic is not None and eid in edge_traffic:
+                color = self._traffic_color(edge_traffic[eid])
+                width = 3
+            else:
+                color = EDGE_COL
+                width = 2
             p1 = self._transform(*self._node_pos[fn])
             p2 = self._transform(*self._node_pos[tn])
-            pygame.draw.line(surf, EDGE_COL, p1, p2, 2)
+            pygame.draw.line(surf, color, p1, p2, width)
 
     def _draw_nodes(self, surf: pygame.Surface, served_customers: set[str]) -> None:
         font = pygame.font.Font(None, 16)

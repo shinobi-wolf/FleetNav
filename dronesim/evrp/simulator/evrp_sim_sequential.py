@@ -247,6 +247,8 @@ class EVRPSequentialSimulator:
         sim_time_s = float(traci.simulation.getTime())
         traffic.update(sim_time_s)
 
+        fleet_size = len(routes)
+
         # Initial draw so the pygame window appears before any vehicle moves.
         if renderer is not None:
             renderer.draw(
@@ -255,6 +257,7 @@ class EVRPSequentialSimulator:
                 vehicle_positions=vehicle_positions,
                 served_customers=served_customers,
                 vehicle_states=vehicle_states,
+                edge_traffic=self._edge_traffic_map(fleet_size),
             )
 
         customer_completion_times: list[float] = []
@@ -378,6 +381,7 @@ class EVRPSequentialSimulator:
                         vehicle_positions=vehicle_positions,
                         served_customers=served_customers,
                         vehicle_states=vehicle_states,
+                        edge_traffic=self._edge_traffic_map(1),
                     )
 
                 # After refuel, update src to depot and retry this leg.
@@ -443,6 +447,7 @@ class EVRPSequentialSimulator:
                     vehicle_positions=vehicle_positions,
                     served_customers=served_customers,
                     vehicle_states=vehicle_states,
+                    edge_traffic=self._edge_traffic_map(1),
                 )
 
             leg_idx += 1
@@ -610,6 +615,21 @@ class EVRPSequentialSimulator:
             )
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return float("inf")
+
+    def _edge_traffic_map(self, fleet_size: int) -> dict[str, float]:
+        """Return {edge_id: load} where load ∈ [0, 1], normalised by fleet_size."""
+        result: dict[str, float] = {}
+        for edge in self._net.getEdges():
+            eid = edge.getID()
+            if eid.startswith(":"):
+                continue
+            try:
+                count = traci.edge.getLastStepVehicleNumber(eid)
+                if count > 0:
+                    result[eid] = min(count / max(1, fleet_size), 1.0)
+            except traci.TraCIException:
+                pass
+        return result
 
     @staticmethod
     def _collect_node_roles(routes: list[Route]) -> dict[str, str]:
