@@ -12,16 +12,14 @@ Formulation notes:
     v^k = v_f (the optimizer picks one per used arc).
   * Five departure intervals M = {1, ..., 5} split by the 3-level profile and
     the Ichoua (2003) FIFO boundary crossings at T1 and T2.
-  * Energy model (Franceschetti 2013 / Bektas-Laporte 2011):
-        E(d, v, f) = alpha * (mu + f) * d  +  beta * d / v  +  gamma * d * v^2
-    CARGO IS RELAXED HERE: f_ij = 0 across all arcs, so the weight module is
-    simply alpha * mu * d.
+  * Energy model SIMPLIFIED: E(arc) = energy_per_meter * d_ij (linear in
+    distance only, independent of speed or load). Franceschetti model dropped.
+  * CARGO IS RELAXED: f_ij = 0 across all arcs; constraints (14),(15) dropped.
   * Departure-time / departure-mode variables t_ij^{mr}, z_ij^{mr} linearize
-    the time-dependent travel time T_ij^{mr} and energy E_ij^{mr} — both are
-    affine in t_ij^{mr}. The identity z_ij^{mr} * t_ij^{mr} = t_ij^{mr}
-    (enforced by constraint (22)) linearizes every T*z and E*z product.
+    the time-dependent travel time T_ij^{mr}. The identity z_ij^{mr} *
+    t_ij^{mr} = t_ij^{mr} (enforced by constraint (22)) linearizes T*z.
 
-Objective (£): energy cost + driver wage + acquisition cost.
+Objective: w_energy * total_energy_J  +  w_makespan * makespan_s.
 """
 from __future__ import annotations
 
@@ -134,49 +132,6 @@ def _travel_coefs(
     return (0.0, 0.0)
 
 
-def _energy_coefs(
-    m: int,
-    d: float,
-    vc: float,
-    vr: float,
-    T1: float,
-    T2: float,
-    alpha: float,
-    beta: float,
-    gamma: float,
-    mu: float,
-) -> tuple[float, float]:
-    """Return (A_E, B_E) such that E(t) = A_E + B_E * t for interval m (f=0).
-
-    Derived from Lu et al. Eq. (5) with f_ij = 0.
-    """
-    weight_term = alpha * mu * d
-
-    if m in (1, 5):
-        # Constant speed vc throughout
-        a = weight_term + beta * d / vc + gamma * d * vc * vc
-        return (a, 0.0)
-    if m == 3:
-        # Constant speed vr throughout
-        a = weight_term + beta * d / vr + gamma * d * vr * vr
-        return (a, 0.0)
-    if m == 2:
-        # E = α μ d + β d/vr + γ d vr^2  +  (T1 - t) · C2
-        # where C2 = β(1 - vc/vr) + γ · vc · (vc^2 - vr^2)
-        c2 = beta * (1.0 - vc / vr) + gamma * vc * (vc * vc - vr * vr)
-        a = weight_term + beta * d / vr + gamma * d * vr * vr + c2 * T1
-        b = -c2
-        return (a, b)
-    if m == 4:
-        # E = α μ d + β d/vc + γ d vc^2  +  (T2 - t) · C4
-        # where C4 = β(1 - vr/vc) + γ · vr · (vr^2 - vc^2)
-        c4 = beta * (1.0 - vr / vc) + gamma * vr * (vr * vr - vc * vc)
-        a = weight_term + beta * d / vc + gamma * d * vc * vc + c4 * T2
-        b = -c4
-        return (a, b)
-    return (0.0, 0.0)
-
-
 # ── Config extraction ─────────────────────────────────────────────────────────
 
 def _read_traffic_lu(config: dict[str, Any], u0_s: float) -> dict[str, Any]:
@@ -209,14 +164,10 @@ def _read_traffic_lu(config: dict[str, Any], u0_s: float) -> dict[str, Any]:
 def _read_cost_model(config: dict[str, Any]) -> dict[str, float]:
     cfg = config.get("cost_model", {})
     return {
-        "alpha": float(cfg.get("alpha", 0.27272)),              # m/s^2
-        "beta": float(cfg.get("beta", 33000.0)),                # J/s  (= 33 kJ/s)
-        "gamma": float(cfg.get("gamma", 4.58339)),              # kg/m
-        "lambda_energy": float(cfg.get("lambda_energy", 0.14 / 3.6e6)),  # £/J
-        "delta_wage": float(cfg.get("delta_wage", 0.0022)),     # £/s
-        "mu_curb": float(cfg.get("mu_curb", 6350.0)),           # kg
-        "h_acquisition": float(cfg.get("h_acquisition", 200.0)),  # £
-        "Q_energy_j": float(cfg.get("energy_capacity_j", 7.2e7)),  # J (20 kWh)
+        "energy_per_meter": float(cfg.get("energy_per_meter", 100.0)),   # J/m
+        "w_energy": float(cfg.get("w_energy", 1.0)),                     # objective weight
+        "w_makespan": float(cfg.get("w_makespan", 1.0)),                 # objective weight
+        "Q_energy_j": float(cfg.get("energy_capacity_j", 7.2e7)),        # J (20 kWh)
     }
 
 
@@ -270,13 +221,9 @@ def build_td_evrp_milp_model(
     T2 = traffic["T2_s"]
 
     cost = _read_cost_model(config)
-    alpha = cost["alpha"]
-    beta = cost["beta"]
-    gamma = cost["gamma"]
-    lam = cost["lambda_energy"]
-    delta = cost["delta_wage"]
-    mu_curb = cost["mu_curb"]
-    h_acq = cost["h_acquisition"]
+    e_per_m = cost["energy_per_meter"]
+    w_energy = cost["w_energy"]
+    w_makespan = cost["w_makespan"]
     Q = cost["Q_energy_j"]
 
     M_set = [1, 2, 3, 4, 5]
@@ -287,14 +234,12 @@ def build_td_evrp_milp_model(
         f"vf={speed_levels[-1]:.2f} m/s T1={T1/3600:.2f}h T2={T2/3600:.2f}h"
     )
 
-    # ── Precompute per-arc (m, r) data, skipping empty intervals ──────────────
+    # ── Precompute per-arc (m, r) travel-time data, skipping empty intervals ───
     valid_mr: dict[tuple[int, int], list[tuple[int, int]]] = {}
     b_lo: dict[tuple[int, int, int, int], float] = {}
     b_hi: dict[tuple[int, int, int, int], float] = {}
     A_T: dict[tuple[int, int, int, int], float] = {}
     B_T: dict[tuple[int, int, int, int], float] = {}
-    A_E: dict[tuple[int, int, int, int], float] = {}
-    B_E: dict[tuple[int, int, int, int], float] = {}
 
     EPS = 1e-9
     for (i, j) in arcs:
@@ -309,13 +254,8 @@ def build_td_evrp_milp_model(
                 b_lo[(i, j, m, r_idx)] = lo
                 b_hi[(i, j, m, r_idx)] = hi
                 at, bt = _travel_coefs(m, d_ij, vc, float(vr), T1, T2)
-                ae, be = _energy_coefs(
-                    m, d_ij, vc, float(vr), T1, T2, alpha, beta, gamma, mu_curb,
-                )
                 A_T[(i, j, m, r_idx)] = at
                 B_T[(i, j, m, r_idx)] = bt
-                A_E[(i, j, m, r_idx)] = ae
-                B_E[(i, j, m, r_idx)] = be
         valid_mr[(i, j)] = combos
 
     # ── Gurobi model ──────────────────────────────────────────────────────────
@@ -343,51 +283,25 @@ def build_td_evrp_milp_model(
         in_nbrs[j].append(i)
 
     # ── Objective ─────────────────────────────────────────────────────────────
-    # Energy cost: λ · Σ E*z = λ · Σ (A_E · z + B_E · t)  (since z·t = t)
-    energy_cost = gp.quicksum(
-        lam * (A_E[k] * z[k] + B_E[k] * t[k]) for k in zmr_keys
+    # Total energy: linear in distance, summed over all used arcs.
+    total_energy = gp.quicksum(
+        e_per_m * float(d_m[i, j]) * x[i, j] for (i, j) in arcs
     )
 
-    # Driver wage — Lu et al. Eq. (7) and (8), extended so the main depot
-    # participates too (vehicles can return directly to the main depot as
-    # well as via depot dummies).
-    # wage at node i = δ · (service_start_i − dep_from_pred_of_i)
-    # For i ∈ C ∪ afs_nodes: dep_from_i = Σ t_{i,·,m,r}; we sum that form.
-    wage_cf = gp.LinExpr()
-    for i in customers + afs_nodes:
-        dep_from_i = gp.quicksum(
-            t[i, j, m, r]
-            for j in out_nbrs[i] for (m, r) in valid_mr[(i, j)]
-        )
-        dep_to_i = gp.quicksum(
-            t[k, i, m, r]
-            for k in in_nbrs[i] for (m, r) in valid_mr[(k, i)]
-        )
-        wage_cf += delta * (dep_from_i - dep_to_i)
+    # Makespan: earliest time by which every vehicle has returned to a depot node.
+    depot_nodes_set = set([depot] + depot_dummies)
+    T_max = model.addVar(lb=0.0, ub=u0_s, vtype=GRB.CONTINUOUS, name="T_max")
+    for (i, j) in arcs:
+        if j not in depot_nodes_set:
+            continue
+        for (m, r) in valid_mr[(i, j)]:
+            arrival = (
+                A_T[(i, j, m, r)] * z[i, j, m, r]
+                + (1.0 + B_T[(i, j, m, r)]) * t[i, j, m, r]
+            )
+            model.addConstr(T_max >= arrival, name=f"c_makespan_{i}_{j}_{m}_{r}")
 
-    wage_depot = gp.LinExpr()
-    for i in [depot] + depot_dummies:
-        dep_to_i = gp.quicksum(
-            t[k, i, m, r]
-            for k in in_nbrs[i] for (m, r) in valid_mr[(k, i)]
-        )
-        arrival_at_i = gp.quicksum(
-            t[k, i, m, r] + A_T[(k, i, m, r)] * z[k, i, m, r]
-            + B_T[(k, i, m, r)] * t[k, i, m, r]
-            for k in in_nbrs[i] for (m, r) in valid_mr[(k, i)]
-        )
-        # For depot dummies mid-route: w_i ≥ arrival (constraint 16). Wage
-        # contribution is δ·(w_i − dep_to_i) which bounds the travel-from-pred
-        # duration. For the main depot (return endpoint) use arrival directly
-        # so the last leg's duration is charged.
-        if i == depot:
-            wage_depot += delta * (arrival_at_i - dep_to_i)
-        else:
-            wage_depot += delta * (w[i] - dep_to_i)
-
-    acquisition_cost = gp.quicksum(h_acq * x[depot, j] for j in out_nbrs[depot])
-
-    model.setObjective(energy_cost + wage_cf + wage_depot + acquisition_cost, GRB.MINIMIZE)
+    model.setObjective(w_energy * total_energy + w_makespan * T_max, GRB.MINIMIZE)
 
     # ── Constraint (10): vehicle count ────────────────────────────────────────
     model.addConstr(
@@ -446,28 +360,24 @@ def build_td_evrp_milp_model(
 
     # (18): time windows — relaxed to [0, u0] via w's lb/ub. No extra constraint.
 
-    # ── Constraint (19)/(20): energy balance to customer successors ───────────
-    # For any predecessor i → customer j:  y_j ≤ y_i − E_ij^{mr}·z + Q·(1 − z)
-    # where y_i already equals Q when i is a refuel node (constraint 21), so
-    # this unifies Lu's (19) and (20).
+    # ── Constraint (19)/(20): energy balance — simplified linear model ────────
+    # E_ij = e_per_m * d_ij (constant, independent of speed). This unifies
+    # Lu's (19) and (20) since y_i = Q at refuel nodes via constraint (21).
     for (i, j) in arcs:
         if j not in customers:
             continue
-        for (m, r) in valid_mr[(i, j)]:
-            E_lin = A_E[(i, j, m, r)] * z[i, j, m, r] + B_E[(i, j, m, r)] * t[i, j, m, r]
-            model.addConstr(
-                y[j] <= y[i] - E_lin + Q * (1 - z[i, j, m, r]),
-                name=f"c19_energy_{i}_{j}_{m}_{r}",
-            )
+        E_arc = e_per_m * float(d_m[i, j])
+        model.addConstr(
+            y[j] <= y[i] - E_arc * x[i, j] + Q * (1 - x[i, j]),
+            name=f"c19_energy_{i}_{j}",
+        )
 
     # Feasibility: vehicle must have enough energy to traverse any used arc.
-    # (Required for arcs ending at refuel nodes, which otherwise bypass 19/20
-    # because y[j] is pinned to Q irrespective of y[i].)
-    for (i, j, m, r) in zmr_keys:
-        E_lin = A_E[(i, j, m, r)] * z[i, j, m, r] + B_E[(i, j, m, r)] * t[i, j, m, r]
+    for (i, j) in arcs:
+        E_arc = e_per_m * float(d_m[i, j])
         model.addConstr(
-            y[i] >= E_lin,
-            name=f"c_energy_feasible_{i}_{j}_{m}_{r}",
+            y[i] >= E_arc * x[i, j],
+            name=f"c_energy_feasible_{i}_{j}",
         )
 
     # ── Constraint (21): full charge at depot and every refuel station ───────
@@ -506,6 +416,7 @@ def build_td_evrp_milp_model(
     model._t = t
     model._w = w
     model._y = y
+    model._T_max = T_max
     model._instance = instance
     model._valid_mr = valid_mr
     model._A_T = A_T
@@ -535,7 +446,29 @@ def _status_name(status_code: int) -> str:
 def solve_and_extract_td_milp(model, params: dict[str, Any]) -> dict[str, Any]:
     """Solve the Lu et al. ILP and return reconstructed routes."""
     _ = params  # reserved for future reporting hooks
-    model.optimize()
+    print("Num Vars:", model.NumVars)
+    print("Num Constrs:", model.NumConstrs)
+    print("Num QConstrs:", model.NumQConstrs)
+    print("Num NZs (nonzeros):", model.NumNZs)
+    model.printStats()
+    try:
+        model.optimize()
+    except Exception as exc:
+        # Provide a focused error when running with Gurobi's size-limited license.
+        is_gurobi_error = gp is not None and isinstance(exc, gp.GurobiError)
+        if is_gurobi_error and "Model too large for size-limited license" in str(exc):
+            inst = getattr(model, "_instance", {}) or {}
+            n_nodes = len(inst.get("V", []))
+            n_arcs = len(inst.get("arcs", []))
+            n_levels = len(getattr(model, "_speed_levels", []))
+            raise RuntimeError(
+                "TD-EVRP MILP solve failed: model exceeds Gurobi size-limited license capacity "
+                f"(|V|={n_nodes}, |A|={n_arcs}, |R|={n_levels}). "
+                "Use an unrestricted license, or reduce model size in config by lowering "
+                "gvrp.customer_count, gvrp.afs_count, gvrp.afs_dummy_copies, "
+                "gvrp.depot_dummy_copies, and traffic_lu.num_speed_levels."
+            ) from exc
+        raise
     status = model.Status
     status_text = _status_name(status)
     has_feasible = model.SolCount > 0
@@ -629,7 +562,8 @@ def solve_and_extract_td_milp(model, params: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
-    print(f"Objective: {objective:.4f}  (energy £ + wage £ + acquisition £)")
+    makespan_s = float(model._T_max.X)
+    print(f"Objective: {objective:.4f}  (w_energy * total_energy_J + w_makespan * makespan_s={makespan_s:.1f}s)")
     for route in routes:
         seq = " -> ".join(node_names[nd] for nd in route["nodes"])
         print(f"  Vehicle {route['vehicle']}: {seq}  [dist={route['distance']:.2f}]")

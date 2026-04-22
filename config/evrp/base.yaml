@@ -28,7 +28,7 @@ gvrp:
   speed_mph: 40.0            # free-flow planning speed; also simulator speed when traffic disabled
   max_duration_hours: 5.0   # hard route time limit (MILP constraint)
   customer_service_time_hours: 0
-  refuel_time_hours: 0.25
+  refuel_time_hours: 0
 
   # MILP dummy node expansion
   afs_dummy_copies: 3        # copies of each AFS node in the LP graph

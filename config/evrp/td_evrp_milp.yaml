@@ -31,20 +31,18 @@ gvrp:
 traffic_lu:
   v_congestion_kmh: 15.0
   v_freeflow_kmh: 50.0
-  num_speed_levels: 3
+  num_speed_levels: 2
   T1_hours: 1.0
   T2_hours: 4.0
 
-# ── Franceschetti (2013) energy & cost parameters (Lu et al. Table 1) ─────────
-# All quantities in SI (meters, seconds, kg, joules) internally.
+# ── Simplified energy & cost model ───────────────────────────────────────────
+# Objective: w_energy * total_energy_J  +  w_makespan * makespan_s.
+# Energy is linear in distance only: E_ij = energy_per_meter * d_ij.
+# Tune w_energy / w_makespan to balance the two terms (units: J vs s).
 cost_model:
-  alpha: 0.27272             # m/s^2    weight module constant
-  beta: 33000.0              # J/s      engine module constant (33 kJ/s)
-  gamma: 4.58339             # kg/m     speed module constant
-  lambda_energy: 3.889e-8    # £/J      (= 0.14 £/kWh ÷ 3.6e6 J/kWh)
-  delta_wage: 0.0022         # £/s      driver's wage per second
-  mu_curb: 6350.0            # kg       curb weight (override for light drones)
-  h_acquisition: 200.0       # £        fixed acquisition cost per vehicle used
+  energy_per_meter: 100.0    # J/m      energy consumed per metre travelled
+  w_energy: 1.0              # objective weight for total energy term
+  w_makespan: 1.0            # objective weight for makespan term
   energy_capacity_j: 7.2e7   # J        battery capacity (= 20 kWh)
 
 # ── Solver ────────────────────────────────────────────────────────────────────
