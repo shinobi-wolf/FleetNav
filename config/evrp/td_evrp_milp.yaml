@@ -35,18 +35,17 @@ traffic_lu:
   T1_hours: 1.0
   T2_hours: 4.0
 
-# ── Simplified energy & cost model ───────────────────────────────────────────
-# Objective: w_energy * total_energy_J  +  w_makespan * makespan_s.
-# Energy is linear in distance only: E_ij = energy_per_meter * d_ij.
-# Tune w_energy / w_makespan to balance the two terms (units: J vs s).
+# ── Objective weights ────────────────────────────────────────────────────────
+# Battery capacity and consumption rate come from gvrp.fuel_capacity /
+# gvrp.consumption_rate (inherited from base.yaml). The planner converts
+# consumption_rate (gal/mile) → gal/m internally to match SI distances.
+# Tune w_energy / w_makespan to balance total-fuel (gal) vs makespan (s).
 cost_model:
-  energy_per_meter: 100.0    # J/m      energy consumed per metre travelled
-  w_energy: 1.0              # objective weight for total energy term
+  w_energy: 1.0              # objective weight for total fuel term
   w_makespan: 1.0            # objective weight for makespan term
-  energy_capacity_j: 7.2e7   # J        battery capacity (= 20 kWh)
 
 # ── Solver ────────────────────────────────────────────────────────────────────
 solver:
-  time_limit_seconds: 600
+  time_limit_seconds: 200
   mip_gap: 0.01
   output_flag: 1

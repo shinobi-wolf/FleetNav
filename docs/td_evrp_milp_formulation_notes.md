@@ -122,13 +122,17 @@ min  w_energy · (Σ_{(i,j)} e_per_m · d_ij · x_ij)  +  w_makespan · T_max
 ```
 
 where:
-- `e_per_m` (J/m) — constant energy consumption per metre, independent of speed or load.
+- `e_per_m` (gal/m) — consumption rate, derived from `gvrp.consumption_rate` (gal/mile) ÷ 1609.344. Source of truth is the same `gvrp` config section used by all other planners.
+- `Q` (gallons) — battery capacity from `gvrp.fuel_capacity`. Same source as every other planner.
 - `T_max` — makespan: the completion time of the last vehicle to return to any depot node, enforced by `T_max ≥ arrival_{i→j}` for all arcs `(i,j)` with `j` a depot-type node.
-- `w_energy`, `w_makespan` — dimensionless objective weights (tune to balance J vs s).
+- `w_energy`, `w_makespan` — dimensionless objective weights in `cost_model` (tune to balance gal vs s).
+
+The effective vehicle range = `Q / e_per_m` = `fuel_capacity_gal * 1609.344 / consumption_rate_gal_per_mile` metres. With base.yaml defaults (7 gal, 1 gal/mile) this is ≈ 11.3 km, which is binding on a small grid network and forces AFS stops for longer routes.
 
 **Consequences:**
+- `energy_capacity_j` and `energy_per_meter` keys removed from `cost_model`; those values are now derived from the shared `gvrp` section.
 - The Franceschetti parameters α, β, γ, the driver wage δ, and the acquisition cost `h` are all dropped.
-- The energy balance constraints (19)/(20) and the arc feasibility constraint simplify: arc energy `E_ij = e_per_m · d_ij` is now a constant coefficient on `x_ij`, not a function of `(m, r)`. This reduces the constraint count from O(|A|·|M|·|R|) to O(|A|) for energy.
+- The energy balance constraints (19)/(20) and the arc feasibility constraint simplify: arc energy `E_ij = e_per_m · d_ij` is a constant coefficient on `x_ij`, not a function of `(m, r)`. This reduces constraint count from O(|A|·|M|·|R|) to O(|A|) for energy.
 - The speed-level and departure-interval variables `z, t` are still needed — they determine the time-dependent travel times that control the makespan.
 
 ## 6. Speed Level Discretisation
@@ -196,12 +200,14 @@ The arc is forbidden, preventing it from appearing in any solution.
 | `traffic_lu` | `num_speed_levels` | 2 | — | Discrete levels in R |
 | `traffic_lu` | `T1_hours` | 1.0 | h | End of morning congestion |
 | `traffic_lu` | `T2_hours` | 4.0 | h | Start of evening congestion |
-| `cost_model` | `energy_per_meter` | 100.0 | J/m | Energy consumed per metre travelled |
-| `cost_model` | `w_energy` | 1.0 | — | Objective weight for total energy |
-| `cost_model` | `w_makespan` | 1.0 | — | Objective weight for makespan |
-| `cost_model` | `energy_capacity_j` | 7.2e7 | J | Battery capacity (≈ 20 kWh) |
+| `gvrp` | `fuel_capacity` | 7.0 | gal | Battery capacity (shared with all planners) |
+| `gvrp` | `consumption_rate` | 1.0 | gal/mile | Consumption rate; planner converts → gal/m |
+| `cost_model` | `w_energy` | 1.0 | — | Objective weight for total-fuel term |
+| `cost_model` | `w_makespan` | 1.0 | — | Objective weight for makespan term |
 
-All distances are converted to SI (meters) and times to seconds before model construction.
+All distances are converted to metres and times to seconds before model construction.
+`gvrp.fuel_capacity` and `gvrp.consumption_rate` are the single source of truth for range
+constraints, shared with the GVRP MILP and heuristic planners.
 
 ---
 

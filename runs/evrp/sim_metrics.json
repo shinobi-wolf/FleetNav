@@ -1,25 +1,40 @@
 {
-  "makespan_s": 539.0,
-  "makespan_h": 0.14972222222222223,
-  "total_distance_m": 8867.39629451774,
-  "total_distance_km": 8.867396294517741,
-  "total_energy_kwh": 185.68513327495418,
-  "total_recharges": 0,
-  "customers_served": 4,
+  "makespan_s": 1188.0,
+  "makespan_h": 0.33,
+  "total_distance_m": 19713.164808209098,
+  "total_distance_km": 19.713164808209097,
+  "total_energy_kwh": 412.7977946521356,
+  "total_recharges": 4,
+  "customers_served": 5,
   "customer_completion_times_s": [
-    181.0,
-    365.0,
-    423.0,
-    539.0
+    116.0,
+    174.0,
+    533.0,
+    950.0,
+    1129.0
   ],
-  "avg_inter_customer_gap_s": 119.33333333333333,
+  "avg_inter_customer_gap_s": 253.25,
   "per_vehicle": {
     "1": {
-      "distance_m": 8867.39629451774,
-      "energy_kwh": 185.68513327495418,
-      "num_recharges": 0,
-      "customers_served": 4,
-      "finish_time_s": 539.0
+      "distance_m": 5891.452610398455,
+      "energy_kwh": 123.3682500263635,
+      "num_recharges": 1,
+      "customers_served": 2,
+      "finish_time_s": 352.0
+    },
+    "2": {
+      "distance_m": 5936.3634200847,
+      "energy_kwh": 124.30869177556471,
+      "num_recharges": 1,
+      "customers_served": 1,
+      "finish_time_s": 714.0
+    },
+    "3": {
+      "distance_m": 7885.3487777259415,
+      "energy_kwh": 165.12085285020743,
+      "num_recharges": 2,
+      "customers_served": 2,
+      "finish_time_s": 1188.0
     }
   }
 }

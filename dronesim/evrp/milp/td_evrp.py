@@ -164,10 +164,8 @@ def _read_traffic_lu(config: dict[str, Any], u0_s: float) -> dict[str, Any]:
 def _read_cost_model(config: dict[str, Any]) -> dict[str, float]:
     cfg = config.get("cost_model", {})
     return {
-        "energy_per_meter": float(cfg.get("energy_per_meter", 100.0)),   # J/m
-        "w_energy": float(cfg.get("w_energy", 1.0)),                     # objective weight
-        "w_makespan": float(cfg.get("w_makespan", 1.0)),                 # objective weight
-        "Q_energy_j": float(cfg.get("energy_capacity_j", 7.2e7)),        # J (20 kWh)
+        "w_energy":   float(cfg.get("w_energy",   1.0)),
+        "w_makespan": float(cfg.get("w_makespan", 1.0)),
     }
 
 
@@ -221,17 +219,23 @@ def build_td_evrp_milp_model(
     T2 = traffic["T2_s"]
 
     cost = _read_cost_model(config)
-    e_per_m = cost["energy_per_meter"]
-    w_energy = cost["w_energy"]
+    w_energy  = cost["w_energy"]
     w_makespan = cost["w_makespan"]
-    Q = cost["Q_energy_j"]
+
+    # Battery constraints — unified with the rest of the system via gvrp config.
+    # consumption_rate is in gal/mile; convert to gal/m to match d_m (always metres).
+    gvrp_cfg = config.get("gvrp", {})
+    Q = float(gvrp_cfg.get("fuel_capacity", 7.0))                   # gallons
+    r_gal_per_mile = float(gvrp_cfg.get("consumption_rate", 1.0))
+    e_per_m = r_gal_per_mile / 1609.344                              # gal/m
 
     M_set = [1, 2, 3, 4, 5]
     R_set = list(range(len(speed_levels)))
     print(
         f"TD-EVRP-MILP (Lu 2020): |V|={len(V)} |A|={len(arcs)} "
         f"K={K_vehicles} |R|={len(R_set)} vc={vc:.2f} m/s "
-        f"vf={speed_levels[-1]:.2f} m/s T1={T1/3600:.2f}h T2={T2/3600:.2f}h"
+        f"vf={speed_levels[-1]:.2f} m/s T1={T1/3600:.2f}h T2={T2/3600:.2f}h "
+        f"Q={Q:.3f} gal  e_per_m={e_per_m:.6f} gal/m"
     )
 
     # ── Precompute per-arc (m, r) travel-time data, skipping empty intervals ───
@@ -245,7 +249,7 @@ def build_td_evrp_milp_model(
     for (i, j) in arcs:
         d_ij = float(d_m[i, j])
         combos: list[tuple[int, int]] = []
-        for r_idx, vr in enumerate(speed_levels):
+        for r_idx, vr in enumerate(speed_levels[1:]): # skip v_c at r=0 since it doesn't define a free-flow interval
             for m in M_set:
                 lo, hi = _interval_bounds(m, d_ij, vc, float(vr), T1, T2, u0_s)
                 if hi - lo <= EPS:
@@ -446,10 +450,6 @@ def _status_name(status_code: int) -> str:
 def solve_and_extract_td_milp(model, params: dict[str, Any]) -> dict[str, Any]:
     """Solve the Lu et al. ILP and return reconstructed routes."""
     _ = params  # reserved for future reporting hooks
-    print("Num Vars:", model.NumVars)
-    print("Num Constrs:", model.NumConstrs)
-    print("Num QConstrs:", model.NumQConstrs)
-    print("Num NZs (nonzeros):", model.NumNZs)
     model.printStats()
     try:
         model.optimize()
