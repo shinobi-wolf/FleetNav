@@ -42,6 +42,7 @@ except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
 from ..routes.base import Route, Stop
+from ..traffic.base import BaseTrafficModel
 from ..traffic.segmented import SegmentedSpeedModel, build_traffic_model, _mph_to_ms
 from .pygame_renderer import PygameRenderer
 
@@ -157,6 +158,7 @@ class EVRPSimulator:
         self.service_time_s = float(self._gvrp_cfg.get("customer_service_time_hours", 0.5)) * 3600.0
 
         self.runtime_refuel = bool(self._sim_cfg.get("runtime_refuel", True))
+        self.use_planned_wait_times = bool(self._sim_cfg.get("use_planned_wait_times", False))
         self.render_mode = str(self._sim_cfg.get("render_mode", "quiet")).strip().lower()
         valid_render_modes = {"quiet", "print", "human"}
         if self.render_mode not in valid_render_modes:
@@ -223,7 +225,7 @@ class EVRPSimulator:
     # Internal execution
     # ------------------------------------------------------------------
 
-    def _execute(self, routes: list[Route], traffic: SegmentedSpeedModel, renderer: PygameRenderer | None) -> dict[str, Any]:
+    def _execute(self, routes: list[Route], traffic: BaseTrafficModel, renderer: PygameRenderer | None) -> dict[str, Any]:
         vehicle_states: dict[int, _VehicleState] = {}
         for route in routes:
             vs = _VehicleState(
@@ -272,7 +274,7 @@ class EVRPSimulator:
         self,
         route: Route,
         vs: _VehicleState,
-        traffic: SegmentedSpeedModel,
+        traffic: BaseTrafficModel,
         sim_time_s: float,
         customer_completion_times: list[float],
         renderer: PygameRenderer | None,
@@ -311,7 +313,12 @@ class EVRPSimulator:
 
             # ── Same-node dummy stops (AFS / depot copies) ────────────
             if src_node == dst_node:
-                sim_time_s = self._wait(sim_time_s, self.refuel_time_s, traffic)
+                wait_s = (
+                    dst_stop.planned_wait_s
+                    if self.use_planned_wait_times and dst_stop.planned_wait_s > 0
+                    else self.refuel_time_s
+                )
+                sim_time_s = self._wait(sim_time_s, wait_s, traffic)
                 vs.refuel()
                 leg_idx += 1
                 continue
@@ -407,7 +414,12 @@ class EVRPSimulator:
             ntype = dst_stop.node_type
 
             if ntype == "customer":
-                sim_time_s = self._wait(sim_time_s, self.service_time_s, traffic)
+                wait_s = (
+                    dst_stop.planned_wait_s
+                    if self.use_planned_wait_times and dst_stop.planned_wait_s > 0
+                    else self.service_time_s
+                )
+                sim_time_s = self._wait(sim_time_s, wait_s, traffic)
                 vs.customers_served += 1
                 served_customers.add(dst_node)
                 customer_completion_times.append(sim_time_s)
@@ -417,7 +429,12 @@ class EVRPSimulator:
                         f"at t={sim_time_s:.1f}s  fuel={vs.current_fuel:.3f}gal"
                     )
             elif ntype in ("afs", "afs_dummy"):
-                sim_time_s = self._wait(sim_time_s, self.refuel_time_s, traffic)
+                wait_s = (
+                    dst_stop.planned_wait_s
+                    if self.use_planned_wait_times and dst_stop.planned_wait_s > 0
+                    else self.refuel_time_s
+                )
+                sim_time_s = self._wait(sim_time_s, wait_s, traffic)
                 vs.refuel()
                 if self.render_mode in ("print", "human"):
                     print(
@@ -425,7 +442,12 @@ class EVRPSimulator:
                         f"t={sim_time_s:.1f}s"
                     )
             elif ntype in ("depot", "depot_dummy"):
-                sim_time_s = self._wait(sim_time_s, self.refuel_time_s, traffic)
+                wait_s = (
+                    dst_stop.planned_wait_s
+                    if self.use_planned_wait_times and dst_stop.planned_wait_s > 0
+                    else self.refuel_time_s
+                )
+                sim_time_s = self._wait(sim_time_s, wait_s, traffic)
                 vs.refuel()
                 if self.render_mode in ("print", "human"):
                     print(
@@ -451,7 +473,7 @@ class EVRPSimulator:
         vs: _VehicleState,
         edge_list: list[str],
         sim_time_s: float,
-        traffic: SegmentedSpeedModel,
+        traffic: BaseTrafficModel,
     ) -> tuple[float, float]:
         """Add vehicle to SUMO, step until done. Returns (dist_m, new_sim_time_s)."""
         veh_id = f"{vs.veh_id}_leg{self._spawn_counter}"
@@ -530,7 +552,7 @@ class EVRPSimulator:
         return dist_m, sim_time_s
 
     def _wait(
-        self, sim_time_s: float, duration_s: float, traffic: SegmentedSpeedModel
+        self, sim_time_s: float, duration_s: float, traffic: BaseTrafficModel
     ) -> float:
         """Advance simulation by duration_s without spawning a vehicle."""
         target = sim_time_s + duration_s

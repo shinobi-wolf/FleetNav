@@ -543,6 +543,22 @@ def solve_and_extract_td_milp(model, params: dict[str, Any]) -> dict[str, Any]:
                     t_val = float(t[prev, nd, m, r].X)
                     T_val = A_T[(prev, nd, m, r)] + B_T[(prev, nd, m, r)] * t_val
                     arrival_s = t_val + T_val
+
+            # departure_s = active t[nd, nxt, m, r] for the arc leaving this node
+            # in THIS route. We must use nodes[idx_in_route+1], not succ[nd],
+            # because succ[depot] contains all vehicles' first stops and would
+            # incorrectly sum departure times across vehicles.
+            if idx_in_route + 1 < len(nodes):
+                nxt = nodes[idx_in_route + 1]
+                departure_s = sum(
+                    t[nd, nxt, m, r].X
+                    for (m, r) in valid_mr.get((nd, nxt), [])
+                )
+            else:
+                departure_s = 0.0
+            service_start_s = float(w[nd].X)
+            wait_s = max(0.0, departure_s - service_start_s)
+
             stops.append(
                 {
                     "node_index": nd,
@@ -550,6 +566,7 @@ def solve_and_extract_td_milp(model, params: dict[str, Any]) -> dict[str, Any]:
                     "sumo_node_id": node_sumo_ids[nd],
                     "fuel": float(y[nd].X),
                     "arrival_time": arrival_s / 3600.0,  # convert s → hours
+                    "wait_time_s": wait_s,
                 }
             )
 

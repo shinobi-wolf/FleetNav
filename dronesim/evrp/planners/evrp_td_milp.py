@@ -51,6 +51,7 @@ class EVRPTDMILPPlanner(BasePlanner):
                         node_type=node_types[idx],
                         planned_fuel=stop_data["fuel"],
                         planned_time=stop_data["arrival_time"],
+                        planned_wait_s=stop_data.get("wait_time_s", 0.0),
                     )
                 )
             routes.append(Route(vehicle_id=raw["vehicle"], stops=stops))

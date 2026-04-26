@@ -52,9 +52,15 @@ def build_traffic_model(
     config: dict[str, Any],
     free_flow_ms: float,
     max_time_s: float,
-) -> SegmentedSpeedModel:
+) -> BaseTrafficModel:
+    from .lu import build_lu_traffic_model  # avoid circular import at module level
+
     tcfg = config.get("traffic", {})
     enabled = bool(tcfg.get("enabled", True))
+    model_name = str(tcfg.get("model", "segmented")).strip().lower()
+
+    if enabled and model_name == "lu":
+        return build_lu_traffic_model(config)
 
     if not enabled:
         return SegmentedSpeedModel(

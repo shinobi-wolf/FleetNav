@@ -12,6 +12,7 @@ class Stop:
     node_type: str          # depot | customer | afs | afs_dummy | depot_dummy
     planned_fuel: float     # gallons at arrival (from planner)
     planned_time: float     # hours at arrival (from planner)
+    planned_wait_s: float = 0.0  # seconds from service-start to departure (td_evrp only)
 
 
 @dataclass
