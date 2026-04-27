@@ -17,15 +17,17 @@ simulation:
   vehicle_type: car
   warm_up_time: 0
 sumo:
-  delay: 0
+  delay: 10
   step_length: 1
   traffic_scale: 0
 test:
   mode: road_vehicle
 traffic:
+  K: 1
+  T: 7200.0
+  enabled: true
   seed: 42
-  seg_duration: 1
-  speed_limits:
-  - 40
-  - 100
-  speed_step: 10
+  speed_profile_type: random
+  speed_step: 60.0
+  v_max: 100.0
+  v_min: 40.0

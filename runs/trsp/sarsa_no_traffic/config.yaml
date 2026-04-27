@@ -1,6 +1,6 @@
 agent:
   algo: sarsa
-  policy: a7739ceb
+  policy: sarsa_no_traffic
 fleet:
   max_speed: 110
 net:
@@ -10,9 +10,11 @@ simulation:
   max_steps: 50
   max_time: 2
   random_sg_pair: true
-  render_mode: human
+  render_mode: print
   warm_up_time: 0
 sumo:
   delay: 0
   step_length: 1.0
   traffic_scale: 0
+traffic:
+  enabled: false

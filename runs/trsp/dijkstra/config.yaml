@@ -5,23 +5,27 @@ fleet:
   max_speed: 110 # km/h
   range: 100000000 # kms
 net:
-  max_degree: 5
+  max_degree: 4
   net_path: data/grid_road/grid_road.sumocfg
 simulation:
   max_steps: 50
   max_time: 2 # hrs
   random_sg_pair: true
-  render_mode: print
+  render_mode: human
   start_node_idx: 0
   target_junc_id: '1'
   vehicle_type: car
   warm_up_time: 0
 traffic:
-  speed_limits: [40, 100] # km/h
-  speed_step: 10 # km/h
-  seg_duration: 1 # min
+  enabled: true
   seed: 42
+  T: 7200.0              # total simulation horizon (seconds)
+  K: 1                   # number of time slots (1 = constant speed per edge)
+  v_min: 40.0            # km/h — minimum speed level
+  v_max: 100.0           # km/h — maximum speed level
+  speed_step: 60.0       # km/h — step size; gives exactly two levels {40, 110}
+  speed_profile_type: random  # random | function | file
 sumo:
-  delay: 0
+  delay: 10
   step_length: 1
   traffic_scale: 0

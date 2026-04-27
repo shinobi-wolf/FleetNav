@@ -9,6 +9,7 @@ import traci
 import sumolib
 
 from dronesim.trsp.fleet.UGVSumo import UGVSumo
+from dronesim.trsp.traffic import PSLTrafficModel
 
 INF = 100000
 
@@ -56,12 +57,19 @@ class SumoTRSPEnv(gym.Env):
         print(f"Graph: {len(self.G.nodes)} nodes, {len(self.G.edges)} edges")
         self.num_sg_pairs = len(self.sg_pairs)
 
+        traffic_cfg = config.get('traffic', {'enabled': False})
+        self.traffic = PSLTrafficModel(
+            traffic_cfg, self.edge_ids, seed=traffic_cfg.get('seed')
+        )
+        self.current_slot = 0
+
         num_nodes = len(self.node2idx)
+        psl_K = self.traffic.K if self.traffic.enabled else 1
         self.action_space = spaces.Discrete(self.num_actions)
         self.observation_space = spaces.Dict({
             'graph_node':  spaces.Discrete(num_nodes),
             'target_node': spaces.Discrete(num_nodes),
-            'steps2dest':  spaces.Box(low=0, high=INF, shape=(self.num_actions,), dtype=np.float32),
+            'time_slot':   spaces.Discrete(psl_K),
             'best_dir':    spaces.Discrete(self.num_actions),
         })
 
@@ -113,6 +121,7 @@ class SumoTRSPEnv(gym.Env):
             edge_tt = edge_length / self.ugv_speed
             G.add_edge(n2.getID(), n1.getID(), length=edge_length, id=eid, edge_tt=edge_tt)
 
+        self.edge_ids = [data['id'] for _, _, data in G.edges(data=True)]
         G_und = G.to_undirected()
         all_spl = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
 
@@ -173,6 +182,10 @@ class SumoTRSPEnv(gym.Env):
         while self.time_elapsed < self.warmup_time:
             traci.simulationStep()
             self.time_elapsed = traci.simulation.getTime()
+
+        self.current_slot = (
+            self.traffic.get_slot(self.time_elapsed) if self.traffic.enabled else 0
+        )
 
         if self.random_sg_pair:
             init_node, target_junction_id = self._sample_sg_pair()
@@ -249,11 +262,12 @@ class SumoTRSPEnv(gym.Env):
         if not move_flag:
             return
 
+        depart_speed = self._edge_speed(edge_id, self.current_slot)
         route_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}_route"
         self.ugv.veh_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}"
         traci.route.add(route_id, [edge_id])
-        traci.vehicle.add(self.ugv.veh_id, route_id, departSpeed=self.ugv_speed)
-        traci.vehicle.setSpeed(self.ugv.veh_id, self.ugv_speed)
+        traci.vehicle.add(self.ugv.veh_id, route_id, departSpeed=depart_speed)
+        traci.vehicle.setSpeed(self.ugv.veh_id, depart_speed)
         traci.vehicle.setColor(self.ugv.veh_id, (255, 0, 0, 255))
 
         traci.simulationStep()
@@ -264,6 +278,13 @@ class SumoTRSPEnv(gym.Env):
             if self.ugv.veh_id not in traci.vehicle.getIDList():
                 self.ugv.status = 1
                 reached = True
+            else:
+                new_slot = self.traffic.get_slot(self.time_elapsed)
+                if new_slot != self.current_slot:
+                    self.current_slot = new_slot
+                    traci.vehicle.setSpeed(
+                        self.ugv.veh_id, self._edge_speed(edge_id, new_slot)
+                    )
             traci.simulationStep()
             self.time_elapsed = traci.simulation.getTime()
 
@@ -305,6 +326,12 @@ class SumoTRSPEnv(gym.Env):
         target_junction_id = random.choice(available)
         return init_node, target_junction_id
 
+    def _edge_speed(self, edge_id: str, slot: int) -> float:
+        """Speed (m/s) for an edge at a time slot, falling back to fleet max speed."""
+        if self.traffic.enabled and edge_id in self.traffic.profiles:
+            return self.traffic.get_speed(edge_id, slot)
+        return self.ugv_speed
+
     def _get_reward(self):
         if self.ugv.invalid_action_this_step:
             self.ugv.invalid_action_this_step = False
@@ -330,7 +357,6 @@ class SumoTRSPEnv(gym.Env):
         ugv_node = self.idx2node[self.ugv.position]
         task_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
 
-        steps2dest = [INF] * self.num_actions
         best_dir = 0
         target_node_idx = 0
 
@@ -342,13 +368,12 @@ class SumoTRSPEnv(gym.Env):
                 for ni in nb_idxs
             ]
             steps += [INF] * (self.num_actions - len(steps))
-            steps2dest = steps[:self.num_actions]
-            best_dir = int(np.argmin(steps2dest))
+            best_dir = int(np.argmin(steps[:self.num_actions]))
 
         return {
             'graph_node':  self.ugv.position,
             'target_node': target_node_idx,
-            'steps2dest':  np.array(steps2dest, dtype=np.float32),
+            'time_slot':   self.current_slot,
             'best_dir':    best_dir,
         }
 
@@ -366,6 +391,7 @@ class SumoTRSPEnv(gym.Env):
             'ugv_speed_ms':      self.ugv_speed,
             'ugv_speed_kmh':     self.ms_to_kmh(self.ugv_speed),
             'distance_traveled': self.ugv.distance_traveled,
+            'time_slot':         self.current_slot,
         }
 
     # ------------------------------------------------------------------ render
@@ -379,7 +405,8 @@ class SumoTRSPEnv(gym.Env):
 
         if self.render_mode == 'print':
             print(
-                f"t={self.time_elapsed:8.1f}s | step={self.current_timestep:4d}/{self.max_steps} | "
+                f"t={self.time_elapsed:8.1f}s | slot={self.current_slot} | "
+                f"step={self.current_timestep:4d}/{self.max_steps} | "
                 f"pos={ugv_pos_node} → target={task_node} | "
                 f"dist={self.total_ev_distance:.1f}m | "
                 f"r={self.last_reward:+7.2f} | "
@@ -412,10 +439,25 @@ class SumoTRSPEnv(gym.Env):
         def tx(x, y):
             return (int(margin + (x - min_x) * scale), int(margin + (max_y - y) * scale))
 
-        for u, v in self.G.edges():
-            pygame.draw.line(self.screen, (180, 180, 180),
-                             tx(self.G.nodes[u]['x'], self.G.nodes[u]['y']),
-                             tx(self.G.nodes[v]['x'], self.G.nodes[v]['y']), 2)
+        for u, v, edata in self.G_dir.edges(data=True):
+            eid = edata['id']
+            speed = (
+                self.traffic.get_speed(eid, self.current_slot)
+                if self.traffic.enabled and eid in self.traffic.profiles
+                else self.ugv_speed
+            )
+            color = self._speed_to_color(speed)
+            x1, y1 = tx(self.G.nodes[u]['x'], self.G.nodes[u]['y'])
+            x2, y2 = tx(self.G.nodes[v]['x'], self.G.nodes[v]['y'])
+            dx, dy = x2 - x1, y2 - y1
+            ln = (dx * dx + dy * dy) ** 0.5
+            if ln > 0:
+                ox, oy = -dy / ln * 3, dx / ln * 3   # 3 px perpendicular offset
+                pygame.draw.line(self.screen, color,
+                                 (int(x1 + ox), int(y1 + oy)),
+                                 (int(x2 + ox), int(y2 + oy)), 2)
+            else:
+                pygame.draw.line(self.screen, color, (x1, y1), (x2, y2), 2)
 
         for node in self.G.nodes:
             x, y = tx(self.G.nodes[node]['x'], self.G.nodes[node]['y'])
@@ -443,6 +485,7 @@ class SumoTRSPEnv(gym.Env):
             xo, yo = self.screen_width - 320, 10
             for line in [
                 f"t = {self.time_elapsed:.1f} s",
+                f"slot = {self.current_slot}",
                 f"step = {self.current_timestep}/{self.max_steps}",
                 f"pos = {ugv_pos_node}",
                 f"target = {task_node}",
@@ -471,6 +514,15 @@ class SumoTRSPEnv(gym.Env):
             self.clock.tick(30)
 
     # ------------------------------------------------------------------ helpers
+
+    def _speed_to_color(self, speed_ms: float) -> tuple:
+        """Red (slow) → green (fast) linear interpolation over the PSL speed range."""
+        if not self.traffic.enabled:
+            return (180, 180, 180)
+        v_range = self.traffic.v_max - self.traffic.v_min
+        t = (speed_ms - self.traffic.v_min) / v_range if v_range > 1e-9 else 1.0
+        t = max(0.0, min(1.0, t))
+        return (int(255 * (1 - t)), int(255 * t), 0)
 
     def ms_to_kmh(self, speed_ms):
         return None if speed_ms is None else speed_ms * 3.6

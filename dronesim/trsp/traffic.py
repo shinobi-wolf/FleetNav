@@ -1,0 +1,120 @@
+import math
+import json
+import random as _random
+
+import numpy as np
+
+
+class PSLTrafficModel:
+    """
+    Piecewise Speed Limit (PSL) traffic model.
+
+    Each edge e has an independent speed profile v[e][0..K-1].
+    At simulation time t the active slot is j = min(K-1, floor(t / delta_t)).
+    All speeds are stored internally in m/s; config values are given in km/h.
+
+    Special case K=1: single constant-speed slot per edge, no runtime updates.
+    """
+
+    def __init__(self, config: dict, edge_ids: list, seed=None):
+        """
+        Args:
+            config:   traffic config dict (keys: enabled, T, K, v_min, v_max, speed_step,
+                      optionally speed_profile_type, speed_profile_fn, speed_profile_path)
+            edge_ids: list of non-internal SUMO edge IDs
+            seed:     random seed for reproducible random profiles
+        """
+        self.enabled = bool(config.get('enabled', False))
+        if not self.enabled:
+            self.K = 1
+            self.profiles = {}
+            return
+
+        self.T = float(config['T'])
+        self.K = int(config['K'])
+        if self.K < 1:
+            raise ValueError("traffic.K must be >= 1")
+        self.delta_t = self.T / self.K
+
+        self.v_min = float(config['v_min']) / 3.6   # km/h → m/s
+        self.v_max = float(config['v_max']) / 3.6
+        self.speed_step = float(config['speed_step']) / 3.6
+        if self.v_min > self.v_max:
+            raise ValueError("traffic.v_min must be <= v_max")
+        if self.speed_step <= 0:
+            raise ValueError("traffic.speed_step must be > 0")
+
+        rng = _random.Random(seed)
+        profile_type = config.get('speed_profile_type', 'random')
+
+        if profile_type == 'random':
+            self._generate_random(edge_ids, rng)
+        elif profile_type == 'function':
+            self._from_function(edge_ids, config['speed_profile_fn'])
+        elif profile_type == 'file':
+            self._from_file(edge_ids, config['speed_profile_path'])
+        else:
+            raise ValueError(f"Unknown speed_profile_type: '{profile_type}'")
+
+        self._validate(edge_ids)
+
+    # ------------------------------------------------------------------ builders
+
+    def _speed_levels(self):
+        levels, v = [], self.v_min
+        while v <= self.v_max + 1e-9:
+            levels.append(round(v, 8))
+            v += self.speed_step
+        return levels or [self.v_max]
+
+    def _generate_random(self, edge_ids, rng):
+        levels = self._speed_levels()
+        self.profiles = {
+            eid: [rng.choice(levels) for _ in range(self.K)]
+            for eid in edge_ids
+        }
+
+    def _from_function(self, edge_ids, fn):
+        """fn(edge_id: str, slot_idx: int) -> float (km/h)"""
+        self.profiles = {
+            eid: [float(np.clip(fn(eid, j) / 3.6, self.v_min, self.v_max))
+                  for j in range(self.K)]
+            for eid in edge_ids
+        }
+
+    def _from_file(self, edge_ids, path):
+        """File maps edge_id -> [v_slot0_kmh, v_slot1_kmh, ...]"""
+        with open(path) as f:
+            if path.endswith(('.yaml', '.yml')):
+                import yaml
+                data = yaml.safe_load(f)
+            else:
+                data = json.load(f)
+        self.profiles = {
+            eid: [float(np.clip(s / 3.6, self.v_min, self.v_max))
+                  for s in data.get(eid, [self.v_max * 3.6] * self.K)]
+            for eid in edge_ids
+        }
+
+    def _validate(self, edge_ids):
+        for eid in edge_ids:
+            profile = self.profiles.setdefault(eid, [self.v_max] * self.K)
+            if len(profile) != self.K:
+                raise ValueError(
+                    f"Edge '{eid}' has {len(profile)} speed slots; expected {self.K}"
+                )
+            self.profiles[eid] = [
+                float(np.clip(s, self.v_min, self.v_max)) for s in profile
+            ]
+
+    # ------------------------------------------------------------------ runtime
+
+    def get_slot(self, t: float) -> int:
+        """Active time slot index for simulation time t (seconds)."""
+        if self.K == 1:
+            return 0
+        return min(self.K - 1, int(math.floor(t / self.delta_t)))
+
+    def get_speed(self, edge_id: str, slot: int) -> float:
+        """Speed in m/s for edge_id at the given slot."""
+        return self.profiles[edge_id][slot]

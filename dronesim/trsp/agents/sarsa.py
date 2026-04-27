@@ -50,10 +50,8 @@ class SARSAAgent:
     def _observation_to_state(self, observation):
         graph_node = int(observation['graph_node'])
         target_node = int(observation['target_node'])
-        # best_dir = int(observation['best_dir'])
-        # time_slot = int(observation['time_slot'])
-        # return (graph_node, target_node, time_slot)
-        return (graph_node, target_node)
+        time_slot = int(observation.get('time_slot', 0))
+        return (graph_node, target_node, time_slot)
 
     def predict(self, observation, G=None, idx2node=None, node2idx=None):
         """

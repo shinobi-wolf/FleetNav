@@ -13,11 +13,19 @@ from tqdm import tqdm
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
+from dronesim.trsp.traffic import PSLTrafficModel
 from dronesim.trsp.agents.dqn import DQNAgent
 from dronesim.trsp.agents.ppo import PPOAgent
 from dronesim.trsp.agents.sarsa import SARSAAgent
 
 INF = 100000
+
+
+def is_traffic_enabled(config: dict) -> bool:
+    traffic_cfg = config.get('traffic')
+    if traffic_cfg is None:
+        return False
+    return bool(traffic_cfg.get('enabled', True))
 
 
 def get_centroid(shape):
@@ -61,6 +69,7 @@ def build_graph(net_path):
 
         G.add_edge(from_node.getID(), to_node.getID(), id=edge_id, length=edge.getLength(), type='road')
 
+    edge_ids = [data['id'] for _, _, data in G.edges(data=True)]
     G_und = G.to_undirected()
 
     all_shortest_path_lengths = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
@@ -92,71 +101,10 @@ def build_graph(net_path):
         'node2idx': node2idx,
         'idx2node': idx2node,
         'sg_pairs': sg_pairs,
+        'edge_ids': edge_ids,
     }
 
 
-def build_traffic_model(config, max_time):
-    traffic_cfg = config.get('traffic')
-    if traffic_cfg is None:
-        raise ValueError("Missing 'traffic' section in config")
-
-    required_keys = ['speed_limits', 'speed_step', 'seg_duration', 'seed']
-    missing = [key for key in required_keys if key not in traffic_cfg]
-    if missing:
-        raise ValueError(f"Missing traffic config keys: {missing}")
-
-    speed_limits = traffic_cfg['speed_limits']
-    if not isinstance(speed_limits, (list, tuple)) or len(speed_limits) != 2:
-        raise ValueError("traffic.speed_limits must be [min_kmh, max_kmh]")
-
-    min_speed_kmh = float(speed_limits[0])
-    max_speed_kmh = float(speed_limits[1])
-    speed_step_kmh = float(traffic_cfg['speed_step'])
-    seg_duration_min = float(traffic_cfg['seg_duration'])
-    traffic_seed = int(traffic_cfg['seed'])
-
-    if speed_step_kmh <= 0:
-        raise ValueError("traffic.speed_step must be > 0")
-    if seg_duration_min <= 0:
-        raise ValueError("traffic.seg_duration must be > 0")
-    if max_speed_kmh < min_speed_kmh:
-        raise ValueError("traffic.speed_limits must satisfy min <= max")
-
-    min_speed_ms = min_speed_kmh * 1000.0 / 3600.0
-    max_speed_ms = max_speed_kmh * 1000.0 / 3600.0
-    speed_step_ms = speed_step_kmh * 1000.0 / 3600.0
-    seg_duration_s = seg_duration_min * 60.0
-
-    traffic_speed_range = np.arange(min_speed_ms, max_speed_ms + 1e-9, speed_step_ms, dtype=np.float32)
-    if traffic_speed_range.size == 0:
-        raise ValueError("traffic speed range is empty; check speed limits and speed step")
-
-    num_segments = max(1, int(np.ceil(max_time / seg_duration_s)))
-    rng = np.random.RandomState(traffic_seed)
-    traffic_speed_segments = rng.choice(traffic_speed_range, size=num_segments)
-
-    return {
-        'speed_limits_ms': (float(min_speed_ms), float(max_speed_ms)),
-        'seg_duration_s': float(seg_duration_s),
-        'speed_segments_ms': traffic_speed_segments,
-        'num_segments': num_segments,
-    }
-
-
-def get_current_traffic_segment(current_time, traffic_seg_duration, traffic_speed_segments):
-    if len(traffic_speed_segments) == 0:
-        return -1
-    if current_time < 0:
-        return 0
-    segment_index = int(current_time / traffic_seg_duration)
-    return min(segment_index, len(traffic_speed_segments) - 1)
-
-
-def get_current_traffic_speed(current_time, traffic_seg_duration, traffic_speed_segments):
-    segment_index = get_current_traffic_segment(current_time, traffic_seg_duration, traffic_speed_segments)
-    if segment_index < 0:
-        return 0.0
-    return float(traffic_speed_segments[segment_index])
 
 
 def append_result_row(results_path, start_idx, target_idx, warm_up_time, tour_start_time,
@@ -230,17 +178,21 @@ def main():
     num_actions = config['net']['max_degree']
     warm_up_time = float(config['simulation'].get('warm_up_time', 1000))
 
-    traffic_model = build_traffic_model(config, max_time)
-    traffic_seg_duration = traffic_model['seg_duration_s']
-    traffic_speed_segments = traffic_model['speed_segments_ms']
-    speed_min_ms, speed_max_ms = traffic_model['speed_limits_ms']
+    traffic_enabled = is_traffic_enabled(config)
+    edge_ids = graph_info['edge_ids']
+    psl_model = None
 
-    print(
-        "Traffic model:",
-        f"segment_duration={traffic_seg_duration:.1f}s",
-        f"segments={traffic_model['num_segments']}",
-        f"speed_limits={speed_min_ms:.2f}-{speed_max_ms:.2f}m/s",
-    )
+    if traffic_enabled:
+        psl_model = PSLTrafficModel(
+            config['traffic'], edge_ids, seed=config['traffic'].get('seed')
+        )
+        print(
+            f"Traffic model: PSL  K={psl_model.K}  "
+            f"v=[{psl_model.v_min*3.6:.0f},{psl_model.v_max*3.6:.0f}]km/h  "
+            f"delta_t={psl_model.delta_t:.1f}s"
+        )
+    else:
+        print("Traffic model: DISABLED (no speed override)")
 
     sumo_config = [
         'sumo',
@@ -298,7 +250,7 @@ def main():
                         'best_dir': best_dir,
                         'steps2dest': np.array(steps2dest, dtype=np.float32),
                         'sg_pair_idx': sg_idx,
-                        'time_slot': get_current_traffic_segment(0.0, traffic_seg_duration, traffic_speed_segments),
+                        'time_slot': psl_model.get_slot(0.0) if traffic_enabled else 0,
                     }
                     action = int(agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx))
 
@@ -332,32 +284,54 @@ def main():
 
                     veh_id = f"ugv_{start_idx}_{target_idx}_{int(warmup_time)}"
                     route_id = f"{veh_id}_route"
-                    traffic_segment_start = get_current_traffic_segment(sim_time, traffic_seg_duration, traffic_speed_segments)
-                    traffic_speed_start = get_current_traffic_speed(sim_time, traffic_seg_duration, traffic_speed_segments)
+
+                    if traffic_enabled:
+                        traffic_segment_start = psl_model.get_slot(sim_time)
+                        first_edge = route_edges[0]
+                        traffic_speed_start = (
+                            psl_model.get_speed(first_edge, traffic_segment_start)
+                            if first_edge in psl_model.profiles else -1.0
+                        )
+                    else:
+                        traffic_segment_start = -1
+                        traffic_speed_start = -1.0
 
                     try:
                         traci.route.add(route_id, route_edges)
-                        traci.vehicle.add(veh_id, route_id, departSpeed=traffic_speed_start)
+                        depart_spd = traffic_speed_start if traffic_enabled else 'max'
+                        traci.vehicle.add(veh_id, route_id, departSpeed=depart_spd)
                     except traci.TraCIException:
                         append_result_row(results_path, start_idx, target_idx,
                                           -1, -1, -1, -1, -1, -1, -1, -1, -1, "Route can't be added")
                         traci.close()
                         continue
 
-                    traci.vehicle.setSpeed(veh_id, traffic_speed_start)
+                    if traffic_enabled:
+                        traci.vehicle.setSpeed(veh_id, traffic_speed_start)
                     traci.vehicle.setColor(veh_id, (255, 0, 0, 255))
                     traci.simulationStep()
                     sim_time = traci.simulation.getTime()
                     sim_start_time = sim_time
 
                     while veh_id in traci.vehicle.getIDList() and sim_time < max_time:
-                        curr_speed = get_current_traffic_speed(sim_time, traffic_seg_duration, traffic_speed_segments)
-                        traci.vehicle.setSpeed(veh_id, curr_speed)
+                        if traffic_enabled:
+                            slot = psl_model.get_slot(sim_time)
+                            road_id = traci.vehicle.getRoadID(veh_id)
+                            if not road_id.startswith(':') and road_id in psl_model.profiles:
+                                traci.vehicle.setSpeed(veh_id, psl_model.get_speed(road_id, slot))
                         traci.simulationStep()
                         sim_time = traci.simulation.getTime()
 
-                    traffic_segment_end = get_current_traffic_segment(sim_time, traffic_seg_duration, traffic_speed_segments)
-                    traffic_speed_end = get_current_traffic_speed(sim_time, traffic_seg_duration, traffic_speed_segments)
+                    if traffic_enabled:
+                        traffic_segment_end = psl_model.get_slot(sim_time)
+                        last_edge = route_edges[-1]
+                        traffic_speed_end = (
+                            psl_model.get_speed(last_edge, traffic_segment_end)
+                            if last_edge in psl_model.profiles else -1.0
+                        )
+                    else:
+                        traffic_segment_end = -1
+                        traffic_speed_end = -1.0
                     total_time_taken = sim_time - sim_start_time
                     sim_times.append(time.time() - sim_start_time_real)
 
