@@ -1,19 +1,22 @@
-"""TD-EVRP planner — Lera-Romero et al. (2024) exact formulation."""
+"""TD-EVRP MILP planner — Lu et al. (2020) exact formulation (cargo relaxed)."""
 from __future__ import annotations
 
 from typing import Any
 
 from ..instance.builder import build_problem_instance_from_config
-from ..milp.td_evrp import build_td_evrp_model, solve_and_extract_td
+from ..milp.td_evrp import build_td_evrp_milp_model, solve_and_extract_td_milp
 from ..routes.base import Route, Stop
 from .base import BasePlanner
 
 
-class EVRPLeraRomeroPlanner(BasePlanner):
-    """Solves TD-EVRP exactly with Gurobi (Lera-Romero et al. 2024).
+class EVRPTDMILPPlanner(BasePlanner):
+    """Solves the TDEVRP exactly via Gurobi using Lu et al. (2020)'s ILP.
 
-    Traffic is embedded directly in the MILP via period-indicator binary
-    variables and Ichoua-precharacterized travel times. Requires Gurobi license.
+    Embeds a 3-level time-dependent speed profile (morning/freeflow/evening),
+    discrete free-flow speed levels, and the Franceschetti flexible-speed
+    energy model directly in the MIP. Cargo / commodity constraints are
+    relaxed (f_ij = 0); every other aspect of the paper's formulation is
+    preserved. Requires a Gurobi license.
     """
 
     def plan(self, config: dict[str, Any]) -> list[Route]:
@@ -22,12 +25,13 @@ class EVRPLeraRomeroPlanner(BasePlanner):
         )
         params["_physical_meta"] = physical_meta
 
-        model = build_td_evrp_model(physical_dist, params, physical_meta, config)
-        result = solve_and_extract_td(model, params)
+        model = build_td_evrp_milp_model(physical_dist, params, physical_meta, config)
+        result = solve_and_extract_td_milp(model, params)
 
         if not result["has_solution"]:
             raise RuntimeError(
-                f"TD-EVRP planner found no feasible solution (status={result['status']})"
+                f"TD-EVRP MILP planner found no feasible solution "
+                f"(status={result['status']})"
             )
 
         inst = result["instance"]
@@ -47,6 +51,7 @@ class EVRPLeraRomeroPlanner(BasePlanner):
                         node_type=node_types[idx],
                         planned_fuel=stop_data["fuel"],
                         planned_time=stop_data["arrival_time"],
+                        planned_wait_s=stop_data.get("wait_time_s", 0.0),
                     )
                 )
             routes.append(Route(vehicle_id=raw["vehicle"], stops=stops))
