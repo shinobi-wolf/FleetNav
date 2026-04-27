@@ -1,0 +1,30 @@
+net:
+  net_path: data/grid_road/grid_road.sumocfg
+  max_degree: 4
+
+fleet:
+  max_speed: 110          # km/h
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 0       # no background traffic
+  delay: 0             # ms delay for sumo-gui (ignored in quiet/print mode)
+
+simulation:
+  max_time: 2            # hours — SUMO wall-clock budget before forced env.reset()
+  max_steps: 50         # env steps per episode before truncation
+  render_mode: quiet     # quiet | print | human
+  warm_up_time: 0        # seconds of SUMO warm-up before the first episode
+  random_sg_pair: true   # randomise start/goal each episode
+
+agent:
+  algo: sarsa
+  policy: null           # set to a policy_id string to resume/load
+
+training:
+  sarsa:
+    num_episodes: 5000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.9
+    epsilon_decay: 0.9995

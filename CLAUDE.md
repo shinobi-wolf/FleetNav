@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Branch: `dev_trsp` — TRSP Development Only
+
+This branch is exclusively for **Phase 2 (TRSP)** development. When working here:
+- Focus only on `dronesim/trsp/`, `train_trsp.py`, `eval_trsp.py`, and `config/trsp/`
+- Do **not** explore, read, or suggest changes to `dronesim/evrp/` or EVRP-related code
+- The EVRP module is stable, complete, and out of scope for this branch
+
 ## Important: Excluded Directories
 
 Do **not** explore, read, or reference any code in `tmp`
@@ -43,17 +50,15 @@ python run_sim.py -c config/evrp/milp.yaml --no-plot
 ### TRSP RL Agent Training + Evaluation (Level 2)
 ```bash
 # Train a policy
-python dronesim/trsp/train.py
+python train_trsp.py -c config/trsp/train.yaml
 
 # Evaluate a trained policy by policy ID
-python dronesim/trsp/main.py -p <policy_id>
+python eval_trsp.py -p <policy_id>
 ```
 
 ### Smoke Tests / Integration Tests
 ```bash
 python scripts/smoke_test_lmd.py --config config/evrp/base.yaml --steps 8
-python dronesim/trsp/test.py
-python dronesim/trsp/test_road.py
 ```
 
 ## Architecture
@@ -76,13 +81,20 @@ python dronesim/trsp/test_road.py
 
 ### TRSP Module (`dronesim/trsp/`)
 
-A Gymnasium-compliant environment (`SumoTRSPEnv` in `trsp_sumo.py`) wrapping SUMO. The agent observes current position, pending tasks, traffic segment index, and battery level; actions select the next road network junction. Agents in `dronesim/trsp/agents/` share a common `agent.py` interface:
-- `DijkstraAgent` — greedy shortest-path baseline
-- `SARSAAgent` / `SARSALambdaAgent` — tabular Q-learning
-- `DQNAgent` / `PPOAgent` / `A2CAgent` — deep RL via CleanRL
-- `DPAgent` — dynamic programming
+A Gymnasium-compliant environment (`SumoTRSPEnv` in `dronesim/trsp/envs/sumo_trsp_env.py`) registered as `SumoTRSPEnv-v0`. The env wraps SUMO; the agent observes current position, target node, traffic segment index, and steps-to-destination; actions select the next road network junction.
 
-Training: `train.py` / `trainer.py`. Policies saved as `.pkl` under `runs/trsp/`.
+Package layout:
+- `dronesim/trsp/__init__.py` — gym env registration
+- `dronesim/trsp/envs/sumo_trsp_env.py` — `SumoTRSPEnv(gym.Env)` (under development)
+- `dronesim/trsp/fleet/UGVSumo.py` — ground robot state and movement model
+- `dronesim/trsp/trainer.py` — `lmd_trainer()` training loop (module-level, called by runner)
+- `dronesim/trsp/agents/` — agent implementations sharing the `agent.py` base interface:
+  - `DijkstraAgent` — greedy shortest-path baseline
+  - `SARSAAgent` / `SARSALambdaAgent` — tabular on-policy TD control
+  - `DQNAgent` — deep Q-network (CleanRL-style)
+  - `PPOAgent` — proximal policy optimization (stub)
+
+Runner scripts (project root): `train_trsp.py`, `eval_trsp.py`. Policies saved under `runs/trsp/<policy_id>/`.
 
 ### Configuration System
 
