@@ -1,7 +1,6 @@
 """Piecewise-constant speed traffic model (moved from simulator/evrp_sim.py)."""
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -70,24 +69,26 @@ def build_traffic_model(
             seg_duration_s=1e9,
         )
 
-    speed_limits_kmh = tcfg.get("speed_limits", [20, 50])
-    speed_step_kmh = float(tcfg.get("speed_step", 5))
-    seg_duration_min = float(tcfg.get("seg_duration", 5))
+    # PSL-style keys: T (seconds), K (slots), v_min/v_max (km/h), speed_step (km/h)
+    T = float(tcfg.get("T", 86400.0))
+    K = int(tcfg.get("K", 288))
+    v_min_kmh = float(tcfg.get("v_min", 20.0))
+    v_max_kmh = float(tcfg.get("v_max", 50.0))
+    speed_step_kmh = float(tcfg.get("speed_step", 10.0))
     seed = int(tcfg.get("seed", 42))
 
-    lo_ms = _kmh_to_ms(float(speed_limits_kmh[0]))
-    hi_ms = _kmh_to_ms(float(speed_limits_kmh[1]))
+    lo_ms = _kmh_to_ms(v_min_kmh)
+    hi_ms = _kmh_to_ms(v_max_kmh)
     step_ms = _kmh_to_ms(speed_step_kmh)
-    seg_duration_s = seg_duration_min * 60.0
+    delta_t = T / max(K, 1)
 
     speed_range = np.arange(lo_ms, hi_ms + 1e-9, step_ms, dtype=np.float32)
-    num_segs = max(1, int(math.ceil(max_time_s / seg_duration_s)))
     rng = np.random.default_rng(seed)
-    segments = rng.choice(speed_range, size=num_segs)
+    segments = rng.choice(speed_range, size=K)
 
     return SegmentedSpeedModel(
         enabled=True,
         free_flow_ms=free_flow_ms,
         speed_segments=segments,
-        seg_duration_s=seg_duration_s,
+        seg_duration_s=delta_t,
     )

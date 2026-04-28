@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Documentation — Read First
+
+At the start of every conversation, read these files to get the latest progress context before doing any work:
+
+- `docs/EVRP.md` — current state of the EVRP (Level 1) module: what is implemented, tested, and pending
+- `docs/TRSP.md` — current state of the TRSP (Level 2) module: RL agent progress, experiments, and open issues
+- `docs/EVRP_TRSP.md` — integration status between the two levels and cross-cutting concerns
+
+These files are the authoritative source of truth for project progress; they supersede any description in this CLAUDE.md where they conflict.
+
 ## Branch: `dev_trsp` — TRSP Development Only
 
 This branch is exclusively for **Phase 2 (TRSP)** development. When working here:

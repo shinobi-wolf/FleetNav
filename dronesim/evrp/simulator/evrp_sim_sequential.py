@@ -174,6 +174,18 @@ class EVRPSequentialSimulator:
         self._net = None  # loaded on run()
         self._spawn_counter = 0
 
+        local_planner_type = self._sim_cfg.get("local_planner", "dijkstra").strip().lower()
+        if local_planner_type == "trsp":
+            policy_id = self._sim_cfg.get("trsp_policy")
+            if not policy_id:
+                raise ValueError(
+                    "simulation.trsp_policy must be set when simulation.local_planner: trsp"
+                )
+            from dronesim.evrp.local_planner import TRSPLocalPlanner
+            self._local_planner: TRSPLocalPlanner | None = TRSPLocalPlanner(policy_id)
+        else:
+            self._local_planner = None
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -361,8 +373,8 @@ class EVRPSequentialSimulator:
                         )
                     break
 
-                dist_m, sim_time_s = self._drive(vs, edge_list, sim_time_s, traffic)
-                vs.consume(dist_m)
+                _, sim_time_s = self._drive(vs, edge_list, sim_time_s, traffic)
+                vs.consume(dist_to_depot)   # debit Dijkstra distance regardless of path
                 vehicle_positions[vs.vehicle_id] = depot_node
 
                 # Refuel at depot
@@ -397,7 +409,7 @@ class EVRPSequentialSimulator:
                 continue  # retry leg_idx (now from depot)
 
             # ── Drive to next stop ─────────────────────────────────────
-            edge_list = self._find_edge_route(src_node, dst_node)
+            edge_list = self._resolve_route(src_node, dst_node, sim_time_s)
             if not edge_list:
                 if self.render_mode in ("print", "human"):
                     print(
@@ -407,8 +419,8 @@ class EVRPSequentialSimulator:
                 leg_idx += 1
                 continue
 
-            dist_m, sim_time_s = self._drive(vs, edge_list, sim_time_s, traffic)
-            vs.consume(dist_m)
+            _, sim_time_s = self._drive(vs, edge_list, sim_time_s, traffic)
+            vs.consume(dist_to_next)   # debit Dijkstra distance regardless of path
 
             vehicle_positions[vs.vehicle_id] = dst_node
             ntype = dst_stop.node_type
@@ -604,6 +616,12 @@ class EVRPSequentialSimulator:
             if edge_data:
                 edge_ids.append(edge_data["id"])
         return edge_ids
+
+    def _resolve_route(self, src: str, dst: str, sim_time_s: float) -> list[str]:
+        """Return edge list for a planned delivery leg; uses TRSP agent when configured."""
+        if self._local_planner is not None:
+            return self._local_planner.plan(src, dst, sim_time_s)
+        return self._find_edge_route(src, dst)
 
     def _route_distance_m(self, src_node: str, dst_node: str) -> float:
         """Shortest-path distance in metres between two nodes on the routing graph."""

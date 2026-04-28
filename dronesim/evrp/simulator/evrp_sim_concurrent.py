@@ -338,7 +338,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
                 return
 
         # Normal dispatch to next planned stop
-        edge_list = self._find_edge_route(src_node, dst_node)
+        edge_list = self._resolve_route(src_node, dst_node, sim_time_s)
         if not edge_list:
             if self.render_mode in ("print", "human"):
                 print(

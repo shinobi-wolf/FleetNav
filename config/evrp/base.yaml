@@ -54,11 +54,13 @@ sumo:
 # ── Traffic model ─────────────────────────────────────────────────────────────
 traffic:
   enabled: true
-  model: lu   # segmented (random piecewise) | lu (Lu et al. 2020 three-segment)
-  speed_limits: [20, 50]  # km/h  [min, max]  (segmented only)
-  speed_step: 10          # km/h              (segmented only)
-  seg_duration: 5         # minutes per segment (segmented only)
-  seed: 42                #                   (segmented only)
+  model: segmented   # segmented (random piecewise) | lu (Lu et al. 2020 three-segment)
+  T: 86400.0         # total horizon in seconds (24 h)
+  K: 1             # number of time slots (5-min segments: 24*60/5=288)
+  v_min: 40.0        # km/h
+  v_max: 100.0        # km/h
+  speed_step: 60.0   # km/h
+  seed: 42
 
 traffic_lu:
   v_congestion_kmh: 15.0
@@ -70,6 +72,8 @@ traffic_lu:
 # ── Simulation runtime ────────────────────────────────────────────────────────
 simulation:
   simulator: concurrent  # sequential | concurrent
+  local_planner: 77a4169c  # dijkstra | trsp
+  trsp_policy: null        # policy ID under runs/trsp/; required when local_planner: trsp
   max_time: 12         # hours
   render_mode: human   # quiet | print | human
   runtime_refuel: false # when true, vehicles that lack range to reach the next
