@@ -86,7 +86,7 @@ sumo:
   simulator: concurrent          # sequential | concurrent
   max_time: 12                   # hours — SUMO wall-clock budget
   render_mode: human             # quiet | print | human
-  delay: 10                      # ms GUI delay (human mode only)
+  delay: 5                      # ms GUI delay (human mode only)
 
 # ── Output ───────────────────────────────────────────────────────────────────
 output:

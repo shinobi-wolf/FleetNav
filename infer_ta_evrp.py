@@ -153,24 +153,17 @@ def _normalize_config(ta: dict) -> dict:
         "seed": heuristic_cfg.get("seed", 42),
     }
 
-    # Traffic: PSL enabled → global segmented model in simulator
+    # Traffic: PSL config (T derived at simulation time from max_time_s)
     psl_enabled = bool(psl.get("enabled", False))
     cfg["traffic"] = {
         "enabled": psl_enabled,
-        "model": ta.get("traffic_lu") and "lu" or "segmented",
-        "T": 86400.0,
         "K": psl.get("K", 1),
         "v_min": psl.get("v_min", 40.0),
         "v_max": psl.get("v_max", 100.0),
         "speed_step": psl.get("speed_step", 60.0),
         "seed": psl.get("seed", 42),
-        "speed_profile_type": psl.get("profile_type", "random"),
+        "profile_type": psl.get("profile_type", "random"),
     }
-
-    # Lu traffic model params (for td_milp planner + lu simulator)
-    if "traffic_lu" in ta:
-        cfg["traffic_lu"] = ta["traffic_lu"]
-        cfg["traffic"]["model"] = "lu"
 
     # Cost model (td_milp only)
     if "cost_model" in ta:

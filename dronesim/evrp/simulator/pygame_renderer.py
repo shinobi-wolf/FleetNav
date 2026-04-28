@@ -140,12 +140,19 @@ class PygameRenderer:
     def draw(
         self,
         sim_time_s: float,
-        traffic_speed_ms: float,
+        edge_speeds: dict[str, float] | None,
         vehicle_positions: dict[int, str | tuple[float, float]],
         served_customers: set[str],
         vehicle_states: dict[int, Any],
     ) -> None:
-        """Redraw the window."""
+        """Redraw the window.
+
+        Parameters
+        ----------
+        edge_speeds : dict[edge_id, speed_ms] or None
+            Per-edge current speed in m/s. None means traffic is disabled
+            (all edges drawn in the default gray).
+        """
         if self._screen is None:
             self._init_window()
 
@@ -157,10 +164,10 @@ class PygameRenderer:
         surf = self._screen
         surf.fill(BG)
 
-        self._draw_edges(surf, traffic_speed_ms)
+        self._draw_edges(surf, edge_speeds)
         self._draw_nodes(surf, served_customers)
         self._draw_vehicles(surf, vehicle_positions)
-        self._draw_panel(surf, sim_time_s, traffic_speed_ms, vehicle_positions, served_customers, vehicle_states)
+        self._draw_panel(surf, sim_time_s, edge_speeds, vehicle_positions, served_customers, vehicle_states)
 
         pygame.display.flip()
         self._clock.tick(self._fps)
@@ -224,14 +231,17 @@ class PygameRenderer:
                 (int(right[0]), int(right[1])),
             ])
 
-    def _draw_edges(self, surf: pygame.Surface, traffic_speed_ms: float) -> None:
-        color = self._speed_to_color(traffic_speed_ms)
-        traffic_on = self._v_min_ms is not None
+    def _draw_edges(self, surf: pygame.Surface, edge_speeds: dict[str, float] | None) -> None:
+        traffic_on = edge_speeds is not None
         width = 3 if traffic_on else 2
 
-        for (fn, tn) in self._edges:
+        for (fn, tn), eid in zip(self._edges, self._edge_ids):
             if fn not in self._node_pos or tn not in self._node_pos:
                 continue
+            if traffic_on and eid in edge_speeds:
+                color = self._speed_to_color(edge_speeds[eid])
+            else:
+                color = EDGE_COL
             p1 = self._transform(*self._node_pos[fn])
             p2 = self._transform(*self._node_pos[tn])
             self._draw_directed_edge(surf, color, p1, p2, width=width)
@@ -283,7 +293,7 @@ class PygameRenderer:
         self,
         surf: pygame.Surface,
         sim_time_s: float,
-        traffic_speed_ms: float,
+        edge_speeds: dict[str, float] | None,
         vehicle_positions: dict[int, str | tuple[float, float]],
         served_customers: set[str],
         vehicle_states: dict[int, Any],
@@ -306,7 +316,11 @@ class PygameRenderer:
 
         sim_h = sim_time_s / 3600.0
         line(f"t = {sim_time_s:.0f}s  ({sim_h:.2f}h)", big=True)
-        line(f"Traffic: {traffic_speed_ms * 3.6:.1f} km/h")
+        if edge_speeds:
+            avg_kmh = sum(edge_speeds.values()) / len(edge_speeds) * 3.6
+            line(f"Traffic avg: {avg_kmh:.1f} km/h")
+        else:
+            line("Traffic: disabled")
 
         total_c = sum(1 for r in self._node_roles.values() if r == "customer")
         line(f"Customers: {len(served_customers)}/{total_c}")
@@ -318,11 +332,11 @@ class PygameRenderer:
         self._legend_dot(surf, x, y, CUSTOMER_SERVED_COL,  "Customer (served)")   ; y += 22
         self._legend_dot(surf, x, y, AFS_COL,              "AFS (fuel station)")  ; y += 22
 
-        if self._v_min_ms is not None:
+        if edge_speeds is not None and self._v_min_ms is not None:
             y += 6
             line("── Traffic ──", color=TEXT_MID)
-            self._legend_dot(surf, x, y, (255, 0, 0),   f"Slow ({self._v_min_ms * 3.6:.0f} km/h)") ; y += 22
-            self._legend_dot(surf, x, y, (0, 255, 0),   f"Fast ({self._v_max_ms * 3.6:.0f} km/h)") ; y += 22
+            self._legend_dot(surf, x, y, (255, 0, 0), f"Slow ({self._v_min_ms * 3.6:.0f} km/h)") ; y += 22
+            self._legend_dot(surf, x, y, (0, 255, 0), f"Fast ({self._v_max_ms * 3.6:.0f} km/h)") ; y += 22
 
         y += 10
         line("── Vehicles ──", color=TEXT_MID)
@@ -331,7 +345,8 @@ class PygameRenderer:
             color_v = VEHICLE_COLORS[idx % len(VEHICLE_COLORS)]
             pos = vehicle_positions.get(vid, "?")
             loc_label = "transit" if isinstance(pos, tuple) else str(pos)
-            self._legend_dot(surf, x, y, color_v, f"V{vid}  @{loc_label}") ; y += 22
+            self._legend_dot(surf, x, y, color_v, f"V{vid}  @{loc_label}")
+            y += 22
             if vs is not None:
                 line(f"  dist={vs.distance_m:.0f}m  fuel={vs.current_fuel:.2f}gal")
                 line(f"  served={vs.customers_served}  recharges={vs.num_recharges}")

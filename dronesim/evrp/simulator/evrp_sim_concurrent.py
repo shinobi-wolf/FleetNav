@@ -41,7 +41,7 @@ except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
 from ..routes.base import Route, Stop
-from ..traffic.segmented import SegmentedSpeedModel, build_traffic_model
+from ..traffic.segmented import PSLTrafficModel, build_traffic_model
 from .evrp_sim_sequential import EVRPSequentialSimulator, _VehicleState
 from .pygame_renderer import PygameRenderer
 
@@ -88,10 +88,13 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         self._net = sumolib.net.readNet(self.net_xml_path, withInternal=False)
         self._routing_graph = self._build_routing_graph()
 
+        edge_ids = [e.getID() for e in self._net.getEdges() if not e.getID().startswith(":")]
+        self._current_slot = -1
         traffic = build_traffic_model(
             self.config,
             free_flow_ms=self.free_flow_ms,
             max_time_s=self.max_time_s,
+            edge_ids=edge_ids,
         )
 
         sumo_mode = "sumo-gui" if self.render_mode == "human" else "sumo"
@@ -111,7 +114,11 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         if self.render_mode == "human":
             node_roles = self._collect_node_roles(routes)
             vehicle_ids = [r.vehicle_id for r in routes]
-            renderer = PygameRenderer(self._net, node_roles, vehicle_ids)
+            renderer = PygameRenderer(
+                self._net, node_roles, vehicle_ids,
+                v_min_ms=self._traffic_v_min_ms,
+                v_max_ms=self._traffic_v_max_ms,
+            )
 
         traci.start(sumo_cmd)
         try:
@@ -133,7 +140,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
     def _execute(
         self,
         routes: list[Route],
-        traffic: SegmentedSpeedModel,
+        traffic: PSLTrafficModel,
         renderer: PygameRenderer | None,
     ) -> dict[str, Any]:
         # Initialize vehicle states
@@ -161,12 +168,12 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         )
 
         sim_time_s = float(traci.simulation.getTime())
-        traffic.update(sim_time_s)
+        self._check_traffic_slot(sim_time_s, traffic)
 
         fleet_size = len(routes)
 
         if renderer is not None:
-            renderer.draw(sim_time_s, traffic.commanded_speed_ms,
+            renderer.draw(sim_time_s, self._edge_speeds_snapshot(traffic, sim_time_s),
                           vehicle_positions, served_customers, vehicle_states)
 
         # Main time-step loop
@@ -174,13 +181,12 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
             traci.simulationStep()
             sim_time_s = float(traci.simulation.getTime())
 
-            if traffic.update(sim_time_s):
-                self._broadcast_speed(vehicle_states, traffic.commanded_speed_ms)
+            if self._check_traffic_slot(sim_time_s, traffic):
                 if self.render_mode in ("print", "human"):
-                    print(
-                        f"  traffic speed -> {traffic.commanded_speed_ms * 3.6:.1f} km/h "
-                        f"at t={sim_time_s:.1f}s"
-                    )
+                    slot = traffic.get_slot(sim_time_s)
+                    avg_kmh = (sum(p[slot] for p in traffic.profiles.values()) /
+                               max(1, len(traffic.profiles)) * 3.6)
+                    print(f"  traffic slot {slot} (avg {avg_kmh:.1f} km/h) at t={sim_time_s:.1f}s")
 
             sumo_active = set(traci.vehicle.getIDList())
             all_done = True
@@ -196,7 +202,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
                 )
 
             if renderer is not None:
-                renderer.draw(sim_time_s, traffic.commanded_speed_ms,
+                renderer.draw(sim_time_s, self._edge_speeds_snapshot(traffic, sim_time_s),
                               vehicle_positions, served_customers, vehicle_states)
 
             # Terminate early: all vehicles finished/stranded, or all customers served
@@ -225,7 +231,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         vs: _ConcVehicleState,
         route: Route,
         sim_time_s: float,
-        traffic: SegmentedSpeedModel,
+        traffic: PSLTrafficModel,
         sumo_active: set[str],
         vehicle_positions: dict[int, str | tuple[float, float]],
         served_customers: set[str],
@@ -256,7 +262,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         vs: _ConcVehicleState,
         stops: list[Stop],
         sim_time_s: float,
-        traffic: SegmentedSpeedModel,
+        traffic: PSLTrafficModel,
         vehicle_positions: dict[int, str | tuple[float, float]],
     ) -> None:
         """Evaluate fuel constraints and spawn a SUMO leg vehicle toward next stop."""
@@ -425,7 +431,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         self,
         vs: _ConcVehicleState,
         edge_list: list[str],
-        traffic: SegmentedSpeedModel,
+        traffic: PSLTrafficModel,
     ) -> str:
         """Add one SUMO vehicle for a single leg. Returns its SUMO veh_id."""
         veh_id = f"{vs.veh_id}_leg{self._spawn_counter}"
@@ -434,7 +440,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         route_id = f"route_{veh_id}"
         traci.route.add(route_id, edge_list)
 
-        speed = traffic.commanded_speed_ms
+        speed = self.free_flow_ms
         try:
             vtype_list = list(traci.vehicletype.getIDList())
             vtype = (
@@ -456,16 +462,3 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
 
         return veh_id
 
-    def _broadcast_speed(
-        self,
-        vehicle_states: dict[int, _ConcVehicleState],
-        new_speed: float,
-    ) -> None:
-        """Push new traffic speed to all in-transit SUMO vehicles."""
-        for vs in vehicle_states.values():
-            if not vs.at_instance_node and vs.sumo_veh_id:
-                try:
-                    traci.vehicle.setMaxSpeed(vs.sumo_veh_id, new_speed)
-                    traci.vehicle.setSpeed(vs.sumo_veh_id, new_speed)
-                except traci.TraCIException:
-                    pass

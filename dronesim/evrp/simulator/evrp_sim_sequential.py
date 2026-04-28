@@ -45,7 +45,7 @@ except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
 from ..routes.base import Route, Stop
-from ..traffic.segmented import SegmentedSpeedModel, build_traffic_model, _mph_to_ms
+from ..traffic.segmented import PSLTrafficModel, build_traffic_model, _mph_to_ms
 from .pygame_renderer import PygameRenderer
 
 
@@ -193,10 +193,13 @@ class EVRPSequentialSimulator:
         self._net = sumolib.net.readNet(self.net_xml_path, withInternal=False)
         self._routing_graph = self._build_routing_graph()
 
+        edge_ids = [e.getID() for e in self._net.getEdges() if not e.getID().startswith(":")]
+        self._current_slot = -1
         traffic = build_traffic_model(
             self.config,
             free_flow_ms=self.free_flow_ms,
             max_time_s=self.max_time_s,
+            edge_ids=edge_ids,
         )
 
         sumo_mode = "sumo-gui" if self.render_mode == "human" else "sumo"
@@ -240,7 +243,7 @@ class EVRPSequentialSimulator:
     # Internal execution
     # ------------------------------------------------------------------
 
-    def _execute(self, routes: list[Route], traffic: SegmentedSpeedModel, renderer: PygameRenderer | None) -> dict[str, Any]:
+    def _execute(self, routes: list[Route], traffic: PSLTrafficModel, renderer: PygameRenderer | None) -> dict[str, Any]:
         vehicle_states: dict[int, _VehicleState] = {}
         for route in routes:
             vs = _VehicleState(
@@ -259,7 +262,7 @@ class EVRPSequentialSimulator:
         served_customers: set[str] = set()
 
         sim_time_s = float(traci.simulation.getTime())
-        traffic.update(sim_time_s)
+        self._check_traffic_slot(sim_time_s, traffic)
 
         fleet_size = len(routes)
 
@@ -267,7 +270,7 @@ class EVRPSequentialSimulator:
         if renderer is not None:
             renderer.draw(
                 sim_time_s=sim_time_s,
-                traffic_speed_ms=traffic.commanded_speed_ms,
+                edge_speeds=self._edge_speeds_snapshot(traffic, sim_time_s),
                 vehicle_positions=vehicle_positions,
                 served_customers=served_customers,
                 vehicle_states=vehicle_states,
@@ -291,7 +294,7 @@ class EVRPSequentialSimulator:
         self,
         route: Route,
         vs: _VehicleState,
-        traffic: SegmentedSpeedModel,
+        traffic: PSLTrafficModel,
         sim_time_s: float,
         customer_completion_times: list[float],
         renderer: PygameRenderer | None,
@@ -390,7 +393,7 @@ class EVRPSequentialSimulator:
                 if renderer is not None:
                     renderer.draw(
                         sim_time_s=sim_time_s,
-                        traffic_speed_ms=traffic.commanded_speed_ms,
+                        edge_speeds=self._edge_speeds_snapshot(traffic, sim_time_s),
                         vehicle_positions=vehicle_positions,
                         served_customers=served_customers,
                         vehicle_states=vehicle_states,
@@ -455,7 +458,7 @@ class EVRPSequentialSimulator:
             if renderer is not None:
                 renderer.draw(
                     sim_time_s=sim_time_s,
-                    traffic_speed_ms=traffic.commanded_speed_ms,
+                    edge_speeds=self._edge_speeds_snapshot(traffic, sim_time_s),
                     vehicle_positions=vehicle_positions,
                     served_customers=served_customers,
                     vehicle_states=vehicle_states,
@@ -470,7 +473,7 @@ class EVRPSequentialSimulator:
         vs: _VehicleState,
         edge_list: list[str],
         sim_time_s: float,
-        traffic: SegmentedSpeedModel,
+        traffic: PSLTrafficModel,
     ) -> tuple[float, float]:
         """Add vehicle to SUMO, step until done. Returns (dist_m, new_sim_time_s)."""
         veh_id = f"{vs.veh_id}_leg{self._spawn_counter}"
@@ -479,7 +482,7 @@ class EVRPSequentialSimulator:
         route_id = f"route_{veh_id}"
         traci.route.add(route_id, edge_list)
 
-        speed = traffic.commanded_speed_ms
+        speed = self.free_flow_ms
         try:
             vtype_list = list(traci.vehicletype.getIDList())
             vtype = "DEFAULT_VEHTYPE" if "DEFAULT_VEHTYPE" in vtype_list else (vtype_list[0] if vtype_list else None)
@@ -504,21 +507,13 @@ class EVRPSequentialSimulator:
             sim_time_s = traci.simulation.getTime()
             guard += 1
 
-            # Update traffic
-            if traffic.update(sim_time_s):
-                new_speed = traffic.commanded_speed_ms
-                try:
-                    active = set(traci.vehicle.getIDList())
-                    if veh_id in active:
-                        traci.vehicle.setMaxSpeed(veh_id, new_speed)
-                        traci.vehicle.setSpeed(veh_id, new_speed)
-                except traci.TraCIException:
-                    pass
+            # Update traffic slot (sets per-edge SUMO speed limits on change)
+            if self._check_traffic_slot(sim_time_s, traffic):
                 if self.render_mode in ("print", "human"):
-                    print(
-                        f"  traffic speed -> {traffic.commanded_speed_ms*3.6:.1f} km/h "
-                        f"at t={sim_time_s:.1f}s"
-                    )
+                    slot = traffic.get_slot(sim_time_s)
+                    avg_kmh = (sum(p[slot] for p in traffic.profiles.values()) /
+                               max(1, len(traffic.profiles)) * 3.6)
+                    print(f"  traffic slot {slot} (avg {avg_kmh:.1f} km/h) at t={sim_time_s:.1f}s")
 
             # Check if vehicle still exists
             try:
@@ -549,15 +544,38 @@ class EVRPSequentialSimulator:
         return dist_m, sim_time_s
 
     def _wait(
-        self, sim_time_s: float, duration_s: float, traffic: SegmentedSpeedModel
+        self, sim_time_s: float, duration_s: float, traffic: PSLTrafficModel
     ) -> float:
         """Advance simulation by duration_s without spawning a vehicle."""
         target = sim_time_s + duration_s
         while sim_time_s < target:
             traci.simulationStep()
             sim_time_s = traci.simulation.getTime()
-            traffic.update(sim_time_s)
+            self._check_traffic_slot(sim_time_s, traffic)
         return sim_time_s
+
+    def _check_traffic_slot(self, sim_time_s: float, traffic: PSLTrafficModel) -> bool:
+        """Apply per-edge SUMO speed limits if the PSL slot changed. Returns True on change."""
+        new_slot = traffic.get_slot(sim_time_s)
+        if new_slot == self._current_slot:
+            return False
+        self._current_slot = new_slot
+        if traffic.enabled:
+            for eid, profile in traffic.profiles.items():
+                try:
+                    traci.edge.setMaxSpeed(eid, profile[new_slot])
+                except traci.TraCIException:
+                    pass
+        return True
+
+    def _edge_speeds_snapshot(
+        self, traffic: PSLTrafficModel, sim_time_s: float
+    ) -> dict[str, float] | None:
+        """Return {edge_id: speed_ms} for current slot, or None when disabled."""
+        if not traffic.enabled:
+            return None
+        slot = traffic.get_slot(sim_time_s)
+        return {eid: profile[slot] for eid, profile in traffic.profiles.items()}
 
     def _find_sumo_edge_route(self, src_node: str, dst_node: str) -> list[str]:
         """Use TraCI's built-in router to get edge list from node to node."""
