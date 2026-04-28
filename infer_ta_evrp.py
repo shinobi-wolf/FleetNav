@@ -280,6 +280,7 @@ def main() -> None:
     parser.add_argument("-c", "--config", default="config/ta_evrp/milp.yaml")
     parser.add_argument("--no-sim", action="store_true", help="Skip SUMO simulation")
     parser.add_argument("--no-plot", action="store_true", help="Suppress route plot")
+    parser.add_argument("--save-metrics", action="store_true", help="Save TA-EVRP metrics to ta_evrp_metrics.json")
     args = parser.parse_args()
 
     ta_config = load_config(args.config)
@@ -301,7 +302,10 @@ def main() -> None:
     # ── Redirect output paths ─────────────────────────────────────────────────
     if cfg["output"].get("save_instance_json"):
         cfg["output"]["save_instance_json"] = str(run_dir / Path(cfg["output"]["save_instance_json"]).name)
-    if cfg["output"].get("save_metrics_json"):
+    
+    if args.save_metrics:
+        cfg["output"]["save_metrics_json"] = str(run_dir / "ta_evrp_metrics.json")
+    elif cfg["output"].get("save_metrics_json"):
         cfg["output"]["save_metrics_json"] = str(run_dir / Path(cfg["output"]["save_metrics_json"]).name)
 
     # ── Plan ─────────────────────────────────────────────────────────────────
@@ -349,9 +353,11 @@ def main() -> None:
     print("\n[3/3] Results:")
     _print_metrics(metrics)
 
-    metrics_path = cfg["output"].get("save_metrics_json", str(run_dir / "sim_metrics.json"))
-    Path(metrics_path).write_text(json.dumps(metrics, indent=2))
-    print(f"\n  Metrics saved to {metrics_path}")
+    metrics_path = cfg["output"].get("save_metrics_json")
+    if metrics_path:
+        Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(metrics_path).write_text(json.dumps(metrics, indent=2))
+        print(f"\n  Metrics saved to {metrics_path}")
 
 
 if __name__ == "__main__":

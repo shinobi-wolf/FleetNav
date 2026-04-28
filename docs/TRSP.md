@@ -104,7 +104,7 @@ env.step(a) → ugv_handler (move vehicle) → task_handler (check arrival/timeo
 
 **File:** `dronesim/trsp/traffic.py`
 
-Per-edge piecewise speed profiles — each edge gets its own independent speed for each time slot. This is distinct from EVRP's global `SegmentedSpeedModel`.
+Per-edge piecewise speed profiles — each edge gets its own independent speed for each time slot. The TA-EVRP simulators now use the same PSL approach (`dronesim/evrp/traffic/segmented.py`) with a unified config key schema.
 
 ### Config Keys
 
@@ -240,4 +240,4 @@ runs/trsp/<policy_id>/
 - `PPOAgent` is a stub.
 - Pairwise evaluation in `eval_trsp.py` is O(N²) SUMO starts — slow for large networks.
 - `K > 1` training has not been tested end-to-end; state space grows by factor K.
-- TRSP does not yet feed back traffic-slot information when used as a local planner inside EVRP (EVRP sim_time_s is passed to `plan()` and mapped to a slot, but EVRP's `SegmentedSpeedModel` and TRSP's `PSLTrafficModel` are independent — they share config structure but not speed values).
+- TRSP's `PSLTrafficModel` and EVRP's `PSLTrafficModel` are independent instances sharing the same config format. Speed values are sampled from the same discrete levels but with separate RNG instances — they will agree only if given identical seeds and the same edge set.
