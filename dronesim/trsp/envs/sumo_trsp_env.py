@@ -1,3 +1,4 @@
+import math
 import random
 import numpy as np
 import networkx as nx
@@ -439,6 +440,10 @@ class SumoTRSPEnv(gym.Env):
         def tx(x, y):
             return (int(margin + (x - min_x) * scale), int(margin + (max_y - y) * scale))
 
+        _OFFSET = 3      # perpendicular offset (px)
+        _ARROW  = 8      # arrowhead length (px)
+        _ARROW_HW = 3    # arrowhead half-width (px)
+
         for u, v, edata in self.G_dir.edges(data=True):
             eid = edata['id']
             speed = (
@@ -450,14 +455,28 @@ class SumoTRSPEnv(gym.Env):
             x1, y1 = tx(self.G.nodes[u]['x'], self.G.nodes[u]['y'])
             x2, y2 = tx(self.G.nodes[v]['x'], self.G.nodes[v]['y'])
             dx, dy = x2 - x1, y2 - y1
-            ln = (dx * dx + dy * dy) ** 0.5
-            if ln > 0:
-                ox, oy = -dy / ln * 3, dx / ln * 3   # 3 px perpendicular offset
-                pygame.draw.line(self.screen, color,
-                                 (int(x1 + ox), int(y1 + oy)),
-                                 (int(x2 + ox), int(y2 + oy)), 2)
-            else:
-                pygame.draw.line(self.screen, color, (x1, y1), (x2, y2), 2)
+            ln = math.hypot(dx, dy)
+            if ln < 1.0:
+                continue
+            ux, uy = dx / ln, dy / ln
+            ox, oy = -uy * _OFFSET, ux * _OFFSET
+            ax, ay = x1 + ox, y1 + oy
+            bx, by = x2 + ox, y2 + oy
+            pygame.draw.line(self.screen, color,
+                             (int(ax), int(ay)), (int(bx), int(by)), 2)
+            if ln > 2.5 * _ARROW:
+                t = 0.6
+                tip_x = ax + (bx - ax) * t
+                tip_y = ay + (by - ay) * t
+                base_x = tip_x - ux * _ARROW
+                base_y = tip_y - uy * _ARROW
+                left  = (base_x - uy * _ARROW_HW, base_y + ux * _ARROW_HW)
+                right = (base_x + uy * _ARROW_HW, base_y - ux * _ARROW_HW)
+                pygame.draw.polygon(self.screen, color, [
+                    (int(tip_x), int(tip_y)),
+                    (int(left[0]),  int(left[1])),
+                    (int(right[0]), int(right[1])),
+                ])
 
         for node in self.G.nodes:
             x, y = tx(self.G.nodes[node]['x'], self.G.nodes[node]['y'])

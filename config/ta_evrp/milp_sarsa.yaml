@@ -1,0 +1,24 @@
+# =============================================================================
+# config/ta_evrp/milp_sarsa.yaml — MILP outer plan + SARSA inner navigation
+# =============================================================================
+# Full TA-EVRP: traffic-aware PSL model, SARSA RL agent navigates each leg.
+# Requires a trained SARSA policy under runs/trsp/<policy_id>/.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/milp_sarsa.yaml
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: milp
+
+trsp:
+  agent: sarsa
+  policy_id: null            # set to the policy ID, e.g. "77a4169c"
+
+traffic:
+  psl:
+    enabled: true
+    K: 1
+    v_min: 40.0
+    v_max: 100.0
+    speed_step: 60.0
+    seed: 42

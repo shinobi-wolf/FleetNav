@@ -8,9 +8,11 @@ The EVRP module solves the **outer planning layer**: assign delivery stops to a 
 
 | Script | Purpose |
 |--------|---------|
-| `run_sim.py` | Plan → simulate → write metrics. Accepts `-c <config>` and `--planner <name>` |
-| `run_sim.py --no-sim` | Plan only; skip SUMO simulation |
-| `run_sim.py --no-plot` | Suppress route plot |
+| `infer_ta_evrp.py` | Plan → simulate → write metrics. Accepts `-c <config>` |
+| `infer_ta_evrp.py --no-sim` | Plan only; skip SUMO simulation |
+| `infer_ta_evrp.py --no-plot` | Suppress route plot |
+
+Configs live under `config/ta_evrp/`. Pure EVRP runs use configs with `trsp.agent: dijkstra` and `traffic.psl.enabled: false`.
 
 ---
 

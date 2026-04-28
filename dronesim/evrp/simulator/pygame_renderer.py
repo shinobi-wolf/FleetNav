@@ -1,10 +1,12 @@
 """Pygame visualization for the EVRP simulator.
 
-Shows the road network, node types, and current vehicle positions.
+Shows the road network with speed-based edge coloring (red=slow, green=fast),
+directed arrows on edges, node types, and current vehicle positions.
 Updates every time a vehicle arrives at a stop (not mid-leg).
 """
 from __future__ import annotations
 
+import math
 from typing import Any
 
 try:
@@ -27,14 +29,13 @@ BG          = (245, 245, 245)
 EDGE_COL    = (180, 180, 180)
 NODE_COL    = (90, 90, 90)
 DEPOT_COL   = (30, 100, 210)
-CUSTOMER_COL        = (210, 60, 40)    # unserved
-CUSTOMER_SERVED_COL = (50, 180, 80)    # served
+CUSTOMER_COL        = (210, 60, 40)
+CUSTOMER_SERVED_COL = (50, 180, 80)
 AFS_COL     = (140, 60, 200)
 TEXT_DARK   = (20, 20, 20)
 TEXT_MID    = (80, 80, 80)
 PANEL_BG    = (230, 230, 235)
 
-# One bright color per vehicle (cycles if > 8 vehicles)
 VEHICLE_COLORS = [
     (255, 140, 0),
     (0, 180, 220),
@@ -46,6 +47,10 @@ VEHICLE_COLORS = [
     (0, 200, 200),
 ]
 
+_EDGE_OFFSET_PX = 3   # perpendicular offset for directed edges (px)
+_ARROW_SIZE     = 8   # arrowhead length (px)
+_ARROW_HALF_W   = 3   # arrowhead half-width at base (px)
+
 
 class PygameRenderer:
     """Lightweight pygame window for EVRP simulation.
@@ -53,31 +58,39 @@ class PygameRenderer:
     Parameters
     ----------
     net : sumolib net object
-        Used to extract node positions and edges for drawing.
     node_roles : dict[str, str]
-        Maps sumo_node_id → role: 'depot' | 'customer' | 'afs'
+        Maps sumo_node_id → 'depot' | 'customer' | 'afs'
     vehicle_ids : list[int]
-        Ordered list of vehicle IDs (for legend colours).
+    v_min_ms : float | None
+        Min PSL speed in m/s (for edge color normalization). None = no coloring.
+    v_max_ms : float | None
+        Max PSL speed in m/s.
     fps : int
-        Max frames per second (applies only to event-pump rate).
     """
 
-    def __init__(self, net, node_roles: dict[str, str], vehicle_ids: list[int], fps: int = 30) -> None:
+    def __init__(
+        self,
+        net,
+        node_roles: dict[str, str],
+        vehicle_ids: list[int],
+        v_min_ms: float | None = None,
+        v_max_ms: float | None = None,
+        fps: int = 30,
+    ) -> None:
         self._net = net
-        self._node_roles = node_roles   # sumo_node_id → 'depot'|'customer'|'afs'
+        self._node_roles = node_roles
         self._vehicle_ids = vehicle_ids
+        self._v_min_ms = v_min_ms
+        self._v_max_ms = v_max_ms
         self._fps = fps
 
         self._screen: pygame.Surface | None = None
         self._clock: pygame.time.Clock | None = None
 
-        # Build node position lookup and edge list once
         self._node_pos: dict[str, tuple[float, float]] = {}
-        self._edges: list[tuple[str, str]] = []   # (from_node, to_node)
-        self._edge_ids: list[str] = []            # parallel SUMO edge ID list
+        self._edges: list[tuple[str, str]] = []
+        self._edge_ids: list[str] = []
         self._build_graph_geometry()
-
-        # Compute transform parameters
         self._transform = self._make_transform()
 
     # ------------------------------------------------------------------
@@ -89,14 +102,11 @@ class PygameRenderer:
             nid = node.getID()
             coord = node.getCoord()
             self._node_pos[nid] = (float(coord[0]), float(coord[1]))
-
         for edge in self._net.getEdges():
             eid = edge.getID()
             if eid.startswith(":"):
                 continue
-            fn = edge.getFromNode().getID()
-            tn = edge.getToNode().getID()
-            self._edges.append((fn, tn))
+            self._edges.append((edge.getFromNode().getID(), edge.getToNode().getID()))
             self._edge_ids.append(eid)
 
     def _make_transform(self):
@@ -104,7 +114,6 @@ class PygameRenderer:
         ys = [p[1] for p in self._node_pos.values()]
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
-
         map_draw_w = MAP_W - 2 * MARGIN
         map_draw_h = SCREEN_H - 2 * MARGIN
         sx = map_draw_w / max(1.0, max_x - min_x)
@@ -112,9 +121,8 @@ class PygameRenderer:
         scale = min(sx, sy)
 
         def transform(x: float, y: float) -> tuple[int, int]:
-            px = int(MARGIN + (x - min_x) * scale)
-            py = int(MARGIN + (max_y - y) * scale)   # flip y
-            return px, py
+            return (int(MARGIN + (x - min_x) * scale),
+                    int(MARGIN + (max_y - y) * scale))
 
         return transform
 
@@ -122,7 +130,7 @@ class PygameRenderer:
         pygame.init()
         pygame.display.init()
         self._screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
-        pygame.display.set_caption("EVRP Simulation")
+        pygame.display.set_caption("TA-EVRP Simulation")
         self._clock = pygame.time.Clock()
 
     # ------------------------------------------------------------------
@@ -133,10 +141,9 @@ class PygameRenderer:
         self,
         sim_time_s: float,
         traffic_speed_ms: float,
-        vehicle_positions: dict[int, str | tuple[float, float]],  # node_id or (x, y)
-        served_customers: set[str],            # sumo_node_ids already served
-        vehicle_states: dict[int, Any],        # vehicle_id → _VehicleState
-        edge_traffic: dict[str, float] | None = None,  # edge_id → [0, 1] load
+        vehicle_positions: dict[int, str | tuple[float, float]],
+        served_customers: set[str],
+        vehicle_states: dict[int, Any],
     ) -> None:
         """Redraw the window."""
         if self._screen is None:
@@ -150,7 +157,7 @@ class PygameRenderer:
         surf = self._screen
         surf.fill(BG)
 
-        self._draw_edges(surf, edge_traffic)
+        self._draw_edges(surf, traffic_speed_ms)
         self._draw_nodes(surf, served_customers)
         self._draw_vehicles(surf, vehicle_positions)
         self._draw_panel(surf, sim_time_s, traffic_speed_ms, vehicle_positions, served_customers, vehicle_states)
@@ -168,29 +175,66 @@ class PygameRenderer:
     # Drawing helpers
     # ------------------------------------------------------------------
 
-    @staticmethod
-    def _traffic_color(t: float) -> tuple[int, int, int]:
-        """Green (t=0) → yellow (t=0.5) → red (t=1)."""
+    def _speed_to_color(self, speed_ms: float) -> tuple[int, int, int]:
+        """Red (slow) → green (fast) over the configured PSL speed range."""
+        if self._v_min_ms is None or self._v_max_ms is None:
+            return EDGE_COL
+        v_range = self._v_max_ms - self._v_min_ms
+        if v_range < 1e-9:
+            return EDGE_COL
+        t = (speed_ms - self._v_min_ms) / v_range
         t = max(0.0, min(1.0, t))
-        r = int(255 * min(1.0, 2.0 * t))
-        g = int(255 * min(1.0, 2.0 * (1.0 - t)))
-        return (r, g, 0)
+        return (int(255 * (1.0 - t)), int(255 * t), 0)
 
-    def _draw_edges(
-        self, surf: pygame.Surface, edge_traffic: dict[str, float] | None
+    @staticmethod
+    def _draw_directed_edge(
+        surf: pygame.Surface,
+        color: tuple,
+        p1: tuple[int, int],
+        p2: tuple[int, int],
+        width: int = 2,
     ) -> None:
-        for (fn, tn), eid in zip(self._edges, self._edge_ids):
+        """Draw a directed edge: offset line + arrowhead in direction p1→p2."""
+        x1, y1 = float(p1[0]), float(p1[1])
+        x2, y2 = float(p2[0]), float(p2[1])
+        dx, dy = x2 - x1, y2 - y1
+        length = math.hypot(dx, dy)
+        if length < 1.0:
+            return
+
+        ux, uy = dx / length, dy / length
+        ox, oy = -uy * _EDGE_OFFSET_PX, ux * _EDGE_OFFSET_PX
+
+        ax, ay = x1 + ox, y1 + oy
+        bx, by = x2 + ox, y2 + oy
+
+        pygame.draw.line(surf, color, (int(ax), int(ay)), (int(bx), int(by)), width)
+
+        if length > 2.5 * _ARROW_SIZE:
+            t = 0.6
+            tip_x = ax + (bx - ax) * t
+            tip_y = ay + (by - ay) * t
+            base_x = tip_x - ux * _ARROW_SIZE
+            base_y = tip_y - uy * _ARROW_SIZE
+            left  = (base_x - uy * _ARROW_HALF_W, base_y + ux * _ARROW_HALF_W)
+            right = (base_x + uy * _ARROW_HALF_W, base_y - ux * _ARROW_HALF_W)
+            pygame.draw.polygon(surf, color, [
+                (int(tip_x), int(tip_y)),
+                (int(left[0]),  int(left[1])),
+                (int(right[0]), int(right[1])),
+            ])
+
+    def _draw_edges(self, surf: pygame.Surface, traffic_speed_ms: float) -> None:
+        color = self._speed_to_color(traffic_speed_ms)
+        traffic_on = self._v_min_ms is not None
+        width = 3 if traffic_on else 2
+
+        for (fn, tn) in self._edges:
             if fn not in self._node_pos or tn not in self._node_pos:
                 continue
-            if edge_traffic is not None and eid in edge_traffic:
-                color = self._traffic_color(edge_traffic[eid])
-                width = 3
-            else:
-                color = EDGE_COL
-                width = 2
             p1 = self._transform(*self._node_pos[fn])
             p2 = self._transform(*self._node_pos[tn])
-            pygame.draw.line(surf, color, p1, p2, width)
+            self._draw_directed_edge(surf, color, p1, p2, width=width)
 
     def _draw_nodes(self, surf: pygame.Surface, served_customers: set[str]) -> None:
         font = pygame.font.Font(None, 16)
@@ -199,17 +243,14 @@ class PygameRenderer:
             px, py = self._transform(*pos)
 
             if role == "depot":
-                color = DEPOT_COL
-                r = 10
+                color, r = DEPOT_COL, 10
             elif role == "customer":
                 color = CUSTOMER_SERVED_COL if nid in served_customers else CUSTOMER_COL
                 r = 8
             elif role == "afs":
-                color = AFS_COL
-                r = 9
+                color, r = AFS_COL, 9
             else:
-                color = NODE_COL
-                r = 5
+                color, r = NODE_COL, 5
 
             pygame.draw.circle(surf, color, (px, py), r)
 
@@ -233,7 +274,7 @@ class PygameRenderer:
                     continue
                 px, py = self._transform(*self._node_pos[pos])
 
-            px += idx * 14  # offset overlapping vehicles at the same location
+            px += idx * 14
             pygame.draw.circle(surf, color, (px, py - 18), 9)
             txt = font.render(str(vid), True, (255, 255, 255))
             surf.blit(txt, txt.get_rect(center=(px, py - 18)))
@@ -272,22 +313,25 @@ class PygameRenderer:
 
         y += 10
         line("── Legend ──", color=TEXT_MID)
-        self._legend_dot(surf, x, y, DEPOT_COL,            "Depot")        ; y += 22
-        self._legend_dot(surf, x, y, CUSTOMER_COL,         "Customer (pending)") ; y += 22
-        self._legend_dot(surf, x, y, CUSTOMER_SERVED_COL,  "Customer (served)")  ; y += 22
-        self._legend_dot(surf, x, y, AFS_COL,              "AFS (fuel station)") ; y += 22
-        y += 10
+        self._legend_dot(surf, x, y, DEPOT_COL,            "Depot")               ; y += 22
+        self._legend_dot(surf, x, y, CUSTOMER_COL,         "Customer (pending)")  ; y += 22
+        self._legend_dot(surf, x, y, CUSTOMER_SERVED_COL,  "Customer (served)")   ; y += 22
+        self._legend_dot(surf, x, y, AFS_COL,              "AFS (fuel station)")  ; y += 22
 
+        if self._v_min_ms is not None:
+            y += 6
+            line("── Traffic ──", color=TEXT_MID)
+            self._legend_dot(surf, x, y, (255, 0, 0),   f"Slow ({self._v_min_ms * 3.6:.0f} km/h)") ; y += 22
+            self._legend_dot(surf, x, y, (0, 255, 0),   f"Fast ({self._v_max_ms * 3.6:.0f} km/h)") ; y += 22
+
+        y += 10
         line("── Vehicles ──", color=TEXT_MID)
         for idx, vid in enumerate(self._vehicle_ids):
             vs = vehicle_states.get(vid)
-            color = VEHICLE_COLORS[idx % len(VEHICLE_COLORS)]
+            color_v = VEHICLE_COLORS[idx % len(VEHICLE_COLORS)]
             pos = vehicle_positions.get(vid, "?")
-            if isinstance(pos, tuple):
-                loc_label = "transit"
-            else:
-                loc_label = str(pos)
-            self._legend_dot(surf, x, y, color, f"V{vid}  @{loc_label}") ; y += 22
+            loc_label = "transit" if isinstance(pos, tuple) else str(pos)
+            self._legend_dot(surf, x, y, color_v, f"V{vid}  @{loc_label}") ; y += 22
             if vs is not None:
                 line(f"  dist={vs.distance_m:.0f}m  fuel={vs.current_fuel:.2f}gal")
                 line(f"  served={vs.customers_served}  recharges={vs.num_recharges}")

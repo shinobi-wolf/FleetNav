@@ -12,23 +12,25 @@ The EVRP simulators (`EVRPSequentialSimulator`, `EVRPConcurrentSimulator`) can n
 
 ## Config
 
-Set in `config/evrp/base.yaml` under `simulation`:
+Set in `config/ta_evrp/` configs under `trsp`:
 
 ```yaml
-simulation:
-  local_planner: dijkstra   # dijkstra | trsp
-  trsp_policy: null         # policy ID under runs/trsp/; required when local_planner: trsp
+trsp:
+  agent: dijkstra     # dijkstra | dynamic_dijkstra | sarsa | dqn | a2c | ppo
+  policy_id: null     # policy ID under runs/trsp/; required for RL agents
 ```
 
 Example — switch to TRSP navigation with the SARSA policy:
 
 ```yaml
-simulation:
-  local_planner: trsp
-  trsp_policy: sarsa        # loads runs/trsp/sarsa/config.yaml + policy.pkl
+trsp:
+  agent: sarsa
+  policy_id: 77a4169c   # loads runs/trsp/77a4169c/config.yaml + policy.pkl
 ```
 
 The policy ID must correspond to a directory under `runs/trsp/` containing `config.yaml` and `policy.pkl`.
+
+Use `infer_ta_evrp.py -c config/ta_evrp/milp_sarsa.yaml` to run TA-EVRP with a trained SARSA agent.
 
 ---
 

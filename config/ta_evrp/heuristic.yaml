@@ -1,0 +1,16 @@
+# =============================================================================
+# config/ta_evrp/heuristic.yaml — RoutingBlocks ALNS, static Dijkstra navigation
+# =============================================================================
+# Pure EVRP mode: traffic-agnostic heuristic outer plan + static shortest-path inner nav.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/heuristic.yaml
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: heuristic
+  heuristic:
+    alns_iterations: 300
+    seed: 42
+
+trsp:
+  agent: dijkstra

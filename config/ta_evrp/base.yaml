@@ -1,0 +1,95 @@
+# =============================================================================
+# config/ta_evrp/base.yaml — shared TA-EVRP parameters
+# =============================================================================
+# Do not run this file directly. Child configs declare `base: config/ta_evrp/base.yaml`
+# and override only what differs.
+#
+# Parameter sections mirror the experiment setup in the paper:
+#   evrp        — outer routing planner
+#   trsp        — inner navigation agent
+#   network     — road network
+#   traffic     — piecewise speed limit + simulated background traffic
+#   uav_bms     — UAV-assisted Battery Management System
+#   simulation  — UGV fleet and delivery task parameters
+#   sumo        — SUMO process settings
+#   output      — what to save
+
+generation_seed: 42
+
+# ── Outer Routing Planner (EVRP layer) ───────────────────────────────────────
+evrp:
+  planner: milp              # milp | heuristic | mtsp | td_milp
+  milp:
+    time_limit_s: 300        # Gurobi wall-clock limit
+    mip_gap: 0.01            # 0.0 = proven optimal
+    output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+    afs_dummy_copies: 3
+    depot_dummy_copies: 3
+  heuristic:
+    alns_iterations: 300
+    seed: 42
+
+# ── Inner Navigation Agent (TRSP layer) ──────────────────────────────────────
+trsp:
+  agent: dijkstra            # dijkstra | dynamic_dijkstra | sarsa | dqn | a2c | ppo
+  policy_id: null            # policy ID under runs/trsp/; required for RL agents
+
+# ── Road Network ─────────────────────────────────────────────────────────────
+network:
+  net_path: data/grid_road/grid_road.sumocfg
+  warehouse: center          # depot placement: center | random | <sumo node id>
+  max_degree: 4              # max junction degree (used by TRSP obs space)
+
+# ── Traffic Modeling ─────────────────────────────────────────────────────────
+traffic:
+  psl:                       # Piecewise Speed Limit model (per-edge random profile)
+    enabled: true
+    K: 1                     # number of time periods (1 = static speed per edge)
+    v_min: 40.0              # km/h — minimum speed level
+    v_max: 100.0             # km/h — maximum speed level
+    speed_step: 60.0         # km/h — step between levels
+    seed: 42
+    profile_type: random     # random | function | file
+  simulated:                 # SUMO background traffic
+    vehicular:
+      enabled: false
+      scale: 0.0             # SUMO --scale factor (0 = empty roads)
+    pedestrian:
+      enabled: false
+
+# ── UAV-assisted Battery Management System ───────────────────────────────────
+uav_bms:
+  enabled: false
+  fleet_size: 2
+  range_m: 5000
+
+# ── UGV Fleet & Delivery Task Parameters ─────────────────────────────────────
+simulation:
+  ugv:
+    fleet_size: 3
+    battery_range_m: 10000       # full-charge range in metres
+    consumption_rate: 1          # gallons/mile (converted to m internally)
+    free_flow_speed_mph: 40.0    # planning speed; also used when traffic disabled
+    max_duration_hours: 6.0      # hard route time limit
+    customer_service_time_hours: 0
+    recharge_time_hours: 0
+    runtime_refuel: false        # trackback to depot when next stop is out of range
+  tasks:
+    customer_count: 10
+    afs_count: 3
+    customer_sampling: count     # count | density
+    task_density: 30             # % of nodes (used when sampling: density)
+
+# ── SUMO Process ─────────────────────────────────────────────────────────────
+sumo:
+  step_length: 1.0
+  simulator: concurrent          # sequential | concurrent
+  max_time: 12                   # hours — SUMO wall-clock budget
+  render_mode: human             # quiet | print | human
+  delay: 10                      # ms GUI delay (human mode only)
+
+# ── Output ───────────────────────────────────────────────────────────────────
+output:
+  plot: true
+  save_instance_json: true
+  save_metrics_json: true

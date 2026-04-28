@@ -1,7 +1,7 @@
 """Run a saved TRSP policy for N inference episodes.
 
 Usage:
-    python run_trsp_sim.py -p <policy_id> [-n <num_episodes>] [-r <render_mode>]
+    python infer_trsp.py -p <policy_id> [-n <num_episodes>] [-r <render_mode>]
 
 Config is loaded from runs/trsp/<policy_id>/config.yaml (inference config saved
 during training — no 'training' block required).

@@ -1,0 +1,19 @@
+# =============================================================================
+# config/ta_evrp/mtsp.yaml — mTSP baseline (ignores fuel constraints)
+# =============================================================================
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/mtsp.yaml
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: mtsp
+
+trsp:
+  agent: dijkstra
+
+simulation:
+  ugv:
+    runtime_refuel: true   # mTSP ignores fuel — runtime refuel prevents stranding
+
+sumo:
+  render_mode: print

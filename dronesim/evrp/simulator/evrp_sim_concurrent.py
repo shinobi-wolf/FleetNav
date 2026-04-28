@@ -167,8 +167,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
 
         if renderer is not None:
             renderer.draw(sim_time_s, traffic.commanded_speed_ms,
-                          vehicle_positions, served_customers, vehicle_states,
-                          self._edge_traffic_map(fleet_size))
+                          vehicle_positions, served_customers, vehicle_states)
 
         # Main time-step loop
         while sim_time_s < self.max_time_s:
@@ -198,8 +197,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
 
             if renderer is not None:
                 renderer.draw(sim_time_s, traffic.commanded_speed_ms,
-                              vehicle_positions, served_customers, vehicle_states,
-                              self._edge_traffic_map(fleet_size))
+                              vehicle_positions, served_customers, vehicle_states)
 
             # Terminate early: all vehicles finished/stranded, or all customers served
             if all_done:

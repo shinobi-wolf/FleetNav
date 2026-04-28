@@ -10,7 +10,7 @@ The TRSP module is the **inner navigation layer**: given a source node and a des
 |--------|---------|
 | `train_trsp.py` | Train an RL policy. Saves under `runs/trsp/<policy_id>/` |
 | `eval_trsp.py -p <policy_id>` | Pairwise evaluation over all (start, goal) node pairs |
-| `run_trsp_sim.py -p <policy_id>` | Interactive inference for N episodes |
+| `infer_trsp.py -p <policy_id>` | Interactive inference for N episodes |
 
 ---
 

@@ -1,0 +1,31 @@
+# =============================================================================
+# config/ta_evrp/milp_td.yaml — Time-Dependent EVRP MILP (Lu et al. 2020)
+# =============================================================================
+# Traffic-aware outer planner using Ichoua FIFO travel-time model.
+# Known limitations: LP relaxation bound always 0; speed-independent energy model.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/milp_td.yaml --no-sim
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: td_milp
+
+trsp:
+  agent: dijkstra
+
+# Lu et al. three-segment speed profile
+traffic_lu:
+  v_congestion_kmh: 15.0
+  v_freeflow_kmh: 50.0
+  num_speed_levels: 2
+  T1_hours: 1.0
+  T2_hours: 4.0
+
+traffic:
+  psl:
+    enabled: true           # use Lu model in simulator (model override below)
+
+# Objective weights
+cost_model:
+  w_energy: 0.0
+  w_makespan: 1.0

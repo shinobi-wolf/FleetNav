@@ -131,7 +131,7 @@ class _VehicleState:
 class EVRPSequentialSimulator:
     """Execute routes sequentially: each vehicle runs to completion before the next starts."""
 
-    def __init__(self, config: dict[str, Any]) -> None:
+    def __init__(self, config: dict[str, Any], local_planner=None) -> None:
         self.config = config
         self._sumo_cfg = config.get("sumo", {})
         self._sim_cfg = config.get("simulation", {})
@@ -173,18 +173,16 @@ class EVRPSequentialSimulator:
 
         self._net = None  # loaded on run()
         self._spawn_counter = 0
+        self._local_planner = local_planner
 
-        local_planner_type = self._sim_cfg.get("local_planner", "dijkstra").strip().lower()
-        if local_planner_type == "trsp":
-            policy_id = self._sim_cfg.get("trsp_policy")
-            if not policy_id:
-                raise ValueError(
-                    "simulation.trsp_policy must be set when simulation.local_planner: trsp"
-                )
-            from dronesim.evrp.local_planner import TRSPLocalPlanner
-            self._local_planner: TRSPLocalPlanner | None = TRSPLocalPlanner(policy_id)
+        # Speed range for edge-color normalization in human render mode
+        tcfg = config.get("traffic", {})
+        if tcfg.get("enabled", False):
+            self._traffic_v_min_ms = float(tcfg.get("v_min", 20.0)) / 3.6
+            self._traffic_v_max_ms = float(tcfg.get("v_max", 50.0)) / 3.6
         else:
-            self._local_planner = None
+            self._traffic_v_min_ms = None
+            self._traffic_v_max_ms = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -219,7 +217,11 @@ class EVRPSequentialSimulator:
         if self.render_mode == "human":
             node_roles = self._collect_node_roles(routes)
             vehicle_ids = [r.vehicle_id for r in routes]
-            renderer = PygameRenderer(self._net, node_roles, vehicle_ids)
+            renderer = PygameRenderer(
+                self._net, node_roles, vehicle_ids,
+                v_min_ms=self._traffic_v_min_ms,
+                v_max_ms=self._traffic_v_max_ms,
+            )
 
         traci.start(sumo_cmd)
         try:
@@ -269,7 +271,6 @@ class EVRPSequentialSimulator:
                 vehicle_positions=vehicle_positions,
                 served_customers=served_customers,
                 vehicle_states=vehicle_states,
-                edge_traffic=self._edge_traffic_map(fleet_size),
             )
 
         customer_completion_times: list[float] = []
@@ -393,7 +394,6 @@ class EVRPSequentialSimulator:
                         vehicle_positions=vehicle_positions,
                         served_customers=served_customers,
                         vehicle_states=vehicle_states,
-                        edge_traffic=self._edge_traffic_map(1),
                     )
 
                 # After refuel, update src to depot and retry this leg.
@@ -459,7 +459,6 @@ class EVRPSequentialSimulator:
                     vehicle_positions=vehicle_positions,
                     served_customers=served_customers,
                     vehicle_states=vehicle_states,
-                    edge_traffic=self._edge_traffic_map(1),
                 )
 
             leg_idx += 1
@@ -633,21 +632,6 @@ class EVRPSequentialSimulator:
             )
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return float("inf")
-
-    def _edge_traffic_map(self, fleet_size: int) -> dict[str, float]:
-        """Return {edge_id: load} where load ∈ [0, 1], normalised by fleet_size."""
-        result: dict[str, float] = {}
-        for edge in self._net.getEdges():
-            eid = edge.getID()
-            if eid.startswith(":"):
-                continue
-            try:
-                count = traci.edge.getLastStepVehicleNumber(eid)
-                if count > 0:
-                    result[eid] = min(count / max(1, fleet_size), 1.0)
-            except traci.TraCIException:
-                pass
-        return result
 
     @staticmethod
     def _collect_node_roles(routes: list[Route]) -> dict[str, str]:

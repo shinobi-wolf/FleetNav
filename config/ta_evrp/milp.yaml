@@ -1,0 +1,13 @@
+# =============================================================================
+# config/ta_evrp/milp.yaml — MILP exact planner, static Dijkstra navigation
+# =============================================================================
+# Pure EVRP mode: traffic-agnostic outer plan + static shortest-path inner nav.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/milp.yaml
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: milp
+
+trsp:
+  agent: dijkstra

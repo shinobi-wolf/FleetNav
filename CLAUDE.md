@@ -39,22 +39,25 @@ The inner navigation layer handles **node-to-node routing** for each ground robo
 
 ## Running the System
 
-### EVRP Planning + Simulation (Level 1)
+### TA-EVRP Inference (outer plan + inner navigation)
 ```bash
-# Exact MILP solver (best quality, slowest — requires Gurobi license)
-python run_sim.py -c config/evrp/milp.yaml --planner milp
+# Pure EVRP: MILP planner + static Dijkstra (no traffic)
+python infer_ta_evrp.py -c config/ta_evrp/milp.yaml
 
-# Fast heuristic (RoutingBlocks ALNS)
-python run_sim.py -c config/evrp/heuristic.yaml --planner heuristic
+# Pure EVRP: RoutingBlocks ALNS heuristic
+python infer_ta_evrp.py -c config/ta_evrp/heuristic.yaml
 
-# Multi-TSP baseline (ignores fuel constraints)
-python run_sim.py -c config/evrp/mtsp.yaml --planner mtsp
+# Pure EVRP: mTSP baseline
+python infer_ta_evrp.py -c config/ta_evrp/mtsp.yaml
+
+# Full TA-EVRP: MILP + SARSA (set trsp.policy_id in config first)
+python infer_ta_evrp.py -c config/ta_evrp/milp_sarsa.yaml
 
 # Plan only, skip SUMO simulation
-python run_sim.py -c config/evrp/gvrp.yaml --no-sim
+python infer_ta_evrp.py -c config/ta_evrp/milp.yaml --no-sim
 
 # Suppress route plot
-python run_sim.py -c config/evrp/milp.yaml --no-plot
+python infer_ta_evrp.py -c config/ta_evrp/milp.yaml --no-plot
 ```
 
 ### TRSP RL Agent Training + Evaluation (Level 2)
@@ -64,11 +67,14 @@ python train_trsp.py -c config/trsp/train.yaml
 
 # Evaluate a trained policy by policy ID
 python eval_trsp.py -p <policy_id>
+
+# Run inference episodes
+python infer_trsp.py -p <policy_id> -n 10
 ```
 
 ### Smoke Tests / Integration Tests
 ```bash
-python scripts/smoke_test_lmd.py --config config/evrp/base.yaml --steps 8
+python scripts/smoke_test_lmd.py --config config/ta_evrp/base.yaml --steps 8
 ```
 
 ## Architecture
@@ -104,19 +110,23 @@ Package layout:
   - `DQNAgent` — deep Q-network (CleanRL-style)
   - `PPOAgent` — proximal policy optimization (stub)
 
-Runner scripts (project root): `train_trsp.py`, `eval_trsp.py`. Policies saved under `runs/trsp/<policy_id>/`.
+Runner scripts (project root): `train_trsp.py`, `eval_trsp.py`, `infer_trsp.py`. Policies saved under `runs/trsp/<policy_id>/`.
 
 ### Configuration System
 
-YAML-based with **inheritance**: child configs declare `base: path/to/base.yaml` and deep-merge on top (dicts merge recursively, scalars override). `config/evrp/base.yaml` holds shared fleet/network/vehicle parameters.
+YAML-based with **inheritance**: child configs declare `base: path/to/base.yaml` and deep-merge on top (dicts merge recursively, scalars override). `config/ta_evrp/base.yaml` holds all shared TA-EVRP parameters.
 
-Key config sections:
-- `net.net_path` — path to `.sumocfg` or `.net.xml`
-- `fleet.size` — number of ground robots
-- `gvrp.*` — customer count, AFS count, fuel/battery capacity, consumption rate, distance unit
-- `solver.*` — MILP time limit, MIP gap (MILP planner only)
-- `traffic.*` — piecewise speed limit range, segment duration (default 5 min)
-- `simulation.render_mode` — `quiet` (silent) | `print` (log events to stdout) | `human` (sumo-gui + pygame window; applies `sumo.delay`)
+Key config sections (TA-EVRP schema):
+- `evrp.planner` — `milp` | `heuristic` | `mtsp` | `td_milp`
+- `trsp.agent` — `dijkstra` | `sarsa` | `dqn` | `ppo` | `a2c`
+- `trsp.policy_id` — policy ID under `runs/trsp/`; required for RL agents
+- `network.net_path` — path to `.sumocfg` or `.net.xml`
+- `simulation.ugv.*` — fleet size, battery range, speed, service/recharge times
+- `simulation.tasks.*` — customer count, AFS count
+- `traffic.psl.*` — PSL model: K, v_min, v_max, speed_step, seed
+- `traffic.simulated.*` — SUMO background vehicular/pedestrian traffic
+- `uav_bms.*` — UAV-BMS enabled flag, fleet size, range
+- `sumo.render_mode` — `quiet` | `print` | `human`
 
 ### Key Dependencies
 
@@ -131,7 +141,9 @@ Key config sections:
 
 | File | Description |
 |------|-------------|
-| `gvrp_routes.png` | Matplotlib plot of planned routes |
-| `sim_metrics.json` | Makespan, distance, energy, recharges per vehicle |
-| `generated_gvrp_instance.json` | Problem instance definition |
-| `runs/trsp/{agent}/policy.pkl` | Saved RL policy |
+| `runs/ta_evrp/{run_id}/gvrp_routes.png` | Matplotlib plot of planned routes |
+| `runs/ta_evrp/{run_id}/sim_metrics.json` | Makespan, distance, energy, recharges per vehicle |
+| `runs/ta_evrp/{run_id}/generated_instance.json` | Problem instance definition |
+| `runs/trsp/{policy_id}/policy.pkl` | Saved TRSP RL policy |
+
+`run_id` format: `{planner}_{agent}_{YYYYMMDD_HHMMSS}` (e.g. `milp_sarsa_20260428_143200`).
