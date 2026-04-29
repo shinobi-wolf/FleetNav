@@ -118,7 +118,7 @@ def build_traffic_model(
     if profile_type == "random":
         profiles = {
             eid: [rng.choice(levels) for _ in range(K)]
-            for eid in edge_ids
+            for eid in sorted(edge_ids)
         }
     elif profile_type == "function":
         fn = tcfg["speed_profile_fn"]

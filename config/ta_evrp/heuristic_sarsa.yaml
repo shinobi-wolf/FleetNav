@@ -12,7 +12,7 @@ evrp:
 
 trsp:
   agent: sarsa
-  policy_id: 77a4169c            # set to the policy ID, e.g. "77a4169c"
+  policy_id: ff58b1a9            # set to the policy ID, e.g. "77a4169c"
 
 traffic:
   psl:

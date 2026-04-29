@@ -71,7 +71,7 @@ class PSLTrafficModel:
         levels = self._speed_levels()
         self.profiles = {
             eid: [rng.choice(levels) for _ in range(self.K)]
-            for eid in edge_ids
+            for eid in sorted(edge_ids)
         }
 
     def _from_function(self, edge_ids, fn):
