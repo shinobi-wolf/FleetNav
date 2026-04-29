@@ -69,7 +69,7 @@ simulation:
     fleet_size: 3
     battery_range_m: 10000       # full-charge range in metres
     consumption_rate: 1          # gallons/mile (converted to m internally)
-    free_flow_speed_mph: 40.0    # planning speed; also used when traffic disabled
+    free_flow_speed_mph: 120.0    # planning speed; also used when traffic disabled
     max_duration_hours: 6.0      # hard route time limit
     customer_service_time_hours: 0
     recharge_time_hours: 0
