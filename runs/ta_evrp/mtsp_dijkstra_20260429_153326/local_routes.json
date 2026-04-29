@@ -1,6 +1,6 @@
 {
-  "run_id": "heuristic_dijkstra_20260429_130452",
-  "created_at": "2026-04-29T13:04:54",
+  "run_id": "mtsp_dijkstra_20260429_153326",
+  "created_at": "2026-04-29T15:33:28",
   "simulator": "concurrent",
   "traffic_enabled": true,
   "vehicles": [
@@ -12,15 +12,17 @@
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "C2",
-          "to_sumo_node_id": "C3",
+          "to_sumo_node_id": "D1",
           "start_time_s": 1.0,
           "traffic_slot": 0,
           "node_ids": [
             "C2",
-            "C3"
+            "C1",
+            "D1"
           ],
           "edge_ids": [
-            "C2C3"
+            "C2C1",
+            "C1D1"
           ],
           "fallback_reason": null
         },
@@ -28,16 +30,16 @@
           "leg_idx": 1,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
-          "from_sumo_node_id": "C3",
-          "to_sumo_node_id": "B3",
-          "start_time_s": 22.0,
+          "from_sumo_node_id": "D1",
+          "to_sumo_node_id": "E1",
+          "start_time_s": 194.0,
           "traffic_slot": 0,
           "node_ids": [
-            "C3",
-            "B3"
+            "D1",
+            "E1"
           ],
           "edge_ids": [
-            "C3B3"
+            "D1E1"
           ],
           "fallback_reason": null
         },
@@ -45,18 +47,20 @@
           "leg_idx": 2,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
-          "from_sumo_node_id": "B3",
-          "to_sumo_node_id": "A4",
-          "start_time_s": 43.0,
+          "from_sumo_node_id": "E1",
+          "to_sumo_node_id": "D3",
+          "start_time_s": 233.0,
           "traffic_slot": 0,
           "node_ids": [
-            "B3",
-            "A3",
-            "A4"
+            "E1",
+            "D1",
+            "D2",
+            "D3"
           ],
           "edge_ids": [
-            "B3A3",
-            "A3A4"
+            "E1D1",
+            "D1D2",
+            "D2D3"
           ],
           "fallback_reason": null
         },
@@ -64,22 +68,18 @@
           "leg_idx": 3,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
-          "from_sumo_node_id": "A4",
+          "from_sumo_node_id": "D3",
           "to_sumo_node_id": "C2",
-          "start_time_s": 120.0,
+          "start_time_s": 467.0,
           "traffic_slot": 0,
           "node_ids": [
-            "A4",
-            "A3",
-            "A2",
-            "B2",
+            "D3",
+            "C3",
             "C2"
           ],
           "edge_ids": [
-            "A4A3",
-            "A3A2",
-            "A2B2",
-            "B2C2"
+            "D3C3",
+            "C3C2"
           ],
           "fallback_reason": null
         }
@@ -94,17 +94,15 @@
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "C2",
-          "to_sumo_node_id": "B1",
+          "to_sumo_node_id": "C1",
           "start_time_s": 1.0,
           "traffic_slot": 0,
           "node_ids": [
             "C2",
-            "B2",
-            "B1"
+            "C1"
           ],
           "edge_ids": [
-            "C2B2",
-            "B2B1"
+            "C2C1"
           ],
           "fallback_reason": null
         },
@@ -112,9 +110,26 @@
           "leg_idx": 1,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
+          "from_sumo_node_id": "C1",
+          "to_sumo_node_id": "B1",
+          "start_time_s": 3.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "C1",
+            "B1"
+          ],
+          "edge_ids": [
+            "C1B1"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 2,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
           "from_sumo_node_id": "B1",
           "to_sumo_node_id": "A1",
-          "start_time_s": 76.0,
+          "start_time_s": 42.0,
           "traffic_slot": 0,
           "node_ids": [
             "B1",
@@ -126,12 +141,12 @@
           "fallback_reason": null
         },
         {
-          "leg_idx": 2,
+          "leg_idx": 3,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "A1",
           "to_sumo_node_id": "B0",
-          "start_time_s": 97.0,
+          "start_time_s": 81.0,
           "traffic_slot": 0,
           "node_ids": [
             "A1",
@@ -145,12 +160,12 @@
           "fallback_reason": null
         },
         {
-          "leg_idx": 3,
+          "leg_idx": 4,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "B0",
           "to_sumo_node_id": "C2",
-          "start_time_s": 153.0,
+          "start_time_s": 273.0,
           "traffic_slot": 0,
           "node_ids": [
             "B0",
@@ -176,15 +191,15 @@
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "C2",
-          "to_sumo_node_id": "C1",
+          "to_sumo_node_id": "C3",
           "start_time_s": 1.0,
           "traffic_slot": 0,
           "node_ids": [
             "C2",
-            "C1"
+            "C3"
           ],
           "edge_ids": [
-            "C2C1"
+            "C2C3"
           ],
           "fallback_reason": null
         },
@@ -192,16 +207,16 @@
           "leg_idx": 1,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
-          "from_sumo_node_id": "C1",
-          "to_sumo_node_id": "D1",
-          "start_time_s": 22.0,
+          "from_sumo_node_id": "C3",
+          "to_sumo_node_id": "B3",
+          "start_time_s": 39.0,
           "traffic_slot": 0,
           "node_ids": [
-            "C1",
-            "D1"
+            "C3",
+            "B3"
           ],
           "edge_ids": [
-            "C1D1"
+            "C3B3"
           ],
           "fallback_reason": null
         },
@@ -209,16 +224,18 @@
           "leg_idx": 2,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
-          "from_sumo_node_id": "D1",
-          "to_sumo_node_id": "E1",
-          "start_time_s": 43.0,
+          "from_sumo_node_id": "B3",
+          "to_sumo_node_id": "A4",
+          "start_time_s": 135.0,
           "traffic_slot": 0,
           "node_ids": [
-            "D1",
-            "E1"
+            "B3",
+            "A3",
+            "A4"
           ],
           "edge_ids": [
-            "D1E1"
+            "B3A3",
+            "A3A4"
           ],
           "fallback_reason": null
         },
@@ -226,39 +243,22 @@
           "leg_idx": 3,
           "leg_kind": "planned",
           "planner_kind": "dijkstra",
-          "from_sumo_node_id": "E1",
-          "to_sumo_node_id": "D3",
-          "start_time_s": 64.0,
-          "traffic_slot": 0,
-          "node_ids": [
-            "E1",
-            "D1",
-            "D2",
-            "D3"
-          ],
-          "edge_ids": [
-            "E1D1",
-            "D1D2",
-            "D2D3"
-          ],
-          "fallback_reason": null
-        },
-        {
-          "leg_idx": 4,
-          "leg_kind": "planned",
-          "planner_kind": "dijkstra",
-          "from_sumo_node_id": "D3",
+          "from_sumo_node_id": "A4",
           "to_sumo_node_id": "C2",
-          "start_time_s": 137.0,
+          "start_time_s": 274.0,
           "traffic_slot": 0,
           "node_ids": [
-            "D3",
-            "C3",
+            "A4",
+            "A3",
+            "A2",
+            "B2",
             "C2"
           ],
           "edge_ids": [
-            "D3C3",
-            "C3C2"
+            "A4A3",
+            "A3A2",
+            "A2B2",
+            "B2C2"
           ],
           "fallback_reason": null
         }

@@ -1,6 +1,6 @@
 {
-  "run_id": "heuristic_dijkstra_20260429_115559",
-  "created_at": "2026-04-29T11:56:01",
+  "run_id": "heuristic_dijkstra_20260429_153042",
+  "created_at": "2026-04-29T15:30:44",
   "simulator": "concurrent",
   "traffic_enabled": true,
   "vehicles": [
@@ -30,7 +30,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "C3",
           "to_sumo_node_id": "B3",
-          "start_time_s": 60.0,
+          "start_time_s": 39.0,
           "traffic_slot": 0,
           "node_ids": [
             "C3",
@@ -47,7 +47,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "B3",
           "to_sumo_node_id": "A4",
-          "start_time_s": 119.0,
+          "start_time_s": 135.0,
           "traffic_slot": 0,
           "node_ids": [
             "B3",
@@ -66,7 +66,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "A4",
           "to_sumo_node_id": "C2",
-          "start_time_s": 285.0,
+          "start_time_s": 274.0,
           "traffic_slot": 0,
           "node_ids": [
             "A4",
@@ -114,7 +114,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "B1",
           "to_sumo_node_id": "A1",
-          "start_time_s": 165.0,
+          "start_time_s": 139.0,
           "traffic_slot": 0,
           "node_ids": [
             "B1",
@@ -131,7 +131,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "A1",
           "to_sumo_node_id": "B0",
-          "start_time_s": 224.0,
+          "start_time_s": 178.0,
           "traffic_slot": 0,
           "node_ids": [
             "A1",
@@ -150,7 +150,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "B0",
           "to_sumo_node_id": "C2",
-          "start_time_s": 344.0,
+          "start_time_s": 370.0,
           "traffic_slot": 0,
           "node_ids": [
             "B0",
@@ -194,7 +194,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "C1",
           "to_sumo_node_id": "D1",
-          "start_time_s": 60.0,
+          "start_time_s": 97.0,
           "traffic_slot": 0,
           "node_ids": [
             "C1",
@@ -211,7 +211,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "D1",
           "to_sumo_node_id": "E1",
-          "start_time_s": 120.0,
+          "start_time_s": 193.0,
           "traffic_slot": 0,
           "node_ids": [
             "D1",
@@ -228,7 +228,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "E1",
           "to_sumo_node_id": "D3",
-          "start_time_s": 180.0,
+          "start_time_s": 232.0,
           "traffic_slot": 0,
           "node_ids": [
             "E1",
@@ -249,7 +249,7 @@
           "planner_kind": "dijkstra",
           "from_sumo_node_id": "D3",
           "to_sumo_node_id": "C2",
-          "start_time_s": 358.0,
+          "start_time_s": 466.0,
           "traffic_slot": 0,
           "node_ids": [
             "D3",

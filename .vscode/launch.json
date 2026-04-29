@@ -7,7 +7,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/clean.py",
             "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
+            "pythonArgs": [
+                "-W",
+                "ignore"
+            ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -18,8 +21,14 @@
             "request": "launch",
             "program": "${workspaceFolder}/train_trsp.py",
             "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            "args": ["-c", "${workspaceFolder}/config/trsp/train.yaml"],
+            "pythonArgs": [
+                "-W",
+                "ignore"
+            ],
+            "args": [
+                "-c",
+                "${workspaceFolder}/config/trsp/train.yaml"
+            ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -30,8 +39,14 @@
             "request": "launch",
             "program": "${workspaceFolder}/eval_trsp.py",
             "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "sarsa"],
+            "pythonArgs": [
+                "-W",
+                "ignore"
+            ],
+            "args": [
+                "-p",
+                "sarsa"
+            ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -42,8 +57,14 @@
             "request": "launch",
             "program": "${workspaceFolder}/infer_trsp.py",
             "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            "args": ["-p", "sarsa"],
+            "pythonArgs": [
+                "-W",
+                "ignore"
+            ],
+            "args": [
+                "-p",
+                "sarsa"
+            ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }
@@ -54,8 +75,14 @@
             "request": "launch",
             "program": "${workspaceFolder}/infer_ta_evrp.py",
             "console": "integratedTerminal",
-            "pythonArgs": ["-W", "ignore"],
-            "args": ["-c", "${workspaceFolder}/config/ta_evrp/heuristic_sarsa.yaml"],
+            "pythonArgs": [
+                "-W",
+                "ignore"
+            ],
+            "args": [
+                "-c",
+                "${workspaceFolder}/config/ta_evrp/mtsp_sarsa.yaml"
+            ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
             }

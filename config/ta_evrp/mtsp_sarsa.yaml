@@ -1,0 +1,20 @@
+# =============================================================================
+# config/ta_evrp/mtsp.yaml — mTSP baseline (ignores fuel constraints)
+# =============================================================================
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/mtsp.yaml
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: mtsp
+
+trsp:
+  agent: sarsa
+  policy_id: ff58b1a9            # set to the policy ID, e.g. "77a4169c"
+
+simulation:
+  ugv:
+    runtime_refuel: true   # mTSP ignores fuel — runtime refuel prevents stranding
+
+sumo:
+  render_mode: print

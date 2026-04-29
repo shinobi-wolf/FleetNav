@@ -1,9 +1,9 @@
 {
-  "run_id": "heuristic_sarsa_20260429_130529",
-  "created_at": "2026-04-29T13:05:29",
+  "run_id": "heuristic_dijkstra_20260429_153042",
+  "created_at": "2026-04-29T15:30:42",
   "planner": "heuristic",
-  "trsp_agent": "sarsa",
-  "trsp_policy_id": "ff58b1a9",
+  "trsp_agent": "dijkstra",
+  "trsp_policy_id": null,
   "traffic_enabled": true,
   "vehicles": [
     {

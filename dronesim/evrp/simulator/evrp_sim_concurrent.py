@@ -189,6 +189,20 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
                     print(f"  traffic slot {slot} (avg {avg_kmh:.1f} km/h) at t={sim_time_s:.1f}s")
 
             sumo_active = set(traci.vehicle.getIDList())
+
+            slot = traffic.get_slot(sim_time_s)
+            for veh_id in sumo_active:
+                try:
+                    edge_id = traci.vehicle.getRoadID(veh_id)
+                    if not edge_id.startswith(":"):
+                        try:
+                            speed = traffic.get_speed(edge_id, slot)
+                            traci.vehicle.setMaxSpeed(veh_id, speed)
+                        except KeyError:
+                            pass
+                except traci.TraCIException:
+                    pass
+
             all_done = True
 
             for route in routes:
@@ -436,7 +450,12 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         route_id = f"route_{veh_id}"
         traci.route.add(route_id, edge_list)
 
-        speed = self.free_flow_ms
+        # speed = self.free_flow_ms
+        slot = traffic.get_slot(traci.simulation.getTime())
+        try:
+            speed = traffic.get_speed(edge_list[0], slot)
+        except KeyError:
+            speed = traffic.free_flow_ms
         try:
             vtype_list = list(traci.vehicletype.getIDList())
             vtype = (
@@ -451,7 +470,7 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
         else:
             traci.vehicle.add(veh_id, route_id, departSpeed=speed)
 
-        traci.vehicle.setMaxSpeed(veh_id, speed)
+        # traci.vehicle.setMaxSpeed(veh_id, speed)
         color = _SUMO_COLORS[vs.vehicle_id % len(_SUMO_COLORS)]
         traci.vehicle.setColor(veh_id, color)
         vs.active = True

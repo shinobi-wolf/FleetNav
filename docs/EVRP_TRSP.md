@@ -151,6 +151,14 @@ infer_ta_evrp.py
 
 ---
 
+## End-to-End Testing Results
+
+End-to-end testing of TA-EVRP with different planners (MILP, MTSP, Heuristic) and TRSP agents has been completed. The results show that using the SARSA local planner consistently gives better makespans compared to the default Dijkstra shortest-path routing. This aligns with expectations, as SARSA is trained to avoid traffic congestion and outperforms Dijkstra in the underlying TRSP.
+
+Detailed analysis and metric comparisons across all runs are available in `notebooks/ta_evrp_testing_analysis.ipynb`.
+
+---
+
 ## Current Status
 
 | Feature | Status |
@@ -162,5 +170,5 @@ infer_ta_evrp.py
 | `traci.edge.setMaxSpeed()` per-edge slot transitions in EVRP | ✅ Done |
 | Pygame renderer: per-edge color from PSL profile | ✅ Done |
 | DQN/PPO policy support in `TRSPLocalPlanner` | ❌ Not yet |
-| End-to-end test: MILP plan + TRSP navigation + metrics | ❌ Not yet run |
+| End-to-end test: MILP plan + TRSP navigation + metrics | ✅ Done |
 | TRSP time slot aligned with EVRP sim clock for K>1 | ⚠️ Works for K=1; needs validation for K>1 |
