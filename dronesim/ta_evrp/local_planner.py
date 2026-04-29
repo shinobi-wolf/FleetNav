@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import pickle
+from typing import Optional
 
 import numpy as np
 import networkx as nx
@@ -52,27 +53,42 @@ class TRSPLocalPlanner:
 
     def plan(self, src_node: str, dst_node: str, sim_time_s: float) -> list[str]:
         """Return SUMO edge ID list from src_node to dst_node using the RL policy."""
+        edges, _nodes, _meta = self.plan_edges_and_nodes(src_node, dst_node, sim_time_s)
+        return edges
+
+    def plan_edges_and_nodes(
+        self, src_node: str, dst_node: str, sim_time_s: float
+    ) -> tuple[list[str], list[str], dict]:
+        """Return (edge_ids, node_ids, meta) for the leg.
+
+        - edge_ids: SUMO edge IDs in traversal order
+        - node_ids: SUMO node/junction IDs in traversal order (includes src and dst)
+        - meta: {traffic_slot, fallback_reason}
+        """
         if src_node == dst_node:
-            return []
+            slot = self.traffic.get_slot(sim_time_s) if self.traffic.enabled else 0
+            return [], [src_node], {"traffic_slot": int(slot), "fallback_reason": None}
 
         slot = self.traffic.get_slot(sim_time_s) if self.traffic.enabled else 0
         curr_node = src_node
         curr_pos = self.node2idx[curr_node]
         target_idx = self.node2idx[dst_node]
         visited: set[str] = set()
+
         edges: list[str] = []
+        nodes: list[str] = [src_node]
 
         for _ in range(_MAX_PLAN_STEPS):
             if curr_node == dst_node:
-                return edges
+                return edges, nodes, {"traffic_slot": int(slot), "fallback_reason": None}
 
             if curr_node in visited:
-                return self._dijkstra_edges(src_node, dst_node)
+                return self._dijkstra_edges_and_nodes(src_node, dst_node, slot=slot, reason="cycle_detected")
             visited.add(curr_node)
 
             nb_nodes = list(self.G.neighbors(curr_node))
             if not nb_nodes:
-                break
+                return self._dijkstra_edges_and_nodes(src_node, dst_node, slot=slot, reason="dead_end")
             nb_idxs = sorted([self.node2idx[nb] for nb in nb_nodes])[: self.num_actions]
 
             steps = [
@@ -97,22 +113,32 @@ class TRSPLocalPlanner:
 
             edge_data = self.G_dir.get_edge_data(curr_node, next_node)
             if edge_data is None:
-                return self._dijkstra_edges(src_node, dst_node)
+                return self._dijkstra_edges_and_nodes(src_node, dst_node, slot=slot, reason="missing_edge_data")
             edges.append(edge_data["id"])
+            nodes.append(next_node)
 
             curr_node = next_node
             curr_pos = next_pos_idx
 
-        return self._dijkstra_edges(src_node, dst_node)
+        return self._dijkstra_edges_and_nodes(src_node, dst_node, slot=slot, reason="max_steps_exceeded")
 
     def _dijkstra_edges(self, src_node: str, dst_node: str) -> list[str]:
+        edges, _nodes, _meta = self._dijkstra_edges_and_nodes(src_node, dst_node, slot=0, reason=None)
+        return edges
+
+    def _dijkstra_edges_and_nodes(
+        self, src_node: str, dst_node: str, *, slot: int, reason: Optional[str]
+    ) -> tuple[list[str], list[str], dict]:
         try:
             node_path = nx.shortest_path(self.G_dir, src_node, dst_node, weight="length")
         except (nx.NetworkXNoPath, nx.NodeNotFound):
-            return []
-        edges = []
+            return [], [src_node], {"traffic_slot": int(slot), "fallback_reason": reason or "no_path"}
+
+        edges: list[str] = []
         for u, v in zip(node_path[:-1], node_path[1:]):
             edata = self.G_dir.get_edge_data(u, v)
             if edata:
                 edges.append(edata["id"])
-        return edges
+
+        meta = {"traffic_slot": int(slot), "fallback_reason": reason}
+        return edges, list(node_path), meta

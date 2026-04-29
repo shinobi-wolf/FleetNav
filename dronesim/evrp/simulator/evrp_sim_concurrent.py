@@ -205,12 +205,8 @@ class EVRPConcurrentSimulator(EVRPSequentialSimulator):
                 renderer.draw(sim_time_s, self._edge_speeds_snapshot(traffic, sim_time_s),
                               vehicle_positions, served_customers, vehicle_states)
 
-            # Terminate early: all vehicles finished/stranded, or all customers served
+            # Terminate when every vehicle has either returned to depot or is stranded
             if all_done:
-                break
-            if total_customers > 0 and len(served_customers) >= total_customers:
-                if self.render_mode in ("print", "human"):
-                    print(f"  all {total_customers} customers served at t={sim_time_s:.1f}s, stopping")
                 break
 
         # Cap any vehicles that hit max_time without finishing

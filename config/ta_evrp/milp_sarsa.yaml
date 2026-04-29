@@ -14,11 +14,3 @@ trsp:
   agent: sarsa
   policy_id: ff58b1a9            # set to the policy ID, e.g. "77a4169c"
 
-traffic:
-  psl:
-    enabled: true
-    K: 1
-    v_min: 40.0
-    v_max: 100.0
-    speed_step: 60.0
-    seed: 42

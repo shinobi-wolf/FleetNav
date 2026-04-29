@@ -32,9 +32,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import inspect
 import sys
+import threading
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
 
 import matplotlib
 matplotlib.use("Agg")
@@ -49,6 +53,350 @@ from dronesim.evrp.planners import get_planner
 from dronesim.evrp.planners.gvrp_milp import GVRPMILPPlanner
 
 RUNS_DIR = Path("runs/ta_evrp")
+
+
+# ---------------------------------------------------------------------------
+# Output helpers
+# ---------------------------------------------------------------------------
+
+def _write_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _export_planned_stops(
+    *,
+    routes: list,
+    run_dir: Path,
+    run_id: str,
+    planner_name: str,
+    agent_name: str,
+    policy_id: Optional[str],
+    traffic_enabled: bool,
+) -> Path:
+    vehicles = []
+    for route in routes:
+        stops = []
+        for i, s in enumerate(route.stops):
+            stops.append(
+                {
+                    "stop_idx": i,
+                    "node_name": getattr(s, "node_name", None),
+                    "node_type": getattr(s, "node_type", None),
+                    "sumo_node_id": getattr(s, "sumo_node_id", None),
+                }
+            )
+        vehicles.append({"vehicle_id": route.vehicle_id, "stops": stops})
+
+    payload = {
+        "run_id": run_id,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "planner": planner_name,
+        "trsp_agent": agent_name,
+        "trsp_policy_id": policy_id,
+        "traffic_enabled": bool(traffic_enabled),
+        "vehicles": vehicles,
+    }
+
+    out_path = run_dir / "planned_stops.json"
+    _write_json(out_path, payload)
+    return out_path
+
+
+def _resolve_net_xml_path(net_path: str) -> Optional[Path]:
+    """Best-effort resolve a SUMO `.net.xml` path from a config net_path."""
+    p = Path(net_path)
+    if not p.exists():
+        return None
+
+    if p.suffixes[-2:] == [".net", ".xml"]:
+        return p
+
+    if p.suffix == ".sumocfg":
+        try:
+            root = ET.parse(p).getroot()
+        except ET.ParseError:
+            return None
+        net_el = root.find("./input/net-file") or root.find(".//net-file")
+        if net_el is None:
+            return None
+        value = net_el.get("value")
+        if not value:
+            return None
+        net_xml = (p.parent / value).resolve()
+        return net_xml if net_xml.exists() else None
+
+    return None
+
+
+def _edges_to_nodes_from_net(edge_ids: list[str], net) -> Optional[list[str]]:
+    if not edge_ids:
+        return []
+    node_ids: list[str] = []
+    for i, eid in enumerate(edge_ids):
+        try:
+            e = net.getEdge(eid)
+        except Exception:
+            return None
+        if i == 0:
+            node_ids.append(e.getFromNode().getID())
+        node_ids.append(e.getToNode().getID())
+    return node_ids
+
+
+def _extract_vehicle_id(vs: Any) -> Optional[int]:
+    if vs is None:
+        return None
+    for attr in ("vehicle_id", "ugv_id", "vid", "id"):
+        if hasattr(vs, attr):
+            try:
+                return int(getattr(vs, attr))
+            except Exception:
+                continue
+    return None
+
+
+class _RouteLogger:
+    """Runtime logger for per-leg driven routes.
+
+    Attaches a wrapper around the simulator's private `_drive` method (if present)
+    without requiring edits to the simulator implementation.
+    """
+
+    def __init__(self, *, net_path: str) -> None:
+        self._lock = threading.Lock()
+        self.legs: list[dict[str, Any]] = []
+
+        self._net = None
+        net_xml = _resolve_net_xml_path(net_path)
+        if net_xml is None:
+            return
+        try:
+            import sumolib  # type: ignore
+
+            self._net = sumolib.net.readNet(str(net_xml))
+        except Exception:
+            self._net = None
+
+    def _log_leg(
+        self,
+        *,
+        vehicle_id: Optional[int],
+        sim_time_s: Optional[float],
+        edge_ids: list[str],
+        src_node: Optional[str] = None,
+        dst_node: Optional[str] = None,
+    ) -> None:
+        node_ids = None
+        if self._net is not None:
+            node_ids = _edges_to_nodes_from_net(edge_ids, self._net)
+        # Prefer the mapped endpoints when available.
+        mapped_src = node_ids[0] if isinstance(node_ids, list) and node_ids else None
+        mapped_dst = node_ids[-1] if isinstance(node_ids, list) and node_ids else None
+        with self._lock:
+            self.legs.append(
+                {
+                    "vehicle_id": vehicle_id,
+                    "start_time_s": float(sim_time_s) if sim_time_s is not None else None,
+                    "src_node": mapped_src or src_node,
+                    "dst_node": mapped_dst or dst_node,
+                    "edge_ids": list(edge_ids),
+                    "node_ids": node_ids,
+                    "thread": threading.current_thread().name,
+                }
+            )
+
+    def _vehicle_id_from_stack(self) -> Optional[int]:
+        frame = inspect.currentframe()
+        # Skip ourselves + wrapper frame.
+        for _ in range(12):
+            if frame is None:
+                break
+            for key in ("vs", "vehicle_state", "vehicle", "ugv", "state"):
+                if key in frame.f_locals:
+                    vid = _extract_vehicle_id(frame.f_locals.get(key))
+                    if vid is not None:
+                        return vid
+            for v in frame.f_locals.values():
+                vid = _extract_vehicle_id(v)
+                if vid is not None:
+                    return vid
+            frame = frame.f_back
+        return None
+
+    def attach(self, sim: Any) -> bool:
+        # Prefer hooking `_resolve_route(src, dst, sim_time_s) -> edge_ids`, which is
+        # used in both sequential and concurrent simulators.
+        if hasattr(sim, "_resolve_route") and callable(getattr(sim, "_resolve_route")):
+            original = getattr(sim, "_resolve_route")
+            sig = inspect.signature(original)
+
+            def _wrapper(*args, **kwargs):
+                bound = sig.bind_partial(*args, **kwargs)
+                src = bound.arguments.get("src_node")
+                dst = bound.arguments.get("dst_node")
+                sim_time_s = bound.arguments.get("sim_time_s")
+
+                if src is None and len(args) >= 1:
+                    src = args[0]
+                if dst is None and len(args) >= 2:
+                    dst = args[1]
+                if sim_time_s is None and len(args) >= 3:
+                    sim_time_s = args[2]
+
+                edge_ids = original(*args, **kwargs)
+                if edge_ids is None:
+                    edge_ids = []
+                if isinstance(edge_ids, tuple):
+                    edge_ids = list(edge_ids)
+
+                vid = self._vehicle_id_from_stack()
+                # Store src/dst even if we cannot map edges->nodes.
+                self._log_leg(
+                    vehicle_id=vid,
+                    sim_time_s=float(sim_time_s) if sim_time_s is not None else None,
+                    edge_ids=list(edge_ids),
+                    src_node=src,
+                    dst_node=dst,
+                )
+                return edge_ids
+
+            setattr(sim, "_resolve_route", _wrapper)
+            return True
+
+        # Fallback: hook `_drive(...)` if `_resolve_route` is unavailable.
+        if hasattr(sim, "_drive") and callable(getattr(sim, "_drive")):
+            original = getattr(sim, "_drive")
+            sig = inspect.signature(original)
+
+            def _wrapper(*args, **kwargs):
+                bound = sig.bind_partial(*args, **kwargs)
+                vs = bound.arguments.get("vs")
+                edge_list = bound.arguments.get("edge_list")
+                sim_time_s = bound.arguments.get("sim_time_s")
+
+                if vs is None and args:
+                    vs = args[0]
+                if edge_list is None:
+                    for v in list(bound.arguments.values()) + list(args):
+                        if isinstance(v, (list, tuple)) and all(isinstance(x, str) for x in v):
+                            edge_list = v
+                            break
+                if sim_time_s is None:
+                    for name in ("t", "time_s", "start_time_s"):
+                        if name in bound.arguments:
+                            sim_time_s = bound.arguments[name]
+                            break
+
+                if isinstance(edge_list, tuple):
+                    edge_list = list(edge_list)
+                if not isinstance(edge_list, list):
+                    edge_list = []
+
+                self._log_leg(
+                    vehicle_id=_extract_vehicle_id(vs),
+                    sim_time_s=float(sim_time_s) if sim_time_s is not None else None,
+                    edge_ids=edge_list,
+                )
+                return original(*args, **kwargs)
+
+            setattr(sim, "_drive", _wrapper)
+            return True
+
+        return False
+
+
+def _build_local_routes_payload(
+    *,
+    run_id: str,
+    cfg: dict,
+    routes: list,
+    leg_logs: list[dict[str, Any]],
+    local_planner: Any,
+) -> dict:
+    traffic_enabled = bool(cfg.get("traffic", {}).get("enabled", False))
+    sim_type = cfg.get("simulation", {}).get("simulator", "unknown")
+
+    planned_by_vehicle: dict[int, list[str]] = {}
+    for r in routes:
+        seq = [getattr(s, "sumo_node_id", None) for s in r.stops]
+        planned_by_vehicle[int(r.vehicle_id)] = [x for x in seq if isinstance(x, str)]
+
+    vehicles_out: dict[str, dict[str, Any]] = {}
+    for entry in leg_logs:
+        vid = entry.get("vehicle_id")
+        vid_key = str(vid) if vid is not None else "unknown"
+        vehicles_out.setdefault(vid_key, {"vehicle_id": vid, "legs": [], "warnings": []})
+
+        edge_ids = entry.get("edge_ids") or []
+        node_ids = entry.get("node_ids")
+
+        from_node = (
+            node_ids[0]
+            if isinstance(node_ids, list) and node_ids
+            else entry.get("src_node")
+        )
+        to_node = (
+            node_ids[-1]
+            if isinstance(node_ids, list) and node_ids
+            else entry.get("dst_node")
+        )
+        start_time_s = entry.get("start_time_s")
+
+        leg_kind = "unknown"
+        if vid is not None and vid in planned_by_vehicle and from_node and to_node:
+            planned = planned_by_vehicle[vid]
+            for i in range(len(planned) - 1):
+                if planned[i] == from_node and planned[i + 1] == to_node:
+                    leg_kind = "planned"
+                    break
+            else:
+                leg_kind = "emergency"
+
+        traffic_slot = 0
+        if local_planner is not None and hasattr(local_planner, "traffic"):
+            try:
+                traffic_slot = int(local_planner.traffic.get_slot(float(start_time_s or 0.0)))
+            except Exception:
+                traffic_slot = 0
+
+        planner_kind = "dijkstra"
+        fallback_reason = None
+        if local_planner is not None and from_node and to_node and start_time_s is not None:
+            if hasattr(local_planner, "plan_edges_and_nodes"):
+                try:
+                    pred_edges, _pred_nodes, meta = local_planner.plan_edges_and_nodes(
+                        from_node, to_node, float(start_time_s)
+                    )
+                    if list(pred_edges) == list(edge_ids):
+                        planner_kind = "trsp"
+                        fallback_reason = meta.get("fallback_reason")
+                except Exception:
+                    pass
+
+        vehicles_out[vid_key]["legs"].append(
+            {
+                "leg_idx": len(vehicles_out[vid_key]["legs"]),
+                "leg_kind": leg_kind,
+                "planner_kind": planner_kind,
+                "from_sumo_node_id": from_node,
+                "to_sumo_node_id": to_node,
+                "start_time_s": start_time_s,
+                "traffic_slot": traffic_slot if traffic_enabled else 0,
+                "node_ids": node_ids,
+                "edge_ids": edge_ids,
+                "fallback_reason": fallback_reason,
+            }
+        )
+
+    payload = {
+        "run_id": run_id,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "simulator": sim_type,
+        "traffic_enabled": traffic_enabled,
+        "vehicles": list(vehicles_out.values()),
+    }
+    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -314,6 +662,17 @@ def main() -> None:
     routes = planner.plan(cfg)
     _print_routes(routes)
 
+    planned_stops_path = _export_planned_stops(
+        routes=routes,
+        run_dir=run_dir,
+        run_id=run_id,
+        planner_name=planner_name,
+        agent_name=agent_name,
+        policy_id=policy_id,
+        traffic_enabled=cfg.get("traffic", {}).get("enabled", False),
+    )
+    print(f"\n  Planned stops saved to {planned_stops_path}")
+
     save_instance_json(
         cfg,
         planner._last_physical_dist,
@@ -347,6 +706,12 @@ def main() -> None:
     print(f"\n[2/3] Starting SUMO simulation ({sim_type})...")
     from dronesim.evrp.simulator import get_simulator
     sim = get_simulator(cfg, local_planner=local_planner)
+
+    route_logger = _RouteLogger(net_path=cfg.get("net", {}).get("net_path", ""))
+    logger_attached = route_logger.attach(sim)
+    if not logger_attached:
+        print("  [route-log] Warning: simulator has no _drive() hook; local_routes.json may be empty.")
+
     metrics = sim.run(routes)
 
     # ── Report ────────────────────────────────────────────────────────────────
@@ -358,6 +723,17 @@ def main() -> None:
         Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
         Path(metrics_path).write_text(json.dumps(metrics, indent=2))
         print(f"\n  Metrics saved to {metrics_path}")
+
+    local_routes_payload = _build_local_routes_payload(
+        run_id=run_id,
+        cfg=cfg,
+        routes=routes,
+        leg_logs=route_logger.legs,
+        local_planner=local_planner,
+    )
+    local_routes_path = run_dir / "local_routes.json"
+    _write_json(local_routes_path, local_routes_payload)
+    print(f"\n  Local routes saved to {local_routes_path}")
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ trsp:
 network:
   net_path: data/grid_road/grid_road.sumocfg
   warehouse: center          # depot placement: center | random | <sumo node id>
-  max_degree: 4              # max junction degree (used by TRSP obs space)
+  max_degree: 5              # max junction degree (used by TRSP obs space)
 
 # ── Traffic Modeling ─────────────────────────────────────────────────────────
 traffic:
@@ -85,7 +85,7 @@ sumo:
   step_length: 1.0
   simulator: concurrent          # sequential | concurrent
   max_time: 12                   # hours — SUMO wall-clock budget
-  render_mode: human             # quiet | print | human
+  render_mode: print             # quiet | print | human
   delay: 5                      # ms GUI delay (human mode only)
 
 # ── Output ───────────────────────────────────────────────────────────────────
