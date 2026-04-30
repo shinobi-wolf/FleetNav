@@ -1,0 +1,7 @@
+evrp_planner,trsp_agent,problem,network,traffic,uav_bms,makespan_s,ugv_distance_m,uav_distance_m,total_distance_m,ugv_energy_kwh,uav_energy_kwh,total_energy_kwh,recharges,throughput_tasks_per_h,gap_pct,run_id
+Heuristic,SARSA,P1,N1,T1,No,549.0,23662.4,0.0,23662.4,797422.88,0.0,797422.88,3,65.57,,heuristic_sarsa_20260429_153056
+Heuristic,SSP,P1,N1,T1,No,658.0,23662.4,0.0,23662.4,797422.88,0.0,797422.88,3,54.71,,heuristic_dijkstra_20260429_153042
+MILP,SARSA,P1,N1,T1,No,1395.0,17748.8,0.0,17748.8,598134.5599999999,0.0,598134.5599999999,2,25.81,,milp_sarsa_20260429_153014
+MILP,SSP,P1,N1,T1,No,1448.0,17748.8,0.0,17748.8,598134.5599999999,0.0,598134.5599999999,2,24.86,,milp_dijkstra_20260429_153000
+mTSP,SARSA,P1,N1,T1,No,550.0,23662.4,0.0,23662.4,797422.88,0.0,797422.88,3,65.45,,mtsp_sarsa_20260429_153427
+mTSP,SSP,P1,N1,T1,No,659.0,23662.4,0.0,23662.4,797422.88,0.0,797422.88,3,54.63,,mtsp_dijkstra_20260429_153326

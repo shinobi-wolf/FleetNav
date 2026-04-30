@@ -45,7 +45,7 @@
             ],
             "args": [
                 "-p",
-                "sarsa"
+                "dijkstra"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -63,7 +63,7 @@
             ],
             "args": [
                 "-p",
-                "sarsa"
+                "44a88465"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

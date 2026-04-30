@@ -1,0 +1,2 @@
+traffic_id,K,v_min_kmh,v_max_kmh,step_kmh,type
+T1,1,40.0,100.0,60.0,PSL

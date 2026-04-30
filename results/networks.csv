@@ -1,0 +1,2 @@
+network_id,num_nodes,num_edges,topology,connectivity_lambda,vehicle_type
+N1,25,80,Grid,0.3,Car

@@ -1,0 +1,2 @@
+problem_id,num_ugvs,num_tasks,num_afs,battery_range_m,service_time_s,recharge_time_s
+P1,3,10,3,10000,0,0
