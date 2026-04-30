@@ -39,6 +39,7 @@ class SARSAAgent:
             with open(policy_path, 'rb') as f:
                 self.Q = pickle.load(f)
             print(f"Policy loaded from {policy_path}")
+            self._fix_oscillations()
 
         # Metrics / diagnostics (initialized/overwritten in learn())
         self.exploration_steps = 0
@@ -46,6 +47,75 @@ class SARSAAgent:
         self.all_td_errors = []
         self.episode_summaries = []
         self.last_action_was_exploratory = False
+
+    def _fix_oscillations(self):
+        """Detect and break 2-cycles in the greedy policy after loading.
+
+        A 2-cycle occurs when node A's greedy action leads to B and B's greedy
+        action leads back to A (for the same target_node and time_slot).  We
+        resolve it by boosting the Q-value of A's best Dijkstra-alternative
+        neighbor (excluding B) so that predict() no longer loops.
+        """
+        G        = self.env.unwrapped.G
+        idx2node = self.env.unwrapped.idx2node
+        node2idx = self.env.unwrapped.node2idx
+        all_spl  = self.env.unwrapped.all_shortest_path_lengths
+
+        # Build greedy next-hop for every state in Q
+        greedy_next     = {}   # state -> next_node_idx
+        state_neighbors = {}   # state -> nb_idxs (cached)
+        for state, q_vals in self.Q.items():
+            graph_node = state[0]
+            ugv_node = idx2node[graph_node]
+            nb_idxs = sorted([node2idx[nb] for nb in G.neighbors(ugv_node)])
+            if not nb_idxs:
+                continue
+            best_action = int(np.argmax(q_vals[:len(nb_idxs)]))
+            greedy_next[state]     = nb_idxs[best_action]
+            state_neighbors[state] = nb_idxs
+
+        # Detect and fix 2-cycles
+        fixed_pairs = set()
+        fixes = 0
+        for state, next_node_idx in greedy_next.items():
+            graph_node, target_node, time_slot = state
+            next_state = (next_node_idx, target_node, time_slot)
+            if next_state not in greedy_next:
+                continue
+            if greedy_next[next_state] != graph_node:
+                continue
+
+            # 2-cycle: graph_node <-> next_node_idx for this (target, slot)
+            pair_key = (min(graph_node, next_node_idx), max(graph_node, next_node_idx),
+                        target_node, time_slot)
+            if pair_key in fixed_pairs:
+                continue
+            fixed_pairs.add(pair_key)
+
+            # Find best alternative: Dijkstra-ordered neighbors, skip next_node_idx
+            nb_idxs   = state_neighbors[state]
+            task_node = idx2node[target_node]
+            dists = [
+                all_spl.get(idx2node[ni], {}).get(task_node, float('inf'))
+                for ni in nb_idxs
+            ]
+            alt_action = None
+            for _, action_idx in sorted(zip(dists, range(len(nb_idxs)))):
+                if nb_idxs[action_idx] != next_node_idx:
+                    alt_action = action_idx
+                    break
+
+            if alt_action is None:
+                continue  # sole neighbor is the oscillating one; nothing to do
+
+            # Boost alt_action's Q-value to be strictly the highest
+            q = self.Q[state]
+            max_q = float(np.max(q[:len(nb_idxs)]))
+            q[alt_action] = max_q + 1e-5
+            fixes += 1
+
+        if fixes:
+            print(f"[SARSA] Fixed {fixes} oscillating node pair(s) in loaded Q-table.")
 
     def _observation_to_state(self, observation):
         graph_node = int(observation['graph_node'])
