@@ -45,7 +45,7 @@
             ],
             "args": [
                 "-p",
-                "dijkstra"
+                "44a88465"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
