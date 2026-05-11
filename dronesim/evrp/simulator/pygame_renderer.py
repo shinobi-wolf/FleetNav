@@ -144,6 +144,7 @@ class PygameRenderer:
         vehicle_positions: dict[int, str | tuple[float, float]],
         served_customers: set[str],
         vehicle_states: dict[int, Any],
+        vehicle_speeds: dict[int, float] | None = None,
     ) -> None:
         """Redraw the window.
 
@@ -152,6 +153,8 @@ class PygameRenderer:
         edge_speeds : dict[edge_id, speed_ms] or None
             Per-edge current speed in m/s. None means traffic is disabled
             (all edges drawn in the default gray).
+        vehicle_speeds : dict[vehicle_id, speed_ms] or None
+            Real-time speed per vehicle from TraCI. None means not available.
         """
         if self._screen is None:
             self._init_window()
@@ -167,7 +170,7 @@ class PygameRenderer:
         self._draw_edges(surf, edge_speeds)
         self._draw_nodes(surf, served_customers)
         self._draw_vehicles(surf, vehicle_positions)
-        self._draw_panel(surf, sim_time_s, edge_speeds, vehicle_positions, served_customers, vehicle_states)
+        self._draw_panel(surf, sim_time_s, edge_speeds, vehicle_positions, served_customers, vehicle_states, vehicle_speeds)
 
         pygame.display.flip()
         self._clock.tick(self._fps)
@@ -297,6 +300,7 @@ class PygameRenderer:
         vehicle_positions: dict[int, str | tuple[float, float]],
         served_customers: set[str],
         vehicle_states: dict[int, Any],
+        vehicle_speeds: dict[int, float] | None = None,
     ) -> None:
         panel_rect = pygame.Rect(MAP_W, 0, PANEL_W, SCREEN_H)
         pygame.draw.rect(surf, PANEL_BG, panel_rect)
@@ -348,6 +352,9 @@ class PygameRenderer:
             self._legend_dot(surf, x, y, color_v, f"V{vid}  @{loc_label}")
             y += 22
             if vs is not None:
+                spd_ms = (vehicle_speeds or {}).get(vid, 0.0)
+                spd_kmh = spd_ms * 3.6
+                line(f"  speed={spd_kmh:.1f} km/h")
                 line(f"  dist={vs.distance_m:.0f}m  fuel={vs.current_fuel:.2f}gal")
                 line(f"  served={vs.customers_served}  recharges={vs.num_recharges}")
 

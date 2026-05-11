@@ -179,7 +179,7 @@ def solve_and_extract(model, dist: np.ndarray, params: dict[str, Any]) -> dict[s
         print("Reporting best available feasible incumbent solution.")
 
     objective = float(model.ObjVal)
-    print(f"Objective value (total distance): {objective:.3f} {params.get('distance_unit', 'units')}")
+    print(f"Objective value (total distance): {objective:.3f} m")
 
     x = model._x
     y = model._y
@@ -254,8 +254,8 @@ def solve_and_extract(model, dist: np.ndarray, params: dict[str, Any]) -> dict[s
         for route in routes:
             seq = " -> ".join(node_names[node] for node in route["nodes"])
             print(f"\nVehicle {route['vehicle']} route: {seq}")
-            print(f"Route distance: {route['distance']:.3f} {params.get('distance_unit', 'units')}")
-            print("Node details (arrival time in hours, fuel in gallons):")
+            print(f"Route distance: {route['distance']:.3f} m")
+            print("Node details (arrival time in seconds, range in metres):")
             for stop in route["stops"]:
                 print(
                     f"  {stop['node_name']:<10s} ({stop['sumo_node_id']}) | "
@@ -296,7 +296,7 @@ def run_single_vehicle_check(
         value = float(result_m1["objective"])
         diff = value - target
 
-        print(f"Single-vehicle objective: {value:.3f} {params.get('distance_unit', 'units')}")
+        print(f"Single-vehicle objective: {value:.3f} m")
         if abs(diff) <= tolerance:
             print(f"Benchmark confirmation: objective matches target {target:.3f}.")
         else:

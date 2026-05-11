@@ -8,7 +8,7 @@ The TRSP module is the **inner navigation layer**: given a source node and a des
 
 | Script | Purpose |
 |--------|---------|
-| `train_trsp.py` | Train an RL policy. Saves under `runs/trsp/<policy_id>/` |
+| `train_trsp.py` | Train a TRSP policy (currently: SARSA). Saves under `runs/trsp/<policy_id>/` |
 | `eval_trsp.py -p <policy_id>` | Pairwise evaluation over all (start, goal) node pairs |
 | `infer_trsp.py -p <policy_id>` | Interactive inference for N episodes |
 
@@ -124,13 +124,15 @@ With `K=1` every edge has a single fixed speed for the entire simulation (set at
 
 ### Speed Profile Generation
 
-- `random`: each edge independently draws from `np.arange(v_min, v_max, step)` using the seeded RNG. Same seed + same net file → identical profiles across training, eval, and inference.
+- `random`: each edge independently draws from a discrete set of speed levels spanning `[v_min, v_max]` in increments of `speed_step` (inclusive of `v_max` when it lands exactly). Same seed + same net file → identical profiles across training, eval, and inference.
 - `function`: `fn(edge_id, slot_idx) → km/h` callable.
 - `file`: JSON/YAML mapping `edge_id → [v_slot0, v_slot1, ...]` in km/h.
 
+Internally, the model stores and returns speeds in **m/s**; config values are in km/h.
+
 ### Usage in the Env
 
-At each SUMO step, the env calls `traffic.get_slot(sim_time_s)` to get the active slot. When the slot changes, `traci.vehicle.setSpeed()` is called with the new per-edge speed. Departure speed is set to the edge's speed at the current slot.
+At each SUMO step, the env calls `traffic.get_slot(sim_time_s)` to get the active slot. When the slot changes, the env updates the active vehicle’s speed via `traci.vehicle.setSpeed()` using the per-edge speed for the current road.
 
 ### Edge Coloring (human render mode)
 
@@ -153,15 +155,18 @@ Always picks the neighbour with the smallest `steps2dest` (greedy shortest path)
 - **ε-greedy** with multiplicative decay each episode.
 - Policies saved as `policy.pkl` (Python pickle of the Q-table dict).
 
-### `SARSALambdaAgent` ⚠️ Skeleton
+Policy-loading safeguard:
+- When `agent.policy` is set (loading an existing `policy.pkl`), the agent runs a post-pass that detects greedy 2-cycles (A→B→A for the same target/slot) and breaks them by boosting a Dijkstra-consistent alternative action.
+
+### `SARSALambdaAgent` ⚠️ Partial
 
 Eligibility traces support added to file structure; training loop not yet wired.
 
-### `DQNAgent` ⚠️ Skeleton
+### `DQNAgent` ⚠️ Experimental
 
 CleanRL-style MLP Q-network with replay buffer. File exists; not fully integrated.
 
-### `PPOAgent` ❌ Stub
+### `PPOAgent` ⚠️ Experimental / incomplete
 
 Not yet implemented.
 
@@ -215,6 +220,8 @@ Iterates over all (start, goal) node pairs. For each pair:
 
 Results written to `runs/trsp/<policy_id>/test_<N>/simulation_results.csv`.
 
+Current limitation: the *planning* phase in `eval_trsp.py` uses `time_slot = get_slot(0.0)` (i.e., slot 0) rather than a simulated clock. The *SUMO execution* phase uses the real `sim_time` slot when overriding speeds.
+
 Traffic consistency across training/eval/inference: `PSLTrafficModel` uses an isolated `random.Random(seed)` — never affects the global RNG — so the same seed + same net file produces identical per-edge profiles everywhere.
 
 ---
@@ -230,6 +237,8 @@ runs/trsp/<policy_id>/
     test_<N>/
     ├── config.yaml
     └── simulation_results.csv
+
+Note: only SARSA training is currently wired in `train_trsp.py` (it always instantiates `SARSAAgent`). DQN/PPO code exists, but training those policies requires additional runner wiring.
 ```
 
 ---
@@ -240,4 +249,7 @@ runs/trsp/<policy_id>/
 - `PPOAgent` is a stub.
 - Pairwise evaluation in `eval_trsp.py` is O(N²) SUMO starts — slow for large networks.
 - `K > 1` training has not been tested end-to-end; state space grows by factor K.
-- TRSP's `PSLTrafficModel` and EVRP's `PSLTrafficModel` are independent instances sharing the same config format. Speed values are sampled from the same discrete levels but with separate RNG instances — they will agree only if given identical seeds and the same edge set.
+- TRSP's `PSLTrafficModel` and EVRP's `PSLTrafficModel` are independent instances sharing the same config format. Speed values are sampled from the same discrete levels but with separate RNG instances — they will agree only if given identical seeds and the same edge set. Config key names differ: TRSP uses `v_min`/`v_max`/`speed_step` (km/h), EVRP uses `v_min_kmh`/`v_max_kmh`/`speed_step_kmh`.
+
+Runner limitation:
+- `infer_trsp.py` currently treats an episode as done only when `terminated` (wall-clock `max_time`) becomes true; it does not break on `truncated` even though truncation is how the env ends “one routing task”. Use `simulation.max_time` to bound runs, or adjust the runner if you want one route per `env.reset()`.

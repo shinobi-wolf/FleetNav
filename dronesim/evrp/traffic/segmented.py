@@ -11,14 +11,6 @@ import random as _random
 from typing import Any
 
 
-def _kmh_to_ms(kmh: float) -> float:
-    return float(kmh) / 3.6
-
-
-def _mph_to_ms(mph: float) -> float:
-    return float(mph) * 0.44704
-
-
 class PSLTrafficModel:
     """Per-edge piecewise-constant speed limit model.
 
@@ -94,9 +86,10 @@ def build_traffic_model(
         raise ValueError("traffic.K must be >= 1")
     delta_t = max_time_s / K
 
-    v_min_ms = _kmh_to_ms(float(tcfg.get("v_min", 40.0)))
-    v_max_ms = _kmh_to_ms(float(tcfg.get("v_max", 100.0)))
-    step_ms = _kmh_to_ms(float(tcfg.get("speed_step", 10.0)))
+    # All speed values in m/s; callers must pre-convert from any other unit.
+    v_min_ms = float(tcfg.get("v_min", 11.11))    # default ~40 km/h in m/s
+    v_max_ms = float(tcfg.get("v_max", 27.78))    # default ~100 km/h in m/s
+    step_ms  = float(tcfg.get("speed_step", 2.78)) # default ~10 km/h in m/s
     if step_ms <= 0:
         raise ValueError("traffic.speed_step must be > 0")
 
@@ -123,7 +116,7 @@ def build_traffic_model(
     elif profile_type == "function":
         fn = tcfg["speed_profile_fn"]
         profiles = {
-            eid: [float(max(v_min_ms, min(v_max_ms, fn(eid, j) / 3.6)))
+            eid: [float(max(v_min_ms, min(v_max_ms, fn(eid, j))))
                   for j in range(K)]
             for eid in edge_ids
         }
@@ -136,8 +129,8 @@ def build_traffic_model(
             else:
                 data = json.load(f)
         profiles = {
-            eid: [float(max(v_min_ms, min(v_max_ms, s / 3.6)))
-                  for s in data.get(eid, [v_max_ms * 3.6] * K)]
+            eid: [float(max(v_min_ms, min(v_max_ms, s)))
+                  for s in data.get(eid, [v_max_ms] * K)]
             for eid in edge_ids
         }
     else:

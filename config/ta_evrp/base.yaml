@@ -4,15 +4,12 @@
 # Do not run this file directly. Child configs declare `base: config/ta_evrp/base.yaml`
 # and override only what differs.
 #
-# Parameter sections mirror the experiment setup in the paper:
-#   evrp        — outer routing planner
-#   trsp        — inner navigation agent
-#   network     — road network
-#   traffic     — piecewise speed limit + simulated background traffic
-#   uav_bms     — UAV-assisted Battery Management System
-#   simulation  — UGV fleet and delivery task parameters
-#   sumo        — SUMO process settings
-#   output      — what to save
+# Unit conventions (all physical quantities use human-friendly units here;
+# the runner script converts to SI before passing to the package):
+#   distances  → km
+#   speeds     → km/h
+#   times      → hours  (exceptions: step_length in s, delay in ms, time_limit_s in s)
+#   fuel       → litres (L) and L/km
 
 generation_seed: 42
 
@@ -20,7 +17,7 @@ generation_seed: 42
 evrp:
   planner: milp              # milp | heuristic | mtsp | td_milp
   milp:
-    time_limit_s: 300        # Gurobi wall-clock limit
+    time_limit_s: 300        # seconds — Gurobi wall-clock limit
     mip_gap: 0.01            # 0.0 = proven optimal
     output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
     afs_dummy_copies: 3
@@ -36,7 +33,7 @@ trsp:
 
 # ── Road Network ─────────────────────────────────────────────────────────────
 network:
-  net_path: data/rand_grid_road/rand_grid_road.sumocfg
+  net_path: data/grid_road/grid_road.sumocfg
   warehouse: center          # depot placement: center | random | <sumo node id>
   max_degree: 5              # max junction degree (used by TRSP obs space)
 
@@ -45,9 +42,9 @@ traffic:
   psl:                       # Piecewise Speed Limit model (per-edge random profile)
     enabled: true
     K: 1                     # number of time periods (1 = static speed per edge)
-    v_min: 40.0              # km/h — minimum speed level
-    v_max: 100.0             # km/h — maximum speed level
-    speed_step: 60.0         # km/h — step between levels
+    v_min_kmh: 40.0          # km/h — minimum speed level
+    v_max_kmh: 100.0         # km/h — maximum speed level
+    speed_step_kmh: 60.0     # km/h — step between levels
     seed: 42
     profile_type: random     # random | function | file
   simulated:                 # SUMO background traffic
@@ -61,32 +58,32 @@ traffic:
 uav_bms:
   enabled: false
   fleet_size: 2
-  range_m: 5000
+  range_km: 5.0              # km
 
 # ── UGV Fleet & Delivery Task Parameters ─────────────────────────────────────
 simulation:
   ugv:
     fleet_size: 3
-    battery_range_m: 10000       # full-charge range in metres
-    consumption_rate: 1          # gallons/mile (converted to m internally)
-    free_flow_speed_mph: 150.0    # planning speed; also used when traffic disabled
-    max_duration_hours: 6.0      # hard route time limit
-    customer_service_time_hours: 0
-    recharge_time_hours: 0
-    runtime_refuel: false        # trackback to depot when next stop is out of range
+    battery_capacity_L: 1000.0        # litres of fuel/energy on a full charge
+    consumption_rate_L_per_km: 1.0  # L/km  →  range = 50 / 5 = 10 km
+    free_flow_speed_kmh: 110     # km/h  (= 120 mph)
+    max_duration_h: 6.0             # hours — hard route time limit
+    customer_service_time_h: 0      # hours — dwell time at each customer stop
+    recharge_time_h: 0              # hours — dwell time at each AFS stop
+    runtime_refuel: false           # trackback to depot when next stop is out of range
   tasks:
     customer_count: 10
     afs_count: 3
-    customer_sampling: count     # count | density
-    task_density: 30             # % of nodes (used when sampling: density)
+    customer_sampling: count        # count | density
+    task_density: 30                # % of nodes (used when sampling: density)
 
 # ── SUMO Process ─────────────────────────────────────────────────────────────
 sumo:
-  step_length: 1.0
+  step_length: 1.0               # seconds
   simulator: concurrent          # sequential | concurrent
-  max_time: 12                   # hours — SUMO wall-clock budget
+  max_time_h: 12                 # hours — SUMO wall-clock budget
   render_mode: print             # quiet | print | human
-  delay: 5                      # ms GUI delay (human mode only)
+  delay: 5                       # ms GUI delay (human mode only)
 
 # ── Output ───────────────────────────────────────────────────────────────────
 output:

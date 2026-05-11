@@ -1,0 +1,140 @@
+{
+  "run_id": "heuristic_dijkstra_20260504_151352",
+  "created_at": "2026-05-04T15:14:20",
+  "simulator": "concurrent",
+  "traffic_enabled": true,
+  "vehicles": [
+    {
+      "vehicle_id": 1,
+      "legs": [
+        {
+          "leg_idx": 0,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
+          "from_sumo_node_id": "108",
+          "to_sumo_node_id": "36",
+          "start_time_s": 1.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "108",
+            "10",
+            "22",
+            "36"
+          ],
+          "edge_ids": [
+            "-109",
+            "23",
+            "37"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 1,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
+          "from_sumo_node_id": "36",
+          "to_sumo_node_id": "63",
+          "start_time_s": 290.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "36",
+            "30",
+            "63"
+          ],
+          "edge_ids": [
+            "-58",
+            "64"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 2,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
+          "from_sumo_node_id": "63",
+          "to_sumo_node_id": "78",
+          "start_time_s": 522.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "63",
+            "59",
+            "78"
+          ],
+          "edge_ids": [
+            "-75",
+            "79"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 3,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
+          "from_sumo_node_id": "78",
+          "to_sumo_node_id": "59",
+          "start_time_s": 618.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "78",
+            "59"
+          ],
+          "edge_ids": [
+            "-79"
+          ],
+          "fallback_reason": null
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "vehicle_id": 2,
+      "legs": [
+        {
+          "leg_idx": 0,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
+          "from_sumo_node_id": "108",
+          "to_sumo_node_id": "4",
+          "start_time_s": 1.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "108",
+            "10",
+            "1",
+            "4"
+          ],
+          "edge_ids": [
+            "-109",
+            "-11",
+            "5"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 1,
+          "leg_kind": "planned",
+          "planner_kind": "dijkstra",
+          "from_sumo_node_id": "4",
+          "to_sumo_node_id": "44",
+          "start_time_s": 3.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "4",
+            "1",
+            "2",
+            "26",
+            "44"
+          ],
+          "edge_ids": [
+            "-5",
+            "3",
+            "27",
+            "45"
+          ],
+          "fallback_reason": null
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}

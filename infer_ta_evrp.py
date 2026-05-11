@@ -244,22 +244,26 @@ class _RouteLogger:
                 if sim_time_s is None and len(args) >= 3:
                     sim_time_s = args[2]
 
-                edge_ids = original(*args, **kwargs)
-                if edge_ids is None:
-                    edge_ids = []
-                if isinstance(edge_ids, tuple):
-                    edge_ids = list(edge_ids)
+                result = original(*args, **kwargs)
+                # _resolve_route returns (edge_ids, distance); extract edges for logging
+                if isinstance(result, tuple) and len(result) == 2:
+                    raw_edges, _ = result
+                    edge_ids_to_log = list(raw_edges) if raw_edges else []
+                elif result is None:
+                    edge_ids_to_log = []
+                else:
+                    edge_ids_to_log = list(result)
 
                 vid = self._vehicle_id_from_stack()
                 # Store src/dst even if we cannot map edges->nodes.
                 self._log_leg(
                     vehicle_id=vid,
                     sim_time_s=float(sim_time_s) if sim_time_s is not None else None,
-                    edge_ids=list(edge_ids),
+                    edge_ids=edge_ids_to_log,
                     src_node=src,
                     dst_node=dst,
                 )
-                return edge_ids
+                return result  # return original (tuple or list) unchanged
 
             setattr(sim, "_resolve_route", _wrapper)
             return True
@@ -450,10 +454,14 @@ def _normalize_config(ta: dict) -> dict:
     sumo_cfg = ta.get("sumo", {})
     out = ta.get("output", {})
 
-    # Battery range → fuel_capacity + consumption_rate
-    # battery_range_m sets: consumption_rate_per_m = 1.0 gal/m so range = fuel_capacity
-    # This is achieved by setting consumption_rate = 1609.344 gal/mile (= 1 gal/m after /1609.344)
-    battery_range_m = float(ugv.get("battery_range_m", 10000.0))
+    # Config values are in human-friendly units (km, km/h, L, L/km, hours).
+    # Convert all unit-bearing quantities to SI here before passing to the package.
+    battery_capacity_L      = float(ugv.get("battery_capacity_L", 50.0))
+    consumption_L_per_km    = float(ugv.get("consumption_rate_L_per_km", 5.0))
+    free_flow_speed_kmh     = float(ugv.get("free_flow_speed_kmh", 50.0))
+    max_duration_h          = float(ugv.get("max_duration_h", 6.0))
+    customer_service_time_h = float(ugv.get("customer_service_time_h", 0.0))
+    recharge_time_h         = float(ugv.get("recharge_time_h", 0.0))
 
     cfg: dict = {}
 
@@ -469,7 +477,7 @@ def _normalize_config(ta: dict) -> dict:
 
     cfg["fleet"] = {
         "size": ugv.get("fleet_size", 3),
-        "max_speed": ugv.get("free_flow_speed_mph", 40.0),
+        "max_speed": free_flow_speed_kmh / 3.6,  # m/s
     }
 
     cfg["gvrp"] = {
@@ -477,13 +485,12 @@ def _normalize_config(ta: dict) -> dict:
         "customer_sampling": tasks.get("customer_sampling", "count"),
         "task_density": tasks.get("task_density", 30),
         "afs_count": tasks.get("afs_count", 3),
-        "distance_unit": "meters",
-        "fuel_capacity": battery_range_m,
-        "consumption_rate": 1609.344,        # gal/mile → 1.0 gal/m after internal /1609.344
-        "speed_mph": ugv.get("free_flow_speed_mph", 40.0),
-        "max_duration_hours": ugv.get("max_duration_hours", 6.0),
-        "customer_service_time_hours": ugv.get("customer_service_time_hours", 0),
-        "refuel_time_hours": ugv.get("recharge_time_hours", 0),
+        "fuel_capacity": battery_capacity_L,                        # L
+        "consumption_rate": consumption_L_per_km / 1000.0,          # L/m
+        "speed_ms": free_flow_speed_kmh / 3.6,                      # m/s
+        "max_duration_s": max_duration_h * 3600.0,                  # s
+        "customer_service_time_s": customer_service_time_h * 3600.0, # s
+        "refuel_time_s": recharge_time_h * 3600.0,                  # s
         "afs_dummy_copies": milp_cfg.get("afs_dummy_copies", 3),
         "depot_dummy_copies": milp_cfg.get("depot_dummy_copies", 3),
         "plot": bool(out.get("plot", True)),
@@ -501,14 +508,14 @@ def _normalize_config(ta: dict) -> dict:
         "seed": heuristic_cfg.get("seed", 42),
     }
 
-    # Traffic: PSL config (T derived at simulation time from max_time_s)
+    # Traffic: PSL config — convert km/h → m/s for the package
     psl_enabled = bool(psl.get("enabled", False))
     cfg["traffic"] = {
         "enabled": psl_enabled,
         "K": psl.get("K", 1),
-        "v_min": psl.get("v_min", 40.0),
-        "v_max": psl.get("v_max", 100.0),
-        "speed_step": psl.get("speed_step", 60.0),
+        "v_min": float(psl.get("v_min_kmh", 40.0)) / 3.6,       # m/s
+        "v_max": float(psl.get("v_max_kmh", 100.0)) / 3.6,      # m/s
+        "speed_step": float(psl.get("speed_step_kmh", 60.0)) / 3.6,  # m/s
         "seed": psl.get("seed", 42),
         "profile_type": psl.get("profile_type", "random"),
     }
@@ -530,7 +537,7 @@ def _normalize_config(ta: dict) -> dict:
     policy_id = trsp.get("policy_id", None)
     cfg["simulation"] = {
         "simulator": sumo_cfg.get("simulator", "concurrent"),
-        "max_time": sumo_cfg.get("max_time", 12),
+        "max_time": sumo_cfg.get("max_time_h", 12),
         "render_mode": sumo_cfg.get("render_mode", "quiet"),
         "runtime_refuel": bool(ugv.get("runtime_refuel", False)),
         "use_planned_wait_times": False,
@@ -546,6 +553,62 @@ def _normalize_config(ta: dict) -> dict:
 
     return cfg
 
+def _reformat_cfg_sim(ta: dict) -> dict:
+    ori_net_cfg = ta.get("network", {})
+    ori_evrp_cfg = ta.get("evrp", {})
+    ori_trsp = ta.get("trsp", {})
+    ori_sim = ta.get("simulation", {})
+    ori_ugv = ori_sim.get("ugv", {})
+    ori_tasks = ori_sim.get("tasks", {})
+    ori_traffic_cfg = ta.get("traffic", {})
+    ori_psl = ori_traffic_cfg.get("psl", {})
+    ori_simulated = ori_traffic_cfg.get("simulated", {})
+    sumo_cfg = ta.get("sumo", {})
+    out = ta.get("output", {})
+
+    # Config values are in human-friendly units; convert to SI for the package.
+    battery_capacity_L      = float(ori_ugv.get("battery_capacity_L", 50.0))
+    consumption_L_per_km    = float(ori_ugv.get("consumption_rate_L_per_km", 5.0))
+    free_flow_speed_kmh     = float(ori_ugv.get("free_flow_speed_kmh", 50.0))
+    max_duration_h          = float(ori_ugv.get("max_duration_h", 6.0))
+    customer_service_time_h = float(ori_ugv.get("customer_service_time_h", 0.0))
+    recharge_time_h         = float(ori_ugv.get("recharge_time_h", 0.0))
+
+    model_cfg = {
+        "evrp": ori_evrp_cfg,
+        "trsp": ori_trsp,
+    }
+    instance_cfg = {
+        "fleet_size": ori_ugv.get("fleet_size", 3),
+        "customer_count": ori_tasks.get("customer_count", 10),
+        "ugv_range": battery_capacity_L * 1000.0 / consumption_L_per_km,  # L / (L/km) → km → m
+        "ugv_speed": free_flow_speed_kmh / 3.6,                            # km/h → m/s
+        "customer_service_time_s": customer_service_time_h * 3600.0,       # h → s
+        "recharge_time_s": recharge_time_h * 3600.0,                       # h → s
+        "runtime_refuel": bool(ori_ugv.get("runtime_refuel", False)),
+    }
+    trf_cfg = {
+        "enabled": bool(ori_psl.get("enabled", False)),
+        "K": ori_psl.get("K", 1),
+        "v_min": float(ori_psl.get("v_min_kmh", 40.0)) / 3.6,         # km/h → m/s
+        "v_max": float(ori_psl.get("v_max_kmh", 100.0)) / 3.6,        # km/h → m/s
+        "speed_step": float(ori_psl.get("speed_step_kmh", 60.0)) / 3.6, # km/h → m/s
+        "seed": ori_psl.get("seed", 42),
+    }
+    hps = {
+        "stop_time": max_duration_h * 3600.0,  # h → s
+        "sumo": sumo_cfg,
+        "output": out,
+    }
+    sim_cfg = {
+        "model": model_cfg,
+        "net": ori_net_cfg,
+        "instance": instance_cfg,
+        "traffic": trf_cfg,
+        "hps": hps,
+    }
+
+    return sim_cfg
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -603,7 +666,6 @@ def _print_metrics(metrics: dict) -> None:
     print("\n── Simulation metrics ──────────────────────────────────────────")
     print(f"  makespan          : {metrics['makespan_s']:.1f} s  ({metrics['makespan_h']:.3f} h)")
     print(f"  total distance    : {metrics['total_distance_m']:.1f} m  ({metrics['total_distance_km']:.3f} km)")
-    print(f"  total energy      : {metrics['total_energy_kwh']:.3f} kWh")
     print(f"  total recharges   : {metrics['total_recharges']}")
     print(f"  customers served  : {metrics['customers_served']}")
     if metrics["avg_inter_customer_gap_s"] is not None:
@@ -612,7 +674,6 @@ def _print_metrics(metrics: dict) -> None:
     for vid, v in metrics["per_vehicle"].items():
         print(
             f"    V{vid}: dist={v['distance_m']:.1f}m  "
-            f"energy={v['energy_kwh']:.3f}kWh  "
             f"recharges={v['num_recharges']}  "
             f"customers={v['customers_served']}  "
             f"finish={v['finish_time_s']:.1f}s"
@@ -701,11 +762,12 @@ def main() -> None:
     if args.no_sim:
         print("\n[2/3] Simulation skipped (--no-sim).")
         return
+    
+    sim_cfg = _reformat_cfg_sim(ta_config)
 
-    sim_type = cfg.get("simulation", {}).get("simulator", "sequential")
-    print(f"\n[2/3] Starting SUMO simulation ({sim_type})...")
-    from dronesim.evrp.simulator import get_simulator
-    sim = get_simulator(cfg, local_planner=local_planner)
+    print(f"\n[2/3] Starting SUMO simulation ...")
+    from dronesim.evrp.simulator.evrp_sim import EVRPSimulator
+    sim = EVRPSimulator(sim_cfg, local_planner=local_planner)
 
     route_logger = _RouteLogger(net_path=cfg.get("net", {}).get("net_path", ""))
     logger_attached = route_logger.attach(sim)

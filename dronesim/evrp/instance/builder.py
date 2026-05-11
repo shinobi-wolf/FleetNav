@@ -176,58 +176,17 @@ def _extract_pair_distance(
     return forward if forward_ok else backward
 
 
-def _distance_unit_factor(distance_unit: str) -> float:
-    unit = distance_unit.lower()
-    if unit in {"meters", "meter", "m"}:
-        return 1.0
-    if unit in {"kilometers", "kilometer", "km"}:
-        return 1e-3
-    if unit in {"miles", "mile", "mi"}:
-        return 0.000621371192237334
-
-    raise ValueError(f"Unsupported distance unit '{distance_unit}'")
-
-
-def _convert_consumption_rate(base_gal_per_mile: float, distance_unit: str) -> float:
-    """Convert fuel consumption rate to gallons per configured distance unit."""
-    unit = distance_unit.lower()
-    if unit in {"miles", "mile", "mi"}:
-        return base_gal_per_mile
-    if unit in {"kilometers", "kilometer", "km"}:
-        return base_gal_per_mile * 0.621371192237334
-    if unit in {"meters", "meter", "m"}:
-        return base_gal_per_mile * 0.000621371192237334
-
-    raise ValueError(f"Unsupported distance unit '{distance_unit}'")
-
-
-def _convert_speed_from_mph(speed_mph: float, distance_unit: str) -> float:
-    """Convert mph to configured distance unit per hour."""
-    unit = distance_unit.lower()
-    if unit in {"miles", "mile", "mi"}:
-        return speed_mph
-    if unit in {"kilometers", "kilometer", "km"}:
-        return speed_mph * 1.609344
-    if unit in {"meters", "meter", "m"}:
-        return speed_mph * 1609.344
-
-    raise ValueError(f"Unsupported distance unit '{distance_unit}'")
-
-
 def build_distance_matrix_from_shortest_paths(
     selected_node_ids: list[str],
     shortest_paths: dict[str, dict[str, float]],
-    distance_unit: str,
 ) -> np.ndarray:
-    """Build complete symmetric physical distance matrix from graph shortest paths."""
+    """Build complete symmetric distance matrix (in metres) from graph shortest paths."""
     n_nodes = len(selected_node_ids)
     dist = np.zeros((n_nodes, n_nodes), dtype=float)
-    factor = _distance_unit_factor(distance_unit)
 
     for i in range(n_nodes):
         for j in range(i + 1, n_nodes):
-            dij_meters = _extract_pair_distance(selected_node_ids[i], selected_node_ids[j], shortest_paths)
-            dij = dij_meters * factor
+            dij = _extract_pair_distance(selected_node_ids[i], selected_node_ids[j], shortest_paths)
             dist[i, j] = dij
             dist[j, i] = dij
 
@@ -283,28 +242,25 @@ def build_problem_instance_from_config(config: dict[str, Any]) -> tuple[np.ndarr
     physical_dist = build_distance_matrix_from_shortest_paths(
         selected_node_ids=physical_sumo_ids,
         shortest_paths=shortest_paths,
-        distance_unit=str(gvrp_cfg.get("distance_unit", "miles")),
     )
 
     physical_coords = np.array([graph_data["node_positions"][node_id] for node_id in physical_sumo_ids], dtype=float)
 
-    distance_unit = str(gvrp_cfg.get("distance_unit", "miles"))
-    speed_mph = float(gvrp_cfg.get("speed_mph", 40.0))
-
+    # All parameters in SI units: distances in metres, times in seconds, speed in m/s.
+    # Consumption rate is dimensionless (metres of range consumed per metre travelled).
     params: dict[str, Any] = {
-        "Q": float(gvrp_cfg.get("fuel_capacity", 50.0)),
-        "r": _convert_consumption_rate(float(gvrp_cfg.get("consumption_rate", 0.2)), distance_unit),
-        "speed": _convert_speed_from_mph(speed_mph, distance_unit),
-        "Tmax": float(gvrp_cfg.get("max_duration_hours", 11.0)),
+        "Q": float(gvrp_cfg.get("fuel_capacity", 10000.0)),          # range in metres
+        "r": float(gvrp_cfg.get("consumption_rate", 1.0)),           # dimensionless
+        "speed": float(gvrp_cfg.get("speed_ms", 13.89)),             # m/s
+        "Tmax": float(gvrp_cfg.get("max_duration_s", 21600.0)),      # seconds
         "m": int(gvrp_cfg.get("num_vehicles", fleet_cfg.get("size", 3))),
         "afs_dummy_copies": int(gvrp_cfg.get("afs_dummy_copies", gvrp_cfg.get("nf", 3))),
         "depot_dummy_copies": int(gvrp_cfg.get("depot_dummy_copies", gvrp_cfg.get("nf", 3))),
-        "customer_service_time": float(gvrp_cfg.get("customer_service_time_hours", 0.5)),
-        "refuel_time": float(gvrp_cfg.get("refuel_time_hours", 0.25)),
+        "customer_service_time": float(gvrp_cfg.get("customer_service_time_s", 0.0)),  # seconds
+        "refuel_time": float(gvrp_cfg.get("refuel_time_s", 0.0)),    # seconds
         "time_limit": float(solver_cfg.get("time_limit_seconds", 300.0)),
         "output_flag": int(solver_cfg.get("output_flag", 1)),
         "mip_gap": float(solver_cfg.get("mip_gap", 0.0)),
-        "distance_unit": distance_unit,
         "plot": bool(gvrp_cfg.get("plot", True)),
     }
 

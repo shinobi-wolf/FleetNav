@@ -17,9 +17,8 @@ Key differences from the MILP planner
 Config keys used (same section as gvrp.yaml)
 ---------------------------------------------
   fleet.size              number of vehicles
-  gvrp.fuel_capacity      battery capacity (gallons)
-  gvrp.consumption_rate   gallons per mile (converted internally)
-  gvrp.distance_unit      meters | kilometers | miles
+  gvrp.fuel_capacity      battery range capacity (metres)
+  gvrp.consumption_rate   dimensionless range consumed per metre (= 1.0)
   heuristic.alns_iterations   (optional, default 300)
   heuristic.seed              (optional, default None → time-based)
 """
@@ -36,22 +35,6 @@ import routingblocks as rb
 from ..instance.builder import build_problem_instance_from_config
 from ..routes.base import Route, Stop
 from .base import BasePlanner
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _scale_dist_to_miles(dist_m: np.ndarray, distance_unit: str) -> np.ndarray:
-    """Convert distance matrix to miles for battery accounting."""
-    unit = distance_unit.lower()
-    if unit in {"miles", "mile", "mi"}:
-        return dist_m
-    if unit in {"meters", "meter", "m"}:
-        return dist_m * 0.000621371
-    if unit in {"kilometers", "kilometer", "km"}:
-        return dist_m * 0.621371
-    raise ValueError(f"Unknown distance unit: {distance_unit}")
 
 
 # ---------------------------------------------------------------------------
@@ -73,9 +56,8 @@ class EVRPHeuristicPlanner(BasePlanner):
         coords: np.ndarray = generation_info["physical_coords"]
 
         num_vehicles = int(params["m"])
-        fuel_capacity = float(params["Q"])          # gallons
-        gal_per_mile = float(config.get("gvrp", {}).get("consumption_rate", 1.0))
-        distance_unit = str(params.get("distance_unit", "meters"))
+        fuel_capacity = float(params["Q"])          # metres (range)
+        consumption_rate = float(params.get("r", 1.0))  # dimensionless
 
         heuristic_cfg = config.get("heuristic", {})
         alns_iterations = int(heuristic_cfg.get("alns_iterations", 300))
@@ -90,9 +72,6 @@ class EVRPHeuristicPlanner(BasePlanner):
 
         if not customer_indices:
             raise ValueError("No customer nodes in instance")
-
-        # Convert distance matrix to miles for consistent battery accounting
-        dist_miles = _scale_dist_to_miles(physical_dist, distance_unit)
 
         BIG = 1e9
         BIG_TIME = 1e9
@@ -147,7 +126,7 @@ class EVRPHeuristicPlanner(BasePlanner):
         def arc_dist(a_rb: str, b_rb: str) -> float:
             ai = rb_id_to_idx[a_rb]
             bi = rb_id_to_idx[b_rb]
-            return float(dist_miles[ai, bi])
+            return float(physical_dist[ai, bi])
 
         # ── Build RoutingBlocks instance ───────────────────────────────────
         builder = rb.utility.InstanceBuilder(
@@ -179,7 +158,7 @@ class EVRPHeuristicPlanner(BasePlanner):
         for a_id in all_rb_ids:
             for b_id in all_rb_ids:
                 d = arc_dist(a_id, b_id)
-                builder.add_arc(a_id, b_id, rb.adptw.ArcData(d, d, d * gal_per_mile))
+                builder.add_arc(a_id, b_id, rb.adptw.ArcData(d, d, d * consumption_rate))
 
         builder.fleet_size = num_vehicles
         instance = builder.build()

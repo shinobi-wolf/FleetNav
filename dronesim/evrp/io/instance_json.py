@@ -20,7 +20,7 @@ def save_instance_json(
         return
 
     payload = {
-        "distance_unit": config.get("gvrp", {}).get("distance_unit", "miles"),
+        "distance_unit": "meters",
         "physical_node_names": physical_meta["physical_node_names"],
         "physical_node_types": physical_meta["physical_node_types"],
         "physical_sumo_ids": physical_meta["physical_sumo_ids"],
