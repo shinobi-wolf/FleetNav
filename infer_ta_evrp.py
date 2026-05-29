@@ -49,6 +49,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from dronesim.evrp.io.plot import build_plot_coordinates, plot_routes
 from dronesim.evrp.io.instance_json import save_instance_json
+from dronesim.evrp.network import build_network_context
 from dronesim.evrp.planners import get_planner
 from dronesim.evrp.planners.gvrp_milp import GVRPMILPPlanner
 
@@ -485,8 +486,8 @@ def _normalize_config(ta: dict) -> dict:
         "customer_sampling": tasks.get("customer_sampling", "count"),
         "task_density": tasks.get("task_density", 30),
         "afs_count": tasks.get("afs_count", 3),
-        "fuel_capacity": battery_capacity_L,                        # L
-        "consumption_rate": consumption_L_per_km / 1000.0,          # L/m
+        "fuel_capacity": battery_capacity_L * 1000.0 / consumption_L_per_km,  # m (range)
+        "consumption_rate": 1.0,                                          # dimensionless
         "speed_ms": free_flow_speed_kmh / 3.6,                      # m/s
         "max_duration_s": max_duration_h * 3600.0,                  # s
         "customer_service_time_s": customer_service_time_h * 3600.0, # s
@@ -717,10 +718,15 @@ def main() -> None:
     elif cfg["output"].get("save_metrics_json"):
         cfg["output"]["save_metrics_json"] = str(run_dir / Path(cfg["output"]["save_metrics_json"]).name)
 
+    # ── Load network once ─────────────────────────────────────────────────────
+    print(f"\n[0/3] Loading SUMO network from {ta_config['network']['net_path']} ...")
+    network = build_network_context(ta_config["network"]["net_path"])
+    print(f"       {network.net_xml_path}  ({network.graph.number_of_nodes()} nodes, {network.graph.number_of_edges()} edges)")
+
     # ── Plan ─────────────────────────────────────────────────────────────────
     print(f"\n[1/3] Planning with '{planner_name}' planner...")
     planner = get_planner(planner_name)
-    routes = planner.plan(cfg)
+    routes = planner.plan(cfg, network=network)
     _print_routes(routes)
 
     planned_stops_path = _export_planned_stops(
@@ -767,7 +773,7 @@ def main() -> None:
 
     print(f"\n[2/3] Starting SUMO simulation ...")
     from dronesim.evrp.simulator.evrp_sim import EVRPSimulator
-    sim = EVRPSimulator(sim_cfg, local_planner=local_planner)
+    sim = EVRPSimulator(sim_cfg, network=network, local_planner=local_planner)
 
     route_logger = _RouteLogger(net_path=cfg.get("net", {}).get("net_path", ""))
     logger_attached = route_logger.attach(sim)

@@ -1,104 +1,37 @@
 """Build G-VRP problem instances from SUMO networks and config dicts."""
 from __future__ import annotations
 
-import math
-from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
 
-try:
-    import sumolib  # type: ignore[import-not-found]
-except Exception as exc:  # pragma: no cover - environment dependent
-    sumolib = None
-    SUMOLIB_IMPORT_ERROR = exc
-else:
-    SUMOLIB_IMPORT_ERROR = None
+from ..network import NetworkContext, build_network_context
 
 
 INF = 1e15
 
 
-def _resolve_net_xml_path(net_path: str) -> str:
-    """Resolve SUMO net path from either .sumocfg or .net.xml input."""
-    src = Path(net_path)
-
-    if src.suffix == ".sumocfg":
-        return str(src.with_suffix(".net.xml"))
-
-    if src.suffix == ".xml" and src.name.endswith(".net.xml"):
-        return str(src)
-
-    return str(src)
-
-
-def _node_position(node_obj: Any) -> tuple[float, float]:
-    """Get a stable (x, y) position for a SUMO node object."""
-    shape = node_obj.getShape()
-    if shape:
-        x_coords = [p[0] for p in shape]
-        y_coords = [p[1] for p in shape]
-        return float(np.mean(x_coords)), float(np.mean(y_coords))
-
-    coord = node_obj.getCoord()
-    return float(coord[0]), float(coord[1])
-
-
 def load_sumo_graph(net_path: str) -> dict[str, Any]:
-    """Build directed network graph and shortest-path matrix from SUMO net."""
-    if sumolib is None:
-        raise RuntimeError(f"sumolib import failed: {SUMOLIB_IMPORT_ERROR}")
+    """Build directed network graph and shortest-path matrix from SUMO net.
 
-    net_xml_path = _resolve_net_xml_path(net_path)
-    if not Path(net_xml_path).exists():
-        raise FileNotFoundError(f"SUMO net file not found: {net_xml_path}")
-
-    net = sumolib.net.readNet(net_xml_path, withInternal=False)
-    g_dir = nx.DiGraph()
-
-    for edge in net.getEdges():
-        edge_id = edge.getID()
-        if edge_id.startswith(":"):
-            continue
-
-        from_node = edge.getFromNode()
-        to_node = edge.getToNode()
-        from_id = from_node.getID()
-        to_id = to_node.getID()
-
-        fx, fy = _node_position(from_node)
-        tx, ty = _node_position(to_node)
-
-        g_dir.add_node(from_id, x=fx, y=fy)
-        g_dir.add_node(to_id, x=tx, y=ty)
-
-        edge_length = float(edge.getLength())
-        if edge_length <= 0.0:
-            edge_length = float(math.hypot(tx - fx, ty - fy))
-
-        g_dir.add_edge(from_id, to_id, id=edge_id, length=edge_length)
-
-    if len(g_dir.nodes) == 0:
-        raise ValueError("No non-internal edges/nodes found while building SUMO graph")
-
-    shortest = dict(nx.all_pairs_dijkstra_path_length(g_dir, weight="length"))
-    sorted_nodes = sorted(g_dir.nodes)
+    Delegates network loading to build_network_context (which uses the correct
+    XML-parsing resolver), then computes the all-pairs shortest-path matrix
+    needed by the planners.
+    """
+    nc = build_network_context(net_path)
+    shortest = dict(nx.all_pairs_dijkstra_path_length(nc.graph, weight="length"))
+    sorted_nodes = sorted(nc.graph.nodes)
     node2idx = {node: idx for idx, node in enumerate(sorted_nodes)}
     idx2node = {idx: node for node, idx in node2idx.items()}
 
-    node_positions = {
-        node_id: (float(g_dir.nodes[node_id]["x"]), float(g_dir.nodes[node_id]["y"]))
-        for node_id in g_dir.nodes
-    }
-
     return {
-        "net_xml_path": net_xml_path,
-        "graph": g_dir,
+        "net_xml_path": nc.net_xml_path,
+        "graph": nc.graph,
         "shortest_paths": shortest,
         "node2idx": node2idx,
         "idx2node": idx2node,
-        "node_positions": node_positions,
+        "node_positions": nc.node_positions,
     }
 
 
@@ -193,15 +126,30 @@ def build_distance_matrix_from_shortest_paths(
     return dist
 
 
-def build_problem_instance_from_config(config: dict[str, Any]) -> tuple[np.ndarray, dict[str, Any], dict[str, Any], dict[str, Any]]:
-    """Generate physical G-VRP node set and distance matrix from SUMO graph + config."""
-    net_cfg = config.get("net", {})
-    if "net_path" not in net_cfg:
-        raise KeyError("Config missing required key: net.net_path")
+def build_problem_instance_from_config(
+    config: dict[str, Any],
+    network: Optional[NetworkContext] = None,
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Generate physical G-VRP node set and distance matrix from SUMO graph + config.
 
-    graph_data = load_sumo_graph(str(net_cfg["net_path"]))
-    graph: nx.DiGraph = graph_data["graph"]
-    shortest_paths = graph_data["shortest_paths"]
+    If a pre-built NetworkContext is supplied the network is not reloaded from
+    disk; only the all-pairs shortest-path matrix (planner-specific) is computed.
+    """
+    net_cfg = config.get("net", {})
+
+    if network is not None:
+        graph: nx.DiGraph = network.graph
+        node_positions = network.node_positions
+        net_xml_path = network.net_xml_path
+        shortest_paths = dict(nx.all_pairs_dijkstra_path_length(graph, weight="length"))
+    else:
+        if "net_path" not in net_cfg:
+            raise KeyError("Config missing required key: net.net_path")
+        graph_data = load_sumo_graph(str(net_cfg["net_path"]))
+        graph = graph_data["graph"]
+        shortest_paths = graph_data["shortest_paths"]
+        node_positions = graph_data["node_positions"]
+        net_xml_path = graph_data["net_xml_path"]
 
     gvrp_cfg = config.get("gvrp", {})
     solver_cfg = config.get("solver", {})
@@ -244,7 +192,7 @@ def build_problem_instance_from_config(config: dict[str, Any]) -> tuple[np.ndarr
         shortest_paths=shortest_paths,
     )
 
-    physical_coords = np.array([graph_data["node_positions"][node_id] for node_id in physical_sumo_ids], dtype=float)
+    physical_coords = np.array([node_positions[node_id] for node_id in physical_sumo_ids], dtype=float)
 
     # All parameters in SI units: distances in metres, times in seconds, speed in m/s.
     # Consumption rate is dimensionless (metres of range consumed per metre travelled).
@@ -273,7 +221,7 @@ def build_problem_instance_from_config(config: dict[str, Any]) -> tuple[np.ndarr
 
     generation_info = {
         "seed": seed,
-        "net_xml_path": graph_data["net_xml_path"],
+        "net_xml_path": net_xml_path,
         "depot_sumo_id": depot_node_id,
         "customer_sumo_ids": customer_nodes,
         "afs_sumo_ids": afs_nodes,

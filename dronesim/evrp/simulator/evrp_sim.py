@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
 import networkx as nx
@@ -13,7 +13,7 @@ try:
 except ImportError as e:
     raise ImportError(f"traci/sumolib required for simulation: {e}") from e
 
-
+from ..network import NetworkContext
 from ..routes.base import Route
 from ..traffic.segmented import PSLTrafficModel, build_traffic_model
 from .pygame_renderer import PygameRenderer
@@ -83,7 +83,12 @@ def _resolve_net_xml_path(net_path: str) -> Optional[Path]:
 class EVRPSimulator:
     """Time-step-driven simulator: all vehicles advance concurrently each step."""
 
-    def __init__(self, config: dict[str, Any], local_planner: Optional[Any] = None):
+    def __init__(
+        self,
+        config: dict[str, Any],
+        network: Optional[NetworkContext] = None,
+        local_planner: Optional[Any] = None,
+    ):
         self.config = config
         self.local_planner = local_planner
         self.instance_cfg = config.get("instance", {})
@@ -92,7 +97,6 @@ class EVRPSimulator:
         self.hps = config.get("hps", {})
 
         self.render_mode = self.hps["sumo"]["render_mode"]
-        self.net_xml_path = _resolve_net_xml_path(self.net_cfg.get("net_path", ""))
         self.max_time = self.hps["stop_time"]
         self.ugv_max_speed = self.instance_cfg["ugv_speed"]
         self.sumocfg_path = self.net_cfg["net_path"]
@@ -106,12 +110,18 @@ class EVRPSimulator:
         self.recharge_time_s = self.instance_cfg.get("recharge_time_s", 0.0)
         self.runtime_refuel = bool(self.instance_cfg.get("runtime_refuel", False))
 
-        if self.net_xml_path is None:
-            raise FileNotFoundError(
-                f"Cannot locate .net.xml for SUMO config: {self.net_cfg.get('net_path')}"
-            )
-        self._net = sumolib.net.readNet(self.net_xml_path, withInternal=False)
-        self._routing_graph = self._build_routing_graph()
+        if network is not None:
+            self.net_xml_path = Path(network.net_xml_path)
+            self._net = network.net
+            self._routing_graph = network.graph
+        else:
+            self.net_xml_path = _resolve_net_xml_path(self.net_cfg.get("net_path", ""))
+            if self.net_xml_path is None:
+                raise FileNotFoundError(
+                    f"Cannot locate .net.xml for SUMO config: {self.net_cfg.get('net_path')}"
+                )
+            self._net = sumolib.net.readNet(self.net_xml_path, withInternal=False)
+            self._routing_graph = self._build_routing_graph()
 
     def _build_routing_graph(self) -> nx.DiGraph:
         """Build directed graph from the loaded SUMO net.
@@ -154,9 +164,10 @@ class EVRPSimulator:
         renderer: PygameRenderer | None = None
         if self.render_mode == "human":
             node_roles = self._collect_node_roles(routes)
+            node_labels = self._collect_node_labels(routes)
             vehicle_ids = [r.vehicle_id for r in routes]
             renderer = PygameRenderer(
-                self._net, node_roles, vehicle_ids,
+                self._net, node_roles, node_labels, vehicle_ids,
                 v_min_ms=self._traffic_v_min,
                 v_max_ms=self._traffic_v_max,
             )
@@ -674,6 +685,25 @@ class EVRPSimulator:
                 base_type = stop.node_type.replace("_dummy", "")
                 roles[stop.sumo_node_id] = base_type
         return roles
+
+    @staticmethod
+    def _collect_node_labels(routes: list[Route]) -> dict[str, str]:
+        """Build {sumo_node_id: label} from planned route stops."""
+        labels: dict[str, str] = {}
+        for route in routes:
+            for stop in route.stops:
+                base_type = stop.node_type.replace("_dummy", "")
+                if base_type not in {"depot", "customer", "afs"}:
+                    continue
+                if stop.sumo_node_id in labels:
+                    continue
+                label = getattr(stop, "node_name", None)
+                if not isinstance(label, str) or not label:
+                    continue
+                if "_d" in label:
+                    label = label.split("_d", 1)[0]
+                labels[stop.sumo_node_id] = label
+        return labels
 
     def _find_edge_route(self, src_node: str, dst_node: str) -> tuple[list[str] | None, float]:
         """Return (edge_ids, path_length) for the shortest path from src to dst.

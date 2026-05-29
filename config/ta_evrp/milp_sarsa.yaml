@@ -9,8 +9,14 @@ base: config/ta_evrp/base.yaml
 
 evrp:
   planner: milp
+  milp:
+    time_limit_s: 300        # seconds — Gurobi wall-clock limit
+    mip_gap: 0.01            # 0.0 = proven optimal
+    output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+    afs_dummy_copies: 3
+    depot_dummy_copies: 3
 
 trsp:
   agent: sarsa
-  policy_id: ff58b1a9            # set to the policy ID, e.g. "77a4169c"
+  policy_id: 44a88465            # set to the policy ID, e.g. "77a4169c"
 

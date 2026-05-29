@@ -1,0 +1,7 @@
+seed: 42
+grid.number: 5
+grid.length: 1000
+grid.x-number: 5
+grid.y-number: 5
+grid.x-length: 1000
+grid.y-length: 1000

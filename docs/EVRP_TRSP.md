@@ -138,6 +138,11 @@ infer_ta_evrp.py
   │     ├─ gym.make(SumoTRSPEnv-v0)  ← reads net, no SUMO
   │     └─ load Q-table from policy.pkl
   │
+  ├─ NetworkContext (dronesim/evrp/network.py)          ← built once; injected below
+  │     ├─ resolve .net.xml path from .sumocfg
+  │     ├─ sumolib.net.readNet()
+  │     └─ nx.DiGraph (nodes with x,y; edges with length)
+  │
   └─ EVRPSimulator (dronesim/evrp/simulator/evrp_sim.py)
         │
         ├─ build PSLTrafficModel from edge_ids + config
@@ -182,6 +187,7 @@ In the currently logged experiments, using the SARSA local planner often improve
 | `traci.edge.setMaxSpeed()` per-edge slot transitions in EVRP | ✅ Done |
 | Pygame renderer: per-edge color from PSL profile | ✅ Done |
 | `_RouteLogger` correctly unpacks `(edge_ids, dist)` for per-leg logging | ✅ Done |
+| `NetworkContext` built once per run, injected into planner and simulator | ✅ Done |
 | DQN/PPO policy support in `TRSPLocalPlanner` | ❌ Not yet |
 | End-to-end test: MILP plan + TRSP navigation + metrics | ✅ Done |
 | TRSP time slot aligned with EVRP sim clock for K>1 | ⚠️ Works for K=1; needs validation for K>1 |

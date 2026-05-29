@@ -150,7 +150,7 @@ def _status_name(status_code: int) -> str:
 
 def solve_and_extract(model, dist: np.ndarray, params: dict[str, Any]) -> dict[str, Any]:
     """Solve model and extract route sequences plus node-level fuel/time details."""
-    _ = dist, params
+    _ = dist
     model.optimize()
 
     status = model.Status
@@ -200,6 +200,13 @@ def solve_and_extract(model, dist: np.ndarray, params: dict[str, Any]) -> dict[s
     covered_arcs: set[tuple[int, int]] = set()
     starts = succ.get(depot, [])
 
+    # Constants for forward propagation (same across all vehicles)
+    r_param = float(params["r"])
+    Q_param = float(params["Q"])
+    speed_param = float(params["speed"])
+    p = inst["service_times"]
+    refuel_set = set(inst["refuel_nodes"])
+
     for vehicle_id, first_stop in enumerate(starts, start=1):
         route_nodes = [depot, first_stop]
         covered_arcs.add((depot, first_stop))
@@ -220,17 +227,28 @@ def solve_and_extract(model, dist: np.ndarray, params: dict[str, Any]) -> dict[s
             guard += 1
 
         route_distance = float(sum(d[u, v] for u, v in zip(route_nodes[:-1], route_nodes[1:])))
+
+        # Propagate fuel and time forward through the route so displayed values
+        # reflect actual physical state, not the MILP's slack variable values.
+
+        prop_fuel = Q_param
+        prop_time = 0.0
         route_stops = []
-        for node in route_nodes:
+        for k, node in enumerate(route_nodes):
             route_stops.append(
                 {
                     "node_index": node,
                     "node_name": node_names[node],
                     "sumo_node_id": node_sumo_ids[node],
-                    "fuel": float(y[node].X),
-                    "arrival_time": float(s[node].X),
+                    "fuel": prop_fuel,
+                    "arrival_time": prop_time,
                 }
             )
+            if k + 1 < len(route_nodes):
+                nxt = route_nodes[k + 1]
+                leg = float(d[node, nxt])
+                prop_time += leg / speed_param + float(p[nxt])
+                prop_fuel = Q_param if nxt in refuel_set else prop_fuel - r_param * leg
 
         routes.append(
             {

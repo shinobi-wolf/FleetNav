@@ -1,20 +1,27 @@
 """MILP-based G-VRP planner."""
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from ..instance.builder import build_problem_instance_from_config
 from ..milp.gvrp import build_gvrp_model, solve_and_extract
 from ..routes.base import Route, Stop
 from .base import BasePlanner
 
+if TYPE_CHECKING:
+    from ..network import NetworkContext
+
 
 class GVRPMILPPlanner(BasePlanner):
     """Solves G-VRP exactly with Gurobi and returns Route objects."""
 
-    def plan(self, config: dict[str, Any]) -> list[Route]:
+    def plan(
+        self,
+        config: dict[str, Any],
+        network: Optional["NetworkContext"] = None,
+    ) -> list[Route]:
         physical_dist, params, physical_meta, generation_info = (
-            build_problem_instance_from_config(config)
+            build_problem_instance_from_config(config, network=network)
         )
         params["_physical_meta"] = physical_meta
         params["plot"] = False  # plotting is the simulator's job

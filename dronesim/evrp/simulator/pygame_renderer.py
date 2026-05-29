@@ -60,6 +60,8 @@ class PygameRenderer:
     net : sumolib net object
     node_roles : dict[str, str]
         Maps sumo_node_id → 'depot' | 'customer' | 'afs'
+    node_labels : dict[str, str] | None
+        Maps sumo_node_id → instance node label (e.g., D, C1, F3).
     vehicle_ids : list[int]
     v_min_ms : float | None
         Min PSL speed in m/s (for edge color normalization). None = no coloring.
@@ -72,6 +74,7 @@ class PygameRenderer:
         self,
         net,
         node_roles: dict[str, str],
+        node_labels: dict[str, str] | None,
         vehicle_ids: list[int],
         v_min_ms: float | None = None,
         v_max_ms: float | None = None,
@@ -79,6 +82,7 @@ class PygameRenderer:
     ) -> None:
         self._net = net
         self._node_roles = node_roles
+        self._node_labels = node_labels or {}
         self._vehicle_ids = vehicle_ids
         self._v_min_ms = v_min_ms
         self._v_max_ms = v_max_ms
@@ -251,6 +255,7 @@ class PygameRenderer:
 
     def _draw_nodes(self, surf: pygame.Surface, served_customers: set[str]) -> None:
         font = pygame.font.Font(None, 16)
+        font_small = pygame.font.Font(None, 14)
         for nid, pos in self._node_pos.items():
             role = self._node_roles.get(nid, "road")
             px, py = self._transform(*pos)
@@ -268,9 +273,13 @@ class PygameRenderer:
             pygame.draw.circle(surf, color, (px, py), r)
 
             if role in ("depot", "customer", "afs"):
-                label = {"depot": "D", "customer": "C", "afs": "F"}.get(role, "")
-                txt = font.render(label, True, (255, 255, 255))
-                surf.blit(txt, txt.get_rect(center=(px, py)))
+                label = self._node_labels.get(nid)
+                if not label:
+                    label = {"depot": "D", "customer": "C", "afs": "F"}.get(role, "")
+                if label:
+                    txt_font = font_small if len(label) > 1 else font
+                    txt = txt_font.render(label, True, (255, 255, 255))
+                    surf.blit(txt, txt.get_rect(center=(px, py)))
 
     def _draw_vehicles(
         self,

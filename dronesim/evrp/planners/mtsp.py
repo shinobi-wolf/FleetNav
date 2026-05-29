@@ -18,9 +18,14 @@ from typing import Any
 import numpy as np
 from sklearn.cluster import KMeans
 
+from typing import TYPE_CHECKING, Optional
+
 from ..instance.builder import build_problem_instance_from_config
 from ..routes.base import Route, Stop
 from .base import BasePlanner
+
+if TYPE_CHECKING:
+    from ..network import NetworkContext
 
 
 def _nearest_neighbour_order(
@@ -46,9 +51,13 @@ def _nearest_neighbour_order(
 class MTSPPlanner(BasePlanner):
     """KMeans + nearest-neighbour TSP baseline (no fuel constraints)."""
 
-    def plan(self, config: dict[str, Any]) -> list[Route]:
+    def plan(
+        self,
+        config: dict[str, Any],
+        network: Optional["NetworkContext"] = None,
+    ) -> list[Route]:
         physical_dist, params, physical_meta, generation_info = (
-            build_problem_instance_from_config(config)
+            build_problem_instance_from_config(config, network=network)
         )
 
         names: list[str] = physical_meta["physical_node_names"]

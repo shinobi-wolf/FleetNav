@@ -27,7 +27,10 @@ from __future__ import annotations
 import copy
 import random
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional
+
+if TYPE_CHECKING:
+    from ..network import NetworkContext
 
 import numpy as np
 import routingblocks as rb
@@ -44,9 +47,13 @@ from .base import BasePlanner
 class EVRPHeuristicPlanner(BasePlanner):
     """RoutingBlocks ALNS heuristic for EVRP with explicit AFS nodes."""
 
-    def plan(self, config: dict[str, Any]) -> list[Route]:
+    def plan(
+        self,
+        config: dict[str, Any],
+        network: Optional["NetworkContext"] = None,
+    ) -> list[Route]:
         physical_dist, params, physical_meta, generation_info = (
-            build_problem_instance_from_config(config)
+            build_problem_instance_from_config(config, network=network)
         )
 
         names: list[str] = physical_meta["physical_node_names"]

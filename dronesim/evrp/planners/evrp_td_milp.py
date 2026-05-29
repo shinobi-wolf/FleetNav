@@ -1,9 +1,12 @@
 """TD-EVRP MILP planner — Lu et al. (2020) exact formulation (cargo relaxed)."""
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from ..instance.builder import build_problem_instance_from_config
+
+if TYPE_CHECKING:
+    from ..network import NetworkContext
 from ..milp.td_evrp import build_td_evrp_milp_model, solve_and_extract_td_milp
 from ..routes.base import Route, Stop
 from .base import BasePlanner
@@ -19,9 +22,13 @@ class EVRPTDMILPPlanner(BasePlanner):
     preserved. Requires a Gurobi license.
     """
 
-    def plan(self, config: dict[str, Any]) -> list[Route]:
+    def plan(
+        self,
+        config: dict[str, Any],
+        network: Optional["NetworkContext"] = None,
+    ) -> list[Route]:
         physical_dist, params, physical_meta, generation_info = (
-            build_problem_instance_from_config(config)
+            build_problem_instance_from_config(config, network=network)
         )
         params["_physical_meta"] = physical_meta
 

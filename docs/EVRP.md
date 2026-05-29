@@ -22,11 +22,12 @@ All planners implement `BasePlanner.plan(config) → list[Route]` (`dronesim/evr
 
 ### `milp` — GVRP Exact Solver ✅ Done
 
-- **File:** `dronesim/evrp/planners/gvrp_milp.py`, core model in `dronesim/evrp/evrp_exact.py`
+- **File:** `dronesim/evrp/planners/gvrp_milp.py`; MILP model in `dronesim/evrp/milp/gvrp.py`; instance builder in `dronesim/evrp/instance/`
 - **Config:** `config/ta_evrp/milp.yaml`
 - **Method:** Gurobi MILP with dummy-node expansion: each AFS node gets `afs_dummy_copies` copies, the depot gets `depot_dummy_copies`. This allows a vehicle to revisit the same AFS/depot multiple times without copy-count constraints.
 - **Requires:** Gurobi license
 - **Status:** Fully working. Produces optimal or near-optimal routes bounded by solver time limit and MIP gap.
+- **Fuel semantics:** Q parameter = `battery_capacity_L * 1000 / consumption_rate_L_per_km` (range in metres); r = 1.0 (dimensionless). MILP variables y[j] are forward-propagated in the output to show physically meaningful fuel levels, not raw solver slack values.
 
 ### `heuristic` — RoutingBlocks ALNS ✅ Done
 
@@ -50,6 +51,30 @@ Earlier iterations included a TD-EVRP MILP config (`milp_td.yaml`) and a Lu/Icho
 
 - **File:** `dronesim/evrp/planners/evrp_ctvtt_ga.py`
 - **Status:** Scaffolding only. Not functional.
+
+---
+
+## Network Loading
+
+### `NetworkContext` (`dronesim/evrp/network.py`) ✅ Done
+
+The SUMO network is loaded **once per inference run** and injected into both the planner and the simulator. Before this, each independently reloaded the same file (and the planner used a naive suffix-swap resolver that could reference the wrong `.net.xml`).
+
+```python
+from dronesim.evrp.network import build_network_context
+
+network = build_network_context("data/ames/ames_campus_final.sumocfg")
+routes  = planner.plan(cfg, network=network)
+sim     = EVRPSimulator(sim_cfg, network=network)
+```
+
+`NetworkContext` contains:
+- `net_xml_path` — resolved `.net.xml` path (follows `<net-file>` pointer in `.sumocfg`)
+- `net` — `sumolib.net.Net` object
+- `graph` — `nx.DiGraph` with `length` edge weights and `x, y` node attributes
+- `node_positions` — `{node_id: (x, y)}`
+
+All planners accept `network=None` (falls back to loading from disk when not injected).
 
 ---
 
@@ -101,7 +126,9 @@ The simulator uses a **PSL (Piecewise Speed Limit)** model: each edge gets its o
 
 All TA-EVRP configs inherit from `config/ta_evrp/base.yaml` via `base:` key (deep-merge semantics).
 
-**Unit convention:** config files use human-friendly units (km, km/h, hours, litres). The runner script (`infer_ta_evrp.py`) converts these to SI (m, m/s, s, L/m) before passing to any package function. The `dronesim/evrp/` package itself is unit-free (SI only).
+**Unit convention:** config files use human-friendly units (km, km/h, hours, litres, L/km). The runner script (`infer_ta_evrp.py`) converts to SI before passing to any package function. The `dronesim/evrp/` package itself is unit-free (SI only).
+
+Fuel specifically: `battery_capacity_L` and `consumption_rate_L_per_km` are combined into a single **range in metres** (`Q = battery_capacity_L * 1000 / consumption_rate_L_per_km`) with dimensionless consumption rate `r = 1.0`. The MILP fuel constraint then reads: `y[j] ≤ y[i] − d[i,j]`, where all quantities are in metres.
 
 Special exceptions that keep seconds/ms in config: `sumo.step_length` (seconds), `sumo.delay` (ms), `evrp.milp.time_limit_s` (seconds).
 
@@ -153,8 +180,18 @@ traffic:
 
 ---
 
+## Notebooks
+
+| Notebook | Purpose |
+|----------|---------|
+| `notebooks/graph_verification.ipynb` | Visualize the NX routing graph and sampled instance nodes (depot, customers, AFS) from a config file; useful for verifying network loading and instance generation |
+| `notebooks/results_analysis.ipynb` | Aggregate and compare TA-EVRP results across planners and agents from `results/ta_evrp_results.csv` |
+
+---
+
 ## Known Issues / Future Work
 
 - `ctvtt_ga` planner is not implemented
-- Heuristic planner sometimes produces infeasible routes on sparse networks
+- Heuristic planner (ALNS) can return `feasible=False` routes on tight-range configs; the MILP correctly reports infeasibility in the same cases
 - `milp/td_evrp.py` still contains internal unit conversions (skipped during SI cleanup)
+- SUMO turn restrictions cause `No connection between edge X and Y` errors when the NX Dijkstra path crosses a physically disallowed turn; addressed by rebuilding the net without connection files or handling at planning time

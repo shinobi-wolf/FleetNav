@@ -50,13 +50,16 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
 
 from ..instance.builder import build_problem_instance_from_config
 from ..routes.base import Route, Stop
 from .base import BasePlanner
+
+if TYPE_CHECKING:
+    from ..network import NetworkContext
 
 
 _KM_PER_MILE = 1.609344
@@ -301,9 +304,13 @@ def _swap_mutation(individual: list[int], rng: random.Random) -> list[int]:
 class EVRPCTVTTGAPlanner(BasePlanner):
     """GA planner for the EVRP-CTVTT model of Shao et al., 2017."""
 
-    def plan(self, config: dict[str, Any]) -> list[Route]:
+    def plan(
+        self,
+        config: dict[str, Any],
+        network: Optional["NetworkContext"] = None,
+    ) -> list[Route]:
         physical_dist, params, physical_meta, generation_info = (
-            build_problem_instance_from_config(config)
+            build_problem_instance_from_config(config, network=network)
         )
 
         names: list[str] = physical_meta["physical_node_names"]

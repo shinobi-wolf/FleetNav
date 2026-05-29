@@ -53,6 +53,45 @@ CONFIG_DIR = ROOT / "config" / "ta_evrp"
 
 
 # ---------------------------------------------------------------------------
+# Schema-compat helpers
+# ---------------------------------------------------------------------------
+
+def _first_present(mapping: dict, keys: list[str], default: Any = None) -> Any:
+    for k in keys:
+        if k in mapping and mapping[k] is not None:
+            return mapping[k]
+    return default
+
+
+def _optional_float(mapping: dict, key: str) -> float | None:
+    if key not in mapping:
+        return None
+    val = mapping.get(key)
+    if val is None or val == "":
+        return None
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _optional_int(mapping: dict, key: str) -> int | None:
+    if key not in mapping:
+        return None
+    val = mapping.get(key)
+    if val is None or val == "":
+        return None
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _csv_blank_if_none(val: Any) -> Any:
+    return "" if val is None else val
+
+
+# ---------------------------------------------------------------------------
 # Config helpers (mirrors infer_ta_evrp.py)
 # ---------------------------------------------------------------------------
 
@@ -121,11 +160,18 @@ def _network_fp(net_xml_path: str) -> tuple:
 
 
 def _traffic_fp(psl: dict) -> tuple:
+    enabled = bool(psl.get("enabled", True))
+    if not enabled:
+        return ("none",)
+
+    v_min = _first_present(psl, ["v_min_kmh", "v_min"], 0)
+    v_max = _first_present(psl, ["v_max_kmh", "v_max"], 0)
+    step = _first_present(psl, ["speed_step_kmh", "speed_step"], 0)
     return (
         int(psl.get("K", 1)),
-        float(psl.get("v_min", 0)),
-        float(psl.get("v_max", 0)),
-        float(psl.get("speed_step", 0)),
+        float(v_min),
+        float(v_max),
+        float(step),
         str(psl.get("profile_type", "random")),
     )
 
@@ -195,16 +241,51 @@ def _parse_run(run_dir: Path, config_index: dict) -> dict[str, Any] | None:
     num_tasks = node_types.count("customer")
     num_afs = node_types.count("afs")
     num_ugvs = ugv_cfg.get("fleet_size", len(m.get("per_vehicle", {})))
-    battery_m = float(ugv_cfg.get("battery_range_m", 0))
-    svc_s = float(ugv_cfg.get("customer_service_time_hours", 0)) * 3600
-    rch_s = float(ugv_cfg.get("recharge_time_hours", 0)) * 3600
+
+    # Battery range: prefer explicit battery_range_m; otherwise derive from capacity/consumption.
+    battery_range_m = _optional_float(ugv_cfg, "battery_range_m")
+    if battery_range_m is None:
+        cap_L = _optional_float(ugv_cfg, "battery_capacity_L")
+        cons_L_per_km = _optional_float(ugv_cfg, "consumption_rate_L_per_km")
+        if cap_L is not None and cons_L_per_km not in (None, 0.0):
+            battery_range_m = (cap_L / cons_L_per_km) * 1000.0
+        else:
+            battery_range_m = 0.0
+
+    svc_h = _first_present(ugv_cfg, ["customer_service_time_h", "customer_service_time_hours"], 0)
+    rch_h = _first_present(ugv_cfg, ["recharge_time_h", "recharge_time_hours"], 0)
+    svc_s = float(svc_h) * 3600
+    rch_s = float(rch_h) * 3600
 
     uav_enabled = bool(uav_cfg.get("enabled", False))
-    uav_dist = float(m.get("uav_distance_m", 0))
-    uav_energy = float(m.get("uav_energy_kwh", 0))
-    ugv_dist = float(m.get("total_distance_m", 0)) - uav_dist
-    ugv_energy = float(m.get("total_energy_kwh", 0)) - uav_energy
+    total_dist = _optional_float(m, "total_distance_m")
+    if total_dist is None:
+        # Not a usable run for aggregation.
+        return None
 
+    # UAV distance/energy can be absent in older metrics.
+    uav_dist_opt = _optional_float(m, "uav_distance_m")
+    uav_energy_opt = _optional_float(m, "uav_energy_kwh")
+    total_energy_opt = _optional_float(m, "total_energy_kwh")
+
+    if not uav_enabled:
+        uav_dist_opt = 0.0
+        uav_energy_opt = 0.0
+
+    ugv_dist_opt: float | None
+    if uav_dist_opt is not None:
+        ugv_dist_opt = total_dist - uav_dist_opt
+    else:
+        ugv_dist_opt = None
+
+    ugv_energy_opt: float | None
+    if total_energy_opt is not None and uav_energy_opt is not None:
+        ugv_energy_opt = total_energy_opt - uav_energy_opt
+    else:
+        ugv_energy_opt = None
+
+    if "makespan_s" not in m:
+        return None
     makespan_s = float(m["makespan_s"])
     makespan_h = makespan_s / 3600
     customers_served = int(m.get("customers_served", num_tasks))
@@ -221,15 +302,15 @@ def _parse_run(run_dir: Path, config_index: dict) -> dict[str, Any] | None:
         # fingerprint keys
         "net_xml_path": net_xml_path,
         "traffic_fp": _traffic_fp(psl_cfg),
-        "problem_fp": _problem_fp(num_ugvs, num_tasks, num_afs, battery_m, svc_s, rch_s),
+        "problem_fp": _problem_fp(num_ugvs, num_tasks, num_afs, float(battery_range_m), svc_s, rch_s),
         # metrics
         "makespan_s": makespan_s,
-        "ugv_distance_m": ugv_dist,
-        "uav_distance_m": uav_dist,
-        "total_distance_m": float(m["total_distance_m"]),
-        "ugv_energy_kwh": ugv_energy,
-        "uav_energy_kwh": uav_energy,
-        "total_energy_kwh": float(m["total_energy_kwh"]),
+        "ugv_distance_m": ugv_dist_opt,
+        "uav_distance_m": uav_dist_opt,
+        "total_distance_m": total_dist,
+        "ugv_energy_kwh": ugv_energy_opt,
+        "uav_energy_kwh": uav_energy_opt,
+        "total_energy_kwh": total_energy_opt,
         "recharges": int(m["total_recharges"]),
         "throughput_tasks_per_h": throughput,
         "gap_pct": m.get("milp_gap_pct", ""),
@@ -237,7 +318,7 @@ def _parse_run(run_dir: Path, config_index: dict) -> dict[str, Any] | None:
         "num_ugvs": num_ugvs,
         "num_tasks": num_tasks,
         "num_afs": num_afs,
-        "battery_range_m": battery_m,
+        "battery_range_m": float(battery_range_m),
         "service_time_s": svc_s,
         "recharge_time_s": rch_s,
         "psl": psl_cfg,
@@ -304,12 +385,15 @@ def main() -> None:
             continue
         seen_tr.add(tid)
         psl = r["psl"]
+        v_min = _first_present(psl, ["v_min_kmh", "v_min"], 0)
+        v_max = _first_present(psl, ["v_max_kmh", "v_max"], 0)
+        step = _first_present(psl, ["speed_step_kmh", "speed_step"], 0)
         traffic_rows.append({
             "traffic_id": tid,
             "K": int(psl.get("K", 1)),
-            "v_min_kmh": float(psl.get("v_min", 0)),
-            "v_max_kmh": float(psl.get("v_max", 0)),
-            "step_kmh": float(psl.get("speed_step", 0)),
+            "v_min_kmh": float(v_min),
+            "v_max_kmh": float(v_max),
+            "step_kmh": float(step),
             "type": "PSL" if psl.get("enabled", True) else "None",
         })
     traffic_rows.sort(key=lambda x: x["traffic_id"])
@@ -352,14 +436,14 @@ def main() -> None:
             "traffic":                r["traffic_id"],
             "uav_bms":                r["uav_bms"],
             "makespan_s":             r["makespan_s"],
-            "ugv_distance_m":         r["ugv_distance_m"],
-            "uav_distance_m":         r["uav_distance_m"],
+            "ugv_distance_m":         _csv_blank_if_none(r["ugv_distance_m"]),
+            "uav_distance_m":         _csv_blank_if_none(r["uav_distance_m"]),
             "total_distance_m":       r["total_distance_m"],
-            "ugv_energy_kwh":         r["ugv_energy_kwh"],
-            "uav_energy_kwh":         r["uav_energy_kwh"],
-            "total_energy_kwh":       r["total_energy_kwh"],
+            "ugv_energy_kwh":         _csv_blank_if_none(r["ugv_energy_kwh"]),
+            "uav_energy_kwh":         _csv_blank_if_none(r["uav_energy_kwh"]),
+            "total_energy_kwh":       _csv_blank_if_none(r["total_energy_kwh"]),
             "recharges":              r["recharges"],
-            "throughput_tasks_per_h": r["throughput_tasks_per_h"],
+            "throughput_tasks_per_h": _csv_blank_if_none(r["throughput_tasks_per_h"]),
             "gap_pct":                r["gap_pct"],
             "run_id":                 r["run_id"],
         } for r in result_rows],
