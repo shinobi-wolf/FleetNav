@@ -1,0 +1,41 @@
+{
+  "makespan_s": 1086.0,
+  "makespan_h": 0.3016666666666667,
+  "total_distance_m": 38416.71,
+  "total_distance_km": 38.41671,
+  "total_recharges": 2,
+  "customers_served": 10,
+  "customer_completion_times_s": [
+    73.0,
+    124.0,
+    161.0,
+    181.0,
+    218.0,
+    269.0,
+    320.0,
+    479.0,
+    883.0,
+    1086.0
+  ],
+  "avg_inter_customer_gap_s": 112.55555555555556,
+  "per_vehicle": {
+    "1": {
+      "distance_m": 8705.8,
+      "num_recharges": 0,
+      "customers_served": 2,
+      "finish_time_s": 718.0
+    },
+    "2": {
+      "distance_m": 13923.16,
+      "num_recharges": 1,
+      "customers_served": 4,
+      "finish_time_s": 883.0
+    },
+    "3": {
+      "distance_m": 15787.75,
+      "num_recharges": 1,
+      "customers_served": 4,
+      "finish_time_s": 1086.0
+    }
+  }
+}

@@ -1,0 +1,274 @@
+{
+  "run_id": "milp_sarsa_20260529_155925",
+  "created_at": "2026-05-29T15:59:29",
+  "simulator": "concurrent",
+  "traffic_enabled": true,
+  "vehicles": [
+    {
+      "vehicle_id": 1,
+      "legs": [
+        {
+          "leg_idx": 0,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "108",
+          "to_sumo_node_id": "233",
+          "start_time_s": 0.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "108",
+            "208",
+            "233"
+          ],
+          "edge_ids": [
+            "209",
+            "234"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 1,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "233",
+          "to_sumo_node_id": "346",
+          "start_time_s": 269.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "233",
+            "346"
+          ],
+          "edge_ids": [
+            "-369"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 2,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "346",
+          "to_sumo_node_id": "91",
+          "start_time_s": 320.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "346",
+            "158",
+            "91"
+          ],
+          "edge_ids": [
+            "-347",
+            "-159"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 3,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "91",
+          "to_sumo_node_id": "78",
+          "start_time_s": 591.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "91",
+            "59",
+            "78"
+          ],
+          "edge_ids": [
+            "-92",
+            "79"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 4,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "78",
+          "to_sumo_node_id": "59",
+          "start_time_s": 705.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "78",
+            "59"
+          ],
+          "edge_ids": [
+            "-79"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 5,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "59",
+          "to_sumo_node_id": "63",
+          "start_time_s": 795.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "59",
+            "30",
+            "63"
+          ],
+          "edge_ids": [
+            "-60",
+            "64"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 6,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "63",
+          "to_sumo_node_id": "30",
+          "start_time_s": 873.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "63",
+            "30"
+          ],
+          "edge_ids": [
+            "-64"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 7,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "30",
+          "to_sumo_node_id": "36",
+          "start_time_s": 910.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "30",
+            "36"
+          ],
+          "edge_ids": [
+            "58"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 8,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "36",
+          "to_sumo_node_id": "4",
+          "start_time_s": 1037.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "36",
+            "22",
+            "10",
+            "1",
+            "4"
+          ],
+          "edge_ids": [
+            "-37",
+            "-23",
+            "-11",
+            "5"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 9,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "4",
+          "to_sumo_node_id": "26",
+          "start_time_s": 1296.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "4",
+            "1",
+            "2",
+            "26"
+          ],
+          "edge_ids": [
+            "-5",
+            "3",
+            "27"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 10,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "26",
+          "to_sumo_node_id": "44",
+          "start_time_s": 1498.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "26",
+            "44"
+          ],
+          "edge_ids": [
+            "45"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 11,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "44",
+          "to_sumo_node_id": "26",
+          "start_time_s": 1588.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "44",
+            "26"
+          ],
+          "edge_ids": [
+            "-45"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 12,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "26",
+          "to_sumo_node_id": "1",
+          "start_time_s": 1625.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "26",
+            "2",
+            "1"
+          ],
+          "edge_ids": [
+            "-27",
+            "-3"
+          ],
+          "fallback_reason": null
+        },
+        {
+          "leg_idx": 13,
+          "leg_kind": "planned",
+          "planner_kind": "trsp",
+          "from_sumo_node_id": "1",
+          "to_sumo_node_id": "108",
+          "start_time_s": 1895.0,
+          "traffic_slot": 0,
+          "node_ids": [
+            "1",
+            "10",
+            "108"
+          ],
+          "edge_ids": [
+            "11",
+            "109"
+          ],
+          "fallback_reason": null
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}
