@@ -2,3 +2,5 @@ __pycache__
 tmp*
 tmp/*
 cache
+data/ames/cache/
+data/uiuc/cache/
