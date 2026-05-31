@@ -274,18 +274,25 @@ class SumoTRSPEnv(gym.Env):
         traci.simulationStep()
         self.time_elapsed = traci.simulation.getTime()
 
-        reached = False
-        while not reached and self.time_elapsed < self.max_time:
-            if self.ugv.veh_id not in traci.vehicle.getIDList():
-                self.ugv.status = 1
-                reached = True
-            else:
+        inserted = False
+        while self.time_elapsed < self.max_time:
+            active_ids  = set(traci.vehicle.getIDList())
+            arrived_ids = set(traci.simulation.getArrivedIDList())
+
+            if self.ugv.veh_id in active_ids:
+                inserted = True
                 new_slot = self.traffic.get_slot(self.time_elapsed)
                 if new_slot != self.current_slot:
                     self.current_slot = new_slot
                     traci.vehicle.setSpeed(
                         self.ugv.veh_id, self._edge_speed(edge_id, new_slot)
                     )
+            elif self.ugv.veh_id in arrived_ids or inserted:
+                # Arrived this step, or was confirmed in-network and has since left
+                self.ugv.status = 1
+                break
+            # else: not yet inserted into SUMO — keep stepping
+
             traci.simulationStep()
             self.time_elapsed = traci.simulation.getTime()
 

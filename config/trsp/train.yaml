@@ -1,5 +1,5 @@
 net:
-  net_path: data/rand_grid_road/rand_grid_road.sumocfg
+  net_path: data/ames/ames_campus_final.sumocfg
   max_degree: 5
 
 fleet:

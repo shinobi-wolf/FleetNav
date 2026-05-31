@@ -45,7 +45,7 @@
             ],
             "args": [
                 "-p",
-                "44a88465"
+                "f165999c"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -63,7 +63,7 @@
             ],
             "args": [
                 "-p",
-                "44a88465"
+                "f165999c"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -81,7 +81,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/ta_evrp/mtsp.yaml"
+                "${workspaceFolder}/config/ta_evrp/heuristic.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

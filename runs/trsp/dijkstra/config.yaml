@@ -5,7 +5,7 @@ fleet:
   max_speed: 110
 net:
   max_degree: 5
-  net_path: data/rand_grid_road/rand_grid_road.sumocfg
+  net_path: data/ames/ames_campus_final.sumocfg
 simulation:
   max_steps: 50
   max_time: 2

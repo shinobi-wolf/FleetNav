@@ -1,0 +1,104 @@
+{
+  "run_id": "heuristic_dijkstra_20260529_180617",
+  "created_at": "2026-05-29T18:06:17",
+  "planner": "heuristic",
+  "trsp_agent": "dijkstra",
+  "trsp_policy_id": null,
+  "traffic_enabled": true,
+  "vehicles": [
+    {
+      "vehicle_id": 1,
+      "stops": [
+        {
+          "stop_idx": 0,
+          "node_name": "D",
+          "node_type": "depot",
+          "sumo_node_id": "11105893597"
+        },
+        {
+          "stop_idx": 1,
+          "node_name": "C3",
+          "node_type": "customer",
+          "sumo_node_id": "cluster9127991351_9127991358_9127991361_9127991367_#5more"
+        },
+        {
+          "stop_idx": 2,
+          "node_name": "C8",
+          "node_type": "customer",
+          "sumo_node_id": "cluster_161125851_1756110631"
+        },
+        {
+          "stop_idx": 3,
+          "node_name": "C7",
+          "node_type": "customer",
+          "sumo_node_id": "2449733006"
+        },
+        {
+          "stop_idx": 4,
+          "node_name": "C5",
+          "node_type": "customer",
+          "sumo_node_id": "1756935507"
+        },
+        {
+          "stop_idx": 5,
+          "node_name": "C9",
+          "node_type": "customer",
+          "sumo_node_id": "161035628"
+        },
+        {
+          "stop_idx": 6,
+          "node_name": "D",
+          "node_type": "depot",
+          "sumo_node_id": "11105893597"
+        }
+      ]
+    },
+    {
+      "vehicle_id": 2,
+      "stops": [
+        {
+          "stop_idx": 0,
+          "node_name": "D",
+          "node_type": "depot",
+          "sumo_node_id": "11105893597"
+        },
+        {
+          "stop_idx": 1,
+          "node_name": "C1",
+          "node_type": "customer",
+          "sumo_node_id": "cluster_10781666531_10781666539_1454602029_2010155933"
+        },
+        {
+          "stop_idx": 2,
+          "node_name": "C4",
+          "node_type": "customer",
+          "sumo_node_id": "161132183"
+        },
+        {
+          "stop_idx": 3,
+          "node_name": "C2",
+          "node_type": "customer",
+          "sumo_node_id": "cluster_161156577_161156691"
+        },
+        {
+          "stop_idx": 4,
+          "node_name": "C10",
+          "node_type": "customer",
+          "sumo_node_id": "161156565"
+        },
+        {
+          "stop_idx": 5,
+          "node_name": "C6",
+          "node_type": "customer",
+          "sumo_node_id": "161160292"
+        },
+        {
+          "stop_idx": 6,
+          "node_name": "D",
+          "node_type": "depot",
+          "sumo_node_id": "11105893597"
+        }
+      ]
+    }
+  ]
+}

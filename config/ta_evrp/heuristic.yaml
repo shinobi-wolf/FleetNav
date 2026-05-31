@@ -9,7 +9,7 @@ base: config/ta_evrp/base.yaml
 evrp:
   planner: heuristic
   heuristic:
-    alns_iterations: 300
+    alns_iterations: 8000
     seed: 42
   
 
