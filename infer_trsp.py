@@ -7,7 +7,9 @@ Config is loaded from runs/trsp/<policy_id>/config.yaml (inference config saved
 during training — no 'training' block required).
 """
 import argparse
+import json
 import os
+from pathlib import Path
 import yaml
 import numpy as np
 
@@ -17,7 +19,7 @@ from dronesim.trsp.agents.sarsa import SARSAAgent
 from dronesim.trsp.agents.dijkstra import DijkstraAgent
 
 
-def run(config, num_episodes):
+def run(config, num_episodes, policy_id=None):
     algo = config['agent']['algo']
 
     if algo == 'sarsa':
@@ -74,6 +76,19 @@ def run(config, num_episodes):
 
     env.close()
 
+    if policy_id:
+        out_dir = Path("runs", "trsp", policy_id)
+        profile_path = out_dir / "infer_traffic_profile.json"
+        profile_path.write_text(
+            json.dumps(env.unwrapped.traffic.profiles, indent=2)
+        )
+        print(f"Traffic profile → {profile_path}")
+        log_path = out_dir / "infer_traffic_log.jsonl"
+        with open(log_path, "w") as _f:
+            for event in env.unwrapped.traffic_log:
+                _f.write(json.dumps(event) + "\n")
+        print(f"Traffic event log → {log_path}")
+
     print()
     print("=" * 60)
     print(f"  Episodes   : {num_episodes}")
@@ -106,7 +121,7 @@ def main():
     if args.render:
         config['simulation']['render_mode'] = args.render
 
-    run(config, args.num_episodes)
+    run(config, args.num_episodes, policy_id=args.policy)
 
 
 if __name__ == '__main__':

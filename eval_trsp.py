@@ -14,7 +14,7 @@ from tqdm import tqdm
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
 from dronesim.trsp.traffic import PSLTrafficModel
-from dronesim.trsp.agents.dqn import DQNAgent
+# from dronesim.trsp.agents.dqn import DQNAgent
 from dronesim.trsp.agents.ppo import PPOAgent
 from dronesim.trsp.agents.sarsa import SARSAAgent
 

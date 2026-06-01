@@ -45,7 +45,7 @@
             ],
             "args": [
                 "-p",
-                "f165999c"
+                "dijkstra"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -63,7 +63,7 @@
             ],
             "args": [
                 "-p",
-                "f165999c"
+                "21937982"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -81,7 +81,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/ta_evrp/heuristic.yaml"
+                "${workspaceFolder}/config/ta_evrp/milp.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

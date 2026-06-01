@@ -514,6 +514,7 @@ def _normalize_config(ta: dict) -> dict:
     cfg["traffic"] = {
         "enabled": psl_enabled,
         "K": psl.get("K", 1),
+        "slot_duration": psl.get("slot_duration"),               # None → segmented.py falls back to max_time_s/K
         "v_min": float(psl.get("v_min_kmh", 40.0)) / 3.6,       # m/s
         "v_max": float(psl.get("v_max_kmh", 100.0)) / 3.6,      # m/s
         "speed_step": float(psl.get("speed_step_kmh", 60.0)) / 3.6,  # m/s
@@ -591,6 +592,7 @@ def _reformat_cfg_sim(ta: dict) -> dict:
     trf_cfg = {
         "enabled": bool(ori_psl.get("enabled", False)),
         "K": ori_psl.get("K", 1),
+        "slot_duration": ori_psl.get("slot_duration"),                  # None → segmented.py falls back to max_time_s/K
         "v_min": float(ori_psl.get("v_min_kmh", 40.0)) / 3.6,         # km/h → m/s
         "v_max": float(ori_psl.get("v_max_kmh", 100.0)) / 3.6,        # km/h → m/s
         "speed_step": float(ori_psl.get("speed_step_kmh", 60.0)) / 3.6, # km/h → m/s
@@ -781,6 +783,8 @@ def main() -> None:
         print("  [route-log] Warning: simulator has no _drive() hook; local_routes.json may be empty.")
 
     metrics = sim.run(routes)
+    traffic_log     = metrics.pop("traffic_log", [])
+    traffic_profile = metrics.pop("traffic_profile", {})
 
     # ── Report ────────────────────────────────────────────────────────────────
     print("\n[3/3] Results:")
@@ -791,6 +795,18 @@ def main() -> None:
         Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
         Path(metrics_path).write_text(json.dumps(metrics, indent=2))
         print(f"\n  Metrics saved to {metrics_path}")
+
+    if traffic_profile:
+        profile_path = run_dir / "traffic_profile.json"
+        profile_path.write_text(json.dumps(traffic_profile, indent=2))
+        print(f"  Traffic profile saved to {profile_path}")
+
+    if traffic_log:
+        log_path = run_dir / "traffic_log.jsonl"
+        with open(log_path, "w") as _f:
+            for _event in traffic_log:
+                _f.write(json.dumps(_event) + "\n")
+        print(f"  Traffic event log saved to {log_path}")
 
     local_routes_payload = _build_local_routes_payload(
         run_id=run_id,

@@ -1,6 +1,6 @@
 from dronesim.trsp.agents.sarsa import SARSAAgent
 from dronesim.trsp.agents.dijkstra import DijkstraAgent
-from dronesim.trsp.agents.dqn import DQNAgent
+# from dronesim.trsp.agents.dqn import DQNAgent
 from dronesim.trsp.agents.ppo import PPOAgent
 
 def get_agent(env, config, agent_id, **kwargs):

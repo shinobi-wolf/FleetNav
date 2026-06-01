@@ -6,7 +6,7 @@ import copy
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents.sarsa import SARSAAgent
-from dronesim.trsp.agents.dqn import DQNAgent
+# from dronesim.trsp.agents.dqn import DQNAgent
 from dronesim.trsp.agents.ppo import PPOAgent
 
 

@@ -149,6 +149,7 @@ class PygameRenderer:
         served_customers: set[str],
         vehicle_states: dict[int, Any],
         vehicle_speeds: dict[int, float] | None = None,
+        traffic_slot: int = 0,
     ) -> None:
         """Redraw the window.
 
@@ -174,7 +175,7 @@ class PygameRenderer:
         self._draw_edges(surf, edge_speeds)
         self._draw_nodes(surf, served_customers)
         self._draw_vehicles(surf, vehicle_positions)
-        self._draw_panel(surf, sim_time_s, edge_speeds, vehicle_positions, served_customers, vehicle_states, vehicle_speeds)
+        self._draw_panel(surf, sim_time_s, edge_speeds, vehicle_positions, served_customers, vehicle_states, vehicle_speeds, traffic_slot)
 
         pygame.display.flip()
         self._clock.tick(self._fps)
@@ -310,6 +311,7 @@ class PygameRenderer:
         served_customers: set[str],
         vehicle_states: dict[int, Any],
         vehicle_speeds: dict[int, float] | None = None,
+        traffic_slot: int = 0,
     ) -> None:
         panel_rect = pygame.Rect(MAP_W, 0, PANEL_W, SCREEN_H)
         pygame.draw.rect(surf, PANEL_BG, panel_rect)
@@ -331,7 +333,7 @@ class PygameRenderer:
         line(f"t = {sim_time_s:.0f}s  ({sim_h:.2f}h)", big=True)
         if edge_speeds:
             avg_kmh = sum(edge_speeds.values()) / len(edge_speeds) * 3.6
-            line(f"Traffic avg: {avg_kmh:.1f} km/h")
+            line(f"Traffic slot: {traffic_slot}  avg {avg_kmh:.1f} km/h")
         else:
             line("Traffic: disabled")
 

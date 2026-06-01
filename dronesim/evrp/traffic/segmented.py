@@ -23,7 +23,7 @@ class PSLTrafficModel:
     K : int
         Number of time slots.
     delta_t : float
-        Duration of each slot in seconds (= T / K).
+        Duration of each slot in seconds. Slots cycle: j = floor(t / delta_t) % K.
     v_min, v_max : float
         Speed range in m/s (for normalization; profiles are already clipped).
     profiles : dict[edge_id, list[float]]
@@ -52,7 +52,7 @@ class PSLTrafficModel:
         """Active time slot index for simulation time t (seconds)."""
         if self.K == 1:
             return 0
-        return min(self.K - 1, int(math.floor(t / self.delta_t)))
+        return int(math.floor(t / self.delta_t)) % self.K
 
     def get_speed(self, edge_id: str, slot: int) -> float:
         """Speed in m/s for edge_id at the given slot."""
@@ -84,7 +84,8 @@ def build_traffic_model(
     K = int(tcfg.get("K", 1))
     if K < 1:
         raise ValueError("traffic.K must be >= 1")
-    delta_t = max_time_s / K
+    slot_duration = tcfg.get("slot_duration")
+    delta_t = float(slot_duration) if slot_duration is not None else max_time_s / K
 
     # All speed values in m/s; callers must pre-convert from any other unit.
     v_min_ms = float(tcfg.get("v_min", 11.11))    # default ~40 km/h in m/s

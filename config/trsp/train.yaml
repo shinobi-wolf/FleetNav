@@ -1,5 +1,5 @@
 net:
-  net_path: data/ames/ames_campus_final.sumocfg
+  net_path: data/grid_road/grid_road.sumocfg
   max_degree: 5
 
 fleet:
@@ -11,14 +11,15 @@ sumo:
   delay: 0             # ms delay for sumo-gui (ignored in quiet/print mode)
 
 traffic:
+  K: 2
+  slot_duration: 300.0
+  T: 7200.0
   enabled: true
   seed: 42
-  T: 7200.0              # total simulation horizon (seconds)
-  K: 1                   # number of time slots (1 = constant speed per edge)
-  v_min: 40.0            # km/h — minimum speed level
-  v_max: 100.0           # km/h — maximum speed level
-  speed_step: 60.0       # km/h — step size; gives exactly two levels {40, 110}
-  speed_profile_type: random  # random | function | file
+  speed_profile_type: random
+  speed_step: 60.0
+  v_max: 100.0
+  v_min: 40.0
 
 simulation:
   max_time: 2            # hours — SUMO wall-clock budget before forced env.reset()

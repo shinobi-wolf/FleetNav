@@ -10,7 +10,7 @@ class PSLTrafficModel:
     Piecewise Speed Limit (PSL) traffic model.
 
     Each edge e has an independent speed profile v[e][0..K-1].
-    At simulation time t the active slot is j = min(K-1, floor(t / delta_t)).
+    At simulation time t the active slot is j = floor(t / delta_t) % K (cyclic).
     All speeds are stored internally in m/s; config values are given in km/h.
 
     Special case K=1: single constant-speed slot per edge, no runtime updates.
@@ -34,11 +34,11 @@ class PSLTrafficModel:
         self.K = int(config['K'])
         if self.K < 1:
             raise ValueError("traffic.K must be >= 1")
-        self.delta_t = self.T / self.K
+        self.delta_t = float(config.get('slot_duration', self.T / self.K))
 
-        self.v_min = float(config['v_min']) / 3.6   # km/h → m/s
-        self.v_max = float(config['v_max']) / 3.6
-        self.speed_step = float(config['speed_step']) / 3.6
+        self.v_min = round(float(config['v_min']) / 3.6, 8)    # km/h → m/s, rounded to match _speed_levels()
+        self.v_max = round(float(config['v_max']) / 3.6, 8)
+        self.speed_step = round(float(config['speed_step']) / 3.6, 8)
         if self.v_min > self.v_max:
             raise ValueError("traffic.v_min must be <= v_max")
         if self.speed_step <= 0:
@@ -113,7 +113,7 @@ class PSLTrafficModel:
         """Active time slot index for simulation time t (seconds)."""
         if self.K == 1:
             return 0
-        return min(self.K - 1, int(math.floor(t / self.delta_t)))
+        return int(math.floor(t / self.delta_t)) % self.K
 
     def get_speed(self, edge_id: str, slot: int) -> float:
         """Speed in m/s for edge_id at the given slot."""

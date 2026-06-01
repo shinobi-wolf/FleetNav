@@ -63,6 +63,7 @@ class SumoTRSPEnv(gym.Env):
             traffic_cfg, self.edge_ids, seed=traffic_cfg.get('seed')
         )
         self.current_slot = 0
+        self.traffic_log: list[dict] = []
 
         num_nodes = len(self.node2idx)
         psl_K = self.traffic.K if self.traffic.enabled else 1
@@ -283,10 +284,16 @@ class SumoTRSPEnv(gym.Env):
                 inserted = True
                 new_slot = self.traffic.get_slot(self.time_elapsed)
                 if new_slot != self.current_slot:
+                    old_slot = self.current_slot
                     self.current_slot = new_slot
-                    traci.vehicle.setSpeed(
-                        self.ugv.veh_id, self._edge_speed(edge_id, new_slot)
-                    )
+                    new_speed = self._edge_speed(edge_id, new_slot)
+                    traci.vehicle.setSpeed(self.ugv.veh_id, new_speed)
+                    if self.render_mode != "quiet":
+                        print(f"[{self.time_elapsed:.1f}s] SLOT CHANGE: {old_slot} → {new_slot}"
+                              f"  edge={edge_id}  speed={new_speed:.2f} m/s")
+                    self.traffic_log.append({"t": self.time_elapsed, "type": "slot_change",
+                                             "old_slot": old_slot, "new_slot": new_slot,
+                                             "edge": edge_id, "speed_ms": round(new_speed, 4)})
             elif self.ugv.veh_id in arrived_ids or inserted:
                 # Arrived this step, or was confirmed in-network and has since left
                 self.ugv.status = 1

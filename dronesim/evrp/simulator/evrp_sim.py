@@ -153,6 +153,8 @@ class EVRPSimulator:
             max_time_s=self.max_time,
             edge_ids=all_edge_ids,
         )
+        traffic_log: list[dict] = []
+        traffic_profile: dict = dict(sorted(traffic.profiles.items())) if traffic.enabled else {}
 
         routes_by_id: dict[int, Route] = {r.vehicle_id: r for r in routes}
         veh_states: dict[int, _VehicleState] = {}
@@ -259,6 +261,7 @@ class EVRPSimulator:
                     renderer.draw(
                         sim_time, edge_speeds, vehicle_positions,
                         served_customers, veh_states, vehicle_speeds,
+                        traffic_slot=traffic_slot,
                     )
 
             # Main simulation loop
@@ -268,6 +271,11 @@ class EVRPSimulator:
 
                 next_slot = traffic.get_slot(sim_time)
                 slot_changed = next_slot != traffic_slot
+                if slot_changed:
+                    if self.render_mode != "quiet":
+                        print(f"[{sim_time:.0f}s] SLOT CHANGE: {traffic_slot} → {next_slot}")
+                    traffic_log.append({"t": sim_time, "type": "slot_change",
+                                        "old_slot": traffic_slot, "new_slot": next_slot})
                 traffic_slot = next_slot
 
                 active_traci_ids  = set(traci.vehicle.getIDList())
@@ -328,8 +336,19 @@ class EVRPSimulator:
                         vehicle_speeds[veh_id] = traci.vehicle.getSpeed(traci_veh_id)
                         edge_changed = new_edge != veh_state.curr_net_edge
                         veh_state.curr_net_edge = new_edge
-                        if edge_changed and not new_edge.startswith(":"):
-                            traci.vehicle.setSpeed(traci_veh_id, traffic.get_speed(new_edge, traffic_slot))
+                        if (edge_changed or slot_changed) and not new_edge.startswith(":"):
+                            new_speed = traffic.get_speed(new_edge, traffic_slot)
+                            traci.vehicle.setSpeed(traci_veh_id, new_speed)
+                            trigger = ("slot" if (slot_changed and not edge_changed) else
+                                       "edge" if (edge_changed and not slot_changed) else "both")
+                            if self.render_mode != "quiet":
+                                print(f"[{sim_time:.0f}s] V{veh_id}: speed [{trigger}]"
+                                      f" edge={new_edge}  {new_speed:.2f} m/s")
+                            traffic_log.append({"t": sim_time, "type": "speed_update",
+                                                "vehicle": veh_id, "edge": new_edge,
+                                                "slot": traffic_slot,
+                                                "speed_ms": round(new_speed, 4),
+                                                "trigger": trigger})
                         if self.render_mode != "quiet" and edge_changed and not new_edge.startswith(":"):
                             try:
                                 from_node = self._net.getEdge(new_edge).getFromNode().getID()
@@ -489,12 +508,13 @@ class EVRPSimulator:
                     renderer.draw(
                         sim_time, edge_speeds, vehicle_positions,
                         served_customers, veh_states, vehicle_speeds,
+                        traffic_slot=traffic_slot,
                     )
 
         finally:
             traci.close()
 
-        return self._build_metrics(sim_stats)
+        return self._build_metrics(sim_stats, traffic_log, traffic_profile)
 
     def _spawn_next_leg(
         self,
@@ -647,7 +667,7 @@ class EVRPSimulator:
                 f"  (range: {veh_state.current_fuel:.0f}m, leg dist: {path_dist:.0f}m)"
             )
 
-    def _build_metrics(self, sim_stats: dict) -> dict:
+    def _build_metrics(self, sim_stats: dict, traffic_log: list, traffic_profile: dict) -> dict:
         all_cust_times = sorted(t for v in sim_stats.values() for t in v["cust_times"])
         makespan_s = max((v["finish_time"] for v in sim_stats.values()), default=0.0)
         total_dist = sum(v["distance_covered"] for v in sim_stats.values())
@@ -674,6 +694,8 @@ class EVRPSimulator:
             "customer_completion_times_s": all_cust_times,
             "avg_inter_customer_gap_s": (sum(gaps) / len(gaps) if gaps else None),
             "per_vehicle": per_vehicle,
+            "traffic_log": traffic_log,
+            "traffic_profile": traffic_profile,
         }
 
     @staticmethod

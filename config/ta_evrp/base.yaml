@@ -32,7 +32,8 @@ network:
 traffic:
   psl:                       # Piecewise Speed Limit model (per-edge random profile)
     enabled: true
-    K: 1                     # number of time periods (1 = static speed per edge)
+    K: 2                     # number of time slots
+    slot_duration: 300.0     # seconds per slot (cyclic); slots repeat: 0,1,0,1,...
     v_min_kmh: 40.0          # km/h — minimum speed level
     v_max_kmh: 100.0         # km/h — maximum speed level
     speed_step_kmh: 60.0     # km/h — step between levels
