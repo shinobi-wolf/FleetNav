@@ -1,2 +1,4 @@
-network_id,num_nodes,num_edges,topology,connectivity_lambda,vehicle_type
-N1,28,80,,,
+network_id,network_name,num_nodes,num_edges,topology,connectivity_lambda,vehicle_type
+N1,grid_road
+N2,rand_grid_road
+N3,ames

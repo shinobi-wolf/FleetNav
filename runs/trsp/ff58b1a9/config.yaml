@@ -19,6 +19,7 @@ sumo:
 traffic:
   K: 1
   T: 7200.0
+  slot_duration: 300.0
   enabled: true
   seed: 42
   speed_profile_type: random

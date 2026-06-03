@@ -13,10 +13,9 @@ from tqdm import tqdm
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
-from dronesim.trsp.traffic import PSLTrafficModel
-# from dronesim.trsp.agents.dqn import DQNAgent
-from dronesim.trsp.agents.ppo import PPOAgent
+from dronesim.trsp.agents.dqn import DQNAgent
 from dronesim.trsp.agents.sarsa import SARSAAgent
+from dronesim.trsp.traffic import PSLTrafficModel
 
 INF = 100000
 
@@ -148,14 +147,15 @@ def main():
             "traffic_segment_start,traffic_segment_end,traffic_speed_start_ms,traffic_speed_end_ms,failed_error\n"
         )
 
-    if config['agent']['algo'] == 'dqn':
+    algo = config['agent']['algo']
+    if algo == 'dqn':
         agent = DQNAgent(config)
-    elif config['agent']['algo'] == 'ppo':
-        agent = PPOAgent(config)
-    elif config['agent']['algo'] == 'sarsa':
+    elif algo == 'sarsa':
         agent = SARSAAgent(config)
     else:
-        agent = get_agent(None, config['agent'], 0)
+        agent = get_agent(config['agent'], 0)
+
+    action_mode = config['agent'].get('action_mode', 'neighbor_index')
 
     net_path = config['net']['net_path']
     graph_info = build_graph(net_path)
@@ -254,10 +254,16 @@ def main():
                     }
                     action = int(agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx))
 
-                    if action >= len(nb_node_idxs):
-                        action = best_dir
+                    if action_mode == 'node_id':
+                        # action is a global node index; validate it's a neighbour
+                        if action not in nb_node_idxs:
+                            action = nb_node_idxs[best_dir]
+                        next_pos_idx = action
+                    else:
+                        if action >= len(nb_node_idxs):
+                            action = best_dir
+                        next_pos_idx = nb_node_idxs[action]
 
-                    next_pos_idx = nb_node_idxs[action]
                     next_pos = idx2node[next_pos_idx]
 
                     route_edges.append(G_dir.edges[curr_node, next_pos]['id'])

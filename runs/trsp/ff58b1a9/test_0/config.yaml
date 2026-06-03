@@ -17,12 +17,13 @@ sumo:
   step_length: 1.0
   traffic_scale: 0
 test:
-  mode: road_vehicle
+  mode: sequential_eval
 traffic:
   K: 1
   T: 7200.0
   enabled: true
   seed: 42
+  slot_duration: 300.0
   speed_profile_type: random
   speed_step: 60.0
   v_max: 100.0

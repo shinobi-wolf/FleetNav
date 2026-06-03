@@ -1,5 +1,5 @@
 net:
-  net_path: data/grid_road/grid_road.sumocfg
+  net_path: data/ames/ames_campus_final.sumocfg
   max_degree: 5
 
 fleet:
@@ -29,8 +29,9 @@ simulation:
   random_sg_pair: true   # randomise start/goal each episode
 
 agent:
-  algo: sarsa
-  policy: null           # set to a policy_id string to resume/load
+  algo: sarsa             # sarsa | dqn
+  action_mode: neighbor_index  # neighbor_index (sarsa/dijkstra) | node_id (dqn)
+  policy: null            # set to a policy_id string to resume/load
 
 training:
   sarsa:
@@ -39,3 +40,15 @@ training:
     alpha: 0.1
     epsilon: 0.9
     epsilon_decay: 0.9995
+  dqn:
+    num_episodes: 5000
+    gamma: 0.99
+    lr: 0.001
+    epsilon: 1.0
+    epsilon_decay: 0.9995
+    epsilon_min: 0.05
+    batch_size: 64
+    buffer_capacity: 50000
+    target_update_freq: 500
+    learn_start: 1000
+    hidden_dim: 64

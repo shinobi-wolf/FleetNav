@@ -67,13 +67,27 @@ class SumoTRSPEnv(gym.Env):
 
         num_nodes = len(self.node2idx)
         psl_K = self.traffic.K if self.traffic.enabled else 1
-        self.action_space = spaces.Discrete(self.num_actions)
-        self.observation_space = spaces.Dict({
-            'graph_node':  spaces.Discrete(num_nodes),
-            'target_node': spaces.Discrete(num_nodes),
-            'time_slot':   spaces.Discrete(psl_K),
-            'best_dir':    spaces.Discrete(self.num_actions),
-        })
+
+        # action_mode controls what the agent's action integer means:
+        #   'neighbor_index' (default) — index into sorted neighbor list; SARSA/Dijkstra
+        #   'node_id'                  — global node index with masking; DQN
+        self.action_mode = config.get('agent', {}).get('action_mode', 'neighbor_index')
+
+        if self.action_mode == 'node_id':
+            self.action_space = spaces.Discrete(num_nodes)
+            self.observation_space = spaces.Dict({
+                'graph_node':  spaces.Discrete(num_nodes),
+                'target_node': spaces.Discrete(num_nodes),
+                'time_slot':   spaces.Discrete(psl_K),
+            })
+        else:
+            self.action_space = spaces.Discrete(self.num_actions)
+            self.observation_space = spaces.Dict({
+                'graph_node':  spaces.Discrete(num_nodes),
+                'target_node': spaces.Discrete(num_nodes),
+                'time_slot':   spaces.Discrete(psl_K),
+                'best_dir':    spaces.Discrete(self.num_actions),
+            })
 
         # runtime state — populated in reset()
         self.ugv = None
@@ -246,6 +260,17 @@ class SumoTRSPEnv(gym.Env):
 
     # ------------------------------------------------------------------ internals
 
+    def get_valid_action_mask(self) -> np.ndarray:
+        """Boolean mask of shape (num_nodes,) — True for valid next-hop node indices.
+
+        Only meaningful when action_mode == 'node_id'.
+        """
+        ugv_node = self.idx2node[self.ugv.position]
+        mask = np.zeros(len(self.node2idx), dtype=bool)
+        for nb in self.G.neighbors(ugv_node):
+            mask[self.node2idx[nb]] = True
+        return mask
+
     def ugv_handler(self, action):
         if self.ugv.status == 2:
             return
@@ -256,8 +281,21 @@ class SumoTRSPEnv(gym.Env):
         self.ugv.status = 1
 
         self.ugv.last_position = self.ugv.position
+
+        # In node_id mode the action is a global node index; convert to neighbor
+        # list index before passing to UGVSumo, which expects the latter.
+        if self.action_mode == 'node_id':
+            current_node = self.idx2node[self.ugv.position]
+            nb_idxs = sorted([self.node2idx[nb] for nb in self.G.neighbors(current_node)])
+            if action not in nb_idxs:
+                self.ugv.invalid_action_this_step = True
+                return
+            neighbor_action = nb_idxs.index(action)
+        else:
+            neighbor_action = action
+
         move_flag, edge_id, edge_dir = self.ugv.move(
-            action, self.time_elapsed, self.G, self.G_dir, self.node2idx, self.idx2node
+            neighbor_action, self.time_elapsed, self.G, self.G_dir, self.node2idx, self.idx2node
         )
         self.last_move_time = self.time_elapsed
 
@@ -371,12 +409,18 @@ class SumoTRSPEnv(gym.Env):
     def _get_observation(self):
         ugv_node = self.idx2node[self.ugv.position]
         task_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
+        target_node_idx = self.node2idx[task_node] if task_node else 0
 
+        if self.action_mode == 'node_id':
+            return {
+                'graph_node':  self.ugv.position,
+                'target_node': target_node_idx,
+                'time_slot':   self.current_slot,
+            }
+
+        # neighbor_index mode: compute best_dir hint for Dijkstra/SARSA
         best_dir = 0
-        target_node_idx = 0
-
         if task_node:
-            target_node_idx = self.node2idx[task_node]
             nb_idxs = sorted([self.node2idx[nb] for nb in self.G.neighbors(ugv_node)])
             steps = [
                 self.all_shortest_path_lengths.get(self.idx2node[ni], {}).get(task_node, INF)

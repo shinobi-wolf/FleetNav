@@ -45,7 +45,8 @@
             ],
             "args": [
                 "-p",
-                "dijkstra"
+                // "4a2adb07"
+                "dijkstra",
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -63,7 +64,7 @@
             ],
             "args": [
                 "-p",
-                "21937982"
+                "506a3be8"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

@@ -1,2 +1,3 @@
-traffic_id,K,v_min_kmh,v_max_kmh,step_kmh,type
-T1,1,40.0,100.0,60.0,PSL
+traffic_id,K,slot_duration,v_min_kmh,v_max_kmh,step_kmh,type
+T1,1,300.0,40.0,100.0,60.0,PSL
+T2,2,300.0,40.0,100.0,60.0,PSL

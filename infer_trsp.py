@@ -17,6 +17,7 @@ import dronesim.trsp  # noqa: F401 — registers SumoTRSPEnv-v0
 import gymnasium as gym
 from dronesim.trsp.agents.sarsa import SARSAAgent
 from dronesim.trsp.agents.dijkstra import DijkstraAgent
+from dronesim.trsp.agents.dqn import DQNAgent
 
 
 def run(config, num_episodes, policy_id=None):
@@ -24,6 +25,9 @@ def run(config, num_episodes, policy_id=None):
 
     if algo == 'sarsa':
         agent = SARSAAgent(config)
+        env = agent.env
+    elif algo == 'dqn':
+        agent = DQNAgent(config)
         env = agent.env
     elif algo == 'dijkstra':
         env = gym.make('SumoTRSPEnv-v0', config=config)

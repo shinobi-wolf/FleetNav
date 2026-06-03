@@ -1,32 +1,30 @@
 agent:
+  action_mode: neighbor_index
   algo: dijkstra
-  policy: dijkstra
+  policy: null
 fleet:
   max_speed: 110
-  range: 100000000
 net:
-  max_degree: 4
-  net_path: data/grid_road/grid_road.sumocfg
+  max_degree: 5
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
 simulation:
   max_steps: 50
   max_time: 2
   random_sg_pair: true
   render_mode: human
-  start_node_idx: 0
-  target_junc_id: '1'
-  vehicle_type: car
   warm_up_time: 0
 sumo:
-  delay: 10
-  step_length: 1
+  delay: 0
+  step_length: 1.0
   traffic_scale: 0
 test:
-  mode: road_vehicle
+  mode: sequential_eval
 traffic:
-  K: 1
+  K: 2
   T: 7200.0
   enabled: true
   seed: 42
+  slot_duration: 300.0
   speed_profile_type: random
   speed_step: 60.0
   v_max: 100.0
