@@ -1,0 +1,31 @@
+agent:
+  action_mode: node_id
+  algo: ppo
+  policy: 5dd13f39
+fleet:
+  max_speed: 110
+net:
+  max_degree: 5
+  net_path: data/grid_road/grid_road.sumocfg
+simulation:
+  max_steps: 50
+  max_time: 2
+  random_sg_pair: true
+  render_mode: human
+  warm_up_time: 0
+sumo:
+  delay: 0
+  step_length: 1.0
+  traffic_scale: 0
+test:
+  mode: sequential_eval
+traffic:
+  K: 1
+  T: 7200.0
+  enabled: true
+  seed: 42
+  slot_duration: 300.0
+  speed_profile_type: random
+  speed_step: 60.0
+  v_max: 100.0
+  v_min: 40.0

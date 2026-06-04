@@ -1,6 +1,7 @@
 from dronesim.trsp.agents.sarsa import SARSAAgent
 from dronesim.trsp.agents.dijkstra import DijkstraAgent
 from dronesim.trsp.agents.dqn import DQNAgent
+from dronesim.trsp.agents.ppo import PPOAgent
 
 
 def get_agent(config, agent_id, **kwargs):
@@ -12,5 +13,7 @@ def get_agent(config, agent_id, **kwargs):
         return SARSAAgent(config, **kwargs)
     if algo == 'dqn':
         return DQNAgent(config, **kwargs)
+    if algo == 'ppo':
+        return PPOAgent(config, **kwargs)
     raise ValueError(f"Unknown algo: {algo!r}")
 
