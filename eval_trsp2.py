@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
+from dronesim.trsp.agents.a2c import A2CAgent
 from dronesim.trsp.agents.dijkstra import DijkstraAgent
 from dronesim.trsp.agents.dqn import DQNAgent
 from dronesim.trsp.agents.ppo import PPOAgent
@@ -398,6 +399,8 @@ def main():
         policy_agent = SARSAAgent(config)
     elif algo == 'ppo':
         policy_agent = PPOAgent(config)
+    elif algo == 'a2c':
+        policy_agent = A2CAgent(config)
     else:
         policy_agent = get_agent(config['agent'], 0)
     action_mode = config['agent'].get('action_mode', 'neighbor_index')
