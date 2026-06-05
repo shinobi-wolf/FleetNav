@@ -1,0 +1,42 @@
+net:
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 0
+  delay: 0
+
+traffic:
+  K: 3
+  slot_duration: 60.0
+  T: 7200.0
+  enabled: true
+  seed: 42
+  speed_profile_type: random
+  speed_step: 60.0
+  v_max: 100.0
+  v_min: 40.0
+
+simulation:
+  max_time: 2
+  max_steps: 50
+  render_mode: quiet
+  warm_up_time: 0
+  random_sg_pair: true
+
+agent:
+  algo: sarsa
+  action_mode: neighbor_index
+  policy: null
+
+training:
+  sarsa:
+    num_episodes: 5000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.9
+    epsilon_decay: 0.9995
