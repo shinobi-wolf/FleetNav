@@ -2,53 +2,69 @@
 % \usepackage{multirow}
 \begin{table}[]
 \centering
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|}
 \hline
-\textbf{Network} & \textbf{Traffic} & \textbf{Model} & \textbf{Makespan} \\ \hline
-\multirow{15}{*}{grid} & \multirow{5}{*}{PSL(K=1)} & SSP & 214.04 \\ \cline{3-4}
- &  & SARSA & 182.88 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{181.56} \\ \cline{3-4}
- &  & PPO & 147.30 \\ \cline{3-4}
- &  & A2C & \textbf{130.08} \\ \cline{2-4}
- & \multirow{5}{*}{PSL(K=2)} & SSP & 229.12 \\ \cline{3-4}
- &  & SARSA & 198.61 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{195.10} \\ \cline{3-4}
- &  & PPO & 146.29 \\ \cline{3-4}
- &  & A2C & \textbf{131.18} \\ \cline{2-4}
- & \multirow{3}{*}{PSL(K=3)} & SSP & 200.92 \\ \cline{3-4}
- &  & SARSA & 201.02 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{\textbf{191.21}} \\ \cline{2-4}
- & \multirow{2}{*}{PSL(K=4)} & SSP & \textbf{196.90} \\ \cline{3-4}
- &  & SARSA & 198.76 \\ \hline
-\multirow{14}{*}{rand\_grid} & \multirow{5}{*}{PSL(K=1)} & SSP & 47.75 \\ \cline{3-4}
- &  & SARSA & 47.04 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{43.29} \\ \cline{3-4}
- &  & PPO & \textbf{20.83} \\ \cline{3-4}
- &  & A2C & 23.88 \\ \cline{2-4}
- & \multirow{5}{*}{PSL(K=2)} & SSP & 45.44 \\ \cline{3-4}
- &  & SARSA & 40.64 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{43.05} \\ \cline{3-4}
- &  & PPO & 27.08 \\ \cline{3-4}
- &  & A2C & \textbf{24.75} \\ \cline{2-4}
- & \multirow{2}{*}{PSL(K=3)} & SSP & 46.18 \\ \cline{3-4}
- &  & SARSA & \textbf{45.54} \\ \cline{2-4}
- & \multirow{2}{*}{PSL(K=4)} & SSP & \textbf{44.14} \\ \cline{3-4}
- &  & SARSA & 51.49 \\ \hline
-\multirow{14}{*}{ames} & \multirow{5}{*}{PSL(K=1)} & SSP & 153.62 \\ \cline{3-4}
- &  & SARSA & 146.32 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{141.20} \\ \cline{3-4}
- &  & PPO & \textbf{60.78} \\ \cline{3-4}
- &  & A2C & 70.30 \\ \cline{2-4}
- & \multirow{5}{*}{PSL(K=2)} & SSP & 158.67 \\ \cline{3-4}
- &  & SARSA & 163.88 \\ \cline{3-4}
- &  & \multicolumn{1}{l|}{DQN} & \multicolumn{1}{l|}{152.21} \\ \cline{3-4}
- &  & PPO & \textbf{75.36} \\ \cline{3-4}
- &  & A2C & 82.60 \\ \cline{2-4}
- & \multirow{2}{*}{PSL(K=3)} & SSP & 150.97 \\ \cline{3-4}
- &  & SARSA & \textbf{139.00} \\ \cline{2-4}
- & \multirow{2}{*}{PSL(K=4)} & SSP & \textbf{153.16} \\ \cline{3-4}
- &  & SARSA & 163.25 \\ \hline
- &  &  &  \\ \hline
+\textbf{Network} & \textbf{Traffic} & \textbf{Model} & \textbf{Makespan} & \textbf{Success (\%)} \\ \hline
+\multirow{20}{*}{grid} & \multirow{5}{*}{PSL(K=1)} & SSP & 214.04 & \textbf{98} \\ \cline{3-5}
+ &  & SARSA & 182.88 & 98 \\ \cline{3-5}
+ &  & DQN & 181.56 & 98 \\ \cline{3-5}
+ &  & PPO & 147.30 & 10 \\ \cline{3-5}
+ &  & A2C & \textbf{130.08} & 12 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=2)} & SSP & 229.12 & 97 \\ \cline{3-5}
+ &  & SARSA & 198.61 & \textbf{98} \\ \cline{3-5}
+ &  & DQN & 195.10 & 98 \\ \cline{3-5}
+ &  & PPO & 146.29 & 14 \\ \cline{3-5}
+ &  & A2C & \textbf{131.18} & 17 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=3)} & SSP & 200.92 & \textbf{98} \\ \cline{3-5}
+ &  & SARSA & 201.02 & 97 \\ \cline{3-5}
+ &  & DQN & 191.21 & 98 \\ \cline{3-5}
+ &  & PPO & \textbf{102.60} & 15 \\ \cline{3-5}
+ &  & A2C & 155.54 & 26 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=4)} & SSP & 196.90 & \textbf{98} \\ \cline{3-5}
+ &  & SARSA & 198.76 & 98 \\ \cline{3-5}
+ &  & DQN & 181.73 & 98 \\ \cline{3-5}
+ &  & PPO & \textbf{122.05} & 20 \\ \cline{3-5}
+ &  & A2C & 147.59 & 29 \\ \hline
+\multirow{20}{*}{rand\_grid} & \multirow{5}{*}{PSL(K=1)} & SSP & 47.75 & \textbf{100} \\ \cline{3-5}
+ &  & SARSA & 47.04 & 91 \\ \cline{3-5}
+ &  & DQN & 43.29 & 100 \\ \cline{3-5}
+ &  & PPO & \textbf{20.83} & 6 \\ \cline{3-5}
+ &  & A2C & 23.88 & 8 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=2)} & SSP & 45.44 & \textbf{100} \\ \cline{3-5}
+ &  & SARSA & 40.64 & 78 \\ \cline{3-5}
+ &  & DQN & 43.05 & 100 \\ \cline{3-5}
+ &  & PPO & 27.08 & 13 \\ \cline{3-5}
+ &  & A2C & \textbf{24.75} & 12 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=3)} & SSP & 46.18 & \textbf{100} \\ \cline{3-5}
+ &  & SARSA & 45.54 & 67 \\ \cline{3-5}
+ &  & DQN & 44.49 & 100 \\ \cline{3-5}
+ &  & PPO & \textbf{17.67} & 9 \\ \cline{3-5}
+ &  & A2C & 21.58 & 12 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=4)} & SSP & 44.14 & \textbf{100} \\ \cline{3-5}
+ &  & SARSA & 51.49 & 63 \\ \cline{3-5}
+ &  & DQN & 41.72 & 100 \\ \cline{3-5}
+ &  & PPO & 23.46 & 13 \\ \cline{3-5}
+ &  & A2C & \textbf{20.55} & 11 \\ \hline
+\multirow{20}{*}{ames} & \multirow{5}{*}{PSL(K=1)} & SSP & 153.62 & 98 \\ \cline{3-5}
+ &  & SARSA & 146.32 & 92 \\ \cline{3-5}
+ &  & DQN & 141.20 & \textbf{99} \\ \cline{3-5}
+ &  & PPO & \textbf{60.78} & 9 \\ \cline{3-5}
+ &  & A2C & 70.30 & 10 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=2)} & SSP & 158.67 & \textbf{98} \\ \cline{3-5}
+ &  & SARSA & 163.88 & 83 \\ \cline{3-5}
+ &  & DQN & 152.21 & 97 \\ \cline{3-5}
+ &  & PPO & \textbf{75.36} & 11 \\ \cline{3-5}
+ &  & A2C & 82.60 & 10 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=3)} & SSP & 150.97 & \textbf{98} \\ \cline{3-5}
+ &  & SARSA & 139.00 & 81 \\ \cline{3-5}
+ &  & DQN & 147.49 & 96 \\ \cline{3-5}
+ &  & PPO & 80.55 & 11 \\ \cline{3-5}
+ &  & A2C & \textbf{77.67} & 15 \\ \cline{2-5}
+ & \multirow{5}{*}{PSL(K=4)} & SSP & 153.16 & \textbf{98} \\ \cline{3-5}
+ &  & SARSA & 163.25 & 77 \\ \cline{3-5}
+ &  & DQN & 152.26 & 94 \\ \cline{3-5}
+ &  & PPO & 100.00 & 8 \\ \cline{3-5}
+ &  & A2C & \textbf{70.71} & 14 \\ \hline
 \end{tabular}
 \caption{TRSP Results}
 \label{tab:trsp_results}

@@ -24,34 +24,33 @@ def load_csv(path):
             traf = TRAF_MAP.get(row['traffic'])
             algo = ALGO_MAP.get(row['algo'])
             if net and traf and algo:
-                data[(net, traf, algo)] = float(row['makespan_mean'])
+                data[(net, traf, algo)] = (float(row['makespan_mean']),
+                                           float(row['success_rate']) * 100)
     return data
 
 
-def fmt(val, bold=False):
+def fmt(val, bold=False, decimals=2):
     if val is None:
         return ''
-    s = f'{val:.2f}'
+    s = f'{val:.{decimals}f}'
     return f'\\textbf{{{s}}}' if bold else s
 
 
-def best_model(data, net, traf, models):
-    vals = {m: data[(net, traf, m)] for m in models if (net, traf, m) in data}
+def best_makespan(data, net, traf, models):
+    vals = {m: data[(net, traf, m)][0] for m in models if (net, traf, m) in data}
     return min(vals, key=vals.get) if vals else None
+
+def best_sr(data, net, traf, models):
+    vals = {m: data[(net, traf, m)][1] for m in models if (net, traf, m) in data}
+    return max(vals, key=vals.get) if vals else None
 
 
 def models_for(data, net, traf):
     return [m for m in MODEL_ORDER if (net, traf, m) in data]
 
 
-def build_row(net_cell, traf_cell, model, val_str, sep):
-    if model == 'DQN':
-        model_cell = '\\multicolumn{1}{l|}{DQN}'
-        val_cell   = f'\\multicolumn{{1}}{{l|}}{{{val_str}}}'
-    else:
-        model_cell = model
-        val_cell   = val_str
-    return f'{net_cell} & {traf_cell} & {model_cell} & {val_cell} \\\\ {sep}'
+def build_row(net_cell, traf_cell, model, makespan_str, sr_str, sep):
+    return f'{net_cell} & {traf_cell} & {model} & {makespan_str} & {sr_str} \\\\ {sep}'
 
 
 def generate_tex(data):
@@ -60,9 +59,9 @@ def generate_tex(data):
         '% \\usepackage{multirow}',
         '\\begin{table}[]',
         '\\centering',
-        '\\begin{tabular}{|c|c|c|c|}',
+        '\\begin{tabular}{|c|c|c|c|c|}',
         '\\hline',
-        '\\textbf{Network} & \\textbf{Traffic} & \\textbf{Model} & \\textbf{Makespan} \\\\ \\hline',
+        '\\textbf{Network} & \\textbf{Traffic} & \\textbf{Model} & \\textbf{Makespan} & \\textbf{Success (\\%)} \\\\ \\hline',
     ]
 
     for net in NETWORKS:
@@ -74,20 +73,22 @@ def generate_tex(data):
         for ti, traf in enumerate(active_traffics):
             is_last_traf = ti == len(active_traffics) - 1
             models       = models_for(data, net, traf)
-            best         = best_model(data, net, traf, models)
+            best_ms      = best_makespan(data, net, traf, models)
+            best_success = best_sr(data, net, traf, models)
 
             for mi, model in enumerate(models):
                 is_last_model = mi == len(models) - 1
                 net_cell  = f'\\multirow{{{n_rows}}}{{*}}{{{net_tex}}}' if first_net else ''
                 traf_cell = f'\\multirow{{{len(models)}}}{{*}}{{{traf}}}' if mi == 0 else ''
-                val_str   = fmt(data.get((net, traf, model)), bold=(model == best))
-                sep       = ('\\hline' if is_last_traf else '\\cline{2-4}') if is_last_model else '\\cline{3-4}'
+                entry        = data.get((net, traf, model))
+                makespan_str = fmt(entry[0] if entry else None, bold=(model == best_ms))
+                sr_str       = fmt(entry[1] if entry else None, bold=(model == best_success), decimals=0)
+                sep          = ('\\hline' if is_last_traf else '\\cline{2-5}') if is_last_model else '\\cline{3-5}'
 
-                lines.append(build_row(net_cell, traf_cell, model, val_str, sep))
+                lines.append(build_row(net_cell, traf_cell, model, makespan_str, sr_str, sep))
                 first_net = False
 
     lines += [
-        ' &  &  &  \\\\ \\hline',
         '\\end{tabular}',
         '\\caption{TRSP Results}',
         '\\label{tab:trsp_results}',
