@@ -1,0 +1,29 @@
+# =============================================================================
+# config/ta_evrp/sweep.yaml — Parameter superset for sweep_ta_evrp.py
+# =============================================================================
+# Any leaf value that is a LIST defines a sweep axis.
+# Non-list scalars override base.yaml directly (like a normal child config).
+# sweep_ta_evrp.py computes the Cartesian product of all list axes and runs
+# one TA-EVRP simulation per combination in quiet mode.
+#
+# Default: 3 planners × 3 seeds × 2 fleet_sizes × 2 customer_counts
+#          × 2 traffic_enabled = 72 combinations
+
+base: config/ta_evrp/base.yaml
+
+# ── Sweep axes (lists) ────────────────────────────────────────────────────────
+
+evrp:
+  planner: [milp, heuristic, mtsp]
+
+trsp:
+  agent: [dijkstra, sarsa, dqn, a2c, ppo]
+
+network:
+  net_path: [data/grid_road/grid_road.sumocfg, data/rand_grid_road/rand_grid_road_final.sumocfg, data/ames/ames_campus_final.sumocfg]
+
+traffic:
+  psl:
+    enabled: [true]
+    K: [2]
+

@@ -12,6 +12,15 @@ At the start of every conversation, read these files to get the latest progress 
 
 These files are the authoritative source of truth for project progress; they supersede any description in this CLAUDE.md where they conflict.
 
+## Architecture Docs (`arch/`)
+
+High-level architecture diagrams and schema definitions live in `arch/`:
+
+- `arch/dronesim_arch.jpeg` — top-level system diagram (two-level hierarchy: EVRP outer layer + TRSP inner layer)
+- `arch/instance_arch.jpeg` — `Instance` object structure and data flow between planner, simulator, and local planner
+- `arch/modules.yaml` — machine-readable module dependency map
+- `arch/schema.yaml` — config schema reference for TA-EVRP YAML files
+
 ## Branch: `dev_trsp` — TRSP Development Only
 
 This branch is exclusively for **Phase 2 (TRSP)** development. When working here:

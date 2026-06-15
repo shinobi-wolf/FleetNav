@@ -31,8 +31,8 @@ Outputs
 from __future__ import annotations
 
 import argparse
-import json
 import inspect
+import json
 import sys
 import threading
 import xml.etree.ElementTree as ET
@@ -47,13 +47,39 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from dronesim.evrp.io.plot import build_plot_coordinates, plot_routes
-from dronesim.evrp.io.instance_json import save_instance_json
-from dronesim.evrp.network import build_network_context
-from dronesim.evrp.planners import get_planner
-from dronesim.evrp.planners.gvrp_milp import GVRPMILPPlanner
+from dronesim.ta_evrp import Instance, GlobalPlanner, LocalPlanner, Simulator
 
 RUNS_DIR = Path("runs/ta_evrp")
+
+
+# ---------------------------------------------------------------------------
+# Config loader with base-inheritance and deep-merge
+# ---------------------------------------------------------------------------
+
+def _deep_merge(base: dict, override: dict) -> dict:
+    result = dict(base)
+    for key, val in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(val, dict):
+            result[key] = _deep_merge(result[key], val)
+        else:
+            result[key] = val
+    return result
+
+
+def load_config(config_path: str) -> dict:
+    path = Path(config_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Config not found: {config_path}")
+    with path.open("r", encoding="utf-8") as fh:
+        child = yaml.safe_load(fh) or {}
+    base_ref = child.pop("base", None)
+    if base_ref is None:
+        return child
+    base_path = Path(base_ref)
+    with base_path.open("r", encoding="utf-8") as fh:
+        base = yaml.safe_load(fh) or {}
+    base.pop("base", None)
+    return _deep_merge(base, child)
 
 
 # ---------------------------------------------------------------------------
@@ -65,15 +91,17 @@ def _write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _make_run_id(planner_name: str, agent_name: str) -> str:
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{planner_name}_{agent_name}_{ts}"
+
+
 def _export_planned_stops(
     *,
     routes: list,
     run_dir: Path,
     run_id: str,
-    planner_name: str,
-    agent_name: str,
-    policy_id: Optional[str],
-    traffic_enabled: bool,
+    instance: Instance,
 ) -> Path:
     vehicles = []
     for route in routes:
@@ -92,10 +120,10 @@ def _export_planned_stops(
     payload = {
         "run_id": run_id,
         "created_at": datetime.now().isoformat(timespec="seconds"),
-        "planner": planner_name,
-        "trsp_agent": agent_name,
-        "trsp_policy_id": policy_id,
-        "traffic_enabled": bool(traffic_enabled),
+        "planner": instance.planner_name,
+        "trsp_agent": instance.agent_name,
+        "trsp_policy_id": instance.policy_id,
+        "traffic_enabled": instance.traffic_enabled,
         "vehicles": vehicles,
     }
 
@@ -104,15 +132,42 @@ def _export_planned_stops(
     return out_path
 
 
+def _print_routes(routes) -> None:
+    print("\n── Planned routes ──────────────────────────────────────────────")
+    for route in routes:
+        seq = " → ".join(f"{s.node_name}({s.node_type[0].upper()})" for s in route.stops)
+        print(f"  Vehicle {route.vehicle_id}: {seq}")
+        print(f"    customers={len(route.customer_stops)}  recharges={len(route.afs_stops)}")
+
+
+def _print_metrics(metrics: dict) -> None:
+    print("\n── Simulation metrics ──────────────────────────────────────────")
+    print(f"  makespan          : {metrics['makespan_s']:.1f} s  ({metrics['makespan_h']:.3f} h)")
+    print(f"  total distance    : {metrics['total_distance_m']:.1f} m  ({metrics['total_distance_km']:.3f} km)")
+    print(f"  total recharges   : {metrics['total_recharges']}")
+    print(f"  customers served  : {metrics['customers_served']}")
+    if metrics["avg_inter_customer_gap_s"] is not None:
+        print(f"  avg service gap   : {metrics['avg_inter_customer_gap_s']:.1f} s")
+    print("\n  Per-vehicle breakdown:")
+    for vid, v in metrics["per_vehicle"].items():
+        print(
+            f"    V{vid}: dist={v['distance_m']:.1f}m  "
+            f"recharges={v['num_recharges']}  "
+            f"customers={v['customers_served']}  "
+            f"finish={v['finish_time_s']:.1f}s"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Route logger (attaches to simulator internals to record per-leg edges)
+# ---------------------------------------------------------------------------
+
 def _resolve_net_xml_path(net_path: str) -> Optional[Path]:
-    """Best-effort resolve a SUMO `.net.xml` path from a config net_path."""
     p = Path(net_path)
     if not p.exists():
         return None
-
     if p.suffixes[-2:] == [".net", ".xml"]:
         return p
-
     if p.suffix == ".sumocfg":
         try:
             root = ET.parse(p).getroot()
@@ -126,7 +181,6 @@ def _resolve_net_xml_path(net_path: str) -> Optional[Path]:
             return None
         net_xml = (p.parent / value).resolve()
         return net_xml if net_xml.exists() else None
-
     return None
 
 
@@ -158,23 +212,17 @@ def _extract_vehicle_id(vs: Any) -> Optional[int]:
 
 
 class _RouteLogger:
-    """Runtime logger for per-leg driven routes.
-
-    Attaches a wrapper around the simulator's private `_drive` method (if present)
-    without requiring edits to the simulator implementation.
-    """
+    """Records per-leg driven edge lists by hooking into the simulator."""
 
     def __init__(self, *, net_path: str) -> None:
         self._lock = threading.Lock()
         self.legs: list[dict[str, Any]] = []
-
         self._net = None
         net_xml = _resolve_net_xml_path(net_path)
         if net_xml is None:
             return
         try:
             import sumolib  # type: ignore
-
             self._net = sumolib.net.readNet(str(net_xml))
         except Exception:
             self._net = None
@@ -191,7 +239,6 @@ class _RouteLogger:
         node_ids = None
         if self._net is not None:
             node_ids = _edges_to_nodes_from_net(edge_ids, self._net)
-        # Prefer the mapped endpoints when available.
         mapped_src = node_ids[0] if isinstance(node_ids, list) and node_ids else None
         mapped_dst = node_ids[-1] if isinstance(node_ids, list) and node_ids else None
         with self._lock:
@@ -209,7 +256,6 @@ class _RouteLogger:
 
     def _vehicle_id_from_stack(self) -> Optional[int]:
         frame = inspect.currentframe()
-        # Skip ourselves + wrapper frame.
         for _ in range(12):
             if frame is None:
                 break
@@ -226,8 +272,6 @@ class _RouteLogger:
         return None
 
     def attach(self, sim: Any) -> bool:
-        # Prefer hooking `_resolve_route(src, dst, sim_time_s) -> edge_ids`, which is
-        # used in both sequential and concurrent simulators.
         if hasattr(sim, "_resolve_route") and callable(getattr(sim, "_resolve_route")):
             original = getattr(sim, "_resolve_route")
             sig = inspect.signature(original)
@@ -237,16 +281,13 @@ class _RouteLogger:
                 src = bound.arguments.get("src_node")
                 dst = bound.arguments.get("dst_node")
                 sim_time_s = bound.arguments.get("sim_time_s")
-
                 if src is None and len(args) >= 1:
                     src = args[0]
                 if dst is None and len(args) >= 2:
                     dst = args[1]
                 if sim_time_s is None and len(args) >= 3:
                     sim_time_s = args[2]
-
                 result = original(*args, **kwargs)
-                # _resolve_route returns (edge_ids, distance); extract edges for logging
                 if isinstance(result, tuple) and len(result) == 2:
                     raw_edges, _ = result
                     edge_ids_to_log = list(raw_edges) if raw_edges else []
@@ -254,9 +295,7 @@ class _RouteLogger:
                     edge_ids_to_log = []
                 else:
                     edge_ids_to_log = list(result)
-
                 vid = self._vehicle_id_from_stack()
-                # Store src/dst even if we cannot map edges->nodes.
                 self._log_leg(
                     vehicle_id=vid,
                     sim_time_s=float(sim_time_s) if sim_time_s is not None else None,
@@ -264,12 +303,11 @@ class _RouteLogger:
                     src_node=src,
                     dst_node=dst,
                 )
-                return result  # return original (tuple or list) unchanged
+                return result
 
             setattr(sim, "_resolve_route", _wrapper)
             return True
 
-        # Fallback: hook `_drive(...)` if `_resolve_route` is unavailable.
         if hasattr(sim, "_drive") and callable(getattr(sim, "_drive")):
             original = getattr(sim, "_drive")
             sig = inspect.signature(original)
@@ -279,7 +317,6 @@ class _RouteLogger:
                 vs = bound.arguments.get("vs")
                 edge_list = bound.arguments.get("edge_list")
                 sim_time_s = bound.arguments.get("sim_time_s")
-
                 if vs is None and args:
                     vs = args[0]
                 if edge_list is None:
@@ -292,12 +329,10 @@ class _RouteLogger:
                         if name in bound.arguments:
                             sim_time_s = bound.arguments[name]
                             break
-
                 if isinstance(edge_list, tuple):
                     edge_list = list(edge_list)
                 if not isinstance(edge_list, list):
                     edge_list = []
-
                 self._log_leg(
                     vehicle_id=_extract_vehicle_id(vs),
                     sim_time_s=float(sim_time_s) if sim_time_s is not None else None,
@@ -314,14 +349,11 @@ class _RouteLogger:
 def _build_local_routes_payload(
     *,
     run_id: str,
-    cfg: dict,
+    instance: Instance,
     routes: list,
     leg_logs: list[dict[str, Any]],
     local_planner: Any,
 ) -> dict:
-    traffic_enabled = bool(cfg.get("traffic", {}).get("enabled", False))
-    sim_type = cfg.get("simulation", {}).get("simulator", "unknown")
-
     planned_by_vehicle: dict[int, list[str]] = {}
     for r in routes:
         seq = [getattr(s, "sumo_node_id", None) for s in r.stops]
@@ -335,16 +367,11 @@ def _build_local_routes_payload(
 
         edge_ids = entry.get("edge_ids") or []
         node_ids = entry.get("node_ids")
-
         from_node = (
-            node_ids[0]
-            if isinstance(node_ids, list) and node_ids
-            else entry.get("src_node")
+            node_ids[0] if isinstance(node_ids, list) and node_ids else entry.get("src_node")
         )
         to_node = (
-            node_ids[-1]
-            if isinstance(node_ids, list) and node_ids
-            else entry.get("dst_node")
+            node_ids[-1] if isinstance(node_ids, list) and node_ids else entry.get("dst_node")
         )
         start_time_s = entry.get("start_time_s")
 
@@ -387,300 +414,20 @@ def _build_local_routes_payload(
                 "from_sumo_node_id": from_node,
                 "to_sumo_node_id": to_node,
                 "start_time_s": start_time_s,
-                "traffic_slot": traffic_slot if traffic_enabled else 0,
+                "traffic_slot": traffic_slot if instance.traffic_enabled else 0,
                 "node_ids": node_ids,
                 "edge_ids": edge_ids,
                 "fallback_reason": fallback_reason,
             }
         )
 
-    payload = {
+    return {
         "run_id": run_id,
         "created_at": datetime.now().isoformat(timespec="seconds"),
-        "simulator": sim_type,
-        "traffic_enabled": traffic_enabled,
+        "simulator": instance.sim_type,
+        "traffic_enabled": instance.traffic_enabled,
         "vehicles": list(vehicles_out.values()),
     }
-    return payload
-
-
-# ---------------------------------------------------------------------------
-# Config loader with base-inheritance and deep-merge
-# ---------------------------------------------------------------------------
-
-def _deep_merge(base: dict, override: dict) -> dict:
-    result = dict(base)
-    for key, val in override.items():
-        if key in result and isinstance(result[key], dict) and isinstance(val, dict):
-            result[key] = _deep_merge(result[key], val)
-        else:
-            result[key] = val
-    return result
-
-
-def load_config(config_path: str) -> dict:
-    path = Path(config_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Config not found: {config_path}")
-    with path.open("r", encoding="utf-8") as fh:
-        child = yaml.safe_load(fh) or {}
-    base_ref = child.pop("base", None)
-    if base_ref is None:
-        return child
-    base_path = Path(base_ref)
-    with base_path.open("r", encoding="utf-8") as fh:
-        base = yaml.safe_load(fh) or {}
-    base.pop("base", None)
-    return _deep_merge(base, child)
-
-
-# ---------------------------------------------------------------------------
-# Translate new TA-EVRP config schema → internal format used by simulators/planners
-# ---------------------------------------------------------------------------
-
-def _normalize_config(ta: dict) -> dict:
-    """Map TA-EVRP config keys to the internal format expected by the simulator/planner stack."""
-    net = ta.get("network", {})
-    evrp_cfg = ta.get("evrp", {})
-    milp_cfg = evrp_cfg.get("milp", {})
-    heuristic_cfg = evrp_cfg.get("heuristic", {})
-    trsp = ta.get("trsp", {})
-    sim = ta.get("simulation", {})
-    ugv = sim.get("ugv", {})
-    tasks = sim.get("tasks", {})
-    traffic_cfg = ta.get("traffic", {})
-    psl = traffic_cfg.get("psl", {})
-    simulated = traffic_cfg.get("simulated", {})
-    vehicular = simulated.get("vehicular", {})
-    sumo_cfg = ta.get("sumo", {})
-    out = ta.get("output", {})
-
-    # Config values are in human-friendly units (km, km/h, L, L/km, hours).
-    # Convert all unit-bearing quantities to SI here before passing to the package.
-    battery_capacity_L      = float(ugv.get("battery_capacity_L", 50.0))
-    consumption_L_per_km    = float(ugv.get("consumption_rate_L_per_km", 5.0))
-    free_flow_speed_kmh     = float(ugv.get("free_flow_speed_kmh", 50.0))
-    max_duration_h          = float(ugv.get("max_duration_h", 6.0))
-    customer_service_time_h = float(ugv.get("customer_service_time_h", 0.0))
-    recharge_time_h         = float(ugv.get("recharge_time_h", 0.0))
-
-    cfg: dict = {}
-
-    cfg["generation_seed"] = ta.get("generation_seed", 42)
-
-    cfg["net"] = {
-        "net_path": net.get("net_path", "data/grid_road/grid_road.sumocfg"),
-        "warehouse": net.get("warehouse", "center"),
-        "max_degree": net.get("max_degree", 4),
-    }
-
-    cfg["planner"] = evrp_cfg.get("planner", "milp")
-
-    cfg["fleet"] = {
-        "size": ugv.get("fleet_size", 3),
-        "max_speed": free_flow_speed_kmh / 3.6,  # m/s
-    }
-
-    cfg["gvrp"] = {
-        "customer_count": tasks.get("customer_count", 10),
-        "customer_sampling": tasks.get("customer_sampling", "count"),
-        "task_density": tasks.get("task_density", 30),
-        "afs_count": tasks.get("afs_count", 3),
-        "fuel_capacity": battery_capacity_L * 1000.0 / consumption_L_per_km,  # m (range)
-        "consumption_rate": 1.0,                                          # dimensionless
-        "speed_ms": free_flow_speed_kmh / 3.6,                      # m/s
-        "max_duration_s": max_duration_h * 3600.0,                  # s
-        "customer_service_time_s": customer_service_time_h * 3600.0, # s
-        "refuel_time_s": recharge_time_h * 3600.0,                  # s
-        "afs_dummy_copies": milp_cfg.get("afs_dummy_copies", 3),
-        "depot_dummy_copies": milp_cfg.get("depot_dummy_copies", 3),
-        "plot": bool(out.get("plot", True)),
-        "run_single_vehicle_benchmark": False,
-    }
-
-    cfg["solver"] = {
-        "time_limit_seconds": milp_cfg.get("time_limit_s", 300),
-        "mip_gap": milp_cfg.get("mip_gap", 0.01),
-        "output_flag": milp_cfg.get("output_flag", 1),
-    }
-
-    cfg["heuristic"] = {
-        "alns_iterations": heuristic_cfg.get("alns_iterations", 300),
-        "seed": heuristic_cfg.get("seed", 42),
-    }
-
-    # Traffic: PSL config — convert km/h → m/s for the package
-    psl_enabled = bool(psl.get("enabled", False))
-    cfg["traffic"] = {
-        "enabled": psl_enabled,
-        "K": psl.get("K", 1),
-        "slot_duration": psl.get("slot_duration"),               # None → segmented.py falls back to max_time_s/K
-        "v_min": float(psl.get("v_min_kmh", 40.0)) / 3.6,       # m/s
-        "v_max": float(psl.get("v_max_kmh", 100.0)) / 3.6,      # m/s
-        "speed_step": float(psl.get("speed_step_kmh", 60.0)) / 3.6,  # m/s
-        "seed": psl.get("seed", 42),
-        "profile_type": psl.get("profile_type", "random"),
-    }
-
-    # Cost model (td_milp only)
-    if "cost_model" in ta:
-        cfg["cost_model"] = ta["cost_model"]
-
-    # Background SUMO traffic scale
-    vehicle_scale = float(vehicular.get("scale", 0.0)) if vehicular.get("enabled") else 0.0
-
-    cfg["sumo"] = {
-        "step_length": sumo_cfg.get("step_length", 1.0),
-        "traffic_scale": vehicle_scale,
-        "delay": sumo_cfg.get("delay", 10),
-    }
-
-    agent = trsp.get("agent", "dijkstra")
-    policy_id = trsp.get("policy_id", None)
-    cfg["simulation"] = {
-        "simulator": sumo_cfg.get("simulator", "concurrent"),
-        "max_time": sumo_cfg.get("max_time_h", 12),
-        "render_mode": sumo_cfg.get("render_mode", "quiet"),
-        "runtime_refuel": bool(ugv.get("runtime_refuel", False)),
-        "use_planned_wait_times": False,
-        # kept for reference but no longer drives planner construction
-        "_trsp_agent": agent,
-        "_trsp_policy_id": policy_id,
-    }
-
-    cfg["output"] = {
-        "save_instance_json": "generated_instance.json" if out.get("save_instance_json", True) else None,
-        "save_metrics_json": "sim_metrics.json" if out.get("save_metrics_json", True) else None,
-    }
-
-    return cfg
-
-def _reformat_cfg_sim(ta: dict) -> dict:
-    ori_net_cfg = ta.get("network", {})
-    ori_evrp_cfg = ta.get("evrp", {})
-    ori_trsp = ta.get("trsp", {})
-    ori_sim = ta.get("simulation", {})
-    ori_ugv = ori_sim.get("ugv", {})
-    ori_tasks = ori_sim.get("tasks", {})
-    ori_traffic_cfg = ta.get("traffic", {})
-    ori_psl = ori_traffic_cfg.get("psl", {})
-    ori_simulated = ori_traffic_cfg.get("simulated", {})
-    sumo_cfg = ta.get("sumo", {})
-    out = ta.get("output", {})
-
-    # Config values are in human-friendly units; convert to SI for the package.
-    battery_capacity_L      = float(ori_ugv.get("battery_capacity_L", 50.0))
-    consumption_L_per_km    = float(ori_ugv.get("consumption_rate_L_per_km", 5.0))
-    free_flow_speed_kmh     = float(ori_ugv.get("free_flow_speed_kmh", 50.0))
-    max_duration_h          = float(ori_ugv.get("max_duration_h", 6.0))
-    customer_service_time_h = float(ori_ugv.get("customer_service_time_h", 0.0))
-    recharge_time_h         = float(ori_ugv.get("recharge_time_h", 0.0))
-
-    model_cfg = {
-        "evrp": ori_evrp_cfg,
-        "trsp": ori_trsp,
-    }
-    instance_cfg = {
-        "fleet_size": ori_ugv.get("fleet_size", 3),
-        "customer_count": ori_tasks.get("customer_count", 10),
-        "ugv_range": battery_capacity_L * 1000.0 / consumption_L_per_km,  # L / (L/km) → km → m
-        "ugv_speed": free_flow_speed_kmh / 3.6,                            # km/h → m/s
-        "customer_service_time_s": customer_service_time_h * 3600.0,       # h → s
-        "recharge_time_s": recharge_time_h * 3600.0,                       # h → s
-        "runtime_refuel": bool(ori_ugv.get("runtime_refuel", False)),
-    }
-    trf_cfg = {
-        "enabled": bool(ori_psl.get("enabled", False)),
-        "K": ori_psl.get("K", 1),
-        "slot_duration": ori_psl.get("slot_duration"),                  # None → segmented.py falls back to max_time_s/K
-        "v_min": float(ori_psl.get("v_min_kmh", 40.0)) / 3.6,         # km/h → m/s
-        "v_max": float(ori_psl.get("v_max_kmh", 100.0)) / 3.6,        # km/h → m/s
-        "speed_step": float(ori_psl.get("speed_step_kmh", 60.0)) / 3.6, # km/h → m/s
-        "seed": ori_psl.get("seed", 42),
-    }
-    hps = {
-        "stop_time": max_duration_h * 3600.0,  # h → s
-        "sumo": sumo_cfg,
-        "output": out,
-    }
-    sim_cfg = {
-        "model": model_cfg,
-        "net": ori_net_cfg,
-        "instance": instance_cfg,
-        "traffic": trf_cfg,
-        "hps": hps,
-    }
-
-    return sim_cfg
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _make_run_id(planner: str, agent: str) -> str:
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{planner}_{agent}_{ts}"
-
-
-def _plot_routes(planner, routes, out_path: str) -> None:
-    if not hasattr(planner, "_last_generation_info"):
-        print("  [plot] planner did not store instance data; skipping plot.")
-        return
-
-    gen_info = planner._last_generation_info
-    physical_coords = gen_info.get("physical_coords")
-
-    if isinstance(planner, GVRPMILPPlanner):
-        coords = build_plot_coordinates(
-            planner._last_physical_dist,
-            planner._last_instance,
-            physical_coords,
-        )
-        plot_routes(planner._last_raw_routes, coords, planner._last_instance["node_types"], out_path=out_path)
-    else:
-        meta = planner._last_physical_meta
-        sumo_ids: list[str] = meta["physical_sumo_ids"]
-        node_types: list[str] = meta["physical_node_types"]
-        sumo_to_phys = {sid: i for i, sid in enumerate(sumo_ids)}
-        raw_routes = []
-        for route in routes:
-            nodes = [
-                sumo_to_phys[s.sumo_node_id]
-                for s in route.stops
-                if s.sumo_node_id in sumo_to_phys
-            ]
-            dist = float(sum(
-                planner._last_physical_dist[nodes[i], nodes[i + 1]]
-                for i in range(len(nodes) - 1)
-            ))
-            raw_routes.append({"vehicle": route.vehicle_id, "nodes": nodes, "distance": dist})
-        plot_routes(raw_routes, physical_coords, node_types, out_path=out_path)
-
-
-def _print_routes(routes) -> None:
-    print("\n── Planned routes ──────────────────────────────────────────────")
-    for route in routes:
-        seq = " → ".join(f"{s.node_name}({s.node_type[0].upper()})" for s in route.stops)
-        print(f"  Vehicle {route.vehicle_id}: {seq}")
-        print(f"    customers={len(route.customer_stops)}  recharges={len(route.afs_stops)}")
-
-
-def _print_metrics(metrics: dict) -> None:
-    print("\n── Simulation metrics ──────────────────────────────────────────")
-    print(f"  makespan          : {metrics['makespan_s']:.1f} s  ({metrics['makespan_h']:.3f} h)")
-    print(f"  total distance    : {metrics['total_distance_m']:.1f} m  ({metrics['total_distance_km']:.3f} km)")
-    print(f"  total recharges   : {metrics['total_recharges']}")
-    print(f"  customers served  : {metrics['customers_served']}")
-    if metrics["avg_inter_customer_gap_s"] is not None:
-        print(f"  avg service gap   : {metrics['avg_inter_customer_gap_s']:.1f} s")
-    print("\n  Per-vehicle breakdown:")
-    for vid, v in metrics["per_vehicle"].items():
-        print(
-            f"    V{vid}: dist={v['distance_m']:.1f}m  "
-            f"recharges={v['num_recharges']}  "
-            f"customers={v['customers_served']}  "
-            f"finish={v['finish_time_s']:.1f}s"
-        )
 
 
 # ---------------------------------------------------------------------------
@@ -692,97 +439,57 @@ def main() -> None:
     parser.add_argument("-c", "--config", default="config/ta_evrp/milp.yaml")
     parser.add_argument("--no-sim", action="store_true", help="Skip SUMO simulation")
     parser.add_argument("--no-plot", action="store_true", help="Suppress route plot")
-    parser.add_argument("--save-metrics", action="store_true", help="Save TA-EVRP metrics to ta_evrp_metrics.json")
+    parser.add_argument("--save-metrics", action="store_true", help="Save metrics to ta_evrp_metrics.json")
     args = parser.parse_args()
 
     ta_config = load_config(args.config)
-    cfg = _normalize_config(ta_config)
 
-    planner_name = cfg["planner"]
-    agent_name = cfg["simulation"]["_trsp_agent"]
-    policy_id = cfg["simulation"]["_trsp_policy_id"]
-    run_id = _make_run_id(planner_name, agent_name)
+    # ── Instance ─────────────────────────────────────────────────────────────
+    print(f"\n[0/3] Building instance from {ta_config['network']['net_path']} ...")
+    instance = Instance(ta_config)
+    print(f"       {instance.net_xml_path}  ({instance.num_nodes} nodes, {instance.num_edges} edges)")
+
+    run_id = _make_run_id(instance.planner_name, instance.agent_name)
     run_dir = RUNS_DIR / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\nTA-EVRP run: {run_id}")
-    print(f"  planner : {planner_name}")
-    print(f"  agent   : {agent_name}" + (f"  policy: {policy_id}" if policy_id else ""))
-    print(f"  traffic : {'PSL enabled' if cfg['traffic']['enabled'] else 'disabled'}")
+    print(f"  planner : {instance.planner_name}")
+    print(f"  agent   : {instance.agent_name}" + (f"  policy: {instance.policy_id}" if instance.policy_id else ""))
+    print(f"  traffic : {'PSL enabled' if instance.traffic_enabled else 'disabled'}")
     print(f"  output  : {run_dir}/")
 
-    # ── Redirect output paths ─────────────────────────────────────────────────
-    if cfg["output"].get("save_instance_json"):
-        cfg["output"]["save_instance_json"] = str(run_dir / Path(cfg["output"]["save_instance_json"]).name)
-    
-    if args.save_metrics:
-        cfg["output"]["save_metrics_json"] = str(run_dir / "ta_evrp_metrics.json")
-    elif cfg["output"].get("save_metrics_json"):
-        cfg["output"]["save_metrics_json"] = str(run_dir / Path(cfg["output"]["save_metrics_json"]).name)
-
-    # ── Load network once ─────────────────────────────────────────────────────
-    print(f"\n[0/3] Loading SUMO network from {ta_config['network']['net_path']} ...")
-    network = build_network_context(ta_config["network"]["net_path"])
-    print(f"       {network.net_xml_path}  ({network.graph.number_of_nodes()} nodes, {network.graph.number_of_edges()} edges)")
-
     # ── Plan ─────────────────────────────────────────────────────────────────
-    print(f"\n[1/3] Planning with '{planner_name}' planner...")
-    planner = get_planner(planner_name)
-    routes = planner.plan(cfg, network=network)
+    print(f"\n[1/3] Planning with '{instance.planner_name}' planner...")
+    planner = GlobalPlanner()
+    trsp_planner = LocalPlanner(instance.policy_id) if instance.policy_id else None
+    routes = planner.plan(instance)
     _print_routes(routes)
 
     planned_stops_path = _export_planned_stops(
-        routes=routes,
-        run_dir=run_dir,
-        run_id=run_id,
-        planner_name=planner_name,
-        agent_name=agent_name,
-        policy_id=policy_id,
-        traffic_enabled=cfg.get("traffic", {}).get("enabled", False),
+        routes=routes, run_dir=run_dir, run_id=run_id, instance=instance,
     )
     print(f"\n  Planned stops saved to {planned_stops_path}")
 
-    save_instance_json(
-        cfg,
-        planner._last_physical_dist,
-        planner._last_physical_meta,
-        planner._last_generation_info,
-    )
+    planner.save_instance_json(out_dir=run_dir)
 
-    # ── Optional plot ─────────────────────────────────────────────────────────
-    do_plot = bool(cfg.get("gvrp", {}).get("plot", True)) and not args.no_plot
-    if do_plot:
-        plot_path = str(run_dir / "gvrp_routes.png")
-        _plot_routes(planner, routes, out_path=plot_path)
-
-    # ── Build TRSP local planner if RL agent requested ────────────────────────
-    local_planner = None
-    if agent_name not in ("dijkstra", "dynamic_dijkstra"):
-        if not policy_id:
-            raise ValueError(
-                f"trsp.policy_id must be set in config when trsp.agent is '{agent_name}'"
-            )
-        import dronesim.trsp  # noqa: F401 — registers SumoTRSPEnv-v0
-        from dronesim.ta_evrp import TRSPLocalPlanner
-        local_planner = TRSPLocalPlanner(policy_id)
+    if not args.no_plot:
+        planner.plot(routes, out_path=str(run_dir / "gvrp_routes.png"))
 
     # ── Simulate ─────────────────────────────────────────────────────────────
     if args.no_sim:
         print("\n[2/3] Simulation skipped (--no-sim).")
         return
-    
-    sim_cfg = _reformat_cfg_sim(ta_config)
 
     print(f"\n[2/3] Starting SUMO simulation ...")
-    from dronesim.evrp.simulator.evrp_sim import EVRPSimulator
-    sim = EVRPSimulator(sim_cfg, network=network, local_planner=local_planner)
+    simulator = Simulator(instance, trsp_planner)
 
-    route_logger = _RouteLogger(net_path=cfg.get("net", {}).get("net_path", ""))
-    logger_attached = route_logger.attach(sim)
+    route_logger = _RouteLogger(net_path=instance.net_path)
+    logger_attached = route_logger.attach(simulator.sim)
     if not logger_attached:
-        print("  [route-log] Warning: simulator has no _drive() hook; local_routes.json may be empty.")
+        print("  [route-log] Warning: simulator has no hook; local_routes.json may be empty.")
 
-    metrics = sim.run(routes)
+    metrics = simulator.run(routes)
     traffic_log     = metrics.pop("traffic_log", [])
     traffic_profile = metrics.pop("traffic_profile", {})
 
@@ -790,11 +497,10 @@ def main() -> None:
     print("\n[3/3] Results:")
     _print_metrics(metrics)
 
-    metrics_path = cfg["output"].get("save_metrics_json")
-    if metrics_path:
-        Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
-        Path(metrics_path).write_text(json.dumps(metrics, indent=2))
-        print(f"\n  Metrics saved to {metrics_path}")
+    metrics_filename = "ta_evrp_metrics.json" if args.save_metrics else "sim_metrics.json"
+    metrics_path = run_dir / metrics_filename
+    metrics_path.write_text(json.dumps(metrics, indent=2))
+    print(f"\n  Metrics saved to {metrics_path}")
 
     if traffic_profile:
         profile_path = run_dir / "traffic_profile.json"
@@ -803,17 +509,17 @@ def main() -> None:
 
     if traffic_log:
         log_path = run_dir / "traffic_log.jsonl"
-        with open(log_path, "w") as _f:
-            for _event in traffic_log:
-                _f.write(json.dumps(_event) + "\n")
+        with open(log_path, "w") as f:
+            for event in traffic_log:
+                f.write(json.dumps(event) + "\n")
         print(f"  Traffic event log saved to {log_path}")
 
     local_routes_payload = _build_local_routes_payload(
         run_id=run_id,
-        cfg=cfg,
+        instance=instance,
         routes=routes,
         leg_logs=route_logger.legs,
-        local_planner=local_planner,
+        local_planner=simulator.local_planner,
     )
     local_routes_path = run_dir / "local_routes.json"
     _write_json(local_routes_path, local_routes_payload)

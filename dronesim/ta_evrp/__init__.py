@@ -1,4 +1,6 @@
 """TA-EVRP integration layer: wires EVRP outer planner with TRSP inner agent."""
-from .local_planner import TRSPLocalPlanner
+from .instance import Instance
+from .planner import GlobalPlanner, LocalPlanner
+from .simulator import Simulator
 
-__all__ = ["TRSPLocalPlanner"]
+__all__ = ["Instance", "GlobalPlanner", "LocalPlanner", "Simulator"]

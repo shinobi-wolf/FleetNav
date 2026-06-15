@@ -82,7 +82,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/ta_evrp/milp.yaml"
+                "${workspaceFolder}/config/ta_evrp/mtsp.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

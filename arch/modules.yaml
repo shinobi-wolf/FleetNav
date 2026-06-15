@@ -1,0 +1,71 @@
+# DroneSim Module Definitions
+# Each module declares its input_data_schema, output_data_schema, and submodules.
+# Schema names reference arch/schema.yaml for field-level detail.
+
+dronesim:
+  description: Top-level DroneSim system — orchestrates the full infer_ta_evrp pipeline from a ParameterSet to simulation outputs.
+  input_data_schema: ParameterSet
+  output_data_schema: SimulationMetrics, SimulationAnalytics
+  submodules:
+
+    instance:
+      description: >
+        Loads the SUMO road network graph, builds the PSL traffic model, and samples
+        the problem (depot, customers, AFS) into a unified Instance object.
+        This is the InstanceBuilder shown in the architecture diagram.
+      input_data_schema: ParameterSet
+      output_data_schema: Instance
+      implementation: dronesim/ta_evrp/instance/
+      submodules:
+        network:
+          description: Loads the SUMO net.xml via sumolib and builds an nx.DiGraph (nodes carry x,y; edges carry id, length).
+          output: graph (nx.DiGraph)
+          implementation: dronesim/ta_evrp/instance/network.py
+        traffic:
+          description: Reads PSL config (km/h units), converts to m/s, and generates per-edge speed profiles for K time slots.
+          output: traffic_model (PSLTrafficModel)
+          implementation: dronesim/ta_evrp/instance/traffic.py
+        problem:
+          description: Computes all-pairs shortest paths, samples depot/customers/AFS, and builds the distance matrix.
+          output: sampled_problem (Problem)
+          implementation: dronesim/ta_evrp/instance/problem.py
+
+    planner:
+      description: >
+        Solves the EVRP given an Instance and returns a Plan — a set of vehicle routes
+        that respect battery capacity and route vehicles through AFS nodes as needed.
+        Pluggable implementations: MILP exact solver (Gurobi), ALNS heuristic
+        (RoutingBlocks), mTSP baseline, and time-dependent MILP (TD-EVRP).
+        GlobalPlanner orchestrates dispatch; individual planners live in dronesim/evrp_/.
+      input_data_schema: Instance
+      output_data_schema: Plan
+      submodules:
+        global_planner:
+          description: >
+            Reads instance.planner_name, selects the corresponding EVRPPlanner from
+            REGISTRY, and delegates plan(instance). Also owns plot() and save_instance_json().
+          implementation: dronesim/ta_evrp/planner/evrp.py
+        evrp_planners:
+          description: >
+            One file per EVRP planner, each implementing EVRPPlanner.plan(instance) -> list[Route].
+            All logic is self-contained (no imports from dronesim/evrp/).
+          implementation: dronesim/evrp_/
+        local_planner:
+          description: >
+            Loads a trained TRSP RL policy and routes node-to-node via graph-only agent
+            inference (no SUMO). Dispatches to SARSAAgent, DQNAgent, A2CAgent, or PPOAgent
+            based on algo in the TRSP config. SARSA uses neighbour-index actions; deep RL
+            agents use global node-index actions. Falls back to Dijkstra on cycles,
+            dead-ends, invalid actions, or unknown algo. Constructed only when policy_id
+            is not None.
+          implementation: dronesim/ta_evrp/planner/trsp.py
+
+    simulator:
+      description: >
+        Replays a Plan within SUMO using the Instance traffic model. Resolves each
+        inter-stop leg via LocalPlanner (RL-guided) or Dijkstra (fallback), tracks
+        fuel consumption and vehicle state transitions, and emits SimulationMetrics.
+        SimulationAnalytics are derived post-hoc by generate_results_csvs.py.
+      input_data_schema: Instance, Plan
+      output_data_schema: SimulationMetrics
+      implementation: dronesim/ta_evrp/simulator/

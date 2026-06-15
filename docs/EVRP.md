@@ -18,93 +18,72 @@ Configs live under `config/ta_evrp/`. "Pure EVRP" typically means `trsp.agent: d
 
 ## Planners
 
-All planners implement `BasePlanner.plan(config) → list[Route]` (`dronesim/evrp/planners/base.py`). Each `Route` is a sequence of `Stop` objects (depot → customers/AFS → depot).
+All planners implement `EVRPPlanner.plan(instance: Instance) → list[Route]` (`dronesim/evrp_/base.py`). Each `Route` is a sequence of `Stop` objects (depot → customers/AFS → depot). `Stop` carries both `sumo_node_id` (for TraCI) and `node_name` (logical label, e.g. `C1`, `F3_d2`).
+
+Planners live in `dronesim/evrp_/` and are dispatched via `REGISTRY` in `dronesim/evrp_/__init__.py`. The outer orchestrator is `GlobalPlanner` (`dronesim/ta_evrp/planner/evrp.py`), which selects the right planner from `REGISTRY` based on `instance.planner_name`.
 
 ### `milp` — GVRP Exact Solver ✅ Done
 
-- **File:** `dronesim/evrp/planners/gvrp_milp.py`; MILP model in `dronesim/evrp/milp/gvrp.py`; instance builder in `dronesim/evrp/instance/`
+- **File:** `dronesim/evrp_/milp.py` (Gurobi formulation inline)
 - **Config:** `config/ta_evrp/milp.yaml`
-- **Method:** Gurobi MILP with dummy-node expansion: each AFS node gets `afs_dummy_copies` copies, the depot gets `depot_dummy_copies`. This allows a vehicle to revisit the same AFS/depot multiple times without copy-count constraints.
+- **Method:** Gurobi MILP with dummy-node expansion: each AFS node gets `afs_dummy_copies` copies, the depot gets `depot_dummy_copies`. Allows a vehicle to revisit the same AFS/depot multiple times without copy-count constraints.
 - **Requires:** Gurobi license
 - **Status:** Fully working. Produces optimal or near-optimal routes bounded by solver time limit and MIP gap.
-- **Fuel semantics:** Q parameter = `battery_capacity_L * 1000 / consumption_rate_L_per_km` (range in metres); r = 1.0 (dimensionless). MILP variables y[j] are forward-propagated in the output to show physically meaningful fuel levels, not raw solver slack values.
+- **Fuel semantics:** Q = `battery_capacity_L * 1000 / consumption_rate_L_per_km` (range in metres); r = 1.0 (dimensionless). MILP variables y[j] are forward-propagated to show physically meaningful fuel levels, not raw solver slack values.
 
 ### `heuristic` — RoutingBlocks ALNS ✅ Done
 
-- **File:** `dronesim/evrp/planners/evrp_heuristic.py`
+- **File:** `dronesim/evrp_/heuristic.py`
 - **Config:** `config/ta_evrp/heuristic.yaml`
 - **Method:** Adaptive Large Neighborhood Search via the RoutingBlocks library. Fast; no license needed.
 - **Status:** Fully working. Serves as the practical baseline — often matches MILP quality at a fraction of the solve time.
 
 ### `mtsp` — Multi-TSP Baseline ✅ Done
 
-- **File:** `dronesim/evrp/planners/mtsp.py`
+- **File:** `dronesim/evrp_/mtsp.py`
 - **Config:** `config/ta_evrp/mtsp.yaml`
 - **Method:** KMeans clustering of customers, then nearest-neighbor TSP per cluster. Ignores fuel constraints entirely.
 - **Status:** Fully working. Useful as a lower-bound reference for route length; will strand if fuel runs out.
 
-### Time-Dependent MILP (TD-EVRP) ⚠️ Removed from current TA-EVRP configs
+### `td_milp` — Time-Dependent MILP ⚠️ No config yet
 
-Earlier iterations included a TD-EVRP MILP config (`milp_td.yaml`) and a Lu/Ichoua-style time-dependent formulation. This config is not present in the current `config/ta_evrp/` set, and is not part of the default TA-EVRP experiment pipeline.
+- **File:** `dronesim/evrp_/td_milp.py` (Lu et al. 2020, inline)
+- **Status:** Implemented and in `REGISTRY`. No `config/ta_evrp/td_milp.yaml` exists yet. Requires `ta_config["traffic_lu"]` and `ta_config["cost_model"]` sections.
 
-### `ctvtt_ga` — GA-based Planner ❌ Incomplete
+### `ctvtt_ga` — GA-based Planner ❌ Not ported
 
-- **File:** `dronesim/evrp/planners/evrp_ctvtt_ga.py`
-- **Status:** Scaffolding only. Not functional.
+- Exists in `dronesim/evrp/planners/evrp_ctvtt_ga.py` (old module). Not ported to `evrp_/` and not in `REGISTRY`.
 
 ---
 
-## Network Loading
+## Instance
 
-### `NetworkContext` (`dronesim/evrp/network.py`) ✅ Done
+### `Instance` (`dronesim/ta_evrp/instance/instance.py`) ✅ Done
 
-The SUMO network is loaded **once per inference run** and injected into both the planner and the simulator. Before this, each independently reloaded the same file (and the planner used a naive suffix-swap resolver that could reference the wrong `.net.xml`).
+`Instance` is the unified problem container built once per run and shared across `GlobalPlanner`, `LocalPlanner`, and `Simulator`. It bundles everything that used to be passed as separate arguments.
 
-```python
-from dronesim.evrp.network import build_network_context
-
-network = build_network_context("data/ames/ames_campus_final.sumocfg")
-routes  = planner.plan(cfg, network=network)
-sim     = EVRPSimulator(sim_cfg, network=network)
-```
-
-`NetworkContext` contains:
-- `net_xml_path` — resolved `.net.xml` path (follows `<net-file>` pointer in `.sumocfg`)
-- `net` — `sumolib.net.Net` object
-- `graph` — `nx.DiGraph` with `length` edge weights and `x, y` node attributes
-- `node_positions` — `{node_id: (x, y)}`
-
-All planners accept `network=None` (falls back to loading from disk when not injected).
+Key attributes:
+- `network` — `Network` object: `sumolib.net.Net`, `nx.DiGraph` (with `length`/`id` edge attrs), node positions
+- `traffic` — `PSLTrafficModel`: per-edge piecewise speed profiles
+- `problem` — `Problem`: distance matrix, depot/customer/AFS node lists, `params` dict (SI units), `generation_info`
+- `ta_config` — raw YAML config dict (used by `TDMILPPlanner` and `HeuristicPlanner` for planner-specific settings)
+- Convenience properties: `planner_name`, `agent_name`, `policy_id`, `net_path`, `traffic_enabled`
 
 ---
 
 ## Simulator
 
-### `EVRPSimulator` (`dronesim/evrp/simulator/evrp_sim.py`) ✅ Done
+### `Simulator` (`dronesim/ta_evrp/simulator/`) ⚠️ Stub / under development
 
-Single time-step-driven simulator: all vehicles advance concurrently within each SUMO step via a per-vehicle state machine (`enroute` / `waiting` / `stranded` / `done`). This produces correct makespan (vehicles overlap in time) while keeping the implementation in one file.
-
-Key per-vehicle state tracked in `_VehicleState`:
-- `current_fuel` — remaining range in metres
-- `curr_stop_idx` — index into the planned `Route.stops` list
-- `status` — `enroute` | `waiting` | `stranded` | `done`
-- `curr_traci_veh_id` — active SUMO vehicle ID for the in-transit leg
-
-### `runtime_refuel` ✅ Done
-
-When `simulation.ugv.runtime_refuel: true` in config, the simulator checks at each stop arrival whether the vehicle can reach the next planned stop and still make it back to the depot. If not, it inserts an unplanned emergency detour to the depot for a full recharge before continuing.
-
-- **Check:** `dist(curr→next) + dist(next→depot) > current_fuel` (both distances via Dijkstra / SP)
-- **Detour:** spawns an emergency leg to the depot; on arrival refuels to `ugv_range` (full); applies `recharge_time_s` dwell; then spawns a resume leg to the originally planned next stop
-- **Metrics:** emergency recharges are counted in `num_recharges`; extra distance driven is recorded
+The new `Simulator` is constructed as `Simulator(instance, local_planner)` where `local_planner` is a `LocalPlanner` instance or `None` (for Dijkstra-only runs).
 
 ### Local Route Resolution
 
-`EVRPSimulator._resolve_route(src, dst, sim_time_s) → (edge_ids, dist_m)` dispatches to:
-- `TRSPLocalPlanner.plan()` — RL-policy-guided navigation (when `trsp.agent != dijkstra`; see EVRP_TRSP.md)
-- `_find_edge_route()` — NetworkX Dijkstra on the SUMO net (default / fallback)
+When TRSP is active, the simulator dispatches to:
+- `LocalPlanner.plan(src, dst, sim_time_s)` — RL-policy-guided navigation (see EVRP_TRSP.md); only constructed when `policy_id is not None`
+- Dijkstra fallback on the `instance.network.graph` when `local_planner is None`
 
-When TRSP is active, the **edges driven in SUMO come from the TRSP agent**, but the **distance returned for fuel accounting is always the Dijkstra shortest-path distance** — keeping fuel consumption consistent with the EVRP planner's distance matrix.
+When TRSP is active, the **edges driven in SUMO come from the TRSP agent**, but the **distance charged for fuel accounting is always the Dijkstra shortest-path distance** — keeping fuel consumption consistent with the EVRP planner's distance matrix.
 
 ---
 
@@ -191,7 +170,8 @@ traffic:
 
 ## Known Issues / Future Work
 
-- `ctvtt_ga` planner is not implemented
+- `ctvtt_ga` planner not ported to `evrp_/`; not in `REGISTRY`
+- `td_milp` has no config file (`config/ta_evrp/td_milp.yaml`); can't be selected via CLI yet
 - Heuristic planner (ALNS) can return `feasible=False` routes on tight-range configs; the MILP correctly reports infeasibility in the same cases
-- `milp/td_evrp.py` still contains internal unit conversions (skipped during SI cleanup)
+- `dronesim/evrp/` (old module) still present; will be removed after `Simulator` in `dronesim/ta_evrp/simulator/` is fully implemented
 - SUMO turn restrictions cause `No connection between edge X and Y` errors when the NX Dijkstra path crosses a physically disallowed turn; addressed by rebuilding the net without connection files or handling at planning time

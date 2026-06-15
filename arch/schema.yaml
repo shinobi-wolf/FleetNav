@@ -1,0 +1,99 @@
+# DroneSim Data Schemas
+# Describes every named data contract that flows between modules.
+# Referenced by arch/modules.yaml.
+
+# ─────────────────────────────────────────────
+# INPUT SCHEMAS  (fed into the system)
+# ─────────────────────────────────────────────
+
+ParameterSet:
+  description: Defines the parameters for a drone simulation run.
+  fields:
+    models:
+      evrp_model: str
+      trsp_model: str
+    network_parameters:
+      net_id: str
+    traffic_paramters:
+      traffic_model: PSL/Simulated
+      PSL:
+        K: int
+        vmax: int
+        vmin: int
+        step: int
+        slot_duration: float
+    problem_parameters:
+      num_ugvs: int
+      num_tasks: int
+      num_charging_stations: int
+      ugv_range: float
+
+# ─────────────────────────────────────────────
+# INTERMEDIATE SCHEMAS  (flow between submodules)
+# ─────────────────────────────────────────────
+
+Instance:
+  description: The unified problem description built by InstanceBuilder and consumed by Planner and Simulator.
+  fields:
+    graph: nx.DiGraph
+    # road network; node attrs: x, y; edge attrs: id (SUMO edge ID), length (metres)
+    # produced by dronesim/ta_evrp/instance/network.py
+
+    traffic_model: PSLTrafficModel
+    # per-edge piecewise-constant speed profiles over K time slots (m/s)
+    # produced by dronesim/ta_evrp/instance/traffic.py
+
+    sampled_problem:
+    # produced by dronesim/ta_evrp/instance/problem.py
+      depot_id: str                               # SUMO node ID of the depot
+      customer_ids: list[str]                     # SUMO node IDs of delivery stops
+      afs_ids: list[str]                          # SUMO node IDs of AFS locations
+      distance_matrix: np.ndarray                 # (n × n) metres, symmetric, all-pairs SP
+      fleet_params:
+        Q: float                                  # battery range in metres
+        r: float                                  # consumption rate (dimensionless = 1.0)
+        speed_mps: float                          # free-flow speed in m/s
+        Tmax_s: float                             # max route duration in seconds
+        m: int                                    # fleet size
+        customer_service_time_s: float
+        refuel_time_s: float
+        afs_dummy_copies: int
+        depot_dummy_copies: int
+
+Plan:
+  description: The set of vehicle routes returned by the Planner; consumed by Simulator.
+  fields:
+    routes: list[Route]
+    # Route = ordered sequence of Stops: depot → customers/AFS → depot
+    # Stop fields: node_id, node_name, stop_type (depot | customer | afs)
+
+# ─────────────────────────────────────────────
+# OUTPUT SCHEMAS  (produced by the system)
+# ─────────────────────────────────────────────
+
+SimulationMetrics:
+  description: Raw performance metrics recorded by the Simulator during a single run. Written to runs/ta_evrp/<run_id>/sim_metrics.json.
+  fields:
+    makespan_s: float          # wall-clock time until last vehicle finishes (seconds)
+    makespan_h: float          # makespan in hours
+    total_distance_m: float    # sum of all driven distances across the fleet (metres)
+    total_distance_km: float
+    total_recharges: int       # total recharges (planned + emergency) across all vehicles
+    customers_served: int      # total customers successfully visited
+    customer_completion_times_s: list[float]  # sim-time at each customer delivery
+    avg_inter_customer_gap_s: float           # mean gap between consecutive deliveries
+    per_vehicle:
+      <vehicle_id>:
+        distance_m: float
+        num_recharges: int
+        customers_served: int
+        finish_time_s: float
+
+SimulationAnalytics:
+  description: Derived insights computed from SimulationMetrics by generate_results_csvs.py. Written to results/ta_evrp_results.csv.
+  fields:
+    throughput_tasks_per_h: float   # customers_served / makespan_h
+    gap_pct: float | null           # MILP optimality gap (%) — milp planner only
+    ugv_distance_m: float           # ground vehicle driven distance (metres)
+    uav_distance_m: float | null    # UAV fleet distance (null if UAV-BMS disabled)
+    run_id: str                     # "{planner}_{agent}_{YYYYMMDD_HHMMSS}"

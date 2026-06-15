@@ -6,7 +6,7 @@ This document covers the connection between the two modules: how the EVRP outer 
 
 ## What Is Integrated
 
-`EVRPSimulator` can use a trained TRSP RL agent to navigate between every pair of consecutive stops, replacing the default Dijkstra shortest-path routing. The change is config-driven and fully backward-compatible: the default behavior (`trsp.agent: dijkstra`) is unchanged.
+The `Simulator` can use a trained TRSP RL agent to navigate between every pair of consecutive stops, replacing the default Dijkstra shortest-path routing. The change is config-driven: when `trsp.policy_id` is set, a `LocalPlanner` is constructed and injected into the `Simulator`; otherwise only Dijkstra is used.
 
 ---
 
@@ -36,9 +36,9 @@ Run with: `python infer_ta_evrp.py -c config/ta_evrp/milp_sarsa.yaml`
 
 ## How It Works
 
-### `TRSPLocalPlanner` (`dronesim/ta_evrp/local_planner.py`)
+### `LocalPlanner` (`dronesim/ta_evrp/planner/trsp.py`)
 
-Constructed in `infer_ta_evrp.py` when `trsp.agent != dijkstra`, then injected into `EVRPSimulator`. Steps:
+Constructed in `infer_ta_evrp.py` when `policy_id is not None`, then injected into `Simulator`. Steps:
 
 1. Loads the TRSP config from `runs/trsp/<policy_id>/config.yaml`.
 2. Calls `gym.make("SumoTRSPEnv-v0", config=trsp_config)` to build the road graph and PSL traffic model. **SUMO is not started** — `gym.make()` only reads the net file via `sumolib`.
@@ -66,15 +66,15 @@ while curr_node != dst_node:
 
 Cycle detection: if any node is visited twice, the planner falls back to Dijkstra for the full leg. Also falls back on dead-ends, missing edge data, or if max steps (500) are exceeded without arriving.
 
-### Dispatcher in `EVRPSimulator`
+### Dispatcher in `Simulator`
 
-`EVRPSimulator._resolve_route(src, dst, sim_time_s)` (`dronesim/evrp/simulator/evrp_sim.py`):
-- If `TRSPLocalPlanner` is set → calls `plan()` for the edge list
-- Otherwise → calls `_find_edge_route()` (NetworkX Dijkstra)
+`Simulator._resolve_route(src, dst, sim_time_s)` (`dronesim/ta_evrp/simulator/`):
+- If `LocalPlanner` is set → calls `plan()` for the edge list
+- Otherwise → calls Dijkstra on `instance.network.graph`
 
 Used for all **planned delivery legs** (depot→customer, customer→customer, customer→AFS, etc.) **and** for emergency `runtime_refuel` detour legs to/from the depot.
 
-The `_needs_emergency_refuel` range check always uses `_find_edge_route()` (Dijkstra) directly — it is never routed through the TRSP planner.
+The `_needs_emergency_refuel` range check always uses Dijkstra directly — it is never routed through the TRSP planner.
 
 ---
 
@@ -89,21 +89,18 @@ This ensures:
 
 ### Implementation
 
-In `_resolve_route` (`evrp_sim.py`):
+In `Simulator._resolve_route`:
 ```python
 if self.local_planner is not None:
     edge_ids = self.local_planner.plan(src_node, dst_node, sim_time_s)
     if edge_ids:
-        sp_edges, sp_dist = self._find_edge_route(src_node, dst_node)
-        if sp_edges is not None:
-            return edge_ids, sp_dist   # TRSP path driven; SP distance charged
-        # No SP found (rare); fall back to actual route length
-        actual_dist = sum(net.getEdge(e).getLength() for e in edge_ids ...)
-        return edge_ids, actual_dist
-return self._find_edge_route(src_node, dst_node)
+        sp_dist = dijkstra_dist(instance.network.graph, src_node, dst_node)
+        return edge_ids, sp_dist   # TRSP path driven; SP distance charged
+    # empty edge list → fall back to Dijkstra
+return dijkstra_route(instance.network.graph, src_node, dst_node)
 ```
 
-The returned distance is what `_spawn_next_leg` deducts from `veh_state.current_fuel` and adds to `sim_stats["distance_covered"]`.
+The returned distance is what the simulator deducts from `current_fuel` and records in metrics.
 
 ---
 
@@ -131,28 +128,30 @@ Note on config keys: TA-EVRP nests PSL settings under `traffic.psl.*` and uses `
 ```
 infer_ta_evrp.py
   │
-  ├─ Planner (milp / heuristic / mtsp)
-  │     └─ list[Route] (stops with sumo_node_ids)
+  ├─ Instance (dronesim/ta_evrp/instance/instance.py)
+  │     ├─ Network: sumolib.net + nx.DiGraph + node positions
+  │     ├─ Traffic: PSLTrafficModel (per-edge speed profiles)
+  │     └─ Problem: dist matrix, depot/customers/AFS, params (SI)
   │
-  ├─ [optional] TRSPLocalPlanner(policy_id)      ← dronesim/ta_evrp/local_planner.py
+  ├─ GlobalPlanner (dronesim/ta_evrp/planner/evrp.py)
+  │     └─ REGISTRY[planner_name]().plan(instance) → list[Route]
+  │           stops carry sumo_node_id + node_name
+  │
+  ├─ [optional] LocalPlanner(policy_id)   ← dronesim/ta_evrp/planner/trsp.py
   │     ├─ gym.make(SumoTRSPEnv-v0)  ← reads net, no SUMO
-  │     └─ load Q-table from policy.pkl
+  │     └─ load Q-table from runs/trsp/<policy_id>/policy.pkl
+  │     (only constructed when policy_id is not None)
   │
-  ├─ NetworkContext (dronesim/evrp/network.py)          ← built once; injected below
-  │     ├─ resolve .net.xml path from .sumocfg
-  │     ├─ sumolib.net.readNet()
-  │     └─ nx.DiGraph (nodes with x,y; edges with length)
-  │
-  └─ EVRPSimulator (dronesim/evrp/simulator/evrp_sim.py)
+  └─ Simulator(instance, local_planner)  ← dronesim/ta_evrp/simulator/
         │
-        ├─ build PSLTrafficModel from edge_ids + config
+        ├─ build PSLTrafficModel from instance.traffic
         ├─ traci.start(sumo_cmd)
         │
         └─ per leg: _resolve_route(src, dst, sim_time_s)
-              ├─ TRSPLocalPlanner.plan()   [if trsp.agent != dijkstra]
+              ├─ LocalPlanner.plan()   [if local_planner is not None]
               │     └─ Q-table lookup → edge list (drives TRSP path)
-              │     └─ _find_edge_route() for SP distance (fuel charge)
-              └─ _find_edge_route()        [if trsp.agent: dijkstra]
+              │          SP distance charged for fuel accounting
+              └─ dijkstra(instance.network.graph) [if local_planner is None]
                     └─ nx.shortest_path → edge list + SP distance
 ```
 
@@ -160,8 +159,8 @@ infer_ta_evrp.py
 
 ## Constraints and Assumptions
 
-- **Same network:** The TRSP policy must be trained on the same SUMO network as the TA-EVRP simulation. `TRSPLocalPlanner` builds its graph from the TRSP config's `net.net_path` — mismatched networks cause `KeyError` on node lookup.
-- **SARSA only:** `TRSPLocalPlanner` loads a Q-table pickle directly. DQN/PPO policies are not yet supported.
+- **Same network:** The TRSP policy must be trained on the same SUMO network as the TA-EVRP simulation. `LocalPlanner` builds its graph from the TRSP config's `net.net_path` — mismatched networks cause `KeyError` on node lookup.
+- **All RL agents supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA uses neighbour-index actions; DQN/A2C/PPO use global node-index actions. Unknown algos fall back to Dijkstra.
 - **No SUMO during plan:** `plan()` is pure Python — no TraCI calls. It runs inside the EVRP SUMO session without conflict.
 - **Time slot approximation:** `plan()` receives `sim_time_s` and maps it to a slot via the TRSP PSL model. For `K=1` this is always slot 0 (exact). For `K>1`, the slot reflects the TA-EVRP simulation clock — consistency depends on matching `T` (derived from `max_time_s`) and `K` values between the two configs.
 
@@ -179,15 +178,12 @@ In the currently logged experiments, using the SARSA local planner often improve
 
 | Feature | Status |
 |---------|--------|
-| `TRSPLocalPlanner` with cycle detection and Dijkstra fallback | ✅ Done |
-| `_resolve_route()` in `EVRPSimulator` dispatches to TRSP planner | ✅ Done |
+| `LocalPlanner` with cycle detection and Dijkstra fallback | ✅ Done |
+| `Simulator._resolve_route()` dispatches to `LocalPlanner` | ⚠️ Simulator stub; wiring in progress |
 | Fuel debited by Dijkstra SP distance (not actual TRSP path length) | ✅ Done |
 | `runtime_refuel` — emergency depot detour when range is insufficient | ✅ Done |
 | PSL traffic model unified: per-edge speeds in both EVRP and TRSP | ✅ Done |
-| `traci.edge.setMaxSpeed()` per-edge slot transitions in EVRP | ✅ Done |
-| Pygame renderer: per-edge color from PSL profile | ✅ Done |
-| `_RouteLogger` correctly unpacks `(edge_ids, dist)` for per-leg logging | ✅ Done |
-| `NetworkContext` built once per run, injected into planner and simulator | ✅ Done |
-| DQN/PPO policy support in `TRSPLocalPlanner` | ❌ Not yet |
+| `Instance` built once per run, shared by planner and simulator | ✅ Done |
+| DQN/A2C/PPO policy support in `LocalPlanner` | ✅ Done |
 | End-to-end test: MILP plan + TRSP navigation + metrics | ✅ Done |
 | TRSP time slot aligned with EVRP sim clock for K>1 | ⚠️ Works for K=1; needs validation for K>1 |
