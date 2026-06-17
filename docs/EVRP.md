@@ -73,7 +73,7 @@ Key attributes:
 
 ## Simulator
 
-### `Simulator` (`dronesim/ta_evrp/simulator/`) ⚠️ Stub / under development
+### `Simulator` (`dronesim/ta_evrp/simulator/`) ✅ Done
 
 The new `Simulator` is constructed as `Simulator(instance, local_planner)` where `local_planner` is a `LocalPlanner` instance or `None` (for Dijkstra-only runs).
 
@@ -173,5 +173,5 @@ traffic:
 - `ctvtt_ga` planner not ported to `evrp_/`; not in `REGISTRY`
 - `td_milp` has no config file (`config/ta_evrp/td_milp.yaml`); can't be selected via CLI yet
 - Heuristic planner (ALNS) can return `feasible=False` routes on tight-range configs; the MILP correctly reports infeasibility in the same cases
-- `dronesim/evrp/` (old module) still present; will be removed after `Simulator` in `dronesim/ta_evrp/simulator/` is fully implemented
+- `dronesim/evrp/` (old module) still present; can be removed now that `Simulator` in `dronesim/ta_evrp/simulator/` is complete
 - SUMO turn restrictions cause `No connection between edge X and Y` errors when the NX Dijkstra path crosses a physically disallowed turn; addressed by rebuilding the net without connection files or handling at planning time

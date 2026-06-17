@@ -5,16 +5,19 @@ import time
 import copy
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
-from dronesim.trsp.agents.sarsa import SARSAAgent
-from dronesim.trsp.agents.dqn import DQNAgent
-from dronesim.trsp.agents.ppo import PPOAgent
-from dronesim.trsp.agents.a2c import A2CAgent
+from dronesim.trsp.agents.sarsa_psl import SARSAAgent
+from dronesim.trsp.agents.dqn_psl   import DQNAgent
+from dronesim.trsp.agents.dqn_svc   import DQNSVCAgent
+from dronesim.trsp.agents.ppo_psl   import PPOAgent
+from dronesim.trsp.agents.a2c_psl   import A2CAgent
 
 
 def lmd_trainer(config, policy_dir, resume=False):
     algo = config['agent']['algo']
     if algo == 'dqn':
         agent = DQNAgent(config)
+    elif algo == 'dqn_svc':
+        agent = DQNSVCAgent(config)
     elif algo == 'ppo':
         agent = PPOAgent(config)
     elif algo == 'a2c':

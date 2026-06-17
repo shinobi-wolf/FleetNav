@@ -1,0 +1,40 @@
+# RVT (Random Vehicle Traffic) — grid_road generation parameters
+# Reproduce: run the command below from data/grid_road/
+#
+#   python3 $SUMO_HOME/tools/randomTrips.py \
+#     -n grid_road.net.xml \
+#     -e 20000 \
+#     -p 1.5 \
+#     --min-distance 1500 \
+#     --fringe-factor 5 \
+#     -s 42 \
+#     -o traffic_routes/rvt_trips.xml \
+#     -r traffic_routes/rvt_routes.xml \
+#     --validate
+
+generation:
+  tool: randomTrips.py        # $SUMO_HOME/tools/randomTrips.py
+  sumo_version: "1.27.0"
+  net_file: grid_road.net.xml
+  seed: 42
+
+trips:
+  end_time_s: 20000           # simulation horizon (≈5.5 h)
+  period_s: 1.5               # one vehicle injected every 1.5 s → ~13 334 total
+  min_distance_m: 1500.0      # at least 2 hops (edges ≈ 990 m each); eliminates trivial 1-hop trips
+  fringe_factor: 5            # 5× bias toward fringe nodes as O/D → through-traffic hotspots at central junctions
+  validate: true              # duarouter filters unroutable trips; all 13 334 passed
+
+outputs:
+  trips: traffic_routes/svc_123/rvt_trips.xml
+  routes: traffic_routes/svc_123/rvt_routes.xml
+
+# Design rationale (DQN-favoring traffic)
+# ----------------------------------------
+# Network: ~25 junctions, ~80 directed edges, each ≈ 990 m.
+# At free-flow speed ≈ 50 km/h, edge traversal ≈ 70 s.
+# Average trip ≈ 3–4 hops → ~245 s in network.
+# Simultaneous vehicles: 13 334 × (245 / 20 000) ≈ 163.
+# Per directed edge: 163 / 80 ≈ 2 vehicles → moderate load, no gridlock.
+# fringe-factor 5 concentrates flow through central intersections,
+# creating persistent hotspots that static SPF cannot avoid but RL can learn to route around.

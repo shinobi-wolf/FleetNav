@@ -1,0 +1,41 @@
+# RVT (Random Vehicle Traffic) — rand_grid_road_final generation parameters
+# Reproduce: run the command below from data/rand_grid_road/
+#
+#   python3 $SUMO_HOME/tools/randomTrips.py \
+#     -n rand_grid_road_final.net.xml \
+#     -e 20000 \
+#     -p 3.0 \
+#     --min-distance 300 \
+#     --fringe-factor 5 \
+#     -s 42 \
+#     -o traffic_routes/svc_42/rvt_trips.xml \
+#     -r traffic_routes/svc_42/rvt_routes.xml \
+#     --validate
+
+generation:
+  tool: randomTrips.py        # $SUMO_HOME/tools/randomTrips.py
+  sumo_version: "1.27.0"
+  net_file: rand_grid_road_final.net.xml
+  seed: 42
+
+trips:
+  end_time_s: 20000           # simulation horizon (≈5.5 h)
+  period_s: 3.0               # one vehicle every 3.0 s → 6 667 total
+  min_distance_m: 300.0       # ≈2 hops (median edge ≈ 184 m); avoids trivial 1-hop trips
+  fringe_factor: 5            # 5× bias toward fringe O/D → concentrated flow on central edges
+  validate: true              # duarouter validates routes; all 6 667 passed
+
+outputs:
+  trips: traffic_routes/svc_42/rvt_trips.xml
+  routes: traffic_routes/svc_42/rvt_routes.xml
+
+# Design rationale (DQN-favoring, free-flowing traffic)
+# -------------------------------------------------------
+# Network: 78 directed edges, mean length 152 m (median 184 m), range 81–212 m.
+# Short edges → fast traversal (≈ 11 s per edge at 50 km/h); capacity per edge
+# saturates quickly at high injection rates — p=0.5 caused network-wide gridlock.
+# p=3.0 keeps the network free-flowing globally:
+#   Simultaneous vehicles: 6 667 × (33 / 20 000) ≈ 11  →  ~0.14/edge average.
+# fringe-factor 5 concentrates traffic on a handful of central edges (~0.5–1 vehicle),
+# creating persistent but non-blocking speed differentials that RL can exploit
+# while static Dijkstra is forced to route through the hot corridor.

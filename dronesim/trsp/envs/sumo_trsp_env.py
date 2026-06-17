@@ -59,9 +59,15 @@ class SumoTRSPEnv(gym.Env):
         self.num_sg_pairs = len(self.sg_pairs)
 
         traffic_cfg = config.get('traffic', {'enabled': False})
-        self.traffic = PSLTrafficModel(
-            traffic_cfg, self.edge_ids, seed=traffic_cfg.get('seed')
-        )
+        self.traffic_model = traffic_cfg.get('model', 'psl')   # 'psl' | 'svc'
+
+        if self.traffic_model == 'svc':
+            self.svc_route_file = traffic_cfg.get('route_file', None)
+            self.traffic = PSLTrafficModel({'enabled': False}, self.edge_ids)
+        else:
+            self.traffic = PSLTrafficModel(
+                traffic_cfg, self.edge_ids, seed=traffic_cfg.get('seed')
+            )
         self.current_slot = 0
         self.traffic_log: list[dict] = []
 
@@ -75,11 +81,18 @@ class SumoTRSPEnv(gym.Env):
 
         if self.action_mode == 'node_id':
             self.action_space = spaces.Discrete(num_nodes)
-            self.observation_space = spaces.Dict({
-                'graph_node':  spaces.Discrete(num_nodes),
-                'target_node': spaces.Discrete(num_nodes),
-                'time_slot':   spaces.Discrete(psl_K),
-            })
+            if self.traffic_model == 'svc':
+                self.observation_space = spaces.Dict({
+                    'graph_node':      spaces.Discrete(num_nodes),
+                    'target_node':     spaces.Discrete(num_nodes),
+                    'neighbor_speeds': spaces.Box(0.0, 2.0, shape=(self.num_actions,), dtype=np.float32),
+                })
+            else:
+                self.observation_space = spaces.Dict({
+                    'graph_node':  spaces.Discrete(num_nodes),
+                    'target_node': spaces.Discrete(num_nodes),
+                    'time_slot':   spaces.Discrete(psl_K),
+                })
         else:
             self.action_space = spaces.Discrete(self.num_actions)
             self.observation_space = spaces.Dict({
@@ -193,6 +206,8 @@ class SumoTRSPEnv(gym.Env):
             '--delay', str(delay),
             '--no-warnings',
         ]
+        if self.traffic_model == 'svc' and self.svc_route_file:
+            sumo_cmd += ['--route-files', self.svc_route_file]
         traci.start(sumo_cmd)
 
         while self.time_elapsed < self.warmup_time:
@@ -320,18 +335,19 @@ class SumoTRSPEnv(gym.Env):
 
             if self.ugv.veh_id in active_ids:
                 inserted = True
-                new_slot = self.traffic.get_slot(self.time_elapsed)
-                if new_slot != self.current_slot:
-                    old_slot = self.current_slot
-                    self.current_slot = new_slot
-                    new_speed = self._edge_speed(edge_id, new_slot)
-                    traci.vehicle.setSpeed(self.ugv.veh_id, new_speed)
-                    if self.render_mode != "quiet":
-                        print(f"[{self.time_elapsed:.1f}s] SLOT CHANGE: {old_slot} → {new_slot}"
-                              f"  edge={edge_id}  speed={new_speed:.2f} m/s")
-                    self.traffic_log.append({"t": self.time_elapsed, "type": "slot_change",
-                                             "old_slot": old_slot, "new_slot": new_slot,
-                                             "edge": edge_id, "speed_ms": round(new_speed, 4)})
+                if self.traffic_model == 'psl':
+                    new_slot = self.traffic.get_slot(self.time_elapsed)
+                    if new_slot != self.current_slot:
+                        old_slot = self.current_slot
+                        self.current_slot = new_slot
+                        new_speed = self._edge_speed(edge_id, new_slot)
+                        traci.vehicle.setSpeed(self.ugv.veh_id, new_speed)
+                        if self.render_mode != "quiet":
+                            print(f"[{self.time_elapsed:.1f}s] SLOT CHANGE: {old_slot} → {new_slot}"
+                                  f"  edge={edge_id}  speed={new_speed:.2f} m/s")
+                        self.traffic_log.append({"t": self.time_elapsed, "type": "slot_change",
+                                                 "old_slot": old_slot, "new_slot": new_slot,
+                                                 "edge": edge_id, "speed_ms": round(new_speed, 4)})
             elif self.ugv.veh_id in arrived_ids or inserted:
                 # Arrived this step, or was confirmed in-network and has since left
                 self.ugv.status = 1
@@ -406,12 +422,31 @@ class SumoTRSPEnv(gym.Env):
     def _check_termination_condition(self):
         self.terminated = self.time_elapsed >= self.max_time
 
+    def _get_neighbor_speeds(self) -> np.ndarray:
+        """Normalized mean speeds on outgoing edges, sorted by node2idx, padded to max_degree."""
+        current_node = self.idx2node[self.ugv.position]
+        nb_sorted = sorted(self.G.neighbors(current_node), key=lambda n: self.node2idx[n])
+        speeds = []
+        for nb in nb_sorted:
+            eid = self.G_dir[current_node][nb]['id']
+            raw = traci.edge.getLastStepMeanSpeed(eid)
+            raw = self.ugv_speed if raw < 0 else raw        # -1 → no vehicles → free-flow
+            speeds.append(min(raw / self.ugv_speed, 2.0))   # normalize, cap at 2×
+        speeds += [1.0] * (self.num_actions - len(speeds))  # pad to max_degree
+        return np.array(speeds, dtype=np.float32)
+
     def _get_observation(self):
         ugv_node = self.idx2node[self.ugv.position]
         task_node = self.idx2node[self.ugv.task_list[0]] if self.ugv.task_list else None
         target_node_idx = self.node2idx[task_node] if task_node else 0
 
         if self.action_mode == 'node_id':
+            if self.traffic_model == 'svc':
+                return {
+                    'graph_node':      self.ugv.position,
+                    'target_node':     target_node_idx,
+                    'neighbor_speeds': self._get_neighbor_speeds(),
+                }
             return {
                 'graph_node':  self.ugv.position,
                 'target_node': target_node_idx,

@@ -27,7 +27,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/trsp/train.yaml"
+                "${workspaceFolder}/config/trsp/train_svc_dqn.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -64,7 +64,7 @@
             ],
             "args": [
                 "-p",
-                "506a3be8"
+                "78d5748e"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

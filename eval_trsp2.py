@@ -15,21 +15,42 @@ from tqdm import tqdm
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
-from dronesim.trsp.agents.a2c import A2CAgent
-from dronesim.trsp.agents.dijkstra import DijkstraAgent
-from dronesim.trsp.agents.dqn import DQNAgent
-from dronesim.trsp.agents.ppo import PPOAgent
-from dronesim.trsp.agents.sarsa import SARSAAgent
+from dronesim.trsp.agents.a2c_psl      import A2CAgent
+from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
+from dronesim.trsp.agents.dqn_psl      import DQNAgent
+from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
+from dronesim.trsp.agents.ppo_psl      import PPOAgent
+from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
 from dronesim.trsp.traffic import PSLTrafficModel
 
 INF = 100000
 
 
-def is_traffic_enabled(config: dict) -> bool:
+def get_traffic_model(config: dict) -> str:
+    """Return 'svc', 'psl', or 'none'."""
     traffic_cfg = config.get('traffic')
     if traffic_cfg is None:
-        return False
-    return bool(traffic_cfg.get('enabled', True))
+        return 'none'
+    model = traffic_cfg.get('model', 'psl')
+    if model == 'svc':
+        return 'svc'
+    if not traffic_cfg.get('enabled', True):
+        return 'none'
+    return 'psl'
+
+
+def _neighbor_speeds_from_traci(curr_node, nb_node_idxs, G_dir, idx2node,
+                                 ugv_speed: float, num_actions: int) -> np.ndarray:
+    """Query TraCI for mean speed on each outgoing edge; normalize by ugv_speed."""
+    speeds = []
+    for nb_idx in nb_node_idxs:
+        nb_node = idx2node[nb_idx]
+        eid = G_dir.edges[curr_node, nb_node]['id']
+        raw = traci.edge.getLastStepMeanSpeed(eid)
+        raw = ugv_speed if raw < 0 else raw
+        speeds.append(min(raw / ugv_speed, 2.0))
+    speeds += [1.0] * (num_actions - len(speeds))
+    return np.array(speeds, dtype=np.float32)
 
 
 def get_centroid(shape):
@@ -133,7 +154,8 @@ def select_nodes(num_nodes, seed=42, n_pairs=100):
 
 def plan_route(agent, action_mode, start_node, target_node, time_slot,
                G, G_dir, idx2node, node2idx, junc2idx, sg_pairs,
-               all_shortest_path_lengths_dir, max_steps, num_actions):
+               all_shortest_path_lengths_dir, max_steps, num_actions,
+               traffic_model='psl', ugv_speed=None):
     """Plan a graph-level route using the agent. Returns (route_edges, error_str_or_None)."""
     curr_step = 0
     curr_pos = node2idx[start_node]
@@ -169,8 +191,14 @@ def plan_route(agent, action_mode, start_node, target_node, time_slot,
                 'best_dir': best_dir,
                 'steps2dest': np.array(steps2dest, dtype=np.float32),
                 'sg_pair_idx': sg_idx,
-                'time_slot': time_slot,
             }
+            if traffic_model == 'svc':
+                obs['neighbor_speeds'] = _neighbor_speeds_from_traci(
+                    curr_node, nb_node_idxs, G_dir, idx2node, ugv_speed, num_actions
+                )
+            else:
+                obs['time_slot'] = time_slot
+
             action = int(agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx))
 
             if action_mode == 'node_id':
@@ -221,7 +249,7 @@ def init_results(test_dir, config):
 
 
 def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, config,
-                   sumo_config_cmd, psl_model, traffic_enabled, results_path, desc='Eval'):
+                   sumo_config_cmd, psl_model, traffic_model, results_path, desc='Eval'):
     """
     Run all 100 OG pairs sequentially within a single continuous SUMO session.
     SUMO is only restarted when the simulation clock hits max_time before all pairs finish.
@@ -239,6 +267,8 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
     num_actions = config['net']['max_degree']
     warmup_time = float(config['simulation'].get('warm_up_time', 0))
 
+    ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
+    psl_active = (traffic_model == 'psl')
     n_pairs = len(selected_idxs) - 1
 
     def start_sumo():
@@ -257,12 +287,12 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
         start_node = idx2node[start_idx]
         target_node = idx2node[target_idx]
 
-        # Plan with the actual traffic slot at this moment (key K>1 fix)
-        current_slot = psl_model.get_slot(sim_time) if traffic_enabled else 0
+        current_slot = psl_model.get_slot(sim_time) if psl_active else 0
         route_edges, err = plan_route(
             agent, action_mode, start_node, target_node, current_slot,
             G, G_dir, idx2node, node2idx, junc2idx, sg_pairs,
-            all_shortest_path_lengths_dir, max_steps, num_actions
+            all_shortest_path_lengths_dir, max_steps, num_actions,
+            traffic_model=traffic_model, ugv_speed=ugv_speed,
         )
 
         if err:
@@ -270,9 +300,8 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
                               warmup_time, -1, -1, -1, -1, -1, -1, -1, -1, err)
             continue
 
-        # Record traffic state at the start of this pair
         tour_start_time = sim_time
-        if traffic_enabled:
+        if psl_active:
             traffic_segment_start = psl_model.get_slot(sim_time)
             first_edge = route_edges[0]
             traffic_speed_start = (
@@ -289,9 +318,9 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
 
         try:
             traci.route.add(route_id, route_edges)
-            depart_spd = traffic_speed_start if (traffic_enabled and traffic_speed_start > 0) else 'max'
+            depart_spd = traffic_speed_start if (psl_active and traffic_speed_start > 0) else 'max'
             traci.vehicle.add(veh_id, route_id, departSpeed=depart_spd)
-            if traffic_enabled and traffic_speed_start > 0:
+            if psl_active and traffic_speed_start > 0:
                 traci.vehicle.setSpeed(veh_id, traffic_speed_start)
             traci.simulationStep()
             sim_time = traci.simulation.getTime()
@@ -301,7 +330,7 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
             continue
 
         while veh_id in traci.vehicle.getIDList() and sim_time < max_time:
-            if traffic_enabled:
+            if psl_active:
                 slot = psl_model.get_slot(sim_time)
                 road_id = traci.vehicle.getRoadID(veh_id)
                 if not road_id.startswith(':') and road_id in psl_model.profiles:
@@ -309,13 +338,12 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
             traci.simulationStep()
             sim_time = traci.simulation.getTime()
 
-        # Vehicle left the list either by arriving or by timeout
         if veh_id in traci.vehicle.getIDList():
             failed_error = 'Timeout'
 
         total_time_taken = sim_time - tour_start_time
 
-        if traffic_enabled:
+        if psl_active:
             traffic_segment_end = psl_model.get_slot(sim_time)
             last_edge = route_edges[-1]
             traffic_speed_end = (
@@ -333,7 +361,6 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
             traffic_speed_start, traffic_speed_end, failed_error
         )
 
-        # If clock is exhausted and more pairs remain, restart SUMO fresh
         if sim_time >= max_time and pair_idx < n_pairs - 1:
             traci.close()
             sim_time = start_sumo()
@@ -363,10 +390,10 @@ def main():
     selected_idxs = select_nodes(num_nodes, seed=42, n_pairs=100)
     print(f"Selected 101 nodes ({num_nodes} total) → 100 evaluation pairs")
 
-    traffic_enabled = is_traffic_enabled(config)
+    traffic_model = get_traffic_model(config)
     edge_ids = graph_info['edge_ids']
     psl_model = None
-    if traffic_enabled:
+    if traffic_model == 'psl':
         psl_model = PSLTrafficModel(
             config['traffic'], edge_ids, seed=config['traffic'].get('seed')
         )
@@ -375,6 +402,8 @@ def main():
             f"v=[{psl_model.v_min*3.6:.0f},{psl_model.v_max*3.6:.0f}]km/h  "
             f"delta_t={psl_model.delta_t:.1f}s"
         )
+    elif traffic_model == 'svc':
+        print(f"Traffic model: SVC  route_file={config['traffic']['route_file']}")
     else:
         print("Traffic model: DISABLED")
 
@@ -390,11 +419,15 @@ def main():
         '--no-step-log',
         '--no-duration-log',
     ]
+    if traffic_model == 'svc':
+        sumo_config_cmd += ['--route-files', config['traffic']['route_file']]
 
     # --- Policy evaluation ---
     algo = config['agent']['algo']
     if algo == 'dqn':
         policy_agent = DQNAgent(config)
+    elif algo == 'dqn_svc':
+        policy_agent = DQNSVCAgent(config)
     elif algo == 'sarsa':
         policy_agent = SARSAAgent(config)
     elif algo == 'ppo':
@@ -415,7 +448,7 @@ def main():
     t0 = time.time()
     run_evaluation(
         policy_agent, action_mode, selected_idxs, idx2node, graph_info, config,
-        sumo_config_cmd, psl_model, traffic_enabled, results_path, desc=args.policy
+        sumo_config_cmd, psl_model, traffic_model, results_path, desc=args.policy
     )
     print(f"Policy eval done in {timedelta(seconds=int(time.time() - t0))} → {results_path}")
 
@@ -437,7 +470,7 @@ def main():
         t0 = time.time()
         run_evaluation(
             dij_agent, 'neighbor_index', selected_idxs, idx2node, graph_info, config,
-            sumo_config_cmd, psl_model, traffic_enabled, dij_results_path, desc='Dijkstra'
+            sumo_config_cmd, psl_model, traffic_model, dij_results_path, desc='Dijkstra'
         )
         print(f"Dijkstra eval done in {timedelta(seconds=int(time.time() - t0))} → {dij_results_path}")
 

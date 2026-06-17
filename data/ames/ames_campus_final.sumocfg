@@ -7,6 +7,7 @@
 
     <input>
         <net-file value="ames_campus_final.net.xml"/>
+        <!-- <route-files value="traffic_routes/svc_42/rvt_routes.xml"/> -->
     </input>
 
 </sumoConfiguration>

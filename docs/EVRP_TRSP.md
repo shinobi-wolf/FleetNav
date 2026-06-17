@@ -179,11 +179,11 @@ In the currently logged experiments, using the SARSA local planner often improve
 | Feature | Status |
 |---------|--------|
 | `LocalPlanner` with cycle detection and Dijkstra fallback | ✅ Done |
-| `Simulator._resolve_route()` dispatches to `LocalPlanner` | ⚠️ Simulator stub; wiring in progress |
+| `Simulator._resolve_route()` dispatches to `LocalPlanner` | ✅ Done |
 | Fuel debited by Dijkstra SP distance (not actual TRSP path length) | ✅ Done |
 | `runtime_refuel` — emergency depot detour when range is insufficient | ✅ Done |
 | PSL traffic model unified: per-edge speeds in both EVRP and TRSP | ✅ Done |
 | `Instance` built once per run, shared by planner and simulator | ✅ Done |
 | DQN/A2C/PPO policy support in `LocalPlanner` | ✅ Done |
 | End-to-end test: MILP plan + TRSP navigation + metrics | ✅ Done |
-| TRSP time slot aligned with EVRP sim clock for K>1 | ⚠️ Works for K=1; needs validation for K>1 |
+| TRSP time slot aligned with EVRP sim clock for K>1 | ✅ Done (PSL traffic end-to-end complete) |

@@ -15,9 +15,10 @@ import numpy as np
 
 import dronesim.trsp  # noqa: F401 — registers SumoTRSPEnv-v0
 import gymnasium as gym
-from dronesim.trsp.agents.sarsa import SARSAAgent
-from dronesim.trsp.agents.dijkstra import DijkstraAgent
-from dronesim.trsp.agents.dqn import DQNAgent
+from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
+from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
+from dronesim.trsp.agents.dqn_psl      import DQNAgent
+from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
 
 
 def run(config, num_episodes, policy_id=None):
@@ -28,6 +29,9 @@ def run(config, num_episodes, policy_id=None):
         env = agent.env
     elif algo == 'dqn':
         agent = DQNAgent(config)
+        env = agent.env
+    elif algo == 'dqn_svc':
+        agent = DQNSVCAgent(config)
         env = agent.env
     elif algo == 'dijkstra':
         env = gym.make('SumoTRSPEnv-v0', config=config)
@@ -82,16 +86,18 @@ def run(config, num_episodes, policy_id=None):
 
     if policy_id:
         out_dir = Path("runs", "trsp", policy_id)
-        profile_path = out_dir / "infer_traffic_profile.json"
-        profile_path.write_text(
-            json.dumps(env.unwrapped.traffic.profiles, indent=2)
-        )
-        print(f"Traffic profile → {profile_path}")
-        log_path = out_dir / "infer_traffic_log.jsonl"
-        with open(log_path, "w") as _f:
-            for event in env.unwrapped.traffic_log:
-                _f.write(json.dumps(event) + "\n")
-        print(f"Traffic event log → {log_path}")
+        traffic_model = env.unwrapped.traffic_model
+        if traffic_model == 'psl':
+            profile_path = out_dir / "infer_traffic_profile.json"
+            profile_path.write_text(
+                json.dumps(env.unwrapped.traffic.profiles, indent=2)
+            )
+            print(f"Traffic profile → {profile_path}")
+            log_path = out_dir / "infer_traffic_log.jsonl"
+            with open(log_path, "w") as _f:
+                for event in env.unwrapped.traffic_log:
+                    _f.write(json.dumps(event) + "\n")
+            print(f"Traffic event log → {log_path}")
 
     print()
     print("=" * 60)
