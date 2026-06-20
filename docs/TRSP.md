@@ -9,7 +9,7 @@ The TRSP module is the **inner navigation layer**: given a source node and a des
 | Script | Purpose |
 |--------|---------|
 | `train_trsp.py -c <config>` | Train a TRSP policy. Saves under `runs/trsp/<policy_id>/` |
-| `eval_trsp2.py -p <policy_id> [--dijkstra]` | Sequential evaluation over 100 OD pairs within a single SUMO session (K>1 compatible). Optionally runs Dijkstra baseline on the same pairs. |
+| `eval_trsp2.py -p <policy_id>` | Sequential evaluation over 100 OD pairs within a single SUMO session (K>1 compatible). Always runs Dijkstra and DSP baselines automatically after the policy eval; saves all three CSVs co-located in `test_N/`. |
 | `eval_trsp.py -p <policy_id>` | Legacy pairwise evaluation (O(N²) SUMO starts; use `eval_trsp2.py` instead) |
 | `infer_trsp.py -p <policy_id>` | Interactive inference for N episodes |
 | `train_a2c_all.sh` | Train all 6 A2C (network × traffic) configs sequentially and eval each |
@@ -27,9 +27,10 @@ dronesim/trsp/
 │   └── UGVSumo.py           # Ground robot movement/state model
 ├── traffic.py               # PSLTrafficModel — per-edge piecewise speed profiles
 ├── agents/
-│   ├── __init__.py          # get_agent() registry; dispatches 'dqn_svc' to DQNSVCAgent
+│   ├── __init__.py          # get_agent() registry
 │   ├── agent_psl.py         # BasePSLAgent — shared interface for PSL agents
 │   ├── dijkstra_psl.py      # Greedy shortest-path baseline ✅
+│   ├── dsp.py               # Dynamic Shortest Path — live-speed Dijkstra ✅
 │   ├── sarsa_psl.py         # SARSA tabular Q-learning ✅
 │   ├── sarsa_l_psl.py       # SARSA(λ) with eligibility traces (skeleton)
 │   ├── dqn_psl.py           # Deep Q-Network — PSL traffic ✅
@@ -195,7 +196,19 @@ All route files generated with `seed=42`, `--fringe-factor 5`, `--validate`; see
 
 ### `DijkstraAgent` ✅ Done (`dijkstra_psl.py`)
 
-Always picks the neighbour with the smallest `steps2dest` (greedy shortest path). Used as the baseline. No learning. Works for both PSL and SVC evaluation since it ignores traffic state.
+Always picks the neighbour with the smallest `steps2dest` (greedy shortest path). Used as a static baseline. No learning. Works for both PSL and SVC evaluation since it ignores traffic state.
+
+### `DSPAgent` ✅ Done (`dsp.py`)
+
+**Dynamic Shortest Path** — a non-learning, traffic-aware baseline that sits between static Dijkstra and RL.
+
+At the **start of each OD leg**, queries `traci.edge.getLastStepMeanSpeed()` for every edge in `G_dir`, reweights the graph by travel time (`length / speed`), and runs `nx.dijkstra_path` once. The resulting node sequence is followed hop-by-hop for the rest of the leg without any further TraCI queries.
+
+- **Action mode:** `node_id` — returns a global node index directly.
+- **Speed fallback:** edges with zero/negative TraCI speed (no vehicles yet) use `ugv_speed`; floor of `0.1 m/s` prevents division by zero on fully jammed edges.
+- **Leg hook:** `start_leg(src_node, dst_node)` is called by `plan_route()` in `eval_trsp2.py` via `hasattr(agent, 'start_leg')` before the routing loop.
+- **Fallback:** if the planned path is empty (disconnected graph) or the agent ends up off-path, it falls back to the static best-direction neighbour from `obs['best_dir']`.
+- **Construction:** `DSPAgent(agent_id, G_dir, node2idx, idx2node, ugv_speed)` — requires the directed graph and node maps at construction time; undirected `G` passed via `**kwargs` from `plan_route()` for the fallback only.
 
 ### `SARSAAgent` ✅ Done (`sarsa_psl.py`)
 
@@ -270,14 +283,27 @@ SVC template: `config/trsp/train_svc_dqn.yaml` — copy and update `net.net_path
 
 Runs 100 OD pairs sequentially within a **single continuous SUMO session** — critical for K>1 policies since traffic slots evolve naturally across pairs, and for SVC since background vehicles persist between evaluations.
 
+### Policy evaluation
+
 1. Builds graph from the saved policy's `config.yaml`.
 2. Detects `traffic.model` (`psl` or `svc`) and configures the env accordingly.
 3. For SVC: appends `--route-files` to the SUMO command; queries `traci.edge.getLastStepMeanSpeed()` for obs.
-4. Plans each route using the agent's `predict()` at current sim state.
-5. Injects a vehicle on the planned edge list, steps SUMO until arrival or timeout.
-6. Writes `runs/trsp/<policy_id>/test_<N>/simulation_results.csv`.
+4. For DSP: calls `agent.start_leg(src, dst)` via `hasattr` hook before each route's planning loop.
+5. Plans each route using the agent's `predict()` at current sim state.
+6. Injects a vehicle on the planned edge list, steps SUMO until arrival or timeout.
+7. Writes `runs/trsp/<policy_id>/test_<N>/simulation_results.csv`.
 
-With `--dijkstra`: reruns the same 100 pairs with `DijkstraAgent` on the live SVC/PSL session and saves results to `runs/trsp/dijkstra/test_<N>/`.
+### Automatic baselines
+
+After the policy eval, **Dijkstra and DSP baselines are always run automatically** on the same 100 OD pair indices, same config, and same traffic model — each in an independent SUMO session. Results are co-located in the same `test_N/` directory:
+
+| File | Agent |
+|------|-------|
+| `simulation_results.csv` | Trained policy |
+| `simulation_results_dijkstra.csv` | `DijkstraAgent` |
+| `simulation_results_dsp.csv` | `DSPAgent` (live-speed Dijkstra) |
+
+The `--dijkstra` and `--dsp` CLI flags have been removed — baselines are unconditional.
 
 ---
 
@@ -291,7 +317,9 @@ runs/trsp/<policy_id>/
 │                         #   per-iteration pg_loss/v_loss/mean_ep_ret (A2C/PPO)
 └── test_<N>/
     ├── config.yaml
-    └── simulation_results.csv
+    ├── simulation_results.csv              # Policy results
+    ├── simulation_results_dijkstra.csv     # Dijkstra baseline (same OD pairs)
+    └── simulation_results_dsp.csv          # DSP baseline (same OD pairs)
 ```
 
 **Policy pickle schema:**
@@ -326,15 +354,25 @@ DQN, SARSA, and Dijkstra achieve near-identical success rates (~98–100%) on N1
 
 ### SVC Traffic (DQN-SVC, all three networks)
 
-| Network | Traffic | Policy | Mean time | vs Dijkstra | Success |
-|---------|---------|--------|-----------|-------------|---------|
-| N1 (grid_road) | SVC-svc_123 | `b3ef6da6` | 253.6s | −33% ✓ | 96% |
-| N2 (rand_grid_road) | SVC-svc_42 | `2553013e` | 59.7s | −27% ✓ | 75% |
-| N3 (ames) | SVC-svc_42 | `964ad609` | 146.1s | −3.6% | 95% |
+| Network | Traffic | Policy | Mean time | Dijkstra | DSP | Policy vs Dijkstra | Policy success |
+|---------|---------|--------|-----------|----------|-----|--------------------|----------------|
+| N1 (grid_road) | SVC-svc_123 | `b3ef6da6` | 253.6s | 378s | — | −33% ✓ | 96% |
+| N2 (rand_grid_road) | SVC-svc_42 | `2553013e` | 59.7s | 82s | 68.3s | −27% ✓ | 75% |
+| N3 (ames) | SVC-svc_42 | `964ad609` | 146.1s | 152s | 145.2s | −3.6% | 95% |
 
-Dijkstra baselines: N1=378s (94%), N2=82s (99%), N3=152s (98%).
+DQN-SVC outperforms Dijkstra on mean traversal time on all three networks. DSP (live-speed Dijkstra planned once per leg) performs comparably to or slightly better than static Dijkstra, confirming that one-shot traffic-aware planning helps but learned policies can exploit finer-grained patterns. The N2 success-rate drop (75% vs 99%) suggests the policy sometimes fails to reach the target within `max_steps` — likely due to the short edges (mean 152m) requiring more graph steps per route. N3 (Ames) shows a near-tie across all three agents; the real-world campus topology is less structured, making traffic-avoidance harder to exploit.
 
-DQN-SVC outperforms Dijkstra on mean traversal time on all three networks. The N2 success-rate drop (75% vs 99%) suggests the policy sometimes fails to reach the target within `max_steps` — likely due to the short edges (mean 152m) requiring more graph steps per route. N3 (Ames) shows a near-tie in mean time; the real-world campus topology is less structured, making traffic-avoidance harder to exploit.
+---
+
+## Analysis Notebook
+
+`notebooks/trsp_testing_analysis.ipynb` — three sections:
+
+| Section | What it does |
+|---------|-------------|
+| **Policy Evaluation** | Set `policy_id`; loads the latest `test_N/` directory; compares policy vs Dijkstra vs DSP on common successful OD pairs (box, mean bar, histogram, route-index plots, route map highlights). |
+| **Policy vs Policy** | Set `algo1`/`algo2` (policy IDs or `"dsp"`/`"dijkstra"`); compares any two runs head-to-head using the same analysis. |
+| **Aggregated Results** | Loads `results/trsp_results_psl.csv` (pre-computed PSL sweep), then scans `runs/trsp/` for policies whose latest `test_N/` has all three co-located CSVs. Combines into `results/trsp_results.csv` and plots mean makespan and success rate with networks as rows and traffic conditions as columns. Saves `notebooks/aggregate_makespan.png` and `notebooks/aggregate_success_rate.png`. |
 
 ---
 
