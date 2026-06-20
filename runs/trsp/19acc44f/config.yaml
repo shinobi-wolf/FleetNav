@@ -1,7 +1,7 @@
 agent:
   action_mode: node_id
   algo: dqn_svc
-  policy: b3ef6da6
+  policy: 19acc44f
 fleet:
   max_speed: 110
 net:
@@ -16,9 +16,7 @@ simulation:
 sumo:
   delay: 0
   step_length: 1.0
-  traffic_scale: 1
-test:
-  mode: sequential_eval
+  traffic_scale: 1.5
 traffic:
   model: svc
-  route_file: data/grid_road/traffic_routes/svc_123/rvt_routes.xml
+  route_file: data/grid_road/traffic_routes/svc_42/rvt_routes.xml

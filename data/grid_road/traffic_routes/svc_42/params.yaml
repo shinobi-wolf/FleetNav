@@ -26,8 +26,8 @@ trips:
   validate: true              # duarouter filters unroutable trips; all 13 334 passed
 
 outputs:
-  trips: traffic_routes/svc_123/rvt_trips.xml
-  routes: traffic_routes/svc_123/rvt_routes.xml
+  trips: traffic_routes/svc_42/rvt_trips.xml
+  routes: traffic_routes/svc_42/rvt_routes.xml
 
 # Design rationale (DQN-favoring traffic)
 # ----------------------------------------

@@ -106,7 +106,11 @@ The returned distance is what the simulator deducts from `current_fuel` and reco
 
 ## Traffic Model Unification
 
-Both TA-EVRP and TRSP use the **same PSL (Piecewise Speed Limit) model** — per-edge independent speed profiles over K time slots.
+TRSP now supports two traffic models; TA-EVRP integration currently uses only PSL.
+
+### PSL (Piecewise Speed Limit)
+
+Both TA-EVRP and TRSP share a **PSL model** — per-edge independent speed profiles over K time slots.
 
 | | EVRP `PSLTrafficModel` | TRSP `PSLTrafficModel` |
 |---|---|---|
@@ -120,6 +124,12 @@ Both TA-EVRP and TRSP use the **same PSL (Piecewise Speed Limit) model** — per
 Both models generate a discrete speed level set spanning `[v_min, v_max]` in increments of `speed_step` and draw independently per edge. With identical seed and identical edge set they produce identical profiles — but the TRSP training config and TA-EVRP config can use different seeds and different K values.
 
 Note on config keys: TA-EVRP nests PSL settings under `traffic.psl.*` and uses `_kmh` suffixes (e.g., `v_min_kmh`), while TRSP uses `traffic.*` (e.g., `v_min`). Both store m/s internally. Align both if you want the same profiles end-to-end.
+
+### SVC (Stochastic Vehicular Congestion) — TRSP only
+
+TRSP also supports a second traffic model where real SUMO background vehicles (pre-generated via `randomTrips.py` + `duarouter`) create emergent congestion. The `DQNSVCAgent` observes per-neighbour mean speeds queried live from TraCI (`neighbor_speeds`), replacing the global `time_slot` signal.
+
+**SVC is not yet integrated into LocalPlanner / TA-EVRP.** The `LocalPlanner.plan()` method is graph-only (no TraCI calls), so it cannot populate the `neighbor_speeds` observation that DQN-SVC expects. End-to-end TA-EVRP runs must use a PSL-trained agent (SARSA, DQN-PSL) until a graph-level approximation for `neighbor_speeds` is added to `LocalPlanner`.
 
 ---
 
@@ -187,3 +197,5 @@ In the currently logged experiments, using the SARSA local planner often improve
 | DQN/A2C/PPO policy support in `LocalPlanner` | ✅ Done |
 | End-to-end test: MILP plan + TRSP navigation + metrics | ✅ Done |
 | TRSP time slot aligned with EVRP sim clock for K>1 | ✅ Done (PSL traffic end-to-end complete) |
+| SVC traffic model trained on N1/N2/N3 (DQN-SVC) | ✅ Done (TRSP standalone) |
+| SVC `DQNSVCAgent` support in `LocalPlanner` / TA-EVRP integration | ⏳ Pending (requires TraCI-free neighbor_speeds approximation) |

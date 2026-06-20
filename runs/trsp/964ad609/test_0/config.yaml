@@ -16,7 +16,7 @@ simulation:
 sumo:
   delay: 0
   step_length: 1.0
-  traffic_scale: 1.5
+  traffic_scale: 2
 test:
   mode: sequential_eval
 traffic:

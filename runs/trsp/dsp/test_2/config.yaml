@@ -1,7 +1,7 @@
 agent:
   action_mode: node_id
-  algo: dqn_svc
-  policy: 964ad609
+  algo: dsp
+  policy: null
 fleet:
   max_speed: 110
 net:

@@ -17,6 +17,7 @@ import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
 from dronesim.trsp.agents.a2c_psl      import A2CAgent
 from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
+from dronesim.trsp.agents.dsp          import DSPAgent
 from dronesim.trsp.agents.dqn_psl      import DQNAgent
 from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
 from dronesim.trsp.agents.ppo_psl      import PPOAgent
@@ -162,6 +163,9 @@ def plan_route(agent, action_mode, start_node, target_node, time_slot,
     curr_node = start_node
     route_edges = []
 
+    if hasattr(agent, 'start_leg'):
+        agent.start_leg(start_node, target_node)
+
     try:
         while curr_step < max_steps and curr_node != target_node:
             nb_nodes = list(G_dir.neighbors(curr_node))
@@ -235,16 +239,27 @@ def make_test_dir(base_dir):
     return test_dir
 
 
+_CSV_HEADER = (
+    "start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges,"
+    "traffic_segment_start,traffic_segment_end,traffic_speed_start_ms,traffic_speed_end_ms,failed_error\n"
+)
+
+
 def init_results(test_dir, config):
-    """Write config snapshot and initialize the CSV with headers."""
+    """Write config snapshot and initialize the policy CSV with headers."""
     with open(f"{test_dir}/config.yaml", 'w') as f:
         yaml.dump(config, f)
     results_path = f"{test_dir}/simulation_results.csv"
     with open(results_path, 'w') as f:
-        f.write(
-            "start_idx,target_idx,warm_up_time,tour_start_time,total_time_taken,path_length,path_edges,"
-            "traffic_segment_start,traffic_segment_end,traffic_speed_start_ms,traffic_speed_end_ms,failed_error\n"
-        )
+        f.write(_CSV_HEADER)
+    return results_path
+
+
+def init_baseline_csv(test_dir, suffix):
+    """Initialize a baseline-results CSV (no config.yaml written)."""
+    results_path = f"{test_dir}/simulation_results_{suffix}.csv"
+    with open(results_path, 'w') as f:
+        f.write(_CSV_HEADER)
     return results_path
 
 
@@ -372,8 +387,6 @@ def main():
     parser = argparse.ArgumentParser(description="TRSP Sequential Evaluation (K>1 compatible)")
     parser.add_argument('-p', '--policy', type=str, required=True,
                         help="Policy ID under runs/trsp/")
-    parser.add_argument('--dijkstra', action='store_true',
-                        help="Also run Dijkstra baseline with the same 101 nodes")
     args = parser.parse_args()
 
     config_path = f"runs/trsp/{args.policy}/config.yaml"
@@ -422,6 +435,8 @@ def main():
     if traffic_model == 'svc':
         sumo_config_cmd += ['--route-files', config['traffic']['route_file']]
 
+    ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
+
     # --- Policy evaluation ---
     algo = config['agent']['algo']
     if algo == 'dqn':
@@ -434,9 +449,14 @@ def main():
         policy_agent = PPOAgent(config)
     elif algo == 'a2c':
         policy_agent = A2CAgent(config)
+    elif algo == 'dsp':
+        policy_agent = DSPAgent(0, graph_info['G_dir'], graph_info['node2idx'],
+                                graph_info['idx2node'], ugv_speed)
     else:
         policy_agent = get_agent(config['agent'], 0)
     action_mode = config['agent'].get('action_mode', 'neighbor_index')
+    if algo == 'dsp':
+        action_mode = 'node_id'
 
     policy_dir = f"runs/trsp/{args.policy}"
     test_dir = make_test_dir(policy_dir)
@@ -453,26 +473,29 @@ def main():
     print(f"Policy eval done in {timedelta(seconds=int(time.time() - t0))} → {results_path}")
 
     # --- Dijkstra baseline evaluation ---
-    if args.dijkstra:
-        dij_config = copy.deepcopy(config)
-        dij_config['agent']['algo'] = 'dijkstra'
-        dij_config['agent']['action_mode'] = 'neighbor_index'
-        dij_config['agent']['policy'] = None
-        dij_config['test'] = {'mode': 'sequential_eval'}
+    dij_agent = DijkstraAgent(0)
+    dij_results_path = init_baseline_csv(test_dir, 'dijkstra')
 
-        dij_agent = DijkstraAgent(0)
-        dij_base_dir = 'runs/trsp/dijkstra'
-        os.makedirs(dij_base_dir, exist_ok=True)
-        dij_test_dir = make_test_dir(dij_base_dir)
-        dij_results_path = init_results(dij_test_dir, dij_config)
+    print(f"\n[Dijkstra] → {dij_results_path}")
+    t0 = time.time()
+    run_evaluation(
+        dij_agent, 'neighbor_index', selected_idxs, idx2node, graph_info, config,
+        sumo_config_cmd, psl_model, traffic_model, dij_results_path, desc='Dijkstra'
+    )
+    print(f"Dijkstra eval done in {timedelta(seconds=int(time.time() - t0))} → {dij_results_path}")
 
-        print(f"\n[Dijkstra] → {dij_test_dir}")
-        t0 = time.time()
-        run_evaluation(
-            dij_agent, 'neighbor_index', selected_idxs, idx2node, graph_info, config,
-            sumo_config_cmd, psl_model, traffic_model, dij_results_path, desc='Dijkstra'
-        )
-        print(f"Dijkstra eval done in {timedelta(seconds=int(time.time() - t0))} → {dij_results_path}")
+    # --- DSP baseline evaluation ---
+    dsp_agent = DSPAgent(0, graph_info['G_dir'], graph_info['node2idx'],
+                         graph_info['idx2node'], ugv_speed)
+    dsp_results_path = init_baseline_csv(test_dir, 'dsp')
+
+    print(f"\n[DSP] → {dsp_results_path}")
+    t0 = time.time()
+    run_evaluation(
+        dsp_agent, 'node_id', selected_idxs, idx2node, graph_info, config,
+        sumo_config_cmd, psl_model, traffic_model, dsp_results_path, desc='DSP'
+    )
+    print(f"DSP eval done in {timedelta(seconds=int(time.time() - t0))} → {dsp_results_path}")
 
 
 if __name__ == '__main__':

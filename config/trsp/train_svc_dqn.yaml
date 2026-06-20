@@ -1,5 +1,5 @@
 net:
-  net_path: data/ames/ames_campus_final.sumocfg
+  net_path: data/grid_road/grid_road.sumocfg
   max_degree: 5
 
 fleet:
@@ -12,7 +12,7 @@ sumo:
 
 traffic:
   model: svc
-  route_file: data/ames/traffic_routes/svc_42/rvt_routes.xml
+  route_file: data/grid_road/traffic_routes/svc_42/rvt_routes.xml
 
 simulation:
   max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
