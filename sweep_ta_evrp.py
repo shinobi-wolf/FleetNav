@@ -29,6 +29,7 @@ import os
 import sys
 import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,32 @@ import yaml
 sys.path.insert(0, str(Path(__file__).parent))
 
 from dronesim.ta_evrp import Instance, GlobalPlanner, LocalPlanner, Simulator
+
+# ---------------------------------------------------------------------------
+# Axis — unit of sweep variation (single dotpath or zip group)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class Axis:
+    dotpaths: list[str]
+    values: list  # scalars for single axes, tuples for zip axes
+
+    @property
+    def is_zip(self) -> bool:
+        return len(self.dotpaths) > 1
+
+
+def _combo_to_row(all_axes: list[Axis], combo: tuple) -> dict[str, Any]:
+    """Expand a combo tuple to a flat {col_name: value} dict."""
+    row: dict[str, Any] = {}
+    for ax, val in zip(all_axes, combo):
+        if ax.is_zip:
+            for dp, v in zip(ax.dotpaths, val):
+                row[_dotpath_to_col(dp)] = v
+        else:
+            row[_dotpath_to_col(ax.dotpaths[0])] = val
+    return row
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -316,11 +343,10 @@ def _run_single(args: tuple) -> dict:  # noqa: C901
 # ---------------------------------------------------------------------------
 
 def _print_combo_table(
-    axis_keys: list[str],
+    col_names: list[str],
     all_combos: list[tuple],
     n_skip: int,
 ) -> None:
-    col_names = [_dotpath_to_col(k) for k in axis_keys]
     col_widths = [max(len(cn), 4) for cn in col_names]
     for combo in all_combos:
         for i, v in enumerate(combo):
@@ -330,7 +356,7 @@ def _print_combo_table(
     bar = "─" * (total_w + 2)
 
     print(f"\n{bar}")
-    print(f"  Axes         : {len(axis_keys)}")
+    print(f"  Axes         : {len(col_names)}")
     print(f"  Combinations : {len(all_combos)}")
     if n_skip:
         print(f"  Already done : {n_skip}  (will be skipped)")
@@ -390,29 +416,35 @@ def main() -> None:
     base_path = sweep_raw.pop("base", "config/ta_evrp/base.yaml")
     base_cfg = _load_base_config(base_path)
 
+    zip_groups = sweep_raw.pop("_zip_", []) or []
     axes = _extract_axes(sweep_raw)
     fixed = _extract_fixed(sweep_raw)
 
-    if not axes:
-        log.error("No list values found in %s — nothing to sweep.", args.config)
+    all_axes: list[Axis] = [Axis([k], v) for k, v in axes.items()]
+    for group in zip_groups:
+        all_axes.append(Axis(group["keys"], [tuple(row) for row in group["values"]]))
+
+    if not all_axes:
+        log.error("No sweep axes found in %s — nothing to sweep.", args.config)
         sys.exit(1)
 
-    axis_keys = list(axes.keys())
-    all_combos = list(itertools.product(*[axes[k] for k in axis_keys]))
+    all_dotpaths = [dp for ax in all_axes for dp in ax.dotpaths]
+    all_combos = list(itertools.product(*[ax.values for ax in all_axes]))
 
     total_runs = len(all_combos)
     log.info("Sweep config  : %s", args.config)
-    log.info("Axes          : %d  →  %d combinations", len(axes), total_runs)
-    for k, vals in axes.items():
-        log.info("  %-40s %s", k, vals)
+    log.info("Axes          : %d  →  %d combinations", len(all_axes), total_runs)
+    for ax in all_axes:
+        if ax.is_zip:
+            log.info("  zip(%-36s) %d rows", ", ".join(ax.dotpaths), len(ax.values))
+        else:
+            log.info("  %-40s %s", ax.dotpaths[0], ax.values)
 
     # ── Skip already-done ────────────────────────────────────────────────────
-    done_keys = _load_done_keys(args.output, axis_keys)
+    done_keys = _load_done_keys(args.output, all_dotpaths)
     pending: list[tuple] = [
         c for c in all_combos
-        if _combo_fingerprint(
-            {_dotpath_to_col(k): c[i] for i, k in enumerate(axis_keys)}
-        ) not in done_keys
+        if _combo_fingerprint(_combo_to_row(all_axes, c)) not in done_keys
     ]
     n_skip = total_runs - len(pending)
     if n_skip:
@@ -420,7 +452,9 @@ def main() -> None:
     log.info("To run        : %d", len(pending))
 
     if args.dry_run:
-        _print_combo_table(axis_keys, all_combos, n_skip)
+        col_names = [_dotpath_to_col(dp) for ax in all_axes for dp in ax.dotpaths]
+        flat_combos = [tuple(_combo_to_row(all_axes, c).values()) for c in all_combos]
+        _print_combo_table(col_names, flat_combos, n_skip)
         return
 
     if not pending:
@@ -428,7 +462,7 @@ def main() -> None:
         return
 
     # ── CSV column schema ────────────────────────────────────────────────────
-    sweep_col_names = [_dotpath_to_col(k) for k in axis_keys]
+    sweep_col_names = [_dotpath_to_col(dp) for ax in all_axes for dp in ax.dotpaths]
     all_columns = sweep_col_names + METRIC_COLUMNS + META_COLUMNS
 
     csv_is_new = not Path(args.output).exists() or Path(args.output).stat().st_size == 0
@@ -437,7 +471,13 @@ def main() -> None:
     # ── Build work items (auto-expand RL combos with discovered policy_ids) ──
     work_items: list[tuple] = []
     for combo in pending:
-        combo_dict = dict(zip(axis_keys, combo))
+        combo_dict: dict[str, Any] = {}
+        for ax, val in zip(all_axes, combo):
+            if ax.is_zip:
+                for dp, v in zip(ax.dotpaths, val):
+                    combo_dict[dp] = v
+            else:
+                combo_dict[ax.dotpaths[0]] = val
         cfg = _build_run_config(base_cfg, fixed, combo_dict)
 
         agent     = (cfg.get("trsp") or {}).get("agent", "dijkstra")
@@ -456,11 +496,11 @@ def main() -> None:
             for pid in policies:
                 cfg_copy = copy.deepcopy(cfg)
                 _set_dotpath(cfg_copy, "trsp.policy_id", pid)
-                sweep_row = {_dotpath_to_col(k): v for k, v in zip(axis_keys, combo)}
-                sweep_row["trsp_policy_id"] = pid   # record the actual policy used
+                sweep_row = _combo_to_row(all_axes, combo)
+                sweep_row["trsp_policy_id"] = pid
                 work_items.append((cfg_copy, sweep_row, 0, 0, args.no_sim))
         else:
-            sweep_row = {_dotpath_to_col(k): v for k, v in zip(axis_keys, combo)}
+            sweep_row = _combo_to_row(all_axes, combo)
             work_items.append((cfg, sweep_row, 0, 0, args.no_sim))
 
     # ── Execute ──────────────────────────────────────────────────────────────

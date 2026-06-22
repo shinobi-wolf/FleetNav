@@ -19,17 +19,18 @@ evrp:
 
 # ── Inner Navigation Agent (TRSP layer) ──────────────────────────────────────
 trsp:
-  agent: dijkstra            # dijkstra | dynamic_dijkstra | sarsa | dqn | a2c | ppo
+  agent: dijkstra            # dijkstra | dsp | sarsa | dqn | a2c | ppo | dqn_svc
   policy_id: null            # policy ID under runs/trsp/; required for RL agents
 
 # ── Road Network ─────────────────────────────────────────────────────────────
 network:
-  net_path: data/ames/ames_campus_final.sumocfg
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
   warehouse: center          # depot placement: center | random | <sumo node id>
   max_degree: 5              # max junction degree (used by TRSP obs space)
 
 # ── Traffic Modeling ─────────────────────────────────────────────────────────
 traffic:
+  model: svc                 # psl | svc
   psl:                       # Piecewise Speed Limit model (per-edge random profile)
     enabled: true
     K: 2                     # number of time slots
@@ -39,12 +40,9 @@ traffic:
     speed_step_kmh: 60.0     # km/h — step between levels
     seed: 42
     profile_type: random     # random | function | file
-  simulated:                 # SUMO background traffic
-    vehicular:
-      enabled: false
-      scale: 0.0             # SUMO --scale factor (0 = empty roads)
-    pedestrian:
-      enabled: false
+  svc:                       # Stochastic Vehicular Congestion (background SUMO vehicles)
+    route_file: data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml
+    traffic_scale: 2
 
 # ── UAV-assisted Battery Management System ───────────────────────────────────
 uav_bms:
@@ -59,7 +57,7 @@ simulation:
     battery_capacity_L: 15       # litres of fuel/energy on a full charge
     consumption_rate_L_per_km: 1  # L/km  →  range = 50 / 5 = 10 km
     free_flow_speed_kmh: 110     # km/h  (= 120 mph)
-    max_duration_h: 6.0             # hours — hard route time limit
+    max_duration_h: 6             # hours — hard route time limit
     customer_service_time_h: 0      # hours — dwell time at each customer stop
     recharge_time_h: 0              # hours — dwell time at each AFS stop
     runtime_refuel: false           # trackback to depot when next stop is out of range
@@ -72,8 +70,9 @@ simulation:
 # ── SUMO Process ─────────────────────────────────────────────────────────────
 sumo:
   step_length: 1.0               # seconds
+  warm_up_time: 0                # seconds of SUMO warm-up before vehicles depart
   simulator: concurrent          # sequential | concurrent
-  max_time_h: 12                 # hours — SUMO wall-clock budget
+  max_time_h: 6                 # hours — SUMO wall-clock budget
   render_mode: print             # quiet | print | human
   delay: 5                       # ms GUI delay (human mode only)
 

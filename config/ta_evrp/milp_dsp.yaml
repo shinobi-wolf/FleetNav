@@ -1,0 +1,25 @@
+# =============================================================================
+# config/ta_evrp/milp_dsp.yaml — MILP outer plan + DSP inner navigation
+# =============================================================================
+# Full TA-EVRP: SVC background traffic, DSP (Dynamic Shortest Path) navigates
+# each leg by re-planning over live edge speeds. DSP is non-learning — no
+# trained policy is required; policy_id points at the DSP config dir.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/milp_dsp.yaml
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: milp
+  milp:
+    time_limit_s: 300        # seconds — Gurobi wall-clock limit
+    mip_gap: 0.01            # 0.0 = proven optimal
+    output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+    afs_dummy_copies: 3
+    depot_dummy_copies: 3
+
+traffic:
+  model: svc
+
+trsp:
+  agent: dsp
+  policy_id: dsp_svc_rand_grid

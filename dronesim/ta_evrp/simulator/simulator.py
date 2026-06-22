@@ -76,8 +76,9 @@ class Simulator:
         self.render_mode            = str(sumo_cfg.get("render_mode", "quiet"))
         self.max_time               = float(sim_cfg["hps"]["stop_time"])
         self.step_length            = float(sumo_cfg.get("step_length", 1.0))
+        self.warmup_time            = float(sumo_cfg.get("warm_up_time", 0.0))
         self.gui_delay              = int(sumo_cfg.get("delay", 0))
-        self.traffic_scale          = float(sumo_cfg.get("traffic_scale", 1.0))
+        self.traffic_scale          = float(sim_cfg["traffic"].get("traffic_scale", 1.0))
         self.sumocfg_path           = str(sim_cfg["net"]["net_path"])
         self.ugv_range              = float(sim_cfg["instance"]["ugv_range"])
         self.ugv_max_speed          = float(sim_cfg["instance"]["ugv_speed"])
@@ -86,6 +87,8 @@ class Simulator:
         self.runtime_refuel         = bool(sim_cfg["instance"]["runtime_refuel"])
         self._v_min_ms              = float(sim_cfg["traffic"]["v_min"])
         self._v_max_ms              = float(sim_cfg["traffic"]["v_max"])
+        self.traffic_model          = str(sim_cfg["traffic"].get("model", "psl"))
+        self.svc_route_file         = sim_cfg["traffic"].get("route_file")
 
         self._net            = instance.network.net    # sumolib Net
         self._routing_graph  = instance.network.graph  # nx.DiGraph (edge attrs: id, length)
@@ -131,14 +134,22 @@ class Simulator:
         ]
         if self.render_mode == "human":
             sumo_cmd += ["--delay", str(self.gui_delay)]
+        if self.traffic_model == "svc" and self.svc_route_file:
+            sumo_cmd += ["--route-files", self.svc_route_file]
 
         traci.start(sumo_cmd)
         sim_time     = 0.0
+
+        # Warm up background traffic before spawning delivery vehicles
+        while sim_time < self.warmup_time:
+            traci.simulationStep()
+            sim_time = traci.simulation.getTime()
+
         traffic_slot = traffic.get_slot(sim_time)
 
         try:
-            # Apply initial edge speeds for slot 0
-            if traffic.enabled:
+            # Apply initial edge speeds for slot 0 (PSL only)
+            if self.traffic_model == "psl" and traffic.enabled:
                 for eid in all_edge_ids:
                     traci.edge.setMaxSpeed(eid, traffic.get_speed(eid, traffic_slot))
 
@@ -191,8 +202,8 @@ class Simulator:
                 traci_veh_id = f"ev_{route.vehicle_id}_leg0"
                 route_id     = f"route_{route.vehicle_id}_leg0"
                 traci.route.add(route_id, edge_route)
-                speed = traffic.get_speed(edge_route[0], traffic_slot)
-                traci.vehicle.add(traci_veh_id, route_id, departSpeed=speed)
+                depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+                traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
                 traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[route.vehicle_id % len(_SUMO_COLORS)])
                 vs.curr_traci_veh_id = traci_veh_id
 
@@ -221,7 +232,7 @@ class Simulator:
                         "t": sim_time, "type": "slot_change",
                         "old_slot": traffic_slot, "new_slot": next_slot,
                     })
-                    if traffic.enabled:
+                    if self.traffic_model == "psl" and traffic.enabled:
                         for eid in all_edge_ids:
                             traci.edge.setMaxSpeed(eid, traffic.get_speed(eid, next_slot))
                 traffic_slot = next_slot
@@ -281,7 +292,7 @@ class Simulator:
                         vehicle_speeds[veh_id]    = traci.vehicle.getSpeed(traci_veh_id)
                         edge_changed = new_edge != vs.curr_net_edge
                         vs.curr_net_edge = new_edge
-                        if (edge_changed or slot_changed) and not new_edge.startswith(":"):
+                        if self.traffic_model == "psl" and (edge_changed or slot_changed) and not new_edge.startswith(":"):
                             new_speed = traffic.get_speed(new_edge, traffic_slot)
                             traci.vehicle.setSpeed(traci_veh_id, new_speed)
                             trigger = (
@@ -480,8 +491,8 @@ class Simulator:
         traci_veh_id = f"ev_{veh_id}_leg{leg_idx}"
         route_id     = f"route_{veh_id}_leg{leg_idx}"
         traci.route.add(route_id, edge_route)
-        speed = traffic.get_speed(edge_route[0], traffic_slot)
-        traci.vehicle.add(traci_veh_id, route_id, departSpeed=speed)
+        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+        traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
 
@@ -523,8 +534,8 @@ class Simulator:
         traci_veh_id = f"ev_{veh_id}_emg{vs._emg_serial}d"
         route_id     = f"route_{veh_id}_emg{vs._emg_serial}d"
         traci.route.add(route_id, edge_route)
-        speed = traffic.get_speed(edge_route[0], traffic_slot)
-        traci.vehicle.add(traci_veh_id, route_id, departSpeed=speed)
+        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+        traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
 
@@ -565,8 +576,8 @@ class Simulator:
         traci_veh_id = f"ev_{veh_id}_emg{vs._emg_serial}r"
         route_id     = f"route_{veh_id}_emg{vs._emg_serial}r"
         traci.route.add(route_id, edge_route)
-        speed = traffic.get_speed(edge_route[0], traffic_slot)
-        traci.vehicle.add(traci_veh_id, route_id, departSpeed=speed)
+        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+        traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
 

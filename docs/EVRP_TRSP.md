@@ -12,25 +12,39 @@ The `Simulator` can use a trained TRSP RL agent to navigate between every pair o
 
 ## Config
 
-Set in `config/ta_evrp/` configs under `trsp`:
+Set in `config/ta_evrp/` configs under `trsp` and `traffic`:
 
 ```yaml
 trsp:
-  agent: dijkstra     # dijkstra | dynamic_dijkstra | sarsa | dqn | a2c | ppo
-  policy_id: null     # policy ID under runs/trsp/; required for RL agents
+  agent: dijkstra     # dijkstra | dsp | sarsa | dqn | a2c | ppo | dqn_svc
+  policy_id: null     # config dir under runs/trsp/; required for RL agents and dsp
+
+traffic:
+  model: psl          # psl | svc
+  psl:
+    enabled: true
+    K: 2
+    ...
+  svc:
+    route_file: null  # path to rvt_routes.xml; required when model: svc
 ```
 
-Example — switch to TRSP navigation with the SARSA policy:
+Example — switch to DQN-SVC navigation with SVC background traffic:
 
 ```yaml
+traffic:
+  model: svc
+  svc:
+    route_file: data/grid_road/traffic_routes/svc_42/rvt_routes.xml
+
 trsp:
-  agent: sarsa
-  policy_id: 77a4169c   # loads runs/trsp/77a4169c/config.yaml + policy.pkl
+  agent: dqn_svc
+  policy_id: b3ef6da6   # loads runs/trsp/b3ef6da6/config.yaml + policy.pkl
 ```
 
 The policy ID must correspond to a directory under `runs/trsp/` containing `config.yaml` and `policy.pkl`.
 
-Run with: `python infer_ta_evrp.py -c config/ta_evrp/milp_sarsa.yaml`
+Run with: `python infer_ta_evrp.py -c config/ta_evrp/milp_policy.yaml` (or `milp_dsp.yaml` for the DSP baseline).
 
 ---
 
@@ -65,6 +79,14 @@ while curr_node != dst_node:
 ```
 
 Cycle detection: if any node is visited twice, the planner falls back to Dijkstra for the full leg. Also falls back on dead-ends, missing edge data, or if max steps (500) are exceeded without arriving.
+
+### DSP — Dynamic Shortest Path (non-learning, traffic-aware)
+
+`dsp` is a baseline that sits between static Dijkstra and the learned RL agents. It is **non-learning** — there is no `policy.pkl`; the `policy_id` only needs to point at a `runs/trsp/<id>/config.yaml` with `agent.algo: dsp` that supplies the road graph, fleet speed, and SVC route file.
+
+Per leg, `plan_edges_and_nodes()` first calls `agent.start_leg(src, dst)` (a generic `hasattr` hook — only DSP defines it), which queries `traci.edge.getLastStepMeanSpeed()` for every edge, re-weights the graph by travel time (`length / speed`), and runs Dijkstra **once** to get the full path. The hop-by-hop rollout then just follows that path. Like `dqn_svc`, DSP reads live TraCI speeds, so it must run inside the SUMO session (`plan()` is called from `Simulator.run()`). The same cycle-detection / max-steps / Dijkstra fallbacks apply.
+
+Ready-to-run example: `python infer_ta_evrp.py -c config/ta_evrp/milp_dsp.yaml` (uses `runs/trsp/dsp_svc_rand_grid/`).
 
 ### Dispatcher in `Simulator`
 
@@ -106,7 +128,7 @@ The returned distance is what the simulator deducts from `current_fuel` and reco
 
 ## Traffic Model Unification
 
-TRSP now supports two traffic models; TA-EVRP integration currently uses only PSL.
+Both TRSP and TA-EVRP support two traffic models, selected via `traffic.model`.
 
 ### PSL (Piecewise Speed Limit)
 
@@ -125,11 +147,19 @@ Both models generate a discrete speed level set spanning `[v_min, v_max]` in inc
 
 Note on config keys: TA-EVRP nests PSL settings under `traffic.psl.*` and uses `_kmh` suffixes (e.g., `v_min_kmh`), while TRSP uses `traffic.*` (e.g., `v_min`). Both store m/s internally. Align both if you want the same profiles end-to-end.
 
-### SVC (Stochastic Vehicular Congestion) — TRSP only
+### SVC (Stochastic Vehicular Congestion)
 
-TRSP also supports a second traffic model where real SUMO background vehicles (pre-generated via `randomTrips.py` + `duarouter`) create emergent congestion. The `DQNSVCAgent` observes per-neighbour mean speeds queried live from TraCI (`neighbor_speeds`), replacing the global `time_slot` signal.
+Real SUMO background vehicles (pre-generated via `randomTrips.py` + `duarouter`) create emergent congestion. The `DQNSVCAgent` observes per-neighbour mean speeds queried live from TraCI (`neighbor_speeds`), replacing the global `time_slot` signal.
 
-**SVC is not yet integrated into LocalPlanner / TA-EVRP.** The `LocalPlanner.plan()` method is graph-only (no TraCI calls), so it cannot populate the `neighbor_speeds` observation that DQN-SVC expects. End-to-end TA-EVRP runs must use a PSL-trained agent (SARSA, DQN-PSL) until a graph-level approximation for `neighbor_speeds` is added to `LocalPlanner`.
+**SVC is now fully integrated into TA-EVRP.** Setting `traffic.model: svc` in the TA-EVRP config causes the Simulator to:
+1. Append `--route-files <route_file>` to the SUMO command so background vehicles spawn.
+2. Skip all PSL slot-based `traci.edge.setMaxSpeed()` and `traci.vehicle.setSpeed()` calls — congestion is emergent, not scripted.
+
+When `trsp.agent: dqn_svc`, `LocalPlanner.plan()` queries `traci.edge.getLastStepMeanSpeed()` at each hop to build the `neighbor_speeds` observation for `DQNSVCAgent.predict()`. TraCI is available at call time because `plan()` is invoked from inside `Simulator.run()` (an active SUMO session).
+
+The `dsp` agent is also SVC-oriented: it reads the same live edge speeds, but once per leg (in `start_leg`) rather than per hop, and re-plans the whole path via travel-time Dijkstra. It needs no trained policy — see the DSP subsection above.
+
+**SUMO warm-up.** `sumo.warm_up_time` (seconds, default `0`) steps the SUMO simulation forward before any delivery vehicle is spawned, letting SVC background traffic build to a steady state first — mirroring `simulation.warm_up_time` in the TRSP env. Time is absolute (like the TRSP env), so a non-zero warm-up offsets `finish_time`/makespan by a constant across all vehicles; relative planner/agent comparisons are unaffected.
 
 ---
 
@@ -170,7 +200,7 @@ infer_ta_evrp.py
 ## Constraints and Assumptions
 
 - **Same network:** The TRSP policy must be trained on the same SUMO network as the TA-EVRP simulation. `LocalPlanner` builds its graph from the TRSP config's `net.net_path` — mismatched networks cause `KeyError` on node lookup.
-- **All RL agents supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA uses neighbour-index actions; DQN/A2C/PPO use global node-index actions. Unknown algos fall back to Dijkstra.
+- **All RL agents + DSP supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA uses neighbour-index actions; DQN/A2C/PPO/DQN-SVC and DSP use global node-index actions. DSP is non-learning (no `policy.pkl`). Unknown algos fall back to Dijkstra.
 - **No SUMO during plan:** `plan()` is pure Python — no TraCI calls. It runs inside the EVRP SUMO session without conflict.
 - **Time slot approximation:** `plan()` receives `sim_time_s` and maps it to a slot via the TRSP PSL model. For `K=1` this is always slot 0 (exact). For `K>1`, the slot reflects the TA-EVRP simulation clock — consistency depends on matching `T` (derived from `max_time_s`) and `K` values between the two configs.
 
@@ -198,4 +228,8 @@ In the currently logged experiments, using the SARSA local planner often improve
 | End-to-end test: MILP plan + TRSP navigation + metrics | ✅ Done |
 | TRSP time slot aligned with EVRP sim clock for K>1 | ✅ Done (PSL traffic end-to-end complete) |
 | SVC traffic model trained on N1/N2/N3 (DQN-SVC) | ✅ Done (TRSP standalone) |
-| SVC `DQNSVCAgent` support in `LocalPlanner` / TA-EVRP integration | ⏳ Pending (requires TraCI-free neighbor_speeds approximation) |
+| `traffic.model: psl\|svc` selector in TA-EVRP config + simulator | ✅ Done |
+| SVC background vehicles in TA-EVRP Simulator via `--route-files` | ✅ Done |
+| DQN-SVC `LocalPlanner` support (TraCI `neighbor_speeds` at each hop) | ✅ Done |
+| DSP `LocalPlanner` support (live-speed per-leg Dijkstra, non-learning baseline) | ✅ Done |
+| SUMO `warm_up_time` in TA-EVRP `sumo:` config (steps traffic before vehicles depart) | ✅ Done |

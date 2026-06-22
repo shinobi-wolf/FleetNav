@@ -17,6 +17,6 @@ evrp:
     depot_dummy_copies: 3
 
 trsp:
-  agent: sarsa
-  policy_id: be5dbb1c
+  agent: dqn_svc
+  policy_id: 2553013e
 

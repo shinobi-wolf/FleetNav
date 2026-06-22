@@ -1,0 +1,39 @@
+# =============================================================================
+# runs/trsp/dsp_svc_rand_grid/config.yaml
+# =============================================================================
+# DSP (Dynamic Shortest Path) "policy" config for the rand_grid_road network
+# under SVC background traffic. DSP is non-learning — there is no policy.pkl;
+# this config only supplies the graph, fleet speed, and traffic source that the
+# TA-EVRP LocalPlanner needs to build a DSPAgent.
+#
+# Select it in a TA-EVRP config with:
+#   trsp:
+#     agent: dsp
+#     policy_id: dsp_svc_rand_grid
+agent:
+  algo: dsp
+  action_mode: node_id
+  policy: null
+
+fleet:
+  max_speed: 110            # km/h — must match simulation.ugv.free_flow_speed_kmh
+
+net:
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
+  max_degree: 5
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 2
+  delay: 0
+
+simulation:
+  max_steps: 100
+  max_time: 6
+  random_sg_pair: true
+  render_mode: quiet
+  warm_up_time: 0
+
+traffic:
+  model: svc
+  route_file: data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml

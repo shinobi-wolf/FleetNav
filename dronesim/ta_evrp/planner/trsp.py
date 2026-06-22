@@ -15,37 +15,46 @@ _MAX_PLAN_STEPS = 500
 
 # SARSA-family: predict() returns index into sorted(nb_idxs[:num_actions])
 _NEIGHBOR_IDX_ALGOS = {"sarsa", "sarsa_lambda"}
-# Deep RL: predict() returns global node index masked to valid neighbours
-_NODE_IDX_ALGOS = {"dqn", "a2c", "ppo"}
+# Deep RL + DSP: predict() returns global node index masked to valid neighbours
+_NODE_IDX_ALGOS = {"dqn", "a2c", "ppo", "dqn_svc", "dsp"}
 
 
 def _build_agent(algo: str, trsp_config: dict):
     """Instantiate + load the correct agent.  Returns (agent, action_mode) or (None, None)."""
     if algo == "sarsa":
-        from dronesim.trsp.agents.sarsa import SARSAAgent
+        from dronesim.trsp.agents import SARSAAgent
         return SARSAAgent(trsp_config), "neighbor"
 
     if algo == "dqn":
-        from dronesim.trsp.agents.dqn import DQNAgent
+        from dronesim.trsp.agents import DQNAgent
         return DQNAgent(trsp_config), "node"
 
     if algo == "a2c":
-        from dronesim.trsp.agents.a2c import A2CAgent
+        from dronesim.trsp.agents import A2CAgent
         return A2CAgent(trsp_config), "node"
 
     if algo == "ppo":
-        from dronesim.trsp.agents.ppo import PPOAgent
+        from dronesim.trsp.agents import PPOAgent
         return PPOAgent(trsp_config), "node"
+
+    if algo == "dqn_svc":
+        from dronesim.trsp.agents import DQNSVCAgent
+        return DQNSVCAgent(trsp_config), "node"
 
     return None, None
 
 
 class LocalPlanner:
     """
-    Routes node-to-node via a trained TRSP RL agent (graph-only, no SUMO).
+    Routes node-to-node via a trained TRSP RL agent (graph-only for PSL; TraCI-backed for SVC).
     Falls back to Dijkstra on cycles, dead-ends, invalid actions, or missing policy.
 
-    Supported algos: sarsa, dqn, a2c, ppo.
+    Supported algos: sarsa, dqn, a2c, ppo, dqn_svc, dsp.
+
+    `dsp` (Dynamic Shortest Path) is a non-learning, traffic-aware baseline: it
+    queries live TraCI edge speeds once per leg, re-weights the graph by travel
+    time, and follows the resulting Dijkstra path hop-by-hop. Like dqn_svc, it
+    must run inside the SUMO session (LocalPlanner is called from Simulator.run).
     """
 
     def __init__(self, policy_id: str) -> None:
@@ -54,21 +63,32 @@ class LocalPlanner:
             trsp_config = yaml.safe_load(f)
 
         algo = (trsp_config.get("agent") or {}).get("algo", "sarsa")
+        self.algo = algo
 
         self._agent = None
         self._action_mode: str = "neighbor"
 
-        try:
-            self._agent, self._action_mode = _build_agent(algo, trsp_config)
-        except Exception as exc:
-            print(f"LocalPlanner: failed to load '{algo}' agent — {exc}; using Dijkstra fallback")
-
-        if self._agent is not None:
-            env = self._agent.env.unwrapped
-        else:
-            # No agent (unknown algo or load failure) — still need graph for Dijkstra
+        if algo == "dsp":
+            # DSP is non-learning: it needs the env's graph maps at construction
+            # time (it has no internal env) and queries live TraCI edge speeds
+            # once per leg. Build the env first, then hand its graph to the agent.
+            from dronesim.trsp.agents import DSPAgent
             wrapped = gym.make("SumoTRSPEnv-v0", config=trsp_config)
             env = wrapped.unwrapped
+            self._agent = DSPAgent(0, env.G_dir, env.node2idx, env.idx2node, env.ugv_speed)
+            self._action_mode = "node"
+        else:
+            try:
+                self._agent, self._action_mode = _build_agent(algo, trsp_config)
+            except Exception as exc:
+                print(f"LocalPlanner: failed to load '{algo}' agent — {exc}; using Dijkstra fallback")
+
+            if self._agent is not None:
+                env = self._agent.env.unwrapped
+            else:
+                # No agent (unknown algo or load failure) — still need graph for Dijkstra
+                wrapped = gym.make("SumoTRSPEnv-v0", config=trsp_config)
+                env = wrapped.unwrapped
 
         self.G: nx.Graph              = env.G
         self.G_dir: nx.DiGraph        = env.G_dir
@@ -77,6 +97,13 @@ class LocalPlanner:
         self.all_spl: dict            = env.all_shortest_path_lengths
         self.num_actions: int         = env.num_actions
         self.traffic                  = env.traffic
+
+        # DQN-SVC needs TraCI neighbor speeds; store max_degree and ugv_speed for obs building
+        if algo == "dqn_svc" and self._agent is not None:
+            self.max_degree: int   = self._agent.max_degree
+            self.ugv_speed: float  = float(
+                trsp_config.get("fleet", {}).get("max_speed", 110.0)
+            ) / 3.6   # m/s
 
         mode = "Dijkstra" if self._agent is None else f"{algo.upper()} ({self._action_mode}-index)"
         print(f"TRSPLocalPlanner: policy='{policy_id}'  algo={algo}  mode={mode}")
@@ -107,6 +134,11 @@ class LocalPlanner:
         if self._agent is None:
             return self._dijkstra_edges_and_nodes(src_node, dst_node, slot=slot, reason="no_agent")
 
+        # DSP-family agents plan the full leg up-front from live edge speeds;
+        # the hop-by-hop rollout below then just follows that planned path.
+        if hasattr(self._agent, "start_leg"):
+            self._agent.start_leg(src_node, dst_node)
+
         curr_node  = src_node
         curr_pos   = self.node2idx[curr_node]
         target_idx = self.node2idx[dst_node]
@@ -130,7 +162,11 @@ class LocalPlanner:
                     src_node, dst_node, slot=slot, reason="dead_end"
                 )
 
-            obs = {"graph_node": curr_pos, "target_node": target_idx, "time_slot": int(slot)}
+            if self.algo == "dqn_svc":
+                ns  = self._neighbor_speeds(curr_node)
+                obs = {"graph_node": curr_pos, "target_node": target_idx, "neighbor_speeds": ns}
+            else:
+                obs = {"graph_node": curr_pos, "target_node": target_idx, "time_slot": int(slot)}
             next_pos_idx = self._select_next(obs, nb_nodes, dst_node)
 
             next_node = self.idx2node[next_pos_idx]
@@ -186,6 +222,24 @@ class LocalPlanner:
             except Exception:
                 action = best_nb
             return action if action in nb_idxs_set else best_nb
+
+    def _neighbor_speeds(self, curr_node: str) -> np.ndarray:
+        """Query TraCI for outgoing-edge mean speeds from curr_node.
+
+        Called only when algo == 'dqn_svc'; SUMO must be running (called from
+        inside Simulator.run()). Mirrors how SumoTRSPEnv builds neighbor_speeds:
+        sorted by node2idx, normalized by ugv_speed, clamped to [0, 2], padded
+        with 1.0 (free-flow) for missing slots.
+        """
+        import traci  # noqa: PLC0415 — intentional late import; only used for SVC
+        speeds    = np.ones(self.max_degree, dtype=np.float32)
+        nb_sorted = sorted(self.G.neighbors(curr_node), key=lambda n: self.node2idx[n])
+        for i, nb in enumerate(nb_sorted[: self.max_degree]):
+            edge_data = self.G_dir.get_edge_data(curr_node, nb)
+            if edge_data:
+                raw = traci.edge.getLastStepMeanSpeed(edge_data["id"])
+                speeds[i] = float(np.clip(raw / self.ugv_speed, 0.0, 2.0)) if raw >= 0.0 else 1.0
+        return speeds
 
     def _dijkstra_edges_and_nodes(
         self, src_node: str, dst_node: str, *, slot: int, reason: Optional[str]

@@ -11,6 +11,6 @@ evrp:
   planner: heuristic
 
 trsp:
-  agent: sarsa
-  policy_id: f165999c            # set to the policy ID, e.g. "77a4169c"
+  agent: dqn_svc
+  policy_id: 2553013e
 

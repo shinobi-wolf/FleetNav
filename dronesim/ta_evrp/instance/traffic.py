@@ -1,7 +1,12 @@
-"""PSL traffic model for the TA-EVRP Instance block.
+"""Traffic models for the TA-EVRP Instance block.
 
 Native implementation — does not import from dronesim.evrp.
 Reads ta_config directly (human-friendly units) and converts km/h → m/s internally.
+
+Supported models (traffic.model):
+  psl  — Piecewise Speed Limit: per-edge independent speed profiles over K time slots.
+  svc  — Stochastic Vehicular Congestion: SUMO background vehicles loaded via route file;
+          PSL is disabled so the Simulator skips slot-based speed overrides.
 """
 from __future__ import annotations
 
@@ -48,19 +53,39 @@ class PSLTrafficModel:
 
 
 class Traffic:
-    """Builds a PSLTrafficModel from raw ta_config.
+    """Builds a traffic model from raw ta_config.
 
-    Reads traffic.psl.* keys (in km/h) and converts to m/s internally.
-    Requires the network's edge_ids to generate per-edge speed profiles.
+    Reads traffic.model to select between PSL and SVC, then reads the
+    appropriate sub-section (traffic.psl.* or traffic.svc.*).
+    Requires the network's edge_ids for PSL profile generation.
+
+    Attributes
+    ----------
+    model       : PSLTrafficModel — PSL model (disabled when traffic.model == svc)
+    model_type  : str             — "psl" | "svc"
+    route_file  : str | None      — path to SVC rvt_routes.xml, or None
     """
 
     def __init__(self, ta_config: dict[str, Any], edge_ids: list[str]) -> None:
-        psl = ta_config.get("traffic", {}).get("psl", {})
-        ugv = ta_config.get("simulation", {}).get("ugv", {})
+        traffic_cfg  = ta_config.get("traffic", {})
+        psl          = traffic_cfg.get("psl", {})
+        ugv          = ta_config.get("simulation", {}).get("ugv", {})
 
-        free_flow_ms = float(ugv.get("free_flow_speed_kmh", 50.0)) / 3.6
-        max_time_s   = float(ugv.get("max_duration_h", 6.0)) * 3600.0
-        enabled      = bool(psl.get("enabled", False))
+        free_flow_ms    = float(ugv.get("free_flow_speed_kmh", 50.0)) / 3.6
+        max_time_s      = float(ugv.get("max_duration_h", 6.0)) * 3600.0
+        self.model_type = str(traffic_cfg.get("model", "psl"))
+        self.route_file: str | None = None
+
+        if self.model_type == "svc":
+            svc_cfg             = traffic_cfg.get("svc", {})
+            self.route_file     = svc_cfg.get("route_file") or None
+            self.traffic_scale  = float(svc_cfg.get("traffic_scale", 1.0))
+            self.model          = PSLTrafficModel(enabled=False, free_flow_ms=free_flow_ms)
+            return
+
+        self.traffic_scale = 1.0
+
+        enabled = bool(psl.get("enabled", False))
 
         if not enabled:
             self.model = PSLTrafficModel(enabled=False, free_flow_ms=free_flow_ms)
