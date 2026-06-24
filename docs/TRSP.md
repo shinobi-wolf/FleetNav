@@ -36,7 +36,10 @@ dronesim/trsp/
 │   ├── dqn_psl.py           # Deep Q-Network — PSL traffic ✅
 │   ├── ppo_psl.py           # Proximal Policy Optimization — PSL traffic ✅
 │   ├── a2c_psl.py           # Advantage Actor-Critic — PSL traffic ✅
-│   └── dqn_svc.py           # Deep Q-Network — SVC traffic ✅
+│   ├── dqn_svc.py           # Deep Q-Network — SVC traffic ✅
+│   ├── sarsa_svc.py         # SARSA tabular Q-learning — SVC traffic ✅
+│   ├── a2c_svc.py           # Advantage Actor-Critic — SVC traffic ✅
+│   └── ppo_svc.py           # Proximal Policy Optimization — SVC traffic ✅
 └── trainer.py               # lmd_trainer() — training loop
 
 config/trsp/
@@ -47,7 +50,18 @@ config/trsp/
 ├── a2c_rand_grid_K1.yaml    # A2C — rand_grid_road, K=1
 ├── a2c_rand_grid_K2.yaml    # A2C — rand_grid_road, K=2
 ├── a2c_ames_K1.yaml         # A2C — ames, K=1
-└── a2c_ames_K2.yaml         # A2C — ames, K=2
+├── a2c_ames_K2.yaml         # A2C — ames, K=2
+└── svc/                     # SVC training configs — one per algo × network
+    ├── sarsa_grid_road.yaml
+    ├── sarsa_rand_grid.yaml
+    ├── sarsa_ames.yaml
+    ├── dqn_grid_road.yaml   # (train_svc_dqn.yaml is the grid_road template)
+    ├── a2c_grid_road.yaml
+    ├── a2c_rand_grid.yaml
+    ├── a2c_ames.yaml
+    ├── ppo_grid_road.yaml
+    ├── ppo_rand_grid.yaml
+    └── ppo_ames.yaml
 
 runs/trsp/<policy_id>/       # Saved policies and logs
 ```
@@ -232,6 +246,17 @@ CleanRL-style MLP Q-network with experience replay.
 - **Network:** 3-layer MLP (ReLU, hidden=64)
 - **Training:** ε-greedy, replay buffer (50K), target network (sync every 500 steps), TD(0) MSE loss
 
+### `SARSASVCAgent` ✅ Done (`sarsa_svc.py`) — SVC traffic
+
+SARSA tabular Q-learning adapted for SVC. Discretizes the continuous `neighbor_speeds` vector into bins to keep the state space finite.
+
+- **State key:** `(graph_node, target_node, speed_bins_tuple)` — the speed vector is digitized into `num_speed_bins` bins via `np.digitize`
+- **Action space:** `neighbor_index` — same as SARSA-PSL; action is an index into sorted neighbour list up to `max_degree`
+- **Q-table:** `dict[state → np.ndarray[max_degree]]`; initialized with uniform noise; updates identical to SARSA-PSL
+- **Config key:** `training.sarsa.num_speed_bins` (default 3)
+- **Policy pickle:** same Q-table dict format as SARSA-PSL
+- **Limitation:** the state explosion from combining positional state with speed bins can slow convergence on networks with many neighbour-speed combinations; DQN-SVC handles this better via continuous function approximation
+
 ### `DQNSVCAgent` ✅ Done (`dqn_svc.py`) — SVC traffic
 
 DQN variant for the SVC traffic model. Replaces the global `time_slot` with real-time local traffic observations.
@@ -242,6 +267,24 @@ DQN variant for the SVC traffic model. Replaces the global `time_slot` with real
 - **Hardware:** CUDA-aware; moves networks and tensors to GPU if available
 - **Training:** same ε-greedy / replay / target-net scheme as DQN-PSL
 - **Policy pickle keys:** `state_dict`, `num_nodes`, `max_degree`, `obs_dim`, `hidden_dim`
+
+### `A2CSVCAgent` ✅ Done (`a2c_svc.py`) — SVC traffic
+
+A2C variant for SVC traffic. Architecture and training loop identical to `A2CAgent` (PSL) but replaces `time_slot` with live `neighbor_speeds` in the observation.
+
+- **Observation encoding:** one-hot(graph_node) ++ one-hot(target_node) ++ `neighbor_speeds[max_degree]`; `obs_dim = 2·num_nodes + max_degree`
+- **Network:** separate actor and critic, 2-layer Tanh MLP (hidden=128), orthogonal init
+- **Action space:** `node_id` — global node index, masked to valid neighbours at inference
+- **Policy pickle keys:** `actor_state_dict`, `critic_state_dict`, `num_nodes`, `max_degree`, `obs_dim`, `hidden_dim`
+
+### `PPOSVCAgent` ✅ Done (`ppo_svc.py`) — SVC traffic
+
+PPO variant for SVC traffic. Architecture and training loop identical to `PPOAgent` (PSL) but uses `neighbor_speeds` observation.
+
+- **Observation encoding:** same as A2C-SVC — `obs_dim = 2·num_nodes + max_degree`
+- **Network:** separate actor and critic, 2-layer Tanh MLP (hidden=128), orthogonal init
+- **Training:** `num_steps`-step rollouts, GAE (λ=0.95), `update_epochs` epochs of minibatch PPO (clipped ratio + entropy bonus)
+- **Policy pickle keys:** `actor_state_dict`, `critic_state_dict`, `num_nodes`, `max_degree`, `obs_dim`, `hidden_dim`
 
 ### `PPOAgent` ✅ Done (`ppo_psl.py`)
 
@@ -268,14 +311,15 @@ SVC template: `config/trsp/train_svc_dqn.yaml` — copy and update `net.net_path
 
 ### Key Hyperparameters
 
-| Param | SARSA | DQN-PSL | DQN-SVC | PPO | A2C |
-|-------|-------|---------|---------|-----|-----|
-| Episodes / Iterations | 5000 ep | 5000 ep | 5000 ep | 500 iter | 500 iter |
-| Steps per rollout | — | — | — | 512 | 512 |
-| Learning rate | 0.1 (α) | 1e-3 | 1e-3 | 2.5e-4 | 7e-4 |
-| Hidden dim | — | 64 | 128 | 64 | 64 |
-| Gamma | 0.99 | 0.99 | 0.99 | 0.99 | 0.99 |
-| Warm-up time | — | — | 60s | — | — |
+| Param | SARSA | DQN-PSL | DQN-SVC | PPO | A2C | SARSA-SVC | A2C-SVC | PPO-SVC |
+|-------|-------|---------|---------|-----|-----|-----------|---------|---------|
+| Episodes / Iterations | 5000 ep | 5000 ep | 5000 ep | 500 iter | 500 iter | 5000 ep | 100 iter | 100 iter |
+| Steps per rollout | — | — | — | 512 | 512 | — | 512 | 512 |
+| Learning rate | 0.1 (α) | 1e-3 | 1e-3 | 2.5e-4 | 7e-4 | 0.1 (α) | 7e-4 | 2.5e-4 |
+| Hidden dim | — | 64 | 128 | 64 | 64 | — | 128 | 128 |
+| Gamma | 0.99 | 0.99 | 0.99 | 0.99 | 0.99 | 0.99 | 0.99 | 0.99 |
+| Warm-up time | — | — | 60s | — | — | 60s | 60s | 60s |
+| Speed bins | — | — | — | — | — | 3 | — | — |
 
 ---
 
@@ -326,11 +370,12 @@ runs/trsp/<policy_id>/
 
 | Agent | Keys in `policy.pkl` |
 |-------|----------------------|
-| SARSA | Q-table dict |
+| SARSA / SARSA-SVC | Q-table dict |
 | DQN-PSL | `state_dict`, `num_nodes`, `num_slots`, `obs_dim`, `hidden_dim` |
 | DQN-SVC | `state_dict`, `num_nodes`, `max_degree`, `obs_dim`, `hidden_dim` |
-| PPO | `actor_state_dict`, `critic_state_dict`, `num_nodes`, `num_slots`, `obs_dim`, `hidden_dim` |
-| A2C | `actor_state_dict`, `critic_state_dict`, `num_nodes`, `num_slots`, `obs_dim`, `hidden_dim` |
+| PPO-PSL | `actor_state_dict`, `critic_state_dict`, `num_nodes`, `num_slots`, `obs_dim`, `hidden_dim` |
+| A2C-PSL | `actor_state_dict`, `critic_state_dict`, `num_nodes`, `num_slots`, `obs_dim`, `hidden_dim` |
+| A2C-SVC / PPO-SVC | `actor_state_dict`, `critic_state_dict`, `num_nodes`, `max_degree`, `obs_dim`, `hidden_dim` |
 
 ---
 
@@ -352,15 +397,54 @@ All networks: `max_degree: 5`.
 
 DQN, SARSA, and Dijkstra achieve near-identical success rates (~98–100%) on N1/N2/N3 with K=1. PPO and A2C converge to faster mean traversal times but at significantly lower success rates (8–30%), indicating incomplete policy convergence. SARSA and DQN consistently match or beat Dijkstra on mean makespan.
 
-### SVC Traffic (DQN-SVC, all three networks)
+### SVC Traffic — All Agents (all three networks, SVC-svc_42)
 
-| Network | Traffic | Policy | Mean time | Dijkstra | DSP | Policy vs Dijkstra | Policy success |
-|---------|---------|--------|-----------|----------|-----|--------------------|----------------|
-| N1 (grid_road) | SVC-svc_123 | `b3ef6da6` | 253.6s | 378s | — | −33% ✓ | 96% |
-| N2 (rand_grid_road) | SVC-svc_42 | `2553013e` | 59.7s | 82s | 68.3s | −27% ✓ | 75% |
-| N3 (ames) | SVC-svc_42 | `964ad609` | 146.1s | 152s | 145.2s | −3.6% | 95% |
+All SVC agents trained with `traffic_scale` per network (N1: 1.5, N2: 2.5, N3: 2.0), `warm_up_time: 60s`.
 
-DQN-SVC outperforms Dijkstra on mean traversal time on all three networks. DSP (live-speed Dijkstra planned once per leg) performs comparably to or slightly better than static Dijkstra, confirming that one-shot traffic-aware planning helps but learned policies can exploit finer-grained patterns. The N2 success-rate drop (75% vs 99%) suggests the policy sometimes fails to reach the target within `max_steps` — likely due to the short edges (mean 152m) requiring more graph steps per route. N3 (Ames) shows a near-tie across all three agents; the real-world campus topology is less structured, making traffic-avoidance harder to exploit.
+#### DQN-SVC
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N1 (grid_road) | `19acc44f` | 112.3s | 152.2s | 136.5s | −26% ✓ | 99% |
+| N2 (rand_grid_road) | `2553013e` | 59.7s | 82.0s | 68.3s | −27% ✓ | 75% |
+| N3 (ames) | `964ad609` | 146.1s | 151.5s | 145.2s | −3.5% | 95% |
+
+DQN-SVC achieves the best balance of mean traversal time and success rate across all networks. N2 success rate (75%) is lower due to short edges requiring more hops; N3 shows near-tie with DSP and Dijkstra on this structured campus network.
+
+#### SARSA-SVC
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N1 (grid_road) | `e6703a2a` | 258.2s | 156.7s | 138.2s | +65% ✗ | 72% |
+| N2 (rand_grid_road) | `38ac1d0a` | 52.1s | 59.5s | 62.8s | −12% ✓ | 58% |
+| N3 (ames) | `d3230dca` | 156.8s | 158.9s | 147.1s | −1.3% | 94% |
+
+SARSA-SVC's discretized speed-bin state space works reasonably on N2 and N3 but fails on N1: the grid_road topology (regular grid, high degree, many similar-length edges) creates too many state collisions, pushing mean traversal time well above Dijkstra. The 58% success rate on N2 reflects the same short-edge problem as DQN-SVC.
+
+#### A2C-SVC
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N1 (grid_road) | `1ae65214` | 117.4s | 114.6s | 124.7s | +2.4% | 19% |
+| N2 (rand_grid_road) | `6fe5d2d5` | 13.4s | 45.8s | 51.4s | −71% ✓ | 10% |
+| N3 (ames) | `ccbf5610` | 109.8s | 152.3s | 148.9s | −28% ✓ | 6% |
+
+A2C-SVC mirrors the PSL pattern: extremely fast on successful routes (N2: 13.4s vs 45.8s Dijkstra, N3: 109.8s vs 152.3s) but success rates are very low (6–19%). The policy converges to a fast strategy that works on a small fraction of OD pairs while failing to generalise. N1 essentially ties Dijkstra (the grid's regular structure limits gain).
+
+#### PPO-SVC
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N1 (grid_road) | `7ed3a4eb` | 69.4s | 114.6s | 124.7s | −39% ✓ | 16% |
+| N2 (rand_grid_road) | `17301777` | 20.7s | 45.8s | 51.4s | −55% ✓ | 7% |
+| N3 (ames) | `2c00863a` | 66.5s | 152.3s | 148.9s | −56% ✓ | 13% |
+
+PPO-SVC shows the largest mean-time improvement when successful (N3: 66.5s vs 152.3s, N1: 69.4s vs 114.6s) but at the lowest success rates (7–16%). Same fast-but-narrow convergence as A2C-SVC, with PPO's clipped objective providing slightly higher per-route speed gains. The low success rates make PPO-SVC unsuitable for production TA-EVRP use without further training or reward shaping.
+
+**Summary across SVC agents:**
+- **DQN-SVC** is the recommended SVC agent: high success rate (75–99%), consistent improvement over Dijkstra across all networks.
+- **SARSA-SVC** is viable for N2 and N3 but degrades on N1 due to state-space aliasing.
+- **A2C-SVC / PPO-SVC** have strong per-route speed gains but low success rates (~6–19%); suitable for research comparison, not for end-to-end TA-EVRP deployment without improvement.
 
 ---
 
@@ -379,7 +463,8 @@ DQN-SVC outperforms Dijkstra on mean traversal time on all three networks. DSP (
 ## Known Issues / Future Work
 
 - `SARSALambdaAgent` training loop not yet wired.
-- DQN-SVC N2 success rate (75%) is noticeably below Dijkstra (99%) — consider longer training or a higher `max_steps` limit for the short-edge rand_grid_road network.
+- DQN-SVC / SARSA-SVC N2 (rand_grid_road) success rates (75% / 58%) are below Dijkstra (99%) — the short-edge topology requires more hops per route; consider increasing `max_steps` or training longer.
+- A2C-SVC and PPO-SVC success rates are low (6–19%): these agents converge fast but narrowly. Reward shaping, longer training, or curriculum (start with easy OD pairs) may improve generalisation.
+- SARSA-SVC degrades on N1 (grid_road) relative to Dijkstra: the regular grid creates too many state collisions under binned speed discretisation.
 - `infer_trsp.py` treats an episode as done only when `terminated` (wall-clock) fires; it does not break on `truncated`. Use `simulation.max_time` to bound runs, or adjust the runner for per-route inference.
-- SVC policies (DQN-SVC) are not yet supported by `LocalPlanner` in the TA-EVRP integration — `plan()` is graph-only and cannot call TraCI for `neighbor_speeds`. PSL agents (SARSA, DQN-PSL) are the current choice for end-to-end TA-EVRP runs.
 - TRSP's `PSLTrafficModel` and EVRP's `PSLTrafficModel` are independent instances. Config key names differ: TRSP uses `v_min`/`v_max`/`speed_step` (km/h), EVRP uses `v_min_kmh`/`v_max_kmh`/`speed_step_kmh`.

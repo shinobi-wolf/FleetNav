@@ -16,7 +16,7 @@ Set in `config/ta_evrp/` configs under `trsp` and `traffic`:
 
 ```yaml
 trsp:
-  agent: dijkstra     # dijkstra | dsp | sarsa | dqn | a2c | ppo | dqn_svc
+  agent: dijkstra     # dijkstra | dsp | sarsa | sarsa_svc | dqn | dqn_svc | a2c | a2c_svc | ppo | ppo_svc
   policy_id: null     # config dir under runs/trsp/; required for RL agents and dsp
 
 traffic:
@@ -200,7 +200,7 @@ infer_ta_evrp.py
 ## Constraints and Assumptions
 
 - **Same network:** The TRSP policy must be trained on the same SUMO network as the TA-EVRP simulation. `LocalPlanner` builds its graph from the TRSP config's `net.net_path` — mismatched networks cause `KeyError` on node lookup.
-- **All RL agents + DSP supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA uses neighbour-index actions; DQN/A2C/PPO/DQN-SVC and DSP use global node-index actions. DSP is non-learning (no `policy.pkl`). Unknown algos fall back to Dijkstra.
+- **All RL agents + DSP supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA and SARSA-SVC use neighbour-index actions; DQN/DQN-SVC/A2C/A2C-SVC/PPO/PPO-SVC and DSP use global node-index actions. SVC agents (all `*_svc` and `dsp`) query live TraCI `neighbor_speeds` at each hop and must run inside the SUMO session. DSP is non-learning (no `policy.pkl`). Unknown algos fall back to Dijkstra.
 - **No SUMO during plan:** `plan()` is pure Python — no TraCI calls. It runs inside the EVRP SUMO session without conflict.
 - **Time slot approximation:** `plan()` receives `sim_time_s` and maps it to a slot via the TRSP PSL model. For `K=1` this is always slot 0 (exact). For `K>1`, the slot reflects the TA-EVRP simulation clock — consistency depends on matching `T` (derived from `max_time_s`) and `K` values between the two configs.
 
@@ -208,9 +208,14 @@ infer_ta_evrp.py
 
 ## End-to-End Testing Results
 
-End-to-end runs of TA-EVRP with different planners (MILP, mTSP, Heuristic) and TRSP agents are recorded under `runs/ta_evrp/`, with aggregated tables in `results/ta_evrp_results.csv`.
+End-to-end runs of TA-EVRP with different planners (MILP, mTSP, Heuristic) and TRSP agents are recorded under `runs/ta_evrp/`.
 
-In the currently logged experiments, using the SARSA local planner often improves makespan versus the shortest-path baseline, but it is not guaranteed for every planner/network combination.
+| Results file | Traffic model | Agents covered | Sweep config |
+|---|---|---|---|
+| `results/ta_evrp_results.csv` | PSL | dijkstra, sarsa, dqn, a2c, ppo | `config/ta_evrp/sweep_ta_evrp.yaml` |
+| `results/ta_evrp_results_svc.csv` | SVC | dijkstra, dsp, sarsa_svc, dqn_svc, a2c_svc, ppo_svc | `sweep_dqn_svc.yaml` + `sweep_sarsa_a2c_ppo_svc.yaml` |
+
+Analysis and visualisations are in `notebooks/ta_evrp_sweep_analysis.ipynb` (PSL section) and the SVC section of the same notebook.
 
 ---
 
@@ -233,3 +238,7 @@ In the currently logged experiments, using the SARSA local planner often improve
 | DQN-SVC `LocalPlanner` support (TraCI `neighbor_speeds` at each hop) | ✅ Done |
 | DSP `LocalPlanner` support (live-speed per-leg Dijkstra, non-learning baseline) | ✅ Done |
 | SUMO `warm_up_time` in TA-EVRP `sumo:` config (steps traffic before vehicles depart) | ✅ Done |
+| SARSA-SVC / A2C-SVC / PPO-SVC trained on N1/N2/N3 (TRSP standalone) | ✅ Done |
+| `LocalPlanner` support for sarsa_svc, a2c_svc, ppo_svc (SVC obs + correct action mode) | ✅ Done |
+| SVC sweep (all 6 agents × 3 planners × 3 networks) logged to `results/ta_evrp_results_svc.csv` | ✅ Done |
+| `ta_evrp_sweep_analysis.ipynb` SVC section updated for all 6 agents | ✅ Done |

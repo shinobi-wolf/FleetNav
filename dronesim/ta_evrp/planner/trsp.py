@@ -14,9 +14,11 @@ INF = 100000
 _MAX_PLAN_STEPS = 500
 
 # SARSA-family: predict() returns index into sorted(nb_idxs[:num_actions])
-_NEIGHBOR_IDX_ALGOS = {"sarsa", "sarsa_lambda"}
+_NEIGHBOR_IDX_ALGOS = {"sarsa", "sarsa_lambda", "sarsa_svc"}
 # Deep RL + DSP: predict() returns global node index masked to valid neighbours
-_NODE_IDX_ALGOS = {"dqn", "a2c", "ppo", "dqn_svc", "dsp"}
+_NODE_IDX_ALGOS = {"dqn", "a2c", "ppo", "dqn_svc", "a2c_svc", "ppo_svc", "dsp"}
+# SVC agents: obs includes neighbor_speeds instead of time_slot
+_SVC_ALGOS = {"dqn_svc", "sarsa_svc", "a2c_svc", "ppo_svc"}
 
 
 def _build_agent(algo: str, trsp_config: dict):
@@ -25,21 +27,33 @@ def _build_agent(algo: str, trsp_config: dict):
         from dronesim.trsp.agents import SARSAAgent
         return SARSAAgent(trsp_config), "neighbor"
 
+    if algo == "sarsa_svc":
+        from dronesim.trsp.agents import SARSASVCAgent
+        return SARSASVCAgent(trsp_config), "neighbor"
+
     if algo == "dqn":
         from dronesim.trsp.agents import DQNAgent
         return DQNAgent(trsp_config), "node"
+
+    if algo == "dqn_svc":
+        from dronesim.trsp.agents import DQNSVCAgent
+        return DQNSVCAgent(trsp_config), "node"
 
     if algo == "a2c":
         from dronesim.trsp.agents import A2CAgent
         return A2CAgent(trsp_config), "node"
 
+    if algo == "a2c_svc":
+        from dronesim.trsp.agents import A2CSVCAgent
+        return A2CSVCAgent(trsp_config), "node"
+
     if algo == "ppo":
         from dronesim.trsp.agents import PPOAgent
         return PPOAgent(trsp_config), "node"
 
-    if algo == "dqn_svc":
-        from dronesim.trsp.agents import DQNSVCAgent
-        return DQNSVCAgent(trsp_config), "node"
+    if algo == "ppo_svc":
+        from dronesim.trsp.agents import PPOSVCAgent
+        return PPOSVCAgent(trsp_config), "node"
 
     return None, None
 
@@ -49,7 +63,7 @@ class LocalPlanner:
     Routes node-to-node via a trained TRSP RL agent (graph-only for PSL; TraCI-backed for SVC).
     Falls back to Dijkstra on cycles, dead-ends, invalid actions, or missing policy.
 
-    Supported algos: sarsa, dqn, a2c, ppo, dqn_svc, dsp.
+    Supported algos: sarsa, sarsa_svc, dqn, dqn_svc, a2c, a2c_svc, ppo, ppo_svc, dsp.
 
     `dsp` (Dynamic Shortest Path) is a non-learning, traffic-aware baseline: it
     queries live TraCI edge speeds once per leg, re-weights the graph by travel
@@ -98,10 +112,10 @@ class LocalPlanner:
         self.num_actions: int         = env.num_actions
         self.traffic                  = env.traffic
 
-        # DQN-SVC needs TraCI neighbor speeds; store max_degree and ugv_speed for obs building
-        if algo == "dqn_svc" and self._agent is not None:
-            self.max_degree: int   = self._agent.max_degree
-            self.ugv_speed: float  = float(
+        # SVC agents need TraCI neighbor speeds; store max_degree and ugv_speed for obs building
+        if algo in _SVC_ALGOS and self._agent is not None:
+            self.max_degree: int  = int(trsp_config["net"]["max_degree"])
+            self.ugv_speed: float = float(
                 trsp_config.get("fleet", {}).get("max_speed", 110.0)
             ) / 3.6   # m/s
 
@@ -162,7 +176,7 @@ class LocalPlanner:
                     src_node, dst_node, slot=slot, reason="dead_end"
                 )
 
-            if self.algo == "dqn_svc":
+            if self.algo in _SVC_ALGOS:
                 ns  = self._neighbor_speeds(curr_node)
                 obs = {"graph_node": curr_pos, "target_node": target_idx, "neighbor_speeds": ns}
             else:
@@ -226,7 +240,7 @@ class LocalPlanner:
     def _neighbor_speeds(self, curr_node: str) -> np.ndarray:
         """Query TraCI for outgoing-edge mean speeds from curr_node.
 
-        Called only when algo == 'dqn_svc'; SUMO must be running (called from
+        Called for all SVC algos; SUMO must be running (called from
         inside Simulator.run()). Mirrors how SumoTRSPEnv builds neighbor_speeds:
         sorted by node2idx, normalized by ugv_speed, clamped to [0, 2], padded
         with 1.0 (free-flow) for missing slots.

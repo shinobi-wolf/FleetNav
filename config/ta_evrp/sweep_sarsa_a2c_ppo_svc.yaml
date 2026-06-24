@@ -1,0 +1,35 @@
+# =============================================================================
+# config/ta_evrp/sweep_sarsa_a2c_ppo_svc.yaml — SVC policy sweep for
+# sarsa_svc, a2c_svc, and ppo_svc across all three networks
+# =============================================================================
+# 3 planners × 11 zip rows (dijkstra + dsp + 3 policies per network) = 33 runs
+#
+# _zip_ groups move together as paired rows instead of cartesian-expanding.
+# Each row pairs a network with its matched SVC route file, traffic scale,
+# agent, and trained policy_id.
+
+base: config/ta_evrp/base.yaml
+
+traffic:
+  model: svc
+
+# ── Independent sweep axis ────────────────────────────────────────────────────
+evrp:
+  planner: [milp, heuristic, mtsp]
+
+# ── Zip group: network + SVC traffic + trained policy (move together) ─────────
+_zip_:
+  - keys: [network.net_path, traffic.svc.route_file, traffic.svc.traffic_scale, trsp.agent, trsp.policy_id]
+    values:
+      # N1 — grid_road (traffic_scale: 1.5, svc_42)
+      - [data/grid_road/grid_road.sumocfg, data/grid_road/traffic_routes/svc_42/rvt_routes.xml, 1.5, sarsa_svc, e6703a2a]
+      - [data/grid_road/grid_road.sumocfg, data/grid_road/traffic_routes/svc_42/rvt_routes.xml, 1.5, a2c_svc,   1ae65214]
+      - [data/grid_road/grid_road.sumocfg, data/grid_road/traffic_routes/svc_42/rvt_routes.xml, 1.5, ppo_svc,   7ed3a4eb]
+      # N2 — rand_grid_road (traffic_scale: 2.5, svc_42)
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml, 2.5, sarsa_svc, 38ac1d0a]
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml, 2.5, a2c_svc,   6fe5d2d5]
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml, 2.5, ppo_svc,   17301777]
+      # N3 — ames (traffic_scale: 2.0, svc_42)
+      - [data/ames/ames_campus_final.sumocfg, data/ames/traffic_routes/svc_42/rvt_routes.xml, 2.0, sarsa_svc, d3230dca]
+      - [data/ames/ames_campus_final.sumocfg, data/ames/traffic_routes/svc_42/rvt_routes.xml, 2.0, a2c_svc,   ccbf5610]
+      - [data/ames/ames_campus_final.sumocfg, data/ames/traffic_routes/svc_42/rvt_routes.xml, 2.0, ppo_svc,   2c00863a]
