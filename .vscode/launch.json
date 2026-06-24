@@ -27,7 +27,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/trsp/train_svc_dqn.yaml"
+                "${workspaceFolder}/config/trsp/svc/sarsa_grid_road.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -46,7 +46,7 @@
             "args": [
                 "-p",
                 // "4a2adb07"
-                "dijkstra",
+                "e6703a2a",
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

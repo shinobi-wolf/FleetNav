@@ -1,0 +1,36 @@
+net:
+  net_path: data/ames/ames_campus_final.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 2
+  delay: 0
+
+traffic:
+  model: svc
+  route_file: data/ames/traffic_routes/svc_42/rvt_routes.xml
+
+simulation:
+  max_time: 10
+  max_steps: 50
+  render_mode: quiet
+  warm_up_time: 60
+  random_sg_pair: true
+
+agent:
+  algo: sarsa_svc
+  action_mode: neighbor_index
+  policy: null
+
+training:
+  sarsa:
+    num_episodes: 5000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.9
+    epsilon_decay: 0.9995
+    num_speed_bins: 3

@@ -1,0 +1,20 @@
+Building graph from data/rand_grid_road/rand_grid_road_final.sumocfg ...
+Selected 101 nodes (26 total) → 100 evaluation pairs
+Traffic model: SVC  route_file=data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml
+Graph: 26 nodes, 39 edges
+Policy loaded from runs/trsp/17301777/policy.pkl  [device=cuda]
+
+[Policy: 17301777] → runs/trsp/17301777/test_1
+ Retrying in 1 seconds
+17301777:   0%|          | 0/100 [00:00<?, ?it/s]17301777:   1%|          | 1/100 [00:00<00:11,  8.67it/s]17301777:  10%|█         | 10/100 [00:00<00:01, 51.80it/s]17301777:  18%|█▊        | 18/100 [00:00<00:01, 61.78it/s]17301777:  28%|██▊       | 28/100 [00:00<00:00, 74.95it/s]17301777:  37%|███▋      | 37/100 [00:00<00:00, 78.21it/s]17301777:  45%|████▌     | 45/100 [00:00<00:00, 76.19it/s]17301777:  53%|█████▎    | 53/100 [00:00<00:00, 75.22it/s]17301777:  62%|██████▏   | 62/100 [00:00<00:00, 77.34it/s]17301777:  71%|███████   | 71/100 [00:00<00:00, 78.23it/s]17301777:  79%|███████▉  | 79/100 [00:01<00:00, 76.87it/s]17301777:  87%|████████▋ | 87/100 [00:01<00:00, 76.26it/s]17301777:  95%|█████████▌| 95/100 [00:01<00:00, 76.52it/s]17301777: 100%|██████████| 100/100 [00:01<00:00, 72.98it/s]
+Policy eval done in 0:00:02 → runs/trsp/17301777/test_1/simulation_results.csv
+
+[Dijkstra] → runs/trsp/17301777/test_1/simulation_results_dijkstra.csv
+ Retrying in 1 seconds
+Dijkstra:   0%|          | 0/100 [00:00<?, ?it/s]Dijkstra:   5%|▌         | 5/100 [00:00<00:02, 38.63it/s]Dijkstra:  12%|█▏        | 12/100 [00:00<00:01, 52.76it/s]Dijkstra:  23%|██▎       | 23/100 [00:00<00:01, 76.46it/s]Dijkstra:  35%|███▌      | 35/100 [00:00<00:00, 91.62it/s]Dijkstra:  49%|████▉     | 49/100 [00:00<00:00, 104.15it/s]Dijkstra:  60%|██████    | 60/100 [00:00<00:00, 105.82it/s]Dijkstra:  76%|███████▌  | 76/100 [00:00<00:00, 119.43it/s]Dijkstra:  94%|█████████▍| 94/100 [00:00<00:00, 136.47it/s]Dijkstra: 100%|██████████| 100/100 [00:00<00:00, 107.99it/s]
+Dijkstra eval done in 0:00:01 → runs/trsp/17301777/test_1/simulation_results_dijkstra.csv
+
+[DSP] → runs/trsp/17301777/test_1/simulation_results_dsp.csv
+ Retrying in 1 seconds
+DSP:   0%|          | 0/100 [00:00<?, ?it/s]DSP:   6%|▌         | 6/100 [00:00<00:01, 58.43it/s]DSP:  14%|█▍        | 14/100 [00:00<00:01, 64.76it/s]DSP:  21%|██        | 21/100 [00:00<00:01, 55.75it/s]DSP:  31%|███       | 31/100 [00:00<00:00, 69.79it/s]DSP:  42%|████▏     | 42/100 [00:00<00:00, 81.52it/s]DSP:  52%|█████▏    | 52/100 [00:00<00:00, 85.12it/s]DSP:  63%|██████▎   | 63/100 [00:00<00:00, 91.99it/s]DSP:  74%|███████▍  | 74/100 [00:00<00:00, 96.70it/s]DSP:  84%|████████▍ | 84/100 [00:01<00:00, 90.51it/s]DSP:  96%|█████████▌| 96/100 [00:01<00:00, 98.15it/s]DSP: 100%|██████████| 100/100 [00:01<00:00, 86.27it/s]
+DSP eval done in 0:00:02 → runs/trsp/17301777/test_1/simulation_results_dsp.csv

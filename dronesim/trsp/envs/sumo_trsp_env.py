@@ -95,12 +95,20 @@ class SumoTRSPEnv(gym.Env):
                 })
         else:
             self.action_space = spaces.Discrete(self.num_actions)
-            self.observation_space = spaces.Dict({
-                'graph_node':  spaces.Discrete(num_nodes),
-                'target_node': spaces.Discrete(num_nodes),
-                'time_slot':   spaces.Discrete(psl_K),
-                'best_dir':    spaces.Discrete(self.num_actions),
-            })
+            if self.traffic_model == 'svc':
+                self.observation_space = spaces.Dict({
+                    'graph_node':      spaces.Discrete(num_nodes),
+                    'target_node':     spaces.Discrete(num_nodes),
+                    'neighbor_speeds': spaces.Box(0.0, 2.0, shape=(self.num_actions,), dtype=np.float32),
+                    'best_dir':        spaces.Discrete(self.num_actions),
+                })
+            else:
+                self.observation_space = spaces.Dict({
+                    'graph_node':  spaces.Discrete(num_nodes),
+                    'target_node': spaces.Discrete(num_nodes),
+                    'time_slot':   spaces.Discrete(psl_K),
+                    'best_dir':    spaces.Discrete(self.num_actions),
+                })
 
         # runtime state — populated in reset()
         self.ugv = None
@@ -205,6 +213,8 @@ class SumoTRSPEnv(gym.Env):
             '--start',
             '--delay', str(delay),
             '--no-warnings',
+            '--no-step-log',
+            '--no-duration-log',
         ]
         if self.traffic_model == 'svc' and self.svc_route_file:
             sumo_cmd += ['--route-files', self.svc_route_file]
@@ -464,6 +474,13 @@ class SumoTRSPEnv(gym.Env):
             steps += [INF] * (self.num_actions - len(steps))
             best_dir = int(np.argmin(steps[:self.num_actions]))
 
+        if self.traffic_model == 'svc':
+            return {
+                'graph_node':      self.ugv.position,
+                'target_node':     target_node_idx,
+                'neighbor_speeds': self._get_neighbor_speeds(),
+                'best_dir':        best_dir,
+            }
         return {
             'graph_node':  self.ugv.position,
             'target_node': target_node_idx,

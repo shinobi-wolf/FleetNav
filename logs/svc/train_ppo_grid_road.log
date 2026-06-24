@@ -1,0 +1,2000 @@
+POLICY_ID=7ed3a4eb
+Graph: 25 nodes, 40 edges
+PPOSVCAgent initialized  [device=cuda]
+ Retrying in 1 seconds
+Iter 1/100  Episode 1  Reward: -1210.60
+Iter 1/100  Episode 2  Reward: -1841.72
+Iter 1/100  Episode 3  Reward: -542.68
+Iter 1/100  Episode 4  Reward: -1317.40
+Iter 1/100  Episode 5  Reward: -308.40
+Iter 1/100  Episode 6  Reward: 1.84
+Iter 1/100  Episode 7  Reward: -650.72
+ Retrying in 1 seconds
+Iter 1/100  Episode 8  Reward: -1462.12
+Iter 1/100  Episode 9  Reward: -450.60
+Iter 1/100  Episode 10  Reward: -806.60
+Iter 1/100  Episode 11  Reward: -2136.72
+Iter 1/100  Episode 12  Reward: -1280.72
+ Retrying in 1 seconds
+Iter 1/100  Episode 13  Reward: -291.44
+Iter 1/100  Episode 14  Reward: -1095.96
+Iter 1/100  Episode 15  Reward: -1720.60
+Iter 1/100  Episode 16  Reward: -1495.44
+Iter 2/100  Episode 17  Reward: -1583.32
+ Retrying in 1 seconds
+Iter 2/100  Episode 18  Reward: -2193.36
+Iter 2/100  Episode 19  Reward: -2144.72
+Iter 2/100  Episode 20  Reward: -82.88
+Iter 2/100  Episode 21  Reward: -609.72
+ Retrying in 1 seconds
+Iter 2/100  Episode 22  Reward: 20.56
+Iter 2/100  Episode 23  Reward: -290.16
+Iter 2/100  Episode 24  Reward: -2209.72
+Iter 2/100  Episode 25  Reward: 5.28
+Iter 2/100  Episode 26  Reward: -2713.60
+Iter 2/100  Episode 27  Reward: -1784.44
+ Retrying in 1 seconds
+Iter 2/100  Episode 28  Reward: -116.16
+Iter 2/100  Episode 29  Reward: -138.44
+Iter 2/100  Episode 30  Reward: 20.56
+Iter 2/100  Episode 31  Reward: -672.44
+Iter 2/100  Episode 32  Reward: -2001.40
+Iter 2/100  Episode 33  Reward: 14.56
+Iter 2/100  Episode 34  Reward: -1924.16
+Iter 2/100  Episode 35  Reward: -350.96
+ Retrying in 1 seconds
+Iter 3/100  Episode 36  Reward: -1969.72
+Iter 3/100  Episode 37  Reward: -2056.28
+Iter 3/100  Episode 38  Reward: -224.40
+Iter 3/100  Episode 39  Reward: -143.44
+Iter 3/100  Episode 40  Reward: -701.16
+ Retrying in 1 seconds
+Iter 3/100  Episode 41  Reward: -2177.28
+Iter 3/100  Episode 42  Reward: -1762.16
+Iter 3/100  Episode 43  Reward: -480.32
+Iter 3/100  Episode 44  Reward: -2259.84
+ Retrying in 1 seconds
+Iter 3/100  Episode 45  Reward: -1965.72
+Iter 3/100  Episode 46  Reward: -2273.28
+Iter 3/100  Episode 47  Reward: -1393.52
+Iter 3/100  Episode 48  Reward: -388.16
+ Retrying in 1 seconds
+Iter 4/100  Episode 49  Reward: -1742.60
+Iter 4/100  Episode 50  Reward: -2096.16
+Iter 4/100  Episode 51  Reward: -2143.08
+ Retrying in 1 seconds
+Iter 4/100  Episode 52  Reward: -1294.72
+Iter 4/100  Episode 53  Reward: -1780.60
+Iter 4/100  Episode 54  Reward: -2128.96
+Iter 4/100  Episode 55  Reward: -459.16
+ Retrying in 1 seconds
+Iter 4/100  Episode 56  Reward: -1948.52
+Iter 4/100  Episode 57  Reward: -1065.16
+Iter 4/100  Episode 58  Reward: -440.84
+Iter 5/100  Episode 59  Reward: -1958.72
+ Retrying in 1 seconds
+Iter 5/100  Episode 60  Reward: -52.16
+Iter 5/100  Episode 61  Reward: -1979.08
+Iter 5/100  Episode 62  Reward: -1450.32
+Iter 5/100  Episode 63  Reward: -1094.96
+ Retrying in 1 seconds
+Iter 5/100  Episode 64  Reward: -2297.40
+Iter 5/100  Episode 65  Reward: -651.88
+Iter 5/100  Episode 66  Reward: -511.72
+Iter 5/100  Episode 67  Reward: -1448.88
+Iter 5/100  Episode 68  Reward: -61.44
+ Retrying in 1 seconds
+Iter 5/100  Episode 69  Reward: -1591.88
+Iter 5/100  Episode 70  Reward: -2333.64
+Iter 6/100  Episode 71  Reward: -1838.72
+ Retrying in 1 seconds
+Iter 6/100  Episode 72  Reward: -1954.72
+Iter 6/100  Episode 73  Reward: -14.72
+Iter 6/100  Episode 74  Reward: -1743.88
+Iter 6/100  Episode 75  Reward: -758.88
+Iter 6/100  Episode 76  Reward: 5.28
+ Retrying in 1 seconds
+Iter 6/100  Episode 77  Reward: -318.16
+Iter 6/100  Episode 78  Reward: -1581.88
+Iter 6/100  Episode 79  Reward: -1475.72
+Iter 6/100  Episode 80  Reward: -1102.60
+Iter 6/100  Episode 81  Reward: -1937.28
+ Retrying in 1 seconds
+Iter 6/100  Episode 82  Reward: -2149.28
+Iter 6/100  Episode 83  Reward: -1907.96
+Iter 7/100  Episode 84  Reward: -460.60
+Iter 7/100  Episode 85  Reward: -1997.28
+Iter 7/100  Episode 86  Reward: -208.72
+ Retrying in 1 seconds
+Iter 7/100  Episode 87  Reward: -1861.72
+Iter 7/100  Episode 88  Reward: -1462.60
+Iter 7/100  Episode 89  Reward: -1144.16
+Iter 7/100  Episode 90  Reward: -1177.24
+Iter 7/100  Episode 91  Reward: -133.52
+Iter 7/100  Episode 92  Reward: -531.44
+ Retrying in 1 seconds
+Iter 7/100  Episode 93  Reward: -198.72
+Iter 7/100  Episode 94  Reward: -273.88
+Iter 7/100  Episode 95  Reward: -1824.96
+Iter 7/100  Episode 96  Reward: -1970.28
+Iter 7/100  Episode 97  Reward: -62.16
+Iter 7/100  Episode 98  Reward: -1629.44
+ Retrying in 1 seconds
+Iter 7/100  Episode 99  Reward: -2026.72
+Iter 8/100  Episode 100  Reward: -1517.44
+Iter 8/100  Episode 101  Reward: -1006.16
+Iter 8/100  Episode 102  Reward: -2189.84
+ Retrying in 1 seconds
+Iter 8/100  Episode 103  Reward: -1945.72
+Iter 8/100  Episode 104  Reward: -949.68
+Iter 8/100  Episode 105  Reward: -1782.60
+ Retrying in 1 seconds
+Iter 8/100  Episode 106  Reward: -1066.44
+Iter 8/100  Episode 107  Reward: 18.84
+Iter 8/100  Episode 108  Reward: -1850.40
+Iter 8/100  Episode 109  Reward: -1664.60
+Iter 8/100  Episode 110  Reward: -256.12
+ Retrying in 1 seconds
+Iter 9/100  Episode 111  Reward: -2148.28
+Iter 9/100  Episode 112  Reward: -2087.72
+Iter 9/100  Episode 113  Reward: 43.60
+Iter 9/100  Episode 114  Reward: -793.40
+Iter 9/100  Episode 115  Reward: -0.16
+Iter 9/100  Episode 116  Reward: -665.60
+ Retrying in 1 seconds
+Iter 9/100  Episode 117  Reward: -2223.84
+Iter 9/100  Episode 118  Reward: -1721.96
+Iter 9/100  Episode 119  Reward: -1629.44
+Iter 9/100  Episode 120  Reward: -1123.24
+ Retrying in 1 seconds
+Iter 9/100  Episode 121  Reward: -607.88
+Iter 9/100  Episode 122  Reward: -275.44
+Iter 9/100  Episode 123  Reward: 36.16
+Iter 9/100  Episode 124  Reward: -2185.72
+Iter 9/100  Episode 125  Reward: 5.48
+Iter 9/100  Episode 126  Reward: -4.72
+Iter 9/100  Episode 127  Reward: -2255.08
+Iter 9/100  Episode 128  Reward: -279.88
+ Retrying in 1 seconds
+Iter 9/100  Episode 129  Reward: -690.32
+Iter 9/100  Episode 130  Reward: -382.36
+Iter 10/100  Episode 131  Reward: -377.88
+Iter 10/100  Episode 132  Reward: -551.68
+Iter 10/100  Episode 133  Reward: -763.88
+Iter 10/100  Episode 134  Reward: -87.68
+Iter 10/100  Episode 135  Reward: -1497.24
+ Retrying in 1 seconds
+Iter 10/100  Episode 136  Reward: -1380.88
+Iter 10/100  Episode 137  Reward: -718.68
+Iter 10/100  Episode 138  Reward: -2155.72
+Iter 10/100  Episode 139  Reward: -1807.60
+ Retrying in 1 seconds
+Iter 10/100  Episode 140  Reward: -2316.28
+Iter 10/100  Episode 141  Reward: -1333.84
+Iter 10/100  Episode 142  Reward: -113.88
+Iter 10/100  Episode 143  Reward: -100.16
+Iter 10/100  Episode 144  Reward: -225.48
+Iter 10/100  Episode 145  Reward: -2119.84
+ Retrying in 1 seconds
+Iter 10/100  Episode 146  Reward: -850.88
+Iter 10/100  Episode 147  Reward: -41.96
+Iter 11/100  Episode 148  Reward: -872.60
+Iter 11/100  Episode 149  Reward: -121.68
+Iter 11/100  Episode 150  Reward: -1997.16
+Iter 11/100  Episode 151  Reward: -619.44
+Iter 11/100  Episode 152  Reward: -62.72
+Iter 11/100  Episode 153  Reward: -985.44
+ Retrying in 1 seconds
+Iter 11/100  Episode 154  Reward: -1878.44
+Iter 11/100  Episode 155  Reward: -371.16
+Iter 11/100  Episode 156  Reward: -425.12
+Iter 11/100  Episode 157  Reward: -2196.28
+Iter 11/100  Episode 158  Reward: -1613.16
+ Retrying in 1 seconds
+Iter 11/100  Episode 159  Reward: 23.84
+Iter 11/100  Episode 160  Reward: -885.72
+Iter 11/100  Episode 161  Reward: -234.72
+Iter 11/100  Episode 162  Reward: -2173.16
+Iter 11/100  Episode 163  Reward: -781.16
+Iter 11/100  Episode 164  Reward: -214.44
+Iter 11/100  Episode 165  Reward: -383.88
+Iter 11/100  Episode 166  Reward: -838.84
+Iter 11/100  Episode 167  Reward: -91.44
+Iter 11/100  Episode 168  Reward: -62.72
+ Retrying in 1 seconds
+Iter 12/100  Episode 169  Reward: -1759.60
+Iter 12/100  Episode 170  Reward: -1149.44
+Iter 12/100  Episode 171  Reward: -527.16
+Iter 12/100  Episode 172  Reward: -1927.28
+ Retrying in 1 seconds
+Iter 12/100  Episode 173  Reward: 5.28
+Iter 12/100  Episode 174  Reward: -2110.28
+Iter 12/100  Episode 175  Reward: -2.72
+Iter 12/100  Episode 176  Reward: -2090.72
+Iter 12/100  Episode 177  Reward: -306.88
+Iter 12/100  Episode 178  Reward: -469.12
+ Retrying in 1 seconds
+Iter 12/100  Episode 179  Reward: -1954.28
+Iter 12/100  Episode 180  Reward: -1493.88
+Iter 12/100  Episode 181  Reward: -2139.72
+Iter 12/100  Episode 182  Reward: -489.88
+ Retrying in 1 seconds
+Iter 13/100  Episode 183  Reward: -2090.08
+Iter 13/100  Episode 184  Reward: -710.16
+Iter 13/100  Episode 185  Reward: -967.16
+Iter 13/100  Episode 186  Reward: -8.72
+Iter 13/100  Episode 187  Reward: -32.16
+Iter 13/100  Episode 188  Reward: -303.24
+Iter 13/100  Episode 189  Reward: -1852.72
+Iter 13/100  Episode 190  Reward: -69.72
+Iter 13/100  Episode 191  Reward: -31.96
+ Retrying in 1 seconds
+Iter 13/100  Episode 192  Reward: -867.88
+Iter 13/100  Episode 193  Reward: -1744.16
+Iter 13/100  Episode 194  Reward: -924.16
+Iter 13/100  Episode 195  Reward: -135.96
+Iter 13/100  Episode 196  Reward: 5.28
+Iter 13/100  Episode 197  Reward: -789.16
+ Retrying in 1 seconds
+Iter 13/100  Episode 198  Reward: -1499.84
+Iter 13/100  Episode 199  Reward: -853.44
+Iter 13/100  Episode 200  Reward: -2064.28
+Iter 13/100  Episode 201  Reward: 15.84
+Iter 13/100  Episode 202  Reward: -587.16
+Iter 13/100  Episode 203  Reward: -911.16
+ Retrying in 1 seconds
+Iter 14/100  Episode 204  Reward: -37.16
+Iter 14/100  Episode 205  Reward: -40.16
+Iter 14/100  Episode 206  Reward: -2323.08
+Iter 14/100  Episode 207  Reward: 5.48
+Iter 14/100  Episode 208  Reward: -155.16
+Iter 14/100  Episode 209  Reward: -342.88
+Iter 14/100  Episode 210  Reward: -2089.64
+Iter 14/100  Episode 211  Reward: -969.88
+ Retrying in 1 seconds
+Iter 14/100  Episode 212  Reward: -61.44
+Iter 14/100  Episode 213  Reward: -2337.28
+Iter 14/100  Episode 214  Reward: -145.72
+Iter 14/100  Episode 215  Reward: -2011.72
+Iter 14/100  Episode 216  Reward: -2001.72
+ Retrying in 1 seconds
+Iter 14/100  Episode 217  Reward: -1349.96
+Iter 14/100  Episode 218  Reward: -308.96
+Iter 14/100  Episode 219  Reward: -2036.52
+Iter 14/100  Episode 220  Reward: -2326.40
+Iter 14/100  Episode 221  Reward: 20.56
+Iter 15/100  Episode 222  Reward: -639.16
+ Retrying in 1 seconds
+Iter 15/100  Episode 223  Reward: 5.28
+Iter 15/100  Episode 224  Reward: -1847.96
+Iter 15/100  Episode 225  Reward: -474.16
+Iter 15/100  Episode 226  Reward: -1795.52
+Iter 15/100  Episode 227  Reward: -2163.16
+Iter 15/100  Episode 228  Reward: -76.44
+Iter 15/100  Episode 229  Reward: -62.72
+ Retrying in 1 seconds
+Iter 15/100  Episode 230  Reward: -464.44
+Iter 15/100  Episode 231  Reward: -2216.08
+Iter 15/100  Episode 232  Reward: -60.24
+Iter 15/100  Episode 233  Reward: -1436.60
+Iter 15/100  Episode 234  Reward: -2064.28
+ Retrying in 1 seconds
+Iter 15/100  Episode 235  Reward: -1316.72
+Iter 15/100  Episode 236  Reward: -277.44
+Iter 15/100  Episode 237  Reward: -505.88
+Iter 15/100  Episode 238  Reward: -1517.44
+Iter 15/100  Episode 239  Reward: -2098.84
+ Retrying in 1 seconds
+Iter 16/100  Episode 240  Reward: -1688.40
+Iter 16/100  Episode 241  Reward: -341.96
+Iter 16/100  Episode 242  Reward: -643.72
+Iter 16/100  Episode 243  Reward: -1736.40
+Iter 16/100  Episode 244  Reward: -1055.88
+ Retrying in 1 seconds
+Iter 16/100  Episode 245  Reward: 5.28
+Iter 16/100  Episode 246  Reward: -167.16
+Iter 16/100  Episode 247  Reward: -392.72
+Iter 16/100  Episode 248  Reward: -284.88
+Iter 16/100  Episode 249  Reward: -136.16
+Iter 16/100  Episode 250  Reward: -1915.16
+Iter 16/100  Episode 251  Reward: -510.88
+Iter 16/100  Episode 252  Reward: -2214.08
+Iter 16/100  Episode 253  Reward: -272.72
+Iter 16/100  Episode 254  Reward: -160.24
+ Retrying in 1 seconds
+Iter 16/100  Episode 255  Reward: -410.44
+Iter 16/100  Episode 256  Reward: -2354.28
+Iter 16/100  Episode 257  Reward: -2014.28
+Iter 16/100  Episode 258  Reward: -163.44
+Iter 16/100  Episode 259  Reward: 33.84
+ Retrying in 1 seconds
+Iter 17/100  Episode 260  Reward: -287.16
+Iter 17/100  Episode 261  Reward: -1531.88
+Iter 17/100  Episode 262  Reward: -1300.32
+Iter 17/100  Episode 263  Reward: -2097.72
+Iter 17/100  Episode 264  Reward: -68.72
+Iter 17/100  Episode 265  Reward: -375.60
+Iter 17/100  Episode 266  Reward: 20.76
+Iter 17/100  Episode 267  Reward: -324.72
+ Retrying in 1 seconds
+Iter 17/100  Episode 268  Reward: -167.88
+Iter 17/100  Episode 269  Reward: -544.96
+Iter 17/100  Episode 270  Reward: -2076.72
+Iter 17/100  Episode 271  Reward: -204.88
+Iter 17/100  Episode 272  Reward: -2154.64
+ Retrying in 1 seconds
+Iter 17/100  Episode 273  Reward: -1839.16
+Iter 17/100  Episode 274  Reward: -750.88
+Iter 17/100  Episode 275  Reward: -1009.16
+Iter 17/100  Episode 276  Reward: -65.52
+Iter 18/100  Episode 277  Reward: -731.96
+Iter 18/100  Episode 278  Reward: -1572.16
+ Retrying in 1 seconds
+Iter 18/100  Episode 279  Reward: -2071.72
+Iter 18/100  Episode 280  Reward: -332.68
+Iter 18/100  Episode 281  Reward: -9.44
+Iter 18/100  Episode 282  Reward: -850.68
+Iter 18/100  Episode 283  Reward: -72.44
+Iter 18/100  Episode 284  Reward: -48.16
+Iter 18/100  Episode 285  Reward: -667.88
+Iter 18/100  Episode 286  Reward: -14.44
+Iter 18/100  Episode 287  Reward: -892.60
+ Retrying in 1 seconds
+Iter 18/100  Episode 288  Reward: -865.96
+Iter 18/100  Episode 289  Reward: -768.68
+Iter 18/100  Episode 290  Reward: -1428.24
+Iter 18/100  Episode 291  Reward: -1605.16
+Iter 18/100  Episode 292  Reward: -948.44
+ Retrying in 1 seconds
+Iter 18/100  Episode 293  Reward: -179.40
+Iter 18/100  Episode 294  Reward: -32.16
+Iter 18/100  Episode 295  Reward: -1272.96
+Iter 18/100  Episode 296  Reward: -1219.60
+Iter 19/100  Episode 297  Reward: -2167.04
+ Retrying in 1 seconds
+Iter 19/100  Episode 298  Reward: -1863.72
+Iter 19/100  Episode 299  Reward: -2283.60
+Iter 19/100  Episode 300  Reward: -841.16
+Iter 19/100  Episode 301  Reward: 5.48
+Iter 19/100  Episode 302  Reward: -113.72
+Iter 19/100  Episode 303  Reward: 7.56
+ Retrying in 1 seconds
+Iter 19/100  Episode 304  Reward: -2127.72
+Iter 19/100  Episode 305  Reward: -164.24
+Iter 19/100  Episode 306  Reward: -95.44
+Iter 19/100  Episode 307  Reward: -763.40
+Iter 19/100  Episode 308  Reward: -1849.16
+Iter 19/100  Episode 309  Reward: 5.48
+Iter 19/100  Episode 310  Reward: 5.28
+ Retrying in 1 seconds
+Iter 19/100  Episode 311  Reward: 5.28
+Iter 19/100  Episode 312  Reward: -1688.16
+Iter 19/100  Episode 313  Reward: -219.16
+Iter 20/100  Episode 314  Reward: -2007.28
+Iter 20/100  Episode 315  Reward: -508.40
+Iter 20/100  Episode 316  Reward: 12.56
+Iter 20/100  Episode 317  Reward: -777.24
+Iter 20/100  Episode 318  Reward: 17.76
+Iter 20/100  Episode 319  Reward: -719.60
+ Retrying in 1 seconds
+Iter 20/100  Episode 320  Reward: -1981.16
+Iter 20/100  Episode 321  Reward: -1.72
+Iter 20/100  Episode 322  Reward: -590.16
+Iter 20/100  Episode 323  Reward: -67.44
+Iter 20/100  Episode 324  Reward: -731.16
+Iter 20/100  Episode 325  Reward: 28.84
+Iter 20/100  Episode 326  Reward: -115.44
+Iter 20/100  Episode 327  Reward: -2089.28
+ Retrying in 1 seconds
+Iter 20/100  Episode 328  Reward: -138.44
+Iter 20/100  Episode 329  Reward: -1834.16
+Iter 20/100  Episode 330  Reward: -2200.72
+Iter 20/100  Episode 331  Reward: -74.12
+Iter 20/100  Episode 332  Reward: -2260.28
+ Retrying in 1 seconds
+Iter 20/100  Episode 333  Reward: -231.88
+Iter 20/100  Episode 334  Reward: -2100.72
+Iter 21/100  Episode 335  Reward: -213.68
+Iter 21/100  Episode 336  Reward: -2434.28
+Iter 21/100  Episode 337  Reward: -306.88
+ Retrying in 1 seconds
+Iter 21/100  Episode 338  Reward: 15.56
+Iter 21/100  Episode 339  Reward: -1232.44
+Iter 21/100  Episode 340  Reward: -1669.84
+Iter 21/100  Episode 341  Reward: -1069.12
+Iter 21/100  Episode 342  Reward: -2292.04
+ Retrying in 1 seconds
+Iter 21/100  Episode 343  Reward: -2074.28
+Iter 21/100  Episode 344  Reward: -1968.28
+Iter 21/100  Episode 345  Reward: -2177.28
+Iter 21/100  Episode 346  Reward: -503.68
+ Retrying in 1 seconds
+Iter 21/100  Episode 347  Reward: -1633.16
+Iter 22/100  Episode 348  Reward: -2214.28
+Iter 22/100  Episode 349  Reward: -860.44
+Iter 22/100  Episode 350  Reward: -188.44
+Iter 22/100  Episode 351  Reward: -671.16
+ Retrying in 1 seconds
+Iter 22/100  Episode 352  Reward: -1735.40
+Iter 22/100  Episode 353  Reward: 5.48
+Iter 22/100  Episode 354  Reward: -878.72
+Iter 22/100  Episode 355  Reward: -1647.72
+Iter 22/100  Episode 356  Reward: -2274.64
+ Retrying in 1 seconds
+Iter 22/100  Episode 357  Reward: -2207.72
+Iter 22/100  Episode 358  Reward: -240.88
+Iter 22/100  Episode 359  Reward: -1015.16
+Iter 22/100  Episode 360  Reward: -164.72
+Iter 22/100  Episode 361  Reward: -633.36
+Iter 22/100  Episode 362  Reward: -1573.40
+ Retrying in 1 seconds
+Iter 22/100  Episode 363  Reward: 7.56
+Iter 22/100  Episode 364  Reward: -64.44
+Iter 22/100  Episode 365  Reward: -1359.40
+Iter 23/100  Episode 366  Reward: -1421.72
+Iter 23/100  Episode 367  Reward: -1874.72
+Iter 23/100  Episode 368  Reward: -1619.16
+ Retrying in 1 seconds
+Iter 23/100  Episode 369  Reward: -1975.28
+Iter 23/100  Episode 370  Reward: -1120.44
+Iter 23/100  Episode 371  Reward: 5.28
+Iter 23/100  Episode 372  Reward: -1628.48
+Iter 23/100  Episode 373  Reward: -793.60
+Iter 23/100  Episode 374  Reward: -409.40
+ Retrying in 1 seconds
+Iter 23/100  Episode 375  Reward: -1566.44
+Iter 23/100  Episode 376  Reward: -1239.32
+Iter 23/100  Episode 377  Reward: -9.52
+Iter 23/100  Episode 378  Reward: -73.72
+Iter 23/100  Episode 379  Reward: -881.88
+Iter 23/100  Episode 380  Reward: -682.96
+Iter 23/100  Episode 381  Reward: -454.16
+Iter 23/100  Episode 382  Reward: 18.76
+ Retrying in 1 seconds
+Iter 24/100  Episode 383  Reward: -1479.24
+Iter 24/100  Episode 384  Reward: -669.72
+Iter 24/100  Episode 385  Reward: -1821.16
+Iter 24/100  Episode 386  Reward: -1663.44
+ Retrying in 1 seconds
+Iter 24/100  Episode 387  Reward: -36.96
+Iter 24/100  Episode 388  Reward: -405.88
+Iter 24/100  Episode 389  Reward: -1447.68
+Iter 24/100  Episode 390  Reward: -1708.16
+Iter 24/100  Episode 391  Reward: -765.60
+Iter 24/100  Episode 392  Reward: -1385.96
+ Retrying in 1 seconds
+Iter 24/100  Episode 393  Reward: -1561.48
+Iter 24/100  Episode 394  Reward: -1168.68
+Iter 24/100  Episode 395  Reward: -1869.16
+Iter 24/100  Episode 396  Reward: -2078.28
+ Retrying in 1 seconds
+Iter 25/100  Episode 397  Reward: -1731.88
+Iter 25/100  Episode 398  Reward: -1707.96
+Iter 25/100  Episode 399  Reward: -2138.28
+ Retrying in 1 seconds
+Iter 25/100  Episode 400  Reward: -546.16
+Iter 25/100  Episode 401  Reward: -1478.96
+Iter 25/100  Episode 402  Reward: -2318.72
+Iter 25/100  Episode 403  Reward: -2023.52
+ Retrying in 1 seconds
+Iter 25/100  Episode 404  Reward: -1303.88
+Iter 25/100  Episode 405  Reward: -2376.84
+Iter 25/100  Episode 406  Reward: -126.84
+Iter 25/100  Episode 407  Reward: -677.16
+Iter 25/100  Episode 408  Reward: -87.88
+Iter 25/100  Episode 409  Reward: -283.72
+ Retrying in 1 seconds
+Iter 26/100  Episode 410  Reward: -1989.92
+Iter 26/100  Episode 411  Reward: 20.56
+Iter 26/100  Episode 412  Reward: 25.04
+Iter 26/100  Episode 413  Reward: -2574.60
+Iter 26/100  Episode 414  Reward: -295.44
+Iter 26/100  Episode 415  Reward: -901.96
+Iter 26/100  Episode 416  Reward: 0.60
+Iter 26/100  Episode 417  Reward: -334.16
+ Retrying in 1 seconds
+Iter 26/100  Episode 418  Reward: -2070.28
+Iter 26/100  Episode 419  Reward: -154.72
+Iter 26/100  Episode 420  Reward: -1038.24
+Iter 26/100  Episode 421  Reward: -82.72
+Iter 26/100  Episode 422  Reward: -450.72
+Iter 26/100  Episode 423  Reward: -1811.88
+ Retrying in 1 seconds
+Iter 26/100  Episode 424  Reward: -1613.88
+Iter 26/100  Episode 425  Reward: -2008.96
+Iter 26/100  Episode 426  Reward: 5.28
+Iter 26/100  Episode 427  Reward: -1546.96
+ Retrying in 1 seconds
+Iter 27/100  Episode 428  Reward: -1389.88
+Iter 27/100  Episode 429  Reward: -1487.44
+Iter 27/100  Episode 430  Reward: -2378.08
+ Retrying in 1 seconds
+Iter 27/100  Episode 431  Reward: -397.88
+Iter 27/100  Episode 432  Reward: -21.72
+Iter 27/100  Episode 433  Reward: -136.44
+Iter 27/100  Episode 434  Reward: -63.44
+Iter 27/100  Episode 435  Reward: -2281.04
+Iter 27/100  Episode 436  Reward: -2050.92
+ Retrying in 1 seconds
+Iter 27/100  Episode 437  Reward: -62.52
+Iter 27/100  Episode 438  Reward: -2170.72
+Iter 27/100  Episode 439  Reward: -73.72
+Iter 27/100  Episode 440  Reward: -2119.08
+Iter 27/100  Episode 441  Reward: -142.36
+Iter 28/100  Episode 442  Reward: -2156.48
+ Retrying in 1 seconds
+Iter 28/100  Episode 443  Reward: 18.76
+Iter 28/100  Episode 444  Reward: -1123.16
+Iter 28/100  Episode 445  Reward: -2178.28
+Iter 28/100  Episode 446  Reward: -96.72
+Iter 28/100  Episode 447  Reward: -1974.72
+ Retrying in 1 seconds
+Iter 28/100  Episode 448  Reward: -1610.16
+Iter 28/100  Episode 449  Reward: -451.88
+Iter 28/100  Episode 450  Reward: -1269.88
+Iter 28/100  Episode 451  Reward: -1780.16
+ Retrying in 1 seconds
+Iter 28/100  Episode 452  Reward: -291.72
+Iter 28/100  Episode 453  Reward: -1865.72
+Iter 28/100  Episode 454  Reward: -903.12
+Iter 28/100  Episode 455  Reward: -1277.72
+Iter 28/100  Episode 456  Reward: -204.44
+Iter 28/100  Episode 457  Reward: -974.16
+ Retrying in 1 seconds
+Iter 29/100  Episode 458  Reward: -987.16
+Iter 29/100  Episode 459  Reward: 51.32
+Iter 29/100  Episode 460  Reward: 5.28
+Iter 29/100  Episode 461  Reward: -2031.88
+Iter 29/100  Episode 462  Reward: -1999.72
+ Retrying in 1 seconds
+Iter 29/100  Episode 463  Reward: -1961.28
+Iter 29/100  Episode 464  Reward: -1950.16
+Iter 29/100  Episode 465  Reward: -542.88
+Iter 29/100  Episode 466  Reward: -2043.48
+Iter 29/100  Episode 467  Reward: -275.16
+ Retrying in 1 seconds
+Iter 29/100  Episode 468  Reward: -1228.16
+Iter 29/100  Episode 469  Reward: -418.16
+Iter 29/100  Episode 470  Reward: -1984.72
+Iter 29/100  Episode 471  Reward: 5.28
+Iter 29/100  Episode 472  Reward: -372.16
+Iter 30/100  Episode 473  Reward: -1496.44
+ Retrying in 1 seconds
+Iter 30/100  Episode 474  Reward: -0.72
+Iter 30/100  Episode 475  Reward: 20.76
+Iter 30/100  Episode 476  Reward: -774.44
+Iter 30/100  Episode 477  Reward: 5.48
+Iter 30/100  Episode 478  Reward: -16.88
+Iter 30/100  Episode 479  Reward: -1081.88
+Iter 30/100  Episode 480  Reward: -137.24
+Iter 30/100  Episode 481  Reward: -46.16
+Iter 30/100  Episode 482  Reward: -2173.28
+Iter 30/100  Episode 483  Reward: -2030.72
+Iter 30/100  Episode 484  Reward: 5.28
+ Retrying in 1 seconds
+Iter 30/100  Episode 485  Reward: -2006.28
+Iter 30/100  Episode 486  Reward: -1950.28
+Iter 30/100  Episode 487  Reward: -2066.72
+Iter 30/100  Episode 488  Reward: -784.88
+ Retrying in 1 seconds
+Iter 30/100  Episode 489  Reward: -15.12
+Iter 30/100  Episode 490  Reward: -2120.08
+Iter 30/100  Episode 491  Reward: -2143.16
+Iter 31/100  Episode 492  Reward: -1358.44
+Iter 31/100  Episode 493  Reward: -316.12
+Iter 31/100  Episode 494  Reward: -87.72
+Iter 31/100  Episode 495  Reward: -162.52
+ Retrying in 1 seconds
+Iter 31/100  Episode 496  Reward: -546.72
+Iter 31/100  Episode 497  Reward: -353.60
+Iter 31/100  Episode 498  Reward: -16.60
+Iter 31/100  Episode 499  Reward: -422.84
+Iter 31/100  Episode 500  Reward: -469.96
+Iter 31/100  Episode 501  Reward: -2102.72
+Iter 31/100  Episode 502  Reward: -2038.84
+ Retrying in 1 seconds
+Iter 31/100  Episode 503  Reward: -50.96
+Iter 31/100  Episode 504  Reward: -2211.48
+Iter 31/100  Episode 505  Reward: -916.72
+Iter 31/100  Episode 506  Reward: -5.72
+Iter 31/100  Episode 507  Reward: -644.88
+Iter 31/100  Episode 508  Reward: -1678.60
+ Retrying in 1 seconds
+Iter 31/100  Episode 509  Reward: -180.16
+Iter 31/100  Episode 510  Reward: -10.72
+Iter 31/100  Episode 511  Reward: -1438.16
+Iter 31/100  Episode 512  Reward: -2053.84
+Iter 32/100  Episode 513  Reward: -1443.60
+Iter 32/100  Episode 514  Reward: 5.28
+Iter 32/100  Episode 515  Reward: -541.96
+ Retrying in 1 seconds
+Iter 32/100  Episode 516  Reward: -1913.72
+Iter 32/100  Episode 517  Reward: -2004.28
+Iter 32/100  Episode 518  Reward: -2162.28
+ Retrying in 1 seconds
+Iter 32/100  Episode 519  Reward: -1804.44
+Iter 32/100  Episode 520  Reward: -2030.48
+Iter 32/100  Episode 521  Reward: -354.72
+Iter 32/100  Episode 522  Reward: -2087.72
+ Retrying in 1 seconds
+Iter 32/100  Episode 523  Reward: -849.16
+Iter 32/100  Episode 524  Reward: -559.16
+Iter 32/100  Episode 525  Reward: -47.44
+Iter 33/100  Episode 526  Reward: -1555.48
+Iter 33/100  Episode 527  Reward: -157.72
+Iter 33/100  Episode 528  Reward: -40.16
+Iter 33/100  Episode 529  Reward: -430.16
+Iter 33/100  Episode 530  Reward: 34.84
+Iter 33/100  Episode 531  Reward: -1888.72
+ Retrying in 1 seconds
+Iter 33/100  Episode 532  Reward: -182.88
+Iter 33/100  Episode 533  Reward: -293.96
+Iter 33/100  Episode 534  Reward: 19.56
+Iter 33/100  Episode 535  Reward: -151.72
+Iter 33/100  Episode 536  Reward: -2034.72
+Iter 33/100  Episode 537  Reward: -2322.84
+Iter 33/100  Episode 538  Reward: 33.04
+Iter 33/100  Episode 539  Reward: -450.68
+ Retrying in 1 seconds
+Iter 33/100  Episode 540  Reward: -1342.44
+Iter 33/100  Episode 541  Reward: -2109.84
+Iter 33/100  Episode 542  Reward: -546.16
+Iter 33/100  Episode 543  Reward: -757.16
+Iter 33/100  Episode 544  Reward: -1919.28
+ Retrying in 1 seconds
+Iter 34/100  Episode 545  Reward: -2255.28
+Iter 34/100  Episode 546  Reward: -2339.28
+Iter 34/100  Episode 547  Reward: -682.88
+ Retrying in 1 seconds
+Iter 34/100  Episode 548  Reward: -366.84
+Iter 34/100  Episode 549  Reward: -516.72
+Iter 34/100  Episode 550  Reward: -1952.72
+Iter 34/100  Episode 551  Reward: 17.56
+Iter 34/100  Episode 552  Reward: -1752.60
+Iter 34/100  Episode 553  Reward: -1171.60
+Iter 34/100  Episode 554  Reward: 5.28
+ Retrying in 1 seconds
+Iter 34/100  Episode 555  Reward: -989.12
+Iter 34/100  Episode 556  Reward: -2111.08
+Iter 34/100  Episode 557  Reward: -381.68
+Iter 34/100  Episode 558  Reward: -170.16
+Iter 34/100  Episode 559  Reward: -1678.52
+Iter 34/100  Episode 560  Reward: -85.72
+ Retrying in 1 seconds
+Iter 34/100  Episode 561  Reward: -575.16
+Iter 35/100  Episode 562  Reward: -928.60
+Iter 35/100  Episode 563  Reward: 0.28
+Iter 35/100  Episode 564  Reward: -53.72
+Iter 35/100  Episode 565  Reward: -558.44
+Iter 35/100  Episode 566  Reward: 5.28
+Iter 35/100  Episode 567  Reward: -2095.28
+Iter 35/100  Episode 568  Reward: -1028.88
+Iter 35/100  Episode 569  Reward: -43.96
+Iter 35/100  Episode 570  Reward: -781.68
+ Retrying in 1 seconds
+Iter 35/100  Episode 571  Reward: -881.16
+Iter 35/100  Episode 572  Reward: -1984.28
+Iter 35/100  Episode 573  Reward: -272.72
+Iter 35/100  Episode 574  Reward: 5.28
+Iter 35/100  Episode 575  Reward: 16.56
+Iter 35/100  Episode 576  Reward: -351.72
+Iter 35/100  Episode 577  Reward: -2069.92
+Iter 35/100  Episode 578  Reward: -489.16
+Iter 35/100  Episode 579  Reward: -400.24
+ Retrying in 1 seconds
+Iter 35/100  Episode 580  Reward: -2049.08
+Iter 35/100  Episode 581  Reward: -310.88
+Iter 35/100  Episode 582  Reward: -1693.44
+Iter 35/100  Episode 583  Reward: -79.88
+Iter 35/100  Episode 584  Reward: -1416.16
+ Retrying in 1 seconds
+Iter 35/100  Episode 585  Reward: 20.56
+Iter 36/100  Episode 586  Reward: -2100.72
+Iter 36/100  Episode 587  Reward: -374.16
+Iter 36/100  Episode 588  Reward: -1092.88
+Iter 36/100  Episode 589  Reward: -125.24
+Iter 36/100  Episode 590  Reward: -1777.16
+ Retrying in 1 seconds
+Iter 36/100  Episode 591  Reward: -401.16
+Iter 36/100  Episode 592  Reward: 7.56
+Iter 36/100  Episode 593  Reward: -2372.40
+Iter 36/100  Episode 594  Reward: -1206.40
+Iter 36/100  Episode 595  Reward: -1567.16
+ Retrying in 1 seconds
+Iter 36/100  Episode 596  Reward: -2134.28
+Iter 36/100  Episode 597  Reward: -1727.16
+Iter 36/100  Episode 598  Reward: -758.40
+Iter 36/100  Episode 599  Reward: -569.60
+Iter 37/100  Episode 600  Reward: -728.40
+Iter 37/100  Episode 601  Reward: -138.16
+ Retrying in 1 seconds
+Iter 37/100  Episode 602  Reward: 20.56
+Iter 37/100  Episode 603  Reward: -292.88
+Iter 37/100  Episode 604  Reward: -219.72
+Iter 37/100  Episode 605  Reward: -145.44
+Iter 37/100  Episode 606  Reward: -130.52
+Iter 37/100  Episode 607  Reward: 12.56
+Iter 37/100  Episode 608  Reward: -1260.16
+Iter 37/100  Episode 609  Reward: -629.88
+Iter 37/100  Episode 610  Reward: -485.72
+Iter 37/100  Episode 611  Reward: -48.24
+Iter 37/100  Episode 612  Reward: -426.88
+Iter 37/100  Episode 613  Reward: 2.84
+Iter 37/100  Episode 614  Reward: -1028.16
+ Retrying in 1 seconds
+Iter 37/100  Episode 615  Reward: -928.88
+Iter 37/100  Episode 616  Reward: -1714.88
+Iter 37/100  Episode 617  Reward: -178.68
+Iter 37/100  Episode 618  Reward: -2352.72
+Iter 37/100  Episode 619  Reward: -554.88
+Iter 37/100  Episode 620  Reward: 5.28
+ Retrying in 1 seconds
+Iter 37/100  Episode 621  Reward: -1113.72
+Iter 37/100  Episode 622  Reward: -2163.08
+Iter 37/100  Episode 623  Reward: -2198.28
+Iter 37/100  Episode 624  Reward: -193.16
+ Retrying in 1 seconds
+Iter 38/100  Episode 625  Reward: -211.44
+Iter 38/100  Episode 626  Reward: 5.28
+Iter 38/100  Episode 627  Reward: -555.16
+Iter 38/100  Episode 628  Reward: -534.16
+Iter 38/100  Episode 629  Reward: -591.44
+Iter 38/100  Episode 630  Reward: -1.72
+Iter 38/100  Episode 631  Reward: -515.44
+Iter 38/100  Episode 632  Reward: -1389.88
+Iter 38/100  Episode 633  Reward: -2052.72
+ Retrying in 1 seconds
+Iter 38/100  Episode 634  Reward: -394.48
+Iter 38/100  Episode 635  Reward: -522.60
+Iter 38/100  Episode 636  Reward: -537.12
+Iter 38/100  Episode 637  Reward: -2021.52
+Iter 38/100  Episode 638  Reward: -156.44
+Iter 38/100  Episode 639  Reward: -532.48
+Iter 38/100  Episode 640  Reward: 20.56
+Iter 38/100  Episode 641  Reward: -6.88
+Iter 38/100  Episode 642  Reward: -62.52
+ Retrying in 1 seconds
+Iter 38/100  Episode 643  Reward: -687.12
+Iter 38/100  Episode 644  Reward: -1685.12
+Iter 38/100  Episode 645  Reward: 5.28
+Iter 38/100  Episode 646  Reward: -493.16
+Iter 39/100  Episode 647  Reward: -1991.96
+Iter 39/100  Episode 648  Reward: 21.84
+Iter 39/100  Episode 649  Reward: -300.40
+ Retrying in 1 seconds
+Iter 39/100  Episode 650  Reward: 32.12
+Iter 39/100  Episode 651  Reward: -1889.72
+Iter 39/100  Episode 652  Reward: -93.72
+Iter 39/100  Episode 653  Reward: -2506.28
+Iter 39/100  Episode 654  Reward: 5.28
+Iter 39/100  Episode 655  Reward: 5.48
+Iter 39/100  Episode 656  Reward: -579.44
+Iter 39/100  Episode 657  Reward: -920.60
+ Retrying in 1 seconds
+Iter 39/100  Episode 658  Reward: -2079.72
+Iter 39/100  Episode 659  Reward: -655.44
+Iter 39/100  Episode 660  Reward: -1765.44
+Iter 39/100  Episode 661  Reward: -434.52
+Iter 39/100  Episode 662  Reward: -120.40
+Iter 39/100  Episode 663  Reward: -986.68
+ Retrying in 1 seconds
+Iter 39/100  Episode 664  Reward: -158.52
+Iter 39/100  Episode 665  Reward: -2071.48
+Iter 39/100  Episode 666  Reward: -1847.88
+Iter 40/100  Episode 667  Reward: -2194.84
+ Retrying in 1 seconds
+Iter 40/100  Episode 668  Reward: -1809.16
+Iter 40/100  Episode 669  Reward: 17.84
+Iter 40/100  Episode 670  Reward: -117.44
+Iter 40/100  Episode 671  Reward: -981.88
+Iter 40/100  Episode 672  Reward: -340.16
+Iter 40/100  Episode 673  Reward: -1270.84
+Iter 40/100  Episode 674  Reward: -1406.16
+ Retrying in 1 seconds
+Iter 40/100  Episode 675  Reward: -1934.88
+Iter 40/100  Episode 676  Reward: -277.16
+Iter 40/100  Episode 677  Reward: -2000.84
+Iter 40/100  Episode 678  Reward: -353.44
+Iter 40/100  Episode 679  Reward: 20.56
+Iter 40/100  Episode 680  Reward: -200.44
+Iter 40/100  Episode 681  Reward: -412.84
+ Retrying in 1 seconds
+Iter 40/100  Episode 682  Reward: -752.44
+Iter 40/100  Episode 683  Reward: -2192.28
+Iter 41/100  Episode 684  Reward: -2056.72
+Iter 41/100  Episode 685  Reward: -18.60
+Iter 41/100  Episode 686  Reward: -359.52
+Iter 41/100  Episode 687  Reward: -208.44
+ Retrying in 1 seconds
+Iter 41/100  Episode 688  Reward: -545.96
+Iter 41/100  Episode 689  Reward: -346.12
+Iter 41/100  Episode 690  Reward: -1273.16
+Iter 41/100  Episode 691  Reward: -1053.44
+Iter 41/100  Episode 692  Reward: -2142.28
+ Retrying in 1 seconds
+Iter 41/100  Episode 693  Reward: -1215.88
+Iter 41/100  Episode 694  Reward: -4.72
+Iter 41/100  Episode 695  Reward: -1549.88
+Iter 41/100  Episode 696  Reward: -2055.72
+ Retrying in 1 seconds
+Iter 41/100  Episode 697  Reward: -627.44
+Iter 41/100  Episode 698  Reward: -1990.52
+Iter 41/100  Episode 699  Reward: 8.56
+Iter 42/100  Episode 700  Reward: -1961.72
+Iter 42/100  Episode 701  Reward: -2047.28
+ Retrying in 1 seconds
+Iter 42/100  Episode 702  Reward: -312.44
+Iter 42/100  Episode 703  Reward: -2069.72
+Iter 42/100  Episode 704  Reward: -1606.16
+Iter 42/100  Episode 705  Reward: -11.16
+Iter 42/100  Episode 706  Reward: -70.72
+Iter 42/100  Episode 707  Reward: -2010.28
+Iter 42/100  Episode 708  Reward: -527.16
+ Retrying in 1 seconds
+Iter 42/100  Episode 709  Reward: -1949.16
+Iter 42/100  Episode 710  Reward: -2056.28
+Iter 42/100  Episode 711  Reward: -2019.72
+ Retrying in 1 seconds
+Iter 42/100  Episode 712  Reward: -1819.96
+Iter 43/100  Episode 713  Reward: -369.44
+Iter 43/100  Episode 714  Reward: -1975.44
+Iter 43/100  Episode 715  Reward: -1978.52
+ Retrying in 1 seconds
+Iter 43/100  Episode 716  Reward: -1196.60
+Iter 43/100  Episode 717  Reward: -1996.28
+Iter 43/100  Episode 718  Reward: -316.44
+Iter 43/100  Episode 719  Reward: -2263.84
+Iter 43/100  Episode 720  Reward: -799.16
+ Retrying in 1 seconds
+Iter 43/100  Episode 721  Reward: -291.16
+Iter 43/100  Episode 722  Reward: -1478.72
+Iter 43/100  Episode 723  Reward: -418.96
+Iter 43/100  Episode 724  Reward: -63.72
+Iter 43/100  Episode 725  Reward: -1096.16
+Iter 43/100  Episode 726  Reward: -43.16
+Iter 43/100  Episode 727  Reward: -1754.24
+Iter 43/100  Episode 728  Reward: -217.72
+ Retrying in 1 seconds
+Iter 43/100  Episode 729  Reward: -495.16
+Iter 44/100  Episode 730  Reward: -2368.84
+Iter 44/100  Episode 731  Reward: -2196.28
+Iter 44/100  Episode 732  Reward: -442.40
+Iter 44/100  Episode 733  Reward: -652.40
+ Retrying in 1 seconds
+Iter 44/100  Episode 734  Reward: 20.56
+Iter 44/100  Episode 735  Reward: -506.88
+Iter 44/100  Episode 736  Reward: -115.52
+Iter 44/100  Episode 737  Reward: -2166.72
+Iter 44/100  Episode 738  Reward: -1005.16
+Iter 44/100  Episode 739  Reward: -1340.16
+Iter 44/100  Episode 740  Reward: 5.28
+ Retrying in 1 seconds
+Iter 44/100  Episode 741  Reward: -166.84
+Iter 44/100  Episode 742  Reward: -1624.48
+Iter 44/100  Episode 743  Reward: -1467.88
+Iter 44/100  Episode 744  Reward: -14.72
+Iter 44/100  Episode 745  Reward: -59.44
+Iter 44/100  Episode 746  Reward: -1837.40
+ Retrying in 1 seconds
+Iter 45/100  Episode 747  Reward: -2139.28
+Iter 45/100  Episode 748  Reward: -1810.88
+Iter 45/100  Episode 749  Reward: -1625.68
+ Retrying in 1 seconds
+Iter 45/100  Episode 750  Reward: -404.16
+Iter 45/100  Episode 751  Reward: -288.72
+Iter 45/100  Episode 752  Reward: -454.16
+Iter 45/100  Episode 753  Reward: -646.16
+Iter 45/100  Episode 754  Reward: -1923.16
+Iter 45/100  Episode 755  Reward: -380.72
+Iter 45/100  Episode 756  Reward: -1831.72
+ Retrying in 1 seconds
+Iter 45/100  Episode 757  Reward: -496.84
+Iter 45/100  Episode 758  Reward: -1342.12
+Iter 45/100  Episode 759  Reward: -116.88
+Iter 45/100  Episode 760  Reward: -5.72
+Iter 45/100  Episode 761  Reward: -869.44
+Iter 45/100  Episode 762  Reward: -954.88
+Iter 45/100  Episode 763  Reward: -829.16
+ Retrying in 1 seconds
+Iter 46/100  Episode 764  Reward: -2010.36
+Iter 46/100  Episode 765  Reward: -62.24
+Iter 46/100  Episode 766  Reward: -1457.72
+Iter 46/100  Episode 767  Reward: -802.16
+Iter 46/100  Episode 768  Reward: -2171.84
+ Retrying in 1 seconds
+Iter 46/100  Episode 769  Reward: -656.44
+Iter 46/100  Episode 770  Reward: -1134.40
+Iter 46/100  Episode 771  Reward: -1956.72
+Iter 46/100  Episode 772  Reward: -62.72
+Iter 46/100  Episode 773  Reward: -146.72
+Iter 46/100  Episode 774  Reward: -787.96
+Iter 46/100  Episode 775  Reward: -716.88
+ Retrying in 1 seconds
+Iter 46/100  Episode 776  Reward: -73.36
+Iter 46/100  Episode 777  Reward: -1841.72
+Iter 46/100  Episode 778  Reward: -685.44
+Iter 46/100  Episode 779  Reward: -126.44
+Iter 46/100  Episode 780  Reward: -1950.72
+ Retrying in 1 seconds
+Iter 47/100  Episode 781  Reward: -2271.28
+Iter 47/100  Episode 782  Reward: -1565.12
+Iter 47/100  Episode 783  Reward: -1269.68
+Iter 47/100  Episode 784  Reward: -120.96
+Iter 47/100  Episode 785  Reward: -116.96
+ Retrying in 1 seconds
+Iter 47/100  Episode 786  Reward: -188.12
+Iter 47/100  Episode 787  Reward: -1482.88
+Iter 47/100  Episode 788  Reward: -276.44
+Iter 47/100  Episode 789  Reward: -1409.72
+Iter 47/100  Episode 790  Reward: -2080.72
+ Retrying in 1 seconds
+Iter 47/100  Episode 791  Reward: -301.72
+Iter 47/100  Episode 792  Reward: -2073.08
+Iter 47/100  Episode 793  Reward: -367.60
+Iter 47/100  Episode 794  Reward: -376.40
+Iter 47/100  Episode 795  Reward: -188.12
+Iter 48/100  Episode 796  Reward: -1843.88
+ Retrying in 1 seconds
+Iter 48/100  Episode 797  Reward: -98.88
+Iter 48/100  Episode 798  Reward: -1616.88
+Iter 48/100  Episode 799  Reward: -1008.60
+Iter 48/100  Episode 800  Reward: -236.16
+Iter 48/100  Episode 801  Reward: -1910.44
+Iter 48/100  Episode 802  Reward: -156.88
+ Retrying in 1 seconds
+Iter 48/100  Episode 803  Reward: -1866.92
+Iter 48/100  Episode 804  Reward: -2187.28
+Iter 48/100  Episode 805  Reward: -272.44
+Iter 48/100  Episode 806  Reward: 5.48
+Iter 48/100  Episode 807  Reward: -670.48
+Iter 48/100  Episode 808  Reward: -828.72
+Iter 48/100  Episode 809  Reward: -933.72
+ Retrying in 1 seconds
+Iter 48/100  Episode 810  Reward: -277.16
+Iter 48/100  Episode 811  Reward: -1917.72
+Iter 48/100  Episode 812  Reward: -1992.28
+Iter 49/100  Episode 813  Reward: -2061.48
+ Retrying in 1 seconds
+Iter 49/100  Episode 814  Reward: -543.12
+Iter 49/100  Episode 815  Reward: -629.16
+Iter 49/100  Episode 816  Reward: 5.28
+Iter 49/100  Episode 817  Reward: -1960.40
+Iter 49/100  Episode 818  Reward: -444.60
+Iter 49/100  Episode 819  Reward: 33.84
+Iter 49/100  Episode 820  Reward: -1922.72
+Iter 49/100  Episode 821  Reward: -121.44
+Iter 49/100  Episode 822  Reward: -190.16
+ Retrying in 1 seconds
+Iter 49/100  Episode 823  Reward: -1573.88
+Iter 49/100  Episode 824  Reward: -53.44
+Iter 49/100  Episode 825  Reward: -560.16
+Iter 49/100  Episode 826  Reward: -275.84
+Iter 49/100  Episode 827  Reward: -1213.60
+Iter 49/100  Episode 828  Reward: -2176.28
+ Retrying in 1 seconds
+Iter 49/100  Episode 829  Reward: -1940.28
+Iter 49/100  Episode 830  Reward: -68.72
+Iter 49/100  Episode 831  Reward: -985.16
+Iter 50/100  Episode 832  Reward: -2033.28
+Iter 50/100  Episode 833  Reward: 5.48
+Iter 50/100  Episode 834  Reward: -603.60
+Iter 50/100  Episode 835  Reward: -140.84
+ Retrying in 1 seconds
+Iter 50/100  Episode 836  Reward: -130.60
+Iter 50/100  Episode 837  Reward: -973.16
+Iter 50/100  Episode 838  Reward: -1687.16
+Iter 50/100  Episode 839  Reward: -2321.28
+ Retrying in 1 seconds
+Iter 50/100  Episode 840  Reward: -47.24
+Iter 50/100  Episode 841  Reward: 20.56
+Iter 50/100  Episode 842  Reward: -2138.28
+Iter 50/100  Episode 843  Reward: -1797.88
+Iter 50/100  Episode 844  Reward: -2.96
+Iter 50/100  Episode 845  Reward: -172.60
+Iter 50/100  Episode 846  Reward: -1988.28
+ Retrying in 1 seconds
+Iter 50/100  Episode 847  Reward: 12.56
+Iter 50/100  Episode 848  Reward: -250.72
+Iter 50/100  Episode 849  Reward: -229.88
+Iter 50/100  Episode 850  Reward: -2245.72
+Checkpoint saved at iteration 50 → runs/trsp/7ed3a4eb/policy.pkl
+Iter 51/100  Episode 851  Reward: -571.44
+Iter 51/100  Episode 852  Reward: -207.44
+Iter 51/100  Episode 853  Reward: -1889.60
+ Retrying in 1 seconds
+Iter 51/100  Episode 854  Reward: -1800.72
+Iter 51/100  Episode 855  Reward: -1271.16
+Iter 51/100  Episode 856  Reward: -1962.72
+Iter 51/100  Episode 857  Reward: -1085.16
+ Retrying in 1 seconds
+Iter 51/100  Episode 858  Reward: -583.60
+Iter 51/100  Episode 859  Reward: 3.28
+Iter 51/100  Episode 860  Reward: -2329.84
+Iter 51/100  Episode 861  Reward: -2078.96
+ Retrying in 1 seconds
+Iter 51/100  Episode 862  Reward: -7.52
+Iter 51/100  Episode 863  Reward: -446.44
+Iter 51/100  Episode 864  Reward: -130.16
+Iter 51/100  Episode 865  Reward: -600.16
+Iter 52/100  Episode 866  Reward: -2175.08
+Iter 52/100  Episode 867  Reward: -2385.60
+Iter 52/100  Episode 868  Reward: -420.16
+Iter 52/100  Episode 869  Reward: -178.16
+Iter 52/100  Episode 870  Reward: -109.40
+ Retrying in 1 seconds
+Iter 52/100  Episode 871  Reward: -1295.16
+Iter 52/100  Episode 872  Reward: -106.68
+Iter 52/100  Episode 873  Reward: -756.16
+Iter 52/100  Episode 874  Reward: -162.44
+Iter 52/100  Episode 875  Reward: 5.48
+Iter 52/100  Episode 876  Reward: -237.72
+Iter 52/100  Episode 877  Reward: 20.56
+Iter 52/100  Episode 878  Reward: -2043.84
+ Retrying in 1 seconds
+Iter 52/100  Episode 879  Reward: -1945.72
+Iter 52/100  Episode 880  Reward: 5.28
+Iter 52/100  Episode 881  Reward: -2223.28
+Iter 52/100  Episode 882  Reward: 5.28
+Iter 52/100  Episode 883  Reward: -261.44
+Iter 52/100  Episode 884  Reward: -2102.72
+ Retrying in 1 seconds
+Iter 52/100  Episode 885  Reward: -2133.72
+Iter 52/100  Episode 886  Reward: -246.60
+Iter 53/100  Episode 887  Reward: -1553.16
+Iter 53/100  Episode 888  Reward: -722.72
+Iter 53/100  Episode 889  Reward: -377.44
+Iter 53/100  Episode 890  Reward: -654.96
+ Retrying in 1 seconds
+Iter 53/100  Episode 891  Reward: -579.44
+Iter 53/100  Episode 892  Reward: -1582.88
+Iter 53/100  Episode 893  Reward: -783.32
+Iter 53/100  Episode 894  Reward: 5.28
+Iter 53/100  Episode 895  Reward: 5.28
+Iter 53/100  Episode 896  Reward: -2002.16
+Iter 53/100  Episode 897  Reward: -282.96
+ Retrying in 1 seconds
+Iter 53/100  Episode 898  Reward: -2302.84
+Iter 53/100  Episode 899  Reward: -983.16
+Iter 53/100  Episode 900  Reward: 20.76
+Iter 53/100  Episode 901  Reward: -483.16
+Iter 53/100  Episode 902  Reward: -2026.48
+Iter 53/100  Episode 903  Reward: -143.72
+ Retrying in 1 seconds
+Iter 53/100  Episode 904  Reward: 5.28
+Iter 53/100  Episode 905  Reward: -668.44
+Iter 53/100  Episode 906  Reward: -191.96
+Iter 54/100  Episode 907  Reward: -1130.16
+Iter 54/100  Episode 908  Reward: -1918.16
+Iter 54/100  Episode 909  Reward: -2031.72
+ Retrying in 1 seconds
+Iter 54/100  Episode 910  Reward: -675.12
+Iter 54/100  Episode 911  Reward: -500.24
+Iter 54/100  Episode 912  Reward: -2746.28
+Iter 54/100  Episode 913  Reward: -860.96
+Iter 54/100  Episode 914  Reward: -211.16
+ Retrying in 1 seconds
+Iter 54/100  Episode 915  Reward: -705.72
+Iter 54/100  Episode 916  Reward: -456.40
+Iter 54/100  Episode 917  Reward: -2647.84
+Iter 54/100  Episode 918  Reward: -496.60
+Iter 54/100  Episode 919  Reward: -2253.28
+ Retrying in 1 seconds
+Iter 54/100  Episode 920  Reward: -200.24
+Iter 54/100  Episode 921  Reward: -688.16
+Iter 54/100  Episode 922  Reward: -798.12
+Iter 55/100  Episode 923  Reward: -428.48
+Iter 55/100  Episode 924  Reward: -2053.28
+Iter 55/100  Episode 925  Reward: -1212.24
+ Retrying in 1 seconds
+Iter 55/100  Episode 926  Reward: -1059.88
+Iter 55/100  Episode 927  Reward: -1325.16
+Iter 55/100  Episode 928  Reward: -514.96
+Iter 55/100  Episode 929  Reward: -1651.72
+Iter 55/100  Episode 930  Reward: -1358.88
+ Retrying in 1 seconds
+Iter 55/100  Episode 931  Reward: -171.60
+Iter 55/100  Episode 932  Reward: -2012.28
+Iter 55/100  Episode 933  Reward: -2228.84
+Iter 55/100  Episode 934  Reward: -914.44
+ Retrying in 1 seconds
+Iter 55/100  Episode 935  Reward: 5.28
+Iter 55/100  Episode 936  Reward: -561.40
+Iter 56/100  Episode 937  Reward: -2141.08
+Iter 56/100  Episode 938  Reward: -461.40
+Iter 56/100  Episode 939  Reward: -784.88
+Iter 56/100  Episode 940  Reward: -128.88
+Iter 56/100  Episode 941  Reward: -841.44
+ Retrying in 1 seconds
+Iter 56/100  Episode 942  Reward: -1830.88
+Iter 56/100  Episode 943  Reward: -1784.16
+Iter 56/100  Episode 944  Reward: -92.88
+Iter 56/100  Episode 945  Reward: -2250.28
+ Retrying in 1 seconds
+Iter 56/100  Episode 946  Reward: -1218.16
+Iter 56/100  Episode 947  Reward: -2087.72
+Iter 56/100  Episode 948  Reward: -2193.72
+ Retrying in 1 seconds
+Iter 56/100  Episode 949  Reward: -7.72
+Iter 57/100  Episode 950  Reward: -1878.72
+Iter 57/100  Episode 951  Reward: -47.44
+Iter 57/100  Episode 952  Reward: -212.48
+Iter 57/100  Episode 953  Reward: -2175.28
+Iter 57/100  Episode 954  Reward: -3.52
+Iter 57/100  Episode 955  Reward: -2082.28
+Iter 57/100  Episode 956  Reward: -65.24
+ Retrying in 1 seconds
+Iter 57/100  Episode 957  Reward: -1951.16
+Iter 57/100  Episode 958  Reward: -2330.28
+Iter 57/100  Episode 959  Reward: -132.16
+Iter 57/100  Episode 960  Reward: -1967.16
+ Retrying in 1 seconds
+Iter 57/100  Episode 961  Reward: -594.96
+Iter 57/100  Episode 962  Reward: -568.88
+Iter 57/100  Episode 963  Reward: -72.68
+Iter 57/100  Episode 964  Reward: -1038.44
+Iter 57/100  Episode 965  Reward: -754.60
+Iter 57/100  Episode 966  Reward: -1154.88
+ Retrying in 1 seconds
+Iter 58/100  Episode 967  Reward: -2110.28
+Iter 58/100  Episode 968  Reward: -2149.28
+Iter 58/100  Episode 969  Reward: -429.60
+Iter 58/100  Episode 970  Reward: -387.16
+ Retrying in 1 seconds
+Iter 58/100  Episode 971  Reward: -2278.72
+Iter 58/100  Episode 972  Reward: -220.88
+Iter 58/100  Episode 973  Reward: -383.52
+Iter 58/100  Episode 974  Reward: -578.88
+Iter 58/100  Episode 975  Reward: -321.16
+Iter 58/100  Episode 976  Reward: -2064.28
+Iter 58/100  Episode 977  Reward: 5.28
+ Retrying in 1 seconds
+Iter 58/100  Episode 978  Reward: -537.44
+Iter 58/100  Episode 979  Reward: -86.88
+Iter 58/100  Episode 980  Reward: -2134.72
+Iter 58/100  Episode 981  Reward: -1011.40
+Iter 58/100  Episode 982  Reward: -2098.72
+ Retrying in 1 seconds
+Iter 59/100  Episode 983  Reward: -76.16
+Iter 59/100  Episode 984  Reward: -165.44
+Iter 59/100  Episode 985  Reward: -2507.28
+Iter 59/100  Episode 986  Reward: -932.32
+Iter 59/100  Episode 987  Reward: -1101.68
+ Retrying in 1 seconds
+Iter 59/100  Episode 988  Reward: -1315.96
+Iter 59/100  Episode 989  Reward: -1878.72
+Iter 59/100  Episode 990  Reward: -1589.96
+ Retrying in 1 seconds
+Iter 59/100  Episode 991  Reward: -47.44
+Iter 59/100  Episode 992  Reward: -1902.16
+Iter 59/100  Episode 993  Reward: -216.16
+Iter 59/100  Episode 994  Reward: 4.48
+Iter 59/100  Episode 995  Reward: 9.56
+Iter 59/100  Episode 996  Reward: -2247.72
+Iter 59/100  Episode 997  Reward: -26.88
+Iter 59/100  Episode 998  Reward: -531.88
+ Retrying in 1 seconds
+Iter 60/100  Episode 999  Reward: -601.72
+Iter 60/100  Episode 1000  Reward: -1284.52
+Iter 60/100  Episode 1001  Reward: 35.84
+Iter 60/100  Episode 1002  Reward: 20.76
+Iter 60/100  Episode 1003  Reward: -819.72
+Iter 60/100  Episode 1004  Reward: -2131.28
+Iter 60/100  Episode 1005  Reward: 5.28
+Iter 60/100  Episode 1006  Reward: -1506.12
+ Retrying in 1 seconds
+Iter 60/100  Episode 1007  Reward: -866.16
+Iter 60/100  Episode 1008  Reward: -468.44
+Iter 60/100  Episode 1009  Reward: -2370.28
+Iter 60/100  Episode 1010  Reward: -950.68
+Iter 60/100  Episode 1011  Reward: 1.28
+Iter 60/100  Episode 1012  Reward: -618.32
+ Retrying in 1 seconds
+Iter 60/100  Episode 1013  Reward: -486.40
+Iter 60/100  Episode 1014  Reward: -1944.16
+Iter 60/100  Episode 1015  Reward: -1897.16
+Iter 61/100  Episode 1016  Reward: -2074.28
+ Retrying in 1 seconds
+Iter 61/100  Episode 1017  Reward: 12.56
+Iter 61/100  Episode 1018  Reward: -180.88
+Iter 61/100  Episode 1019  Reward: -217.16
+Iter 61/100  Episode 1020  Reward: -120.16
+Iter 61/100  Episode 1021  Reward: -2157.48
+Iter 61/100  Episode 1022  Reward: -292.44
+Iter 61/100  Episode 1023  Reward: -722.16
+Iter 61/100  Episode 1024  Reward: -1842.16
+ Retrying in 1 seconds
+Iter 61/100  Episode 1025  Reward: -714.40
+Iter 61/100  Episode 1026  Reward: -1513.88
+Iter 61/100  Episode 1027  Reward: -1952.96
+Iter 61/100  Episode 1028  Reward: -1933.28
+ Retrying in 1 seconds
+Iter 61/100  Episode 1029  Reward: -1953.72
+Iter 61/100  Episode 1030  Reward: -1009.84
+Iter 61/100  Episode 1031  Reward: -427.16
+Iter 61/100  Episode 1032  Reward: -134.24
+Iter 61/100  Episode 1033  Reward: -1135.96
+Iter 62/100  Episode 1034  Reward: -737.16
+Iter 62/100  Episode 1035  Reward: -437.72
+ Retrying in 1 seconds
+Iter 62/100  Episode 1036  Reward: -871.60
+Iter 62/100  Episode 1037  Reward: -1144.72
+Iter 62/100  Episode 1038  Reward: -415.60
+Iter 62/100  Episode 1039  Reward: -209.44
+Iter 62/100  Episode 1040  Reward: -1215.88
+Iter 62/100  Episode 1041  Reward: -2328.84
+ Retrying in 1 seconds
+Iter 62/100  Episode 1042  Reward: -1913.40
+Iter 62/100  Episode 1043  Reward: -441.44
+Iter 62/100  Episode 1044  Reward: 4.48
+Iter 62/100  Episode 1045  Reward: -761.40
+Iter 62/100  Episode 1046  Reward: -1366.72
+ Retrying in 1 seconds
+Iter 62/100  Episode 1047  Reward: 20.56
+Iter 62/100  Episode 1048  Reward: -2191.28
+Iter 62/100  Episode 1049  Reward: -1734.16
+Iter 63/100  Episode 1050  Reward: -2587.28
+Iter 63/100  Episode 1051  Reward: -248.96
+ Retrying in 1 seconds
+Iter 63/100  Episode 1052  Reward: -2282.84
+Iter 63/100  Episode 1053  Reward: -1953.72
+Iter 63/100  Episode 1054  Reward: -324.40
+Iter 63/100  Episode 1055  Reward: -2185.84
+Iter 63/100  Episode 1056  Reward: -139.52
+ Retrying in 1 seconds
+Iter 63/100  Episode 1057  Reward: -53.44
+Iter 63/100  Episode 1058  Reward: -647.68
+Iter 63/100  Episode 1059  Reward: -1780.16
+Iter 63/100  Episode 1060  Reward: -669.88
+Iter 63/100  Episode 1061  Reward: -2228.60
+Iter 63/100  Episode 1062  Reward: -261.32
+ Retrying in 1 seconds
+Iter 63/100  Episode 1063  Reward: -1997.28
+Iter 63/100  Episode 1064  Reward: -793.88
+Iter 63/100  Episode 1065  Reward: -876.96
+Iter 63/100  Episode 1066  Reward: -302.44
+Iter 64/100  Episode 1067  Reward: -1031.88
+ Retrying in 1 seconds
+Iter 64/100  Episode 1068  Reward: 19.76
+Iter 64/100  Episode 1069  Reward: -127.44
+Iter 64/100  Episode 1070  Reward: -3.44
+Iter 64/100  Episode 1071  Reward: -1365.16
+Iter 64/100  Episode 1072  Reward: -2167.28
+Iter 64/100  Episode 1073  Reward: -1378.44
+Iter 64/100  Episode 1074  Reward: -783.16
+ Retrying in 1 seconds
+Iter 64/100  Episode 1075  Reward: -2125.72
+Iter 64/100  Episode 1076  Reward: -2337.28
+Iter 64/100  Episode 1077  Reward: -305.12
+Iter 64/100  Episode 1078  Reward: -1465.16
+ Retrying in 1 seconds
+Iter 64/100  Episode 1079  Reward: -1910.72
+Iter 64/100  Episode 1080  Reward: -1148.88
+Iter 64/100  Episode 1081  Reward: -512.44
+Iter 64/100  Episode 1082  Reward: 1.28
+Iter 65/100  Episode 1083  Reward: -2052.72
+ Retrying in 1 seconds
+Iter 65/100  Episode 1084  Reward: -1997.72
+Iter 65/100  Episode 1085  Reward: -1574.88
+Iter 65/100  Episode 1086  Reward: -2333.84
+ Retrying in 1 seconds
+Iter 65/100  Episode 1087  Reward: -2146.28
+Iter 65/100  Episode 1088  Reward: -606.88
+Iter 65/100  Episode 1089  Reward: -1833.44
+Iter 65/100  Episode 1090  Reward: 20.56
+Iter 65/100  Episode 1091  Reward: -316.24
+Iter 65/100  Episode 1092  Reward: -204.88
+ Retrying in 1 seconds
+Iter 65/100  Episode 1093  Reward: -1998.28
+Iter 65/100  Episode 1094  Reward: -254.16
+Iter 65/100  Episode 1095  Reward: -18.72
+Iter 66/100  Episode 1096  Reward: -1862.16
+Iter 66/100  Episode 1097  Reward: -2211.28
+ Retrying in 1 seconds
+Iter 66/100  Episode 1098  Reward: -2454.72
+Iter 66/100  Episode 1099  Reward: -795.44
+Iter 66/100  Episode 1100  Reward: -40.88
+Iter 66/100  Episode 1101  Reward: -1274.48
+Iter 66/100  Episode 1102  Reward: -785.96
+Iter 66/100  Episode 1103  Reward: 5.48
+Iter 66/100  Episode 1104  Reward: -627.44
+ Retrying in 1 seconds
+Iter 66/100  Episode 1105  Reward: -2288.04
+Iter 66/100  Episode 1106  Reward: -1903.28
+Iter 66/100  Episode 1107  Reward: -1519.44
+Iter 66/100  Episode 1108  Reward: 35.84
+ Retrying in 1 seconds
+Iter 66/100  Episode 1109  Reward: -679.88
+Iter 66/100  Episode 1110  Reward: -1990.72
+Iter 67/100  Episode 1111  Reward: -2163.28
+Iter 67/100  Episode 1112  Reward: -1360.68
+Iter 67/100  Episode 1113  Reward: -130.72
+ Retrying in 1 seconds
+Iter 67/100  Episode 1114  Reward: -1378.88
+Iter 67/100  Episode 1115  Reward: -357.24
+Iter 67/100  Episode 1116  Reward: -2040.72
+Iter 67/100  Episode 1117  Reward: -973.32
+Iter 67/100  Episode 1118  Reward: -1191.44
+ Retrying in 1 seconds
+Iter 67/100  Episode 1119  Reward: -1551.16
+Iter 67/100  Episode 1120  Reward: -62.72
+Iter 67/100  Episode 1121  Reward: -9.72
+Iter 67/100  Episode 1122  Reward: -2140.28
+Iter 67/100  Episode 1123  Reward: -27.44
+Iter 67/100  Episode 1124  Reward: -251.72
+Iter 67/100  Episode 1125  Reward: -2152.28
+Iter 67/100  Episode 1126  Reward: -96.44
+ Retrying in 1 seconds
+Iter 67/100  Episode 1127  Reward: -1840.16
+Iter 68/100  Episode 1128  Reward: -1461.40
+Iter 68/100  Episode 1129  Reward: -658.84
+Iter 68/100  Episode 1130  Reward: -579.16
+ Retrying in 1 seconds
+Iter 68/100  Episode 1131  Reward: -2505.84
+Iter 68/100  Episode 1132  Reward: -643.44
+Iter 68/100  Episode 1133  Reward: -445.44
+Iter 68/100  Episode 1134  Reward: -1980.16
+Iter 68/100  Episode 1135  Reward: -986.88
+ Retrying in 1 seconds
+Iter 68/100  Episode 1136  Reward: -1233.60
+Iter 68/100  Episode 1137  Reward: -159.24
+Iter 68/100  Episode 1138  Reward: -709.44
+Iter 68/100  Episode 1139  Reward: -75.44
+Iter 68/100  Episode 1140  Reward: -1182.88
+Iter 68/100  Episode 1141  Reward: -1625.60
+ Retrying in 1 seconds
+Iter 68/100  Episode 1142  Reward: -753.12
+Iter 69/100  Episode 1143  Reward: -2075.28
+Iter 69/100  Episode 1144  Reward: -992.96
+Iter 69/100  Episode 1145  Reward: -2032.52
+ Retrying in 1 seconds
+Iter 69/100  Episode 1146  Reward: 3.28
+Iter 69/100  Episode 1147  Reward: -1326.16
+Iter 69/100  Episode 1148  Reward: -278.44
+Iter 69/100  Episode 1149  Reward: -66.44
+Iter 69/100  Episode 1150  Reward: -577.88
+Iter 69/100  Episode 1151  Reward: -1483.72
+Iter 69/100  Episode 1152  Reward: -2051.72
+Iter 69/100  Episode 1153  Reward: -307.44
+Iter 69/100  Episode 1154  Reward: -48.44
+ Retrying in 1 seconds
+Iter 69/100  Episode 1155  Reward: -459.44
+Iter 69/100  Episode 1156  Reward: -466.72
+Iter 69/100  Episode 1157  Reward: -516.60
+Iter 69/100  Episode 1158  Reward: 7.84
+Iter 69/100  Episode 1159  Reward: -1765.12
+Iter 69/100  Episode 1160  Reward: -1987.28
+ Retrying in 1 seconds
+Iter 70/100  Episode 1161  Reward: -1855.16
+Iter 70/100  Episode 1162  Reward: -2189.84
+Iter 70/100  Episode 1163  Reward: -2229.28
+ Retrying in 1 seconds
+Iter 70/100  Episode 1164  Reward: -335.12
+Iter 70/100  Episode 1165  Reward: -1268.88
+Iter 70/100  Episode 1166  Reward: -1444.44
+Iter 70/100  Episode 1167  Reward: -777.96
+Iter 70/100  Episode 1168  Reward: -1360.72
+Iter 70/100  Episode 1169  Reward: -627.72
+Iter 70/100  Episode 1170  Reward: -224.32
+Iter 70/100  Episode 1171  Reward: 5.28
+ Retrying in 1 seconds
+Iter 70/100  Episode 1172  Reward: -1050.16
+Iter 70/100  Episode 1173  Reward: -228.72
+Iter 70/100  Episode 1174  Reward: -272.16
+Iter 70/100  Episode 1175  Reward: -775.60
+Iter 70/100  Episode 1176  Reward: -2308.28
+ Retrying in 1 seconds
+Iter 71/100  Episode 1177  Reward: -474.88
+Iter 71/100  Episode 1178  Reward: -319.88
+Iter 71/100  Episode 1179  Reward: -318.16
+Iter 71/100  Episode 1180  Reward: -146.16
+Iter 71/100  Episode 1181  Reward: -928.72
+Iter 71/100  Episode 1182  Reward: -761.24
+Iter 71/100  Episode 1183  Reward: 5.48
+Iter 71/100  Episode 1184  Reward: -8.72
+Iter 71/100  Episode 1185  Reward: -710.16
+Iter 71/100  Episode 1186  Reward: -2014.28
+ Retrying in 1 seconds
+Iter 71/100  Episode 1187  Reward: -517.84
+Iter 71/100  Episode 1188  Reward: -2124.28
+Iter 71/100  Episode 1189  Reward: -463.88
+Iter 71/100  Episode 1190  Reward: -495.40
+Iter 71/100  Episode 1191  Reward: -177.52
+Iter 71/100  Episode 1192  Reward: -622.16
+Iter 71/100  Episode 1193  Reward: -496.88
+Iter 71/100  Episode 1194  Reward: 19.76
+ Retrying in 1 seconds
+Iter 71/100  Episode 1195  Reward: -2159.16
+Iter 71/100  Episode 1196  Reward: -36.68
+Iter 71/100  Episode 1197  Reward: -2078.04
+Iter 71/100  Episode 1198  Reward: 5.28
+Iter 71/100  Episode 1199  Reward: -356.44
+Iter 71/100  Episode 1200  Reward: -280.40
+ Retrying in 1 seconds
+Iter 72/100  Episode 1201  Reward: -2015.52
+Iter 72/100  Episode 1202  Reward: -1098.16
+Iter 72/100  Episode 1203  Reward: -59.96
+Iter 72/100  Episode 1204  Reward: -2177.28
+ Retrying in 1 seconds
+Iter 72/100  Episode 1205  Reward: -568.88
+Iter 72/100  Episode 1206  Reward: -1949.72
+Iter 72/100  Episode 1207  Reward: -2196.72
+Iter 72/100  Episode 1208  Reward: -630.88
+Iter 72/100  Episode 1209  Reward: -43.96
+Iter 72/100  Episode 1210  Reward: 19.76
+Iter 72/100  Episode 1211  Reward: -405.68
+ Retrying in 1 seconds
+Iter 72/100  Episode 1212  Reward: -422.96
+Iter 72/100  Episode 1213  Reward: 2.84
+Iter 72/100  Episode 1214  Reward: -619.24
+Iter 72/100  Episode 1215  Reward: 14.56
+Iter 72/100  Episode 1216  Reward: -2026.28
+Iter 72/100  Episode 1217  Reward: -875.16
+Iter 72/100  Episode 1218  Reward: -1061.88
+Iter 72/100  Episode 1219  Reward: -62.72
+ Retrying in 1 seconds
+Iter 73/100  Episode 1220  Reward: -1932.92
+Iter 73/100  Episode 1221  Reward: -287.88
+Iter 73/100  Episode 1222  Reward: -1566.60
+Iter 73/100  Episode 1223  Reward: -479.16
+Iter 73/100  Episode 1224  Reward: -198.72
+Iter 73/100  Episode 1225  Reward: -341.88
+Iter 73/100  Episode 1226  Reward: -57.16
+Iter 73/100  Episode 1227  Reward: -1025.88
+ Retrying in 1 seconds
+Iter 73/100  Episode 1228  Reward: -970.72
+Iter 73/100  Episode 1229  Reward: -2029.28
+Iter 73/100  Episode 1230  Reward: 5.28
+Iter 73/100  Episode 1231  Reward: -2433.84
+Iter 73/100  Episode 1232  Reward: -89.12
+ Retrying in 1 seconds
+Iter 73/100  Episode 1233  Reward: -138.44
+Iter 73/100  Episode 1234  Reward: -546.16
+Iter 73/100  Episode 1235  Reward: -73.72
+Iter 73/100  Episode 1236  Reward: -1621.44
+Iter 73/100  Episode 1237  Reward: -479.44
+Iter 73/100  Episode 1238  Reward: -329.52
+Iter 73/100  Episode 1239  Reward: 20.56
+Iter 73/100  Episode 1240  Reward: -846.24
+Iter 73/100  Episode 1241  Reward: -122.48
+Iter 74/100  Episode 1242  Reward: -783.44
+ Retrying in 1 seconds
+Iter 74/100  Episode 1243  Reward: -2119.72
+Iter 74/100  Episode 1244  Reward: -331.32
+Iter 74/100  Episode 1245  Reward: -2013.28
+Iter 74/100  Episode 1246  Reward: -1908.16
+Iter 74/100  Episode 1247  Reward: -211.44
+ Retrying in 1 seconds
+Iter 74/100  Episode 1248  Reward: -2198.72
+Iter 74/100  Episode 1249  Reward: -193.88
+Iter 74/100  Episode 1250  Reward: -930.84
+Iter 74/100  Episode 1251  Reward: -2038.72
+ Retrying in 1 seconds
+Iter 74/100  Episode 1252  Reward: -366.44
+Iter 74/100  Episode 1253  Reward: -1820.16
+Iter 74/100  Episode 1254  Reward: -208.16
+Iter 74/100  Episode 1255  Reward: -744.88
+Iter 74/100  Episode 1256  Reward: -814.96
+Iter 75/100  Episode 1257  Reward: -117.88
+Iter 75/100  Episode 1258  Reward: -637.84
+Iter 75/100  Episode 1259  Reward: -115.44
+Iter 75/100  Episode 1260  Reward: -404.68
+ Retrying in 1 seconds
+Iter 75/100  Episode 1261  Reward: 5.28
+Iter 75/100  Episode 1262  Reward: 15.84
+Iter 75/100  Episode 1263  Reward: -1409.16
+Iter 75/100  Episode 1264  Reward: -2048.08
+Iter 75/100  Episode 1265  Reward: -770.88
+Iter 75/100  Episode 1266  Reward: -261.88
+Iter 75/100  Episode 1267  Reward: -409.60
+ Retrying in 1 seconds
+Iter 75/100  Episode 1268  Reward: -1500.16
+Iter 75/100  Episode 1269  Reward: -2242.84
+Iter 75/100  Episode 1270  Reward: -221.72
+Iter 75/100  Episode 1271  Reward: -2234.72
+Iter 75/100  Episode 1272  Reward: -239.60
+ Retrying in 1 seconds
+Iter 75/100  Episode 1273  Reward: -2412.64
+Iter 76/100  Episode 1274  Reward: -1943.72
+Iter 76/100  Episode 1275  Reward: -32.44
+Iter 76/100  Episode 1276  Reward: -206.72
+Iter 76/100  Episode 1277  Reward: -2088.52
+ Retrying in 1 seconds
+Iter 76/100  Episode 1278  Reward: -337.96
+Iter 76/100  Episode 1279  Reward: -974.68
+Iter 76/100  Episode 1280  Reward: -2203.28
+Iter 76/100  Episode 1281  Reward: -907.88
+Iter 76/100  Episode 1282  Reward: -41.16
+Iter 76/100  Episode 1283  Reward: -110.88
+ Retrying in 1 seconds
+Iter 76/100  Episode 1284  Reward: -818.72
+Iter 76/100  Episode 1285  Reward: -35.16
+Iter 76/100  Episode 1286  Reward: -496.60
+Iter 76/100  Episode 1287  Reward: -2260.28
+Iter 76/100  Episode 1288  Reward: -472.88
+Iter 76/100  Episode 1289  Reward: -1296.40
+Iter 76/100  Episode 1290  Reward: -374.88
+Iter 76/100  Episode 1291  Reward: 20.56
+Iter 76/100  Episode 1292  Reward: -2.44
+ Retrying in 1 seconds
+Iter 76/100  Episode 1293  Reward: -933.40
+Iter 76/100  Episode 1294  Reward: -624.60
+Iter 76/100  Episode 1295  Reward: -26.44
+Iter 76/100  Episode 1296  Reward: -373.44
+Iter 76/100  Episode 1297  Reward: -732.16
+Iter 77/100  Episode 1298  Reward: -1703.84
+ Retrying in 1 seconds
+Iter 77/100  Episode 1299  Reward: -427.44
+Iter 77/100  Episode 1300  Reward: -968.72
+Iter 77/100  Episode 1301  Reward: -2087.28
+Iter 77/100  Episode 1302  Reward: -2037.28
+Iter 77/100  Episode 1303  Reward: -811.16
+Iter 77/100  Episode 1304  Reward: -256.44
+ Retrying in 1 seconds
+Iter 77/100  Episode 1305  Reward: -209.44
+Iter 77/100  Episode 1306  Reward: -789.44
+Iter 77/100  Episode 1307  Reward: -1801.88
+Iter 77/100  Episode 1308  Reward: -2020.28
+Iter 77/100  Episode 1309  Reward: -269.44
+Iter 77/100  Episode 1310  Reward: -63.12
+ Retrying in 1 seconds
+Iter 77/100  Episode 1311  Reward: -866.24
+Iter 77/100  Episode 1312  Reward: -66.72
+Iter 77/100  Episode 1313  Reward: -459.40
+Iter 77/100  Episode 1314  Reward: -110.88
+Iter 78/100  Episode 1315  Reward: -2363.28
+Iter 78/100  Episode 1316  Reward: -2088.08
+ Retrying in 1 seconds
+Iter 78/100  Episode 1317  Reward: -1286.16
+Iter 78/100  Episode 1318  Reward: -788.88
+Iter 78/100  Episode 1319  Reward: -485.88
+Iter 78/100  Episode 1320  Reward: -2138.28
+Iter 78/100  Episode 1321  Reward: -1074.60
+ Retrying in 1 seconds
+Iter 78/100  Episode 1322  Reward: -2193.28
+Iter 78/100  Episode 1323  Reward: -2269.72
+Iter 78/100  Episode 1324  Reward: 5.28
+Iter 78/100  Episode 1325  Reward: -139.24
+Iter 78/100  Episode 1326  Reward: -1966.16
+ Retrying in 1 seconds
+Iter 78/100  Episode 1327  Reward: -25.68
+Iter 79/100  Episode 1328  Reward: -2033.52
+Iter 79/100  Episode 1329  Reward: -2361.28
+Iter 79/100  Episode 1330  Reward: -1489.88
+Iter 79/100  Episode 1331  Reward: -369.16
+ Retrying in 1 seconds
+Iter 79/100  Episode 1332  Reward: -2122.36
+Iter 79/100  Episode 1333  Reward: -964.40
+Iter 79/100  Episode 1334  Reward: -148.60
+Iter 79/100  Episode 1335  Reward: -1781.60
+ Retrying in 1 seconds
+Iter 79/100  Episode 1336  Reward: -361.96
+Iter 79/100  Episode 1337  Reward: -375.44
+Iter 79/100  Episode 1338  Reward: -457.24
+Iter 79/100  Episode 1339  Reward: -376.68
+Iter 79/100  Episode 1340  Reward: -70.40
+Iter 79/100  Episode 1341  Reward: -1969.72
+Iter 79/100  Episode 1342  Reward: -2275.72
+Iter 79/100  Episode 1343  Reward: -81.44
+ Retrying in 1 seconds
+Iter 80/100  Episode 1344  Reward: -2211.84
+Iter 80/100  Episode 1345  Reward: -1966.16
+Iter 80/100  Episode 1346  Reward: -232.44
+Iter 80/100  Episode 1347  Reward: -89.60
+Iter 80/100  Episode 1348  Reward: -2268.84
+ Retrying in 1 seconds
+Iter 80/100  Episode 1349  Reward: -733.16
+Iter 80/100  Episode 1350  Reward: -1895.48
+Iter 80/100  Episode 1351  Reward: -502.72
+Iter 80/100  Episode 1352  Reward: -185.44
+Iter 80/100  Episode 1353  Reward: -258.44
+Iter 80/100  Episode 1354  Reward: -287.72
+Iter 80/100  Episode 1355  Reward: -1747.96
+Iter 80/100  Episode 1356  Reward: 5.28
+Iter 80/100  Episode 1357  Reward: 20.56
+Iter 80/100  Episode 1358  Reward: -104.16
+ Retrying in 1 seconds
+Iter 80/100  Episode 1359  Reward: -1138.16
+Iter 80/100  Episode 1360  Reward: -283.44
+Iter 80/100  Episode 1361  Reward: -1486.16
+Iter 80/100  Episode 1362  Reward: -2002.96
+Iter 80/100  Episode 1363  Reward: -802.44
+ Retrying in 1 seconds
+Iter 80/100  Episode 1364  Reward: -422.44
+Iter 80/100  Episode 1365  Reward: 5.48
+Iter 81/100  Episode 1366  Reward: -106.88
+Iter 81/100  Episode 1367  Reward: -733.88
+Iter 81/100  Episode 1368  Reward: -152.16
+Iter 81/100  Episode 1369  Reward: -2097.72
+Iter 81/100  Episode 1370  Reward: -1046.48
+Iter 81/100  Episode 1371  Reward: -168.88
+Iter 81/100  Episode 1372  Reward: -72.24
+Iter 81/100  Episode 1373  Reward: -510.72
+Iter 81/100  Episode 1374  Reward: 13.56
+Iter 81/100  Episode 1375  Reward: -40.40
+ Retrying in 1 seconds
+Iter 81/100  Episode 1376  Reward: -942.16
+Iter 81/100  Episode 1377  Reward: -511.44
+Iter 81/100  Episode 1378  Reward: -129.24
+Iter 81/100  Episode 1379  Reward: -2465.04
+Iter 81/100  Episode 1380  Reward: -2150.64
+Iter 81/100  Episode 1381  Reward: -273.88
+ Retrying in 1 seconds
+Iter 81/100  Episode 1382  Reward: -2004.72
+Iter 81/100  Episode 1383  Reward: -1222.88
+Iter 81/100  Episode 1384  Reward: -902.44
+Iter 81/100  Episode 1385  Reward: -2238.28
+Iter 81/100  Episode 1386  Reward: 19.76
+ Retrying in 1 seconds
+Iter 82/100  Episode 1387  Reward: -2287.84
+Iter 82/100  Episode 1388  Reward: -2177.28
+Iter 82/100  Episode 1389  Reward: -533.16
+Iter 82/100  Episode 1390  Reward: -1993.08
+ Retrying in 1 seconds
+Iter 82/100  Episode 1391  Reward: -2027.16
+Iter 82/100  Episode 1392  Reward: -471.96
+Iter 82/100  Episode 1393  Reward: -684.68
+Iter 82/100  Episode 1394  Reward: -1526.96
+Iter 82/100  Episode 1395  Reward: -240.44
+Iter 82/100  Episode 1396  Reward: 20.76
+ Retrying in 1 seconds
+Iter 82/100  Episode 1397  Reward: -578.48
+Iter 82/100  Episode 1398  Reward: -1901.16
+Iter 82/100  Episode 1399  Reward: -1961.72
+Iter 82/100  Episode 1400  Reward: -1639.68
+ Retrying in 1 seconds
+Iter 83/100  Episode 1401  Reward: -1577.88
+Iter 83/100  Episode 1402  Reward: 4.28
+Iter 83/100  Episode 1403  Reward: -853.32
+Iter 83/100  Episode 1404  Reward: -709.16
+Iter 83/100  Episode 1405  Reward: -2135.28
+ Retrying in 1 seconds
+Iter 83/100  Episode 1406  Reward: -749.44
+Iter 83/100  Episode 1407  Reward: -1436.44
+Iter 83/100  Episode 1408  Reward: -716.48
+Iter 83/100  Episode 1409  Reward: -429.88
+Iter 83/100  Episode 1410  Reward: -1969.16
+ Retrying in 1 seconds
+Iter 83/100  Episode 1411  Reward: 5.48
+Iter 83/100  Episode 1412  Reward: -1077.16
+Iter 83/100  Episode 1413  Reward: -1885.72
+Iter 83/100  Episode 1414  Reward: -1926.36
+Iter 83/100  Episode 1415  Reward: -271.44
+ Retrying in 1 seconds
+Iter 84/100  Episode 1416  Reward: -2107.16
+Iter 84/100  Episode 1417  Reward: -421.88
+Iter 84/100  Episode 1418  Reward: -532.60
+Iter 84/100  Episode 1419  Reward: -2163.48
+ Retrying in 1 seconds
+Iter 84/100  Episode 1420  Reward: -53.44
+Iter 84/100  Episode 1421  Reward: -538.88
+Iter 84/100  Episode 1422  Reward: -1096.16
+Iter 84/100  Episode 1423  Reward: -19.88
+Iter 84/100  Episode 1424  Reward: -321.16
+Iter 84/100  Episode 1425  Reward: -1761.88
+Iter 84/100  Episode 1426  Reward: -1095.12
+ Retrying in 1 seconds
+Iter 84/100  Episode 1427  Reward: -2061.28
+Iter 84/100  Episode 1428  Reward: -1376.88
+Iter 85/100  Episode 1429  Reward: -2173.28
+ Retrying in 1 seconds
+Iter 85/100  Episode 1430  Reward: -2190.72
+Iter 85/100  Episode 1431  Reward: -2200.84
+Iter 85/100  Episode 1432  Reward: -2299.28
+Iter 85/100  Episode 1433  Reward: -96.88
+ Retrying in 1 seconds
+Iter 85/100  Episode 1434  Reward: -502.68
+Iter 85/100  Episode 1435  Reward: -1907.16
+Iter 85/100  Episode 1436  Reward: -124.16
+Iter 85/100  Episode 1437  Reward: -1625.44
+Iter 85/100  Episode 1438  Reward: -496.16
+ Retrying in 1 seconds
+Iter 85/100  Episode 1439  Reward: -2041.72
+Iter 85/100  Episode 1440  Reward: -2040.28
+Iter 86/100  Episode 1441  Reward: -1150.16
+ Retrying in 1 seconds
+Iter 86/100  Episode 1442  Reward: 20.56
+Iter 86/100  Episode 1443  Reward: -1861.72
+Iter 86/100  Episode 1444  Reward: -1417.72
+Iter 86/100  Episode 1445  Reward: -2153.28
+ Retrying in 1 seconds
+Iter 86/100  Episode 1446  Reward: -783.44
+Iter 86/100  Episode 1447  Reward: -567.84
+Iter 86/100  Episode 1448  Reward: -2487.04
+Iter 86/100  Episode 1449  Reward: -390.44
+Iter 86/100  Episode 1450  Reward: -1972.72
+ Retrying in 1 seconds
+Iter 86/100  Episode 1451  Reward: -476.68
+Iter 86/100  Episode 1452  Reward: -1922.16
+Iter 86/100  Episode 1453  Reward: -399.88
+Iter 86/100  Episode 1454  Reward: -58.44
+Iter 87/100  Episode 1455  Reward: -503.88
+Iter 87/100  Episode 1456  Reward: 5.28
+Iter 87/100  Episode 1457  Reward: -1223.16
+Iter 87/100  Episode 1458  Reward: -433.32
+Iter 87/100  Episode 1459  Reward: -412.88
+ Retrying in 1 seconds
+Iter 87/100  Episode 1460  Reward: -183.16
+Iter 87/100  Episode 1461  Reward: -609.48
+Iter 87/100  Episode 1462  Reward: -642.16
+Iter 87/100  Episode 1463  Reward: -141.16
+Iter 87/100  Episode 1464  Reward: -1483.60
+Iter 87/100  Episode 1465  Reward: -284.84
+Iter 87/100  Episode 1466  Reward: -686.44
+ Retrying in 1 seconds
+Iter 87/100  Episode 1467  Reward: -535.44
+Iter 87/100  Episode 1468  Reward: -1397.40
+Iter 87/100  Episode 1469  Reward: -1987.72
+Iter 87/100  Episode 1470  Reward: -486.40
+Iter 87/100  Episode 1471  Reward: -1247.84
+ Retrying in 1 seconds
+Iter 87/100  Episode 1472  Reward: -316.60
+Iter 87/100  Episode 1473  Reward: -1216.36
+Iter 88/100  Episode 1474  Reward: -1773.96
+Iter 88/100  Episode 1475  Reward: -91.60
+Iter 88/100  Episode 1476  Reward: -866.16
+Iter 88/100  Episode 1477  Reward: -153.44
+ Retrying in 1 seconds
+Iter 88/100  Episode 1478  Reward: -733.16
+Iter 88/100  Episode 1479  Reward: -1176.68
+Iter 88/100  Episode 1480  Reward: -673.88
+Iter 88/100  Episode 1481  Reward: -923.60
+Iter 88/100  Episode 1482  Reward: -190.44
+Iter 88/100  Episode 1483  Reward: 57.60
+Iter 88/100  Episode 1484  Reward: -2255.28
+ Retrying in 1 seconds
+Iter 88/100  Episode 1485  Reward: -222.52
+Iter 88/100  Episode 1486  Reward: -687.44
+Iter 88/100  Episode 1487  Reward: -1523.40
+Iter 88/100  Episode 1488  Reward: -1047.68
+Iter 88/100  Episode 1489  Reward: -55.44
+Iter 88/100  Episode 1490  Reward: -529.88
+Iter 88/100  Episode 1491  Reward: -480.32
+ Retrying in 1 seconds
+Iter 88/100  Episode 1492  Reward: -500.60
+Iter 88/100  Episode 1493  Reward: -949.96
+Iter 89/100  Episode 1494  Reward: -1193.40
+Iter 89/100  Episode 1495  Reward: -288.72
+Iter 89/100  Episode 1496  Reward: -466.88
+Iter 89/100  Episode 1497  Reward: -593.88
+Iter 89/100  Episode 1498  Reward: 20.76
+ Retrying in 1 seconds
+Iter 89/100  Episode 1499  Reward: -2108.28
+Iter 89/100  Episode 1500  Reward: -360.88
+Iter 89/100  Episode 1501  Reward: -1447.88
+Iter 89/100  Episode 1502  Reward: -234.88
+Iter 89/100  Episode 1503  Reward: -2105.84
+ Retrying in 1 seconds
+Iter 89/100  Episode 1504  Reward: -2100.64
+Iter 89/100  Episode 1505  Reward: -1623.60
+Iter 89/100  Episode 1506  Reward: -1916.72
+Iter 89/100  Episode 1507  Reward: -1.72
+Iter 89/100  Episode 1508  Reward: -130.88
+ Retrying in 1 seconds
+Iter 90/100  Episode 1509  Reward: -1683.68
+Iter 90/100  Episode 1510  Reward: -2133.28
+Iter 90/100  Episode 1511  Reward: 5.48
+Iter 90/100  Episode 1512  Reward: -802.88
+Iter 90/100  Episode 1513  Reward: -275.52
+ Retrying in 1 seconds
+Iter 90/100  Episode 1514  Reward: -2133.72
+Iter 90/100  Episode 1515  Reward: -2347.28
+Iter 90/100  Episode 1516  Reward: -58.16
+Iter 90/100  Episode 1517  Reward: -827.72
+Iter 90/100  Episode 1518  Reward: -399.32
+Iter 90/100  Episode 1519  Reward: -271.36
+ Retrying in 1 seconds
+Iter 90/100  Episode 1520  Reward: -142.88
+Iter 90/100  Episode 1521  Reward: -138.44
+Iter 90/100  Episode 1522  Reward: -624.12
+Iter 90/100  Episode 1523  Reward: -2077.28
+Iter 90/100  Episode 1524  Reward: 20.56
+Iter 90/100  Episode 1525  Reward: -1970.72
+ Retrying in 1 seconds
+Iter 91/100  Episode 1526  Reward: -888.60
+Iter 91/100  Episode 1527  Reward: 33.32
+Iter 91/100  Episode 1528  Reward: -2023.96
+Iter 91/100  Episode 1529  Reward: -843.72
+Iter 91/100  Episode 1530  Reward: -926.44
+ Retrying in 1 seconds
+Iter 91/100  Episode 1531  Reward: 20.76
+Iter 91/100  Episode 1532  Reward: -1627.40
+Iter 91/100  Episode 1533  Reward: -1934.96
+Iter 91/100  Episode 1534  Reward: -2215.28
+ Retrying in 1 seconds
+Iter 91/100  Episode 1535  Reward: -1523.32
+Iter 91/100  Episode 1536  Reward: -139.72
+Iter 91/100  Episode 1537  Reward: -296.12
+Iter 91/100  Episode 1538  Reward: -115.44
+Iter 91/100  Episode 1539  Reward: -1268.44
+Iter 91/100  Episode 1540  Reward: 1.48
+Iter 91/100  Episode 1541  Reward: -2190.84
+Iter 91/100  Episode 1542  Reward: -53.68
+Iter 91/100  Episode 1543  Reward: -8.72
+ Retrying in 1 seconds
+Iter 92/100  Episode 1544  Reward: -106.16
+Iter 92/100  Episode 1545  Reward: -1994.52
+Iter 92/100  Episode 1546  Reward: -2358.28
+Iter 92/100  Episode 1547  Reward: -1392.44
+Iter 92/100  Episode 1548  Reward: 5.28
+ Retrying in 1 seconds
+Iter 92/100  Episode 1549  Reward: -854.44
+Iter 92/100  Episode 1550  Reward: -1069.88
+Iter 92/100  Episode 1551  Reward: -2048.48
+Iter 92/100  Episode 1552  Reward: -373.88
+Iter 92/100  Episode 1553  Reward: -126.96
+Iter 92/100  Episode 1554  Reward: -2331.60
+ Retrying in 1 seconds
+Iter 92/100  Episode 1555  Reward: -62.72
+Iter 92/100  Episode 1556  Reward: 5.48
+Iter 92/100  Episode 1557  Reward: -147.52
+Iter 92/100  Episode 1558  Reward: -619.72
+Iter 92/100  Episode 1559  Reward: -1943.28
+Iter 92/100  Episode 1560  Reward: -2073.28
+Iter 93/100  Episode 1561  Reward: -2250.84
+ Retrying in 1 seconds
+Iter 93/100  Episode 1562  Reward: -35.16
+Iter 93/100  Episode 1563  Reward: -235.72
+Iter 93/100  Episode 1564  Reward: -1449.12
+Iter 93/100  Episode 1565  Reward: -2103.72
+Iter 93/100  Episode 1566  Reward: -791.88
+Iter 93/100  Episode 1567  Reward: -415.72
+Iter 93/100  Episode 1568  Reward: -869.12
+Iter 93/100  Episode 1569  Reward: 5.48
+ Retrying in 1 seconds
+Iter 93/100  Episode 1570  Reward: -376.88
+Iter 93/100  Episode 1571  Reward: -1209.24
+Iter 93/100  Episode 1572  Reward: -2227.60
+Iter 93/100  Episode 1573  Reward: -284.12
+Iter 93/100  Episode 1574  Reward: -2002.16
+ Retrying in 1 seconds
+Iter 93/100  Episode 1575  Reward: -1122.96
+Iter 93/100  Episode 1576  Reward: -428.88
+Iter 93/100  Episode 1577  Reward: -85.40
+Iter 93/100  Episode 1578  Reward: -1633.44
+Iter 93/100  Episode 1579  Reward: -926.72
+Iter 93/100  Episode 1580  Reward: -66.16
+Iter 94/100  Episode 1581  Reward: -1654.16
+ Retrying in 1 seconds
+Iter 94/100  Episode 1582  Reward: 5.28
+Iter 94/100  Episode 1583  Reward: -1434.44
+Iter 94/100  Episode 1584  Reward: -508.60
+Iter 94/100  Episode 1585  Reward: -467.44
+Iter 94/100  Episode 1586  Reward: -19.68
+Iter 94/100  Episode 1587  Reward: 26.84
+Iter 94/100  Episode 1588  Reward: -877.12
+Iter 94/100  Episode 1589  Reward: -1068.16
+ Retrying in 1 seconds
+Iter 94/100  Episode 1590  Reward: -255.16
+Iter 94/100  Episode 1591  Reward: -218.44
+Iter 94/100  Episode 1592  Reward: -575.72
+Iter 94/100  Episode 1593  Reward: -2178.84
+Iter 94/100  Episode 1594  Reward: -1131.48
+Iter 94/100  Episode 1595  Reward: -2244.04
+ Retrying in 1 seconds
+Iter 94/100  Episode 1596  Reward: -1176.96
+Iter 94/100  Episode 1597  Reward: -2152.16
+Iter 95/100  Episode 1598  Reward: -1376.88
+ Retrying in 1 seconds
+Iter 95/100  Episode 1599  Reward: -418.16
+Iter 95/100  Episode 1600  Reward: -1894.16
+Iter 95/100  Episode 1601  Reward: -1002.40
+Iter 95/100  Episode 1602  Reward: -1195.12
+Iter 95/100  Episode 1603  Reward: -1215.72
+Iter 95/100  Episode 1604  Reward: -202.72
+Iter 95/100  Episode 1605  Reward: -4.40
+ Retrying in 1 seconds
+Iter 95/100  Episode 1606  Reward: -491.16
+Iter 95/100  Episode 1607  Reward: -729.44
+Iter 95/100  Episode 1608  Reward: -2172.28
+Iter 95/100  Episode 1609  Reward: -1339.88
+Iter 95/100  Episode 1610  Reward: -1871.16
+ Retrying in 1 seconds
+Iter 95/100  Episode 1611  Reward: 20.56
+Iter 95/100  Episode 1612  Reward: -735.60
+Iter 95/100  Episode 1613  Reward: -819.68
+Iter 95/100  Episode 1614  Reward: -398.44
+Iter 95/100  Episode 1615  Reward: -988.88
+Iter 96/100  Episode 1616  Reward: -1132.68
+Iter 96/100  Episode 1617  Reward: -799.84
+ Retrying in 1 seconds
+Iter 96/100  Episode 1618  Reward: -799.60
+Iter 96/100  Episode 1619  Reward: -166.16
+Iter 96/100  Episode 1620  Reward: -1955.52
+Iter 96/100  Episode 1621  Reward: -1346.72
+Iter 96/100  Episode 1622  Reward: -2034.28
+ Retrying in 1 seconds
+Iter 96/100  Episode 1623  Reward: -1783.48
+Iter 96/100  Episode 1624  Reward: -619.68
+Iter 96/100  Episode 1625  Reward: -602.44
+Iter 96/100  Episode 1626  Reward: -1966.16
+ Retrying in 1 seconds
+Iter 96/100  Episode 1627  Reward: -373.44
+Iter 96/100  Episode 1628  Reward: -1091.68
+Iter 96/100  Episode 1629  Reward: -203.16
+Iter 96/100  Episode 1630  Reward: 14.56
+Iter 96/100  Episode 1631  Reward: -865.88
+Iter 97/100  Episode 1632  Reward: -134.52
+Iter 97/100  Episode 1633  Reward: -99.32
+Iter 97/100  Episode 1634  Reward: -2209.28
+ Retrying in 1 seconds
+Iter 97/100  Episode 1635  Reward: -323.68
+Iter 97/100  Episode 1636  Reward: -196.96
+Iter 97/100  Episode 1637  Reward: -723.16
+Iter 97/100  Episode 1638  Reward: -450.96
+Iter 97/100  Episode 1639  Reward: 47.32
+Iter 97/100  Episode 1640  Reward: -1785.96
+Iter 97/100  Episode 1641  Reward: -2381.48
+Iter 97/100  Episode 1642  Reward: -204.16
+ Retrying in 1 seconds
+Iter 97/100  Episode 1643  Reward: -2067.92
+Iter 97/100  Episode 1644  Reward: -1930.72
+Iter 97/100  Episode 1645  Reward: -51.60
+Iter 97/100  Episode 1646  Reward: -189.44
+Iter 97/100  Episode 1647  Reward: -329.72
+Iter 97/100  Episode 1648  Reward: -2034.72
+ Retrying in 1 seconds
+Iter 97/100  Episode 1649  Reward: -1899.72
+Iter 97/100  Episode 1650  Reward: -7.12
+Iter 98/100  Episode 1651  Reward: -737.88
+Iter 98/100  Episode 1652  Reward: -1711.40
+Iter 98/100  Episode 1653  Reward: -2055.28
+ Retrying in 1 seconds
+Iter 98/100  Episode 1654  Reward: -100.16
+Iter 98/100  Episode 1655  Reward: -331.16
+Iter 98/100  Episode 1656  Reward: -2007.28
+Iter 98/100  Episode 1657  Reward: 2.28
+Iter 98/100  Episode 1658  Reward: -1902.72
+Iter 98/100  Episode 1659  Reward: -19.44
+Iter 98/100  Episode 1660  Reward: -295.72
+Iter 98/100  Episode 1661  Reward: -1959.72
+ Retrying in 1 seconds
+Iter 98/100  Episode 1662  Reward: 5.28
+Iter 98/100  Episode 1663  Reward: -1524.16
+Iter 98/100  Episode 1664  Reward: -68.40
+Iter 98/100  Episode 1665  Reward: -1960.16
+Iter 98/100  Episode 1666  Reward: -641.88
+Iter 98/100  Episode 1667  Reward: -934.88
+Iter 98/100  Episode 1668  Reward: -557.88
+ Retrying in 1 seconds
+Iter 98/100  Episode 1669  Reward: -779.16
+Iter 99/100  Episode 1670  Reward: -2158.28
+Iter 99/100  Episode 1671  Reward: -1330.72
+Iter 99/100  Episode 1672  Reward: -258.60
+Iter 99/100  Episode 1673  Reward: -1396.84
+ Retrying in 1 seconds
+Iter 99/100  Episode 1674  Reward: -1984.96
+Iter 99/100  Episode 1675  Reward: -960.40
+Iter 99/100  Episode 1676  Reward: -1981.72
+Iter 99/100  Episode 1677  Reward: -97.72
+ Retrying in 1 seconds
+Iter 99/100  Episode 1678  Reward: -1912.72
+Iter 99/100  Episode 1679  Reward: -106.16
+Iter 99/100  Episode 1680  Reward: 5.28
+Iter 99/100  Episode 1681  Reward: -630.16
+Iter 99/100  Episode 1682  Reward: -1942.72
+Iter 99/100  Episode 1683  Reward: -2205.28
+ Retrying in 1 seconds
+Iter 100/100  Episode 1684  Reward: -833.84
+Iter 100/100  Episode 1685  Reward: -308.16
+Iter 100/100  Episode 1686  Reward: -2034.92
+Iter 100/100  Episode 1687  Reward: -2341.84
+Iter 100/100  Episode 1688  Reward: -378.24
+Iter 100/100  Episode 1689  Reward: -143.72
+ Retrying in 1 seconds
+Iter 100/100  Episode 1690  Reward: -916.88
+Iter 100/100  Episode 1691  Reward: -2134.28
+Iter 100/100  Episode 1692  Reward: -2095.72
+ Retrying in 1 seconds
+Iter 100/100  Episode 1693  Reward: -68.72
+Iter 100/100  Episode 1694  Reward: -931.44
+Iter 100/100  Episode 1695  Reward: -18.16
+Iter 100/100  Episode 1696  Reward: -137.52
+Iter 100/100  Episode 1697  Reward: -1890.92
+Iter 100/100  Episode 1698  Reward: -2247.72
+Iter 100/100  Episode 1699  Reward: -52.24
+ Retrying in 1 seconds
+Checkpoint saved at iteration 100 → runs/trsp/7ed3a4eb/policy.pkl
+Policy saved to runs/trsp/7ed3a4eb/policy.pkl
+Training completed in 1603.81 seconds.
+Error: tcpip::Socket::recvAndCheck @ recv: peer shutdown
+Quitting (on error).

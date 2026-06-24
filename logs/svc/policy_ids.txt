@@ -1,0 +1,9 @@
+sarsa_grid_road=e6703a2a
+sarsa_rand_grid=38ac1d0a
+sarsa_ames=d3230dca
+a2c_grid_road=1ae65214
+a2c_rand_grid=6fe5d2d5
+a2c_ames=ccbf5610
+ppo_grid_road=7ed3a4eb
+ppo_rand_grid=17301777
+ppo_ames=2c00863a

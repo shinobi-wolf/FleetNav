@@ -16,12 +16,15 @@ from tqdm import tqdm
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents import get_agent
 from dronesim.trsp.agents.a2c_psl      import A2CAgent
+from dronesim.trsp.agents.a2c_svc      import A2CSVCAgent
 from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
 from dronesim.trsp.agents.dsp          import DSPAgent
 from dronesim.trsp.agents.dqn_psl      import DQNAgent
 from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
 from dronesim.trsp.agents.ppo_psl      import PPOAgent
+from dronesim.trsp.agents.ppo_svc      import PPOSVCAgent
 from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
+from dronesim.trsp.agents.sarsa_svc    import SARSASVCAgent
 from dronesim.trsp.traffic import PSLTrafficModel
 
 INF = 100000
@@ -445,10 +448,16 @@ def main():
         policy_agent = DQNSVCAgent(config)
     elif algo == 'sarsa':
         policy_agent = SARSAAgent(config)
+    elif algo == 'sarsa_svc':
+        policy_agent = SARSASVCAgent(config)
     elif algo == 'ppo':
         policy_agent = PPOAgent(config)
+    elif algo == 'ppo_svc':
+        policy_agent = PPOSVCAgent(config)
     elif algo == 'a2c':
         policy_agent = A2CAgent(config)
+    elif algo == 'a2c_svc':
+        policy_agent = A2CSVCAgent(config)
     elif algo == 'dsp':
         policy_agent = DSPAgent(0, graph_info['G_dir'], graph_info['node2idx'],
                                 graph_info['idx2node'], ugv_speed)

@@ -1,0 +1,22 @@
+agent:
+  action_mode: neighbor_index
+  algo: sarsa_svc
+  policy: 38ac1d0a
+fleet:
+  max_speed: 110
+net:
+  max_degree: 5
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
+simulation:
+  max_steps: 50
+  max_time: 10
+  random_sg_pair: true
+  render_mode: human
+  warm_up_time: 60
+sumo:
+  delay: 0
+  step_length: 1.0
+  traffic_scale: 2.5
+traffic:
+  model: svc
+  route_file: data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml

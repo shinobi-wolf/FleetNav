@@ -16,9 +16,14 @@ import numpy as np
 import dronesim.trsp  # noqa: F401 — registers SumoTRSPEnv-v0
 import gymnasium as gym
 from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
+from dronesim.trsp.agents.sarsa_svc    import SARSASVCAgent
 from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
 from dronesim.trsp.agents.dqn_psl      import DQNAgent
 from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
+from dronesim.trsp.agents.a2c_psl      import A2CAgent
+from dronesim.trsp.agents.a2c_svc      import A2CSVCAgent
+from dronesim.trsp.agents.ppo_psl      import PPOAgent
+from dronesim.trsp.agents.ppo_svc      import PPOSVCAgent
 
 
 def run(config, num_episodes, policy_id=None):
@@ -27,11 +32,26 @@ def run(config, num_episodes, policy_id=None):
     if algo == 'sarsa':
         agent = SARSAAgent(config)
         env = agent.env
+    elif algo == 'sarsa_svc':
+        agent = SARSASVCAgent(config)
+        env = agent.env
     elif algo == 'dqn':
         agent = DQNAgent(config)
         env = agent.env
     elif algo == 'dqn_svc':
         agent = DQNSVCAgent(config)
+        env = agent.env
+    elif algo == 'a2c':
+        agent = A2CAgent(config)
+        env = agent.env
+    elif algo == 'a2c_svc':
+        agent = A2CSVCAgent(config)
+        env = agent.env
+    elif algo == 'ppo':
+        agent = PPOAgent(config)
+        env = agent.env
+    elif algo == 'ppo_svc':
+        agent = PPOSVCAgent(config)
         env = agent.env
     elif algo == 'dijkstra':
         env = gym.make('SumoTRSPEnv-v0', config=config)

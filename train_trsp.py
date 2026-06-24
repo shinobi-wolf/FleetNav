@@ -10,6 +10,9 @@ from dronesim.trsp.agents.dqn_psl   import DQNAgent
 from dronesim.trsp.agents.dqn_svc   import DQNSVCAgent
 from dronesim.trsp.agents.ppo_psl   import PPOAgent
 from dronesim.trsp.agents.a2c_psl   import A2CAgent
+from dronesim.trsp.agents.sarsa_svc import SARSASVCAgent
+from dronesim.trsp.agents.a2c_svc   import A2CSVCAgent
+from dronesim.trsp.agents.ppo_svc   import PPOSVCAgent
 
 
 def lmd_trainer(config, policy_dir, resume=False):
@@ -20,8 +23,14 @@ def lmd_trainer(config, policy_dir, resume=False):
         agent = DQNSVCAgent(config)
     elif algo == 'ppo':
         agent = PPOAgent(config)
+    elif algo == 'ppo_svc':
+        agent = PPOSVCAgent(config)
     elif algo == 'a2c':
         agent = A2CAgent(config)
+    elif algo == 'a2c_svc':
+        agent = A2CSVCAgent(config)
+    elif algo == 'sarsa_svc':
+        agent = SARSASVCAgent(config)
     else:
         agent = SARSAAgent(config)
     agent.learn(policy_dir)
@@ -43,6 +52,7 @@ if __name__ == "__main__":
         policy_name = os.urandom(4).hex()
         policy_dir = os.path.join(f"runs/trsp/{policy_name}")
         os.makedirs(policy_dir, exist_ok=True)
+        print(f"POLICY_ID={policy_name}")
 
         config_file = os.path.join(policy_dir, "config.yaml")
         inf_config = copy.deepcopy(train_config)

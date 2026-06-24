@@ -1,0 +1,24 @@
+agent:
+  action_mode: node_id
+  algo: ppo_svc
+  policy: 2c00863a
+fleet:
+  max_speed: 110
+net:
+  max_degree: 5
+  net_path: data/ames/ames_campus_final.sumocfg
+simulation:
+  max_steps: 50
+  max_time: 2
+  random_sg_pair: true
+  render_mode: human
+  warm_up_time: 60
+sumo:
+  delay: 0
+  step_length: 1.0
+  traffic_scale: 1
+test:
+  mode: sequential_eval
+traffic:
+  model: svc
+  route_file: data/ames/traffic_routes/svc_42/rvt_routes.xml
