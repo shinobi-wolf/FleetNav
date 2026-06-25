@@ -261,12 +261,15 @@ infer_ta_evrp.py
 
 End-to-end runs of TA-EVRP with different planners (MILP, mTSP, Heuristic) and TRSP agents are recorded under `runs/ta_evrp/`.
 
-| Results file | Traffic model | Agents covered | Sweep config |
-|---|---|---|---|
-| `results/ta_evrp_results.csv` | PSL | dijkstra, sarsa, dqn, a2c, ppo | `config/ta_evrp/sweep_ta_evrp.yaml` |
-| `results/ta_evrp_results_svc.csv` | SVC | dijkstra, dsp, sarsa_svc, dqn_svc, a2c_svc, ppo_svc | `sweep_dqn_svc.yaml` + `sweep_sarsa_a2c_ppo_svc.yaml` |
+| Results file | Traffic model | Agents covered | RAPS | Sweep config |
+|---|---|---|---|---|
+| `results/ta_evrp_results.csv` | PSL (K=1–4) | dijkstra, sarsa, dqn, a2c, ppo | off | `config/ta_evrp/sweep_ta_evrp.yaml` |
+| `results/ta_evrp_results_svc.csv` | SVC | dijkstra, dsp, sarsa_svc, dqn_svc, a2c_svc, ppo_svc | off | `sweep_dqn_svc.yaml` + `sweep_sarsa_a2c_ppo_svc.yaml` |
+| `results/ta_evrp_results_raps.csv` | PSL (K=1–4) + SVC | all PSL + all SVC agents | **on** | `config/ta_evrp/sweep_raps.yaml` |
 
-Analysis and visualisations are in `notebooks/ta_evrp_sweep_analysis.ipynb` (PSL section) and the SVC section of the same notebook.
+Analysis and visualisations:
+- `notebooks/ta_evrp_sweep_analysis.ipynb` — PSL and SVC results, RAPS off
+- `notebooks/ta_evrp_sweep_raps_analysis.ipynb` — full RAPS sweep (PSL K=1–4 + SVC, 270 runs)
 
 ---
 
@@ -294,3 +297,5 @@ Analysis and visualisations are in `notebooks/ta_evrp_sweep_analysis.ipynb` (PSL
 | SVC sweep (all 6 agents × 3 planners × 3 networks) logged to `results/ta_evrp_results_svc.csv` | ✅ Done |
 | `ta_evrp_sweep_analysis.ipynb` SVC section updated for all 6 agents | ✅ Done |
 | Range-Aware Path Switching (RAPS) — `trsp.raps_enabled` toggle + per-leg surplus check | ✅ Done |
+| RAPS sweep (PSL K=1–4 + SVC, all agents × 3 planners × 3 networks = 270 runs) | ✅ Done |
+| `ta_evrp_sweep_raps_analysis.ipynb` — analysis notebook for RAPS results | ✅ Done |
