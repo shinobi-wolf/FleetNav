@@ -75,10 +75,7 @@ def load_config(config_path: str) -> dict:
     base_ref = child.pop("base", None)
     if base_ref is None:
         return child
-    base_path = Path(base_ref)
-    with base_path.open("r", encoding="utf-8") as fh:
-        base = yaml.safe_load(fh) or {}
-    base.pop("base", None)
+    base = load_config(base_ref)  # recurse to follow the full chain
     return _deep_merge(base, child)
 
 
@@ -490,6 +487,7 @@ def main() -> None:
         print("  [route-log] Warning: simulator has no hook; local_routes.json may be empty.")
 
     metrics = simulator.run(routes)
+    raps_log        = metrics.pop("raps_log", [])
     traffic_log     = metrics.pop("traffic_log", [])
     traffic_profile = metrics.pop("traffic_profile", {})
 
@@ -524,6 +522,11 @@ def main() -> None:
     local_routes_path = run_dir / "local_routes.json"
     _write_json(local_routes_path, local_routes_payload)
     print(f"\n  Local routes saved to {local_routes_path}")
+
+    if raps_log:
+        raps_log_path = run_dir / "raps_log.json"
+        _write_json(raps_log_path, raps_log)
+        print(f"  RAPS log → {raps_log_path}  ({len(raps_log)} legs)")
 
 
 if __name__ == "__main__":

@@ -48,6 +48,7 @@ class _VehicleState:
     finish_time_s: float = 0.0
     wait_until_s: float = 0.0
     inserted: bool = False
+    spawn_time_s: float = -1.0  # sim time when curr SUMO vehicle was added; -1 = not yet spawned
     curr_traci_veh_id: str = ""
     emg_refuel_active: bool = False
     emg_resume_dest: str = ""
@@ -85,6 +86,9 @@ class Simulator:
         self.customer_service_time_s = float(sim_cfg["instance"]["customer_service_time_s"])
         self.recharge_time_s        = float(sim_cfg["instance"]["recharge_time_s"])
         self.runtime_refuel         = bool(sim_cfg["instance"]["runtime_refuel"])
+        trsp_cfg = sim_cfg.get("model", {}).get("trsp", {})
+        self.raps_enabled: bool = bool(trsp_cfg.get("raps_enabled", False))
+        self._raps_log: list[dict] = []
         self._v_min_ms              = float(sim_cfg["traffic"]["v_min"])
         self._v_max_ms              = float(sim_cfg["traffic"]["v_max"])
         self.traffic_model          = str(sim_cfg["traffic"].get("model", "psl"))
@@ -177,7 +181,21 @@ class Simulator:
 
                 src_node  = route.stops[0].sumo_node_id
                 dest_node = route.stops[1].sumo_node_id
-                edge_route, path_dist = self._resolve_route(src_node, dest_node, sim_time)
+                raps_kwargs: dict = {}
+                if self.raps_enabled and self.local_planner is not None:
+                    nsi = 1
+                    ridx = self._find_next_refuel_idx(route.stops, nsi)
+                    min_after = (
+                        route.stops[nsi].planned_fuel - route.stops[ridx].planned_fuel
+                        if ridx is not None and ridx > nsi else 0.0
+                    )
+                    raps_kwargs = dict(
+                        raps_fuel=self.ugv_range,
+                        raps_min_after=min_after,
+                        raps_veh_id=route.vehicle_id,
+                        raps_leg_idx=0,
+                    )
+                edge_route, path_dist = self._resolve_route(src_node, dest_node, sim_time, **raps_kwargs)
 
                 if edge_route is None:
                     raise ValueError(
@@ -206,6 +224,7 @@ class Simulator:
                 traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
                 traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[route.vehicle_id % len(_SUMO_COLORS)])
                 vs.curr_traci_veh_id = traci_veh_id
+                vs.spawn_time_s = sim_time
 
                 if self.render_mode != "quiet":
                     print(
@@ -239,6 +258,29 @@ class Simulator:
 
                 active_traci_ids  = set(traci.vehicle.getIDList())
                 arrived_this_step = set(traci.simulation.getArrivedIDList())
+
+                # Detect SUMO vehicles that were spawned but never appeared or arrived.
+                # SUMO silently drops vehicles whose departure edge is invalid for the
+                # vehicle type (e.g. wrong lane type), leaving the vehicle invisible forever.
+                force_arrived: set[str] = {
+                    vs.curr_traci_veh_id
+                    for vs in veh_states.values()
+                    if (
+                        vs.status == "enroute"
+                        and vs.spawn_time_s >= 0.0
+                        and (sim_time - vs.spawn_time_s) > self._STUCK_TIMEOUT_S
+                        and vs.curr_traci_veh_id not in active_traci_ids
+                        and vs.curr_traci_veh_id not in arrived_this_step
+                    )
+                }
+                if force_arrived and self.render_mode != "quiet":
+                    for vs in veh_states.values():
+                        if vs.curr_traci_veh_id in force_arrived:
+                            print(
+                                f"[{sim_time:.0f}s] V{vs.vehicle_id}: WARNING — SUMO vehicle"
+                                f" {vs.curr_traci_veh_id} invisible for"
+                                f" {sim_time - vs.spawn_time_s:.0f}s, force-arriving at destination"
+                            )
 
                 for veh_id, vs in veh_states.items():
                     if vs.status in {"stranded", "done"}:
@@ -322,7 +364,7 @@ class Simulator:
                                 f"  (range: {vs.current_fuel:.0f}m)"
                             )
 
-                    elif traci_veh_id in arrived_this_step:
+                    elif traci_veh_id in arrived_this_step or traci_veh_id in force_arrived:
                         # Emergency depot arrival — refuel and resume
                         if vs.emg_refuel_active:
                             vs.emg_refuel_active = False
@@ -471,7 +513,21 @@ class Simulator:
     ) -> None:
         src_node  = route.stops[vs.curr_stop_idx].sumo_node_id
         dest_node = route.stops[vs.curr_stop_idx + 1].sumo_node_id
-        edge_route, path_dist = self._resolve_route(src_node, dest_node, sim_time)
+        raps_kwargs: dict = {}
+        if self.raps_enabled and self.local_planner is not None:
+            nsi = vs.curr_stop_idx + 1
+            ridx = self._find_next_refuel_idx(route.stops, nsi)
+            min_after = (
+                route.stops[nsi].planned_fuel - route.stops[ridx].planned_fuel
+                if ridx is not None and ridx > nsi else 0.0
+            )
+            raps_kwargs = dict(
+                raps_fuel=vs.current_fuel,
+                raps_min_after=min_after,
+                raps_veh_id=veh_id,
+                raps_leg_idx=vs.curr_stop_idx,
+            )
+        edge_route, path_dist = self._resolve_route(src_node, dest_node, sim_time, **raps_kwargs)
 
         if edge_route is None or vs.current_fuel < path_dist:
             vs.status = "stranded"
@@ -495,6 +551,7 @@ class Simulator:
         traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
+        vs.spawn_time_s = sim_time
 
         if self.render_mode != "quiet":
             curr = route.stops[vs.curr_stop_idx]
@@ -538,6 +595,7 @@ class Simulator:
         traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
+        vs.spawn_time_s = sim_time
 
         if self.render_mode != "quiet":
             print(
@@ -580,6 +638,7 @@ class Simulator:
         traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
+        vs.spawn_time_s = sim_time
 
         if self.render_mode != "quiet":
             print(
@@ -592,27 +651,54 @@ class Simulator:
     # ------------------------------------------------------------------
 
     def _resolve_route(
-        self, src_node: str, dst_node: str, sim_time_s: float
+        self,
+        src_node: str,
+        dst_node: str,
+        sim_time_s: float,
+        *,
+        raps_fuel: float | None = None,
+        raps_min_after: float | None = None,
+        raps_veh_id: int | None = None,
+        raps_leg_idx: int | None = None,
     ) -> tuple[list[str] | None, float]:
-        """Dispatch leg routing to LocalPlanner (if set) or Dijkstra.
+        if self.local_planner is None:
+            return self._find_edge_route(src_node, dst_node)
 
-        Fuel is always charged at the Dijkstra shortest-path distance so fuel
-        accounting is consistent with the EVRP planner's distance matrix,
-        regardless of which edges the TRSP agent actually drives.
-        """
-        if self.local_planner is not None:
-            edge_ids = self.local_planner.plan(src_node, dst_node, sim_time_s)
-            if edge_ids:
-                sp_edges, sp_dist = self._find_edge_route(src_node, dst_node)
-                if sp_edges is not None:
-                    return edge_ids, sp_dist
-                actual_dist = sum(
-                    self._net.getEdge(eid).getLength()
-                    for eid in edge_ids
-                    if not eid.startswith(":")
-                )
-                return edge_ids, actual_dist
-        return self._find_edge_route(src_node, dst_node)
+        trsp_edges = self.local_planner.plan(src_node, dst_node, sim_time_s)
+        sp_edges, sp_dist = self._find_edge_route(src_node, dst_node)
+
+        if not trsp_edges:
+            return sp_edges, sp_dist
+
+        if self.raps_enabled and raps_fuel is not None and raps_min_after is not None:
+            trsp_dist = sum(
+                self._net.getEdge(eid).getLength()
+                for eid in trsp_edges if not eid.startswith(":")
+            )
+            extra_dist = trsp_dist - sp_dist
+            surplus    = raps_fuel - sp_dist - raps_min_after
+            use_trsp   = extra_dist <= surplus
+            self._raps_log.append({
+                "vehicle_id":      raps_veh_id,
+                "leg_idx":         raps_leg_idx,
+                "from_node":       src_node,
+                "to_node":         dst_node,
+                "dijkstra_dist_m": round(sp_dist, 3),
+                "trsp_dist_m":     round(trsp_dist, 3),
+                "extra_dist_m":    round(extra_dist, 3),
+                "surplus_m":       round(surplus, 3),
+                "used_trsp":       use_trsp,
+            })
+            return (trsp_edges, trsp_dist) if use_trsp else (sp_edges, sp_dist)
+
+        # Legacy: TRSP path, SP distance charged
+        if sp_edges is not None:
+            return trsp_edges, sp_dist
+        actual_dist = sum(
+            self._net.getEdge(eid).getLength()
+            for eid in trsp_edges if not eid.startswith(":")
+        )
+        return trsp_edges, actual_dist
 
     def _find_edge_route(
         self, src_node: str, dst_node: str
@@ -644,6 +730,16 @@ class Simulator:
         _, d_to_next    = self._find_edge_route(vs.curr_net_node, next_stop.sumo_node_id)
         _, d_to_depot   = self._find_edge_route(next_stop.sumo_node_id, depot_node)
         return (d_to_next + d_to_depot) > vs.current_fuel
+
+    _REFUEL_TYPES: frozenset[str] = frozenset({"afs", "afs_dummy", "depot", "depot_dummy"})
+    _STUCK_TIMEOUT_S: float = 30.0  # seconds before an invisible spawned vehicle is force-arrived
+
+    @staticmethod
+    def _find_next_refuel_idx(stops: list, from_idx: int) -> int | None:
+        for i in range(from_idx, len(stops)):
+            if stops[i].node_type in Simulator._REFUEL_TYPES:
+                return i
+        return None
 
     # ------------------------------------------------------------------
     # Metrics
@@ -683,6 +779,7 @@ class Simulator:
             "per_vehicle":                  per_vehicle,
             "traffic_log":                  traffic_log,
             "traffic_profile":              traffic_profile,
+            "raps_log":                     list(self._raps_log),
         }
 
     # ------------------------------------------------------------------

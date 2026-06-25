@@ -1,0 +1,10 @@
+# =============================================================================
+# config/ta_evrp/milp_policy_raps.yaml — MILP plan + TRSP agent + RAPS enabled
+# =============================================================================
+# Inherits milp_policy.yaml and switches on Range-Aware Path Switching.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/milp_policy_raps.yaml
+
+base: config/ta_evrp/milp_policy.yaml
+
+trsp:
+  raps_enabled: true

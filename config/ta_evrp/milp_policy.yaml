@@ -17,6 +17,6 @@ evrp:
     depot_dummy_copies: 3
 
 trsp:
-  agent: dqn_svc
-  policy_id: 2553013e
+  agent: dqn
+  policy_id: e07d1340
 

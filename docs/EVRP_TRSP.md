@@ -102,25 +102,76 @@ The `_needs_emergency_refuel` range check always uses Dijkstra directly — it i
 
 ## Fuel Accounting
 
-**Rule:** Fuel is always debited by the **Dijkstra shortest-path distance** between the two endpoints, regardless of the actual path the TRSP agent takes.
+**Default rule (RAPS disabled):** Fuel is debited by the **Dijkstra shortest-path distance** between the two endpoints, regardless of the actual path the TRSP agent takes.
 
 This ensures:
 - The fuel gate check (`_needs_emergency_refuel`) uses the same distance that is later consumed — no double-accounting errors.
 - If the TRSP agent takes a longer path (due to cycling or traffic-avoidance), it does not strand the vehicle faster than the EVRP planner expected.
 - Metrics (`distance_m`) reflect Dijkstra distances, not actual traversed distances.
 
+### Range-Aware Path Switching (RAPS)
+
+Toggle: `trsp.raps_enabled: true` in the TA-EVRP config. Only meaningful when `trsp.agent` is not `dijkstra`.
+
+RAPS is a per-leg decision rule: use the TRSP path only when the vehicle has enough **surplus fuel** to absorb the extra distance beyond the Dijkstra path. When surplus is insufficient, it falls back to Dijkstra and charges the shorter distance. Under RAPS, fuel is charged at the **actual driven distance** (honest accounting).
+
+**Surplus formula** (evaluated before each leg from stop `i` → stop `i+1`):
+
+```
+sp_dist    = Dijkstra distance from stop[i] to stop[i+1]
+trsp_dist  = sum of non-internal SUMO edge lengths on the TRSP path
+extra_dist = trsp_dist - sp_dist
+
+min_after  = stops[i+1].planned_fuel - stops[refuel_idx].planned_fuel
+             # planned fuel consumption from stop[i+1] to the next AFS/depot stop
+             # refuel_idx = first j ≥ i+1 where node_type ∈ {afs, afs_dummy, depot, depot_dummy}
+             # if next stop IS a refuel stop, or none exists: min_after = 0.0
+
+surplus    = vs.current_fuel - sp_dist - min_after
+use_trsp   = (extra_dist ≤ surplus)
+charge     = trsp_dist if use_trsp else sp_dist
+```
+
+`planned_fuel` is set by the MILP planner as remaining fuel (in metres) at each stop. RAPS is fully compatible with the MILP planner; for `heuristic` and `mtsp` planners `planned_fuel=0.0` at intermediate stops, making `min_after=0.0` always, which is conservative.
+
+**Emergency legs** (`_spawn_emg_to_depot_leg`, `_spawn_emg_resume_leg`) are never subject to RAPS — they call `_resolve_route` without RAPS kwargs so the RAPS block is skipped.
+
+### Output artifact
+
+`runs/ta_evrp/<run_id>/raps_log.json` — written only when `raps_enabled=true` and a TRSP agent is present (empty list → no file):
+
+```json
+[
+  {
+    "vehicle_id": 0,
+    "leg_idx": 2,
+    "from_node": "62259983",
+    "to_node": "62261027",
+    "dijkstra_dist_m": 1200.0,
+    "trsp_dist_m": 1450.0,
+    "extra_dist_m": 250.0,
+    "surplus_m": 800.0,
+    "used_trsp": true
+  }
+]
+```
+
+### Creating a RAPS config
+
+```yaml
+# config/ta_evrp/milp_sarsa_raps.yaml
+base: config/ta_evrp/milp_sarsa.yaml
+trsp:
+  raps_enabled: true
+```
+
 ### Implementation
 
-In `Simulator._resolve_route`:
-```python
-if self.local_planner is not None:
-    edge_ids = self.local_planner.plan(src_node, dst_node, sim_time_s)
-    if edge_ids:
-        sp_dist = dijkstra_dist(instance.network.graph, src_node, dst_node)
-        return edge_ids, sp_dist   # TRSP path driven; SP distance charged
-    # empty edge list → fall back to Dijkstra
-return dijkstra_route(instance.network.graph, src_node, dst_node)
-```
+In `Simulator._resolve_route` (keyword-only RAPS args are `None` unless the caller passes them):
+- If `local_planner is None` → Dijkstra immediately.
+- TRSP plan is obtained; if empty → fall back to SP.
+- If `raps_enabled` and RAPS kwargs are present → compute surplus; log the decision; return TRSP path+dist or SP path+dist.
+- Otherwise (legacy) → TRSP path driven, SP distance charged.
 
 The returned distance is what the simulator deducts from `current_fuel` and records in metrics.
 
@@ -242,3 +293,4 @@ Analysis and visualisations are in `notebooks/ta_evrp_sweep_analysis.ipynb` (PSL
 | `LocalPlanner` support for sarsa_svc, a2c_svc, ppo_svc (SVC obs + correct action mode) | ✅ Done |
 | SVC sweep (all 6 agents × 3 planners × 3 networks) logged to `results/ta_evrp_results_svc.csv` | ✅ Done |
 | `ta_evrp_sweep_analysis.ipynb` SVC section updated for all 6 agents | ✅ Done |
+| Range-Aware Path Switching (RAPS) — `trsp.raps_enabled` toggle + per-leg surplus check | ✅ Done |
