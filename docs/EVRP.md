@@ -52,9 +52,9 @@ Planners live in `dronesim/evrp_/` and are dispatched via `REGISTRY` in `dronesi
 - **Method:** The `milp` G-VRP formulation with **one** change — arc travel time depends on the **departure time** from the tail node, following the three-period time-of-day congestion profile (morning peak `[0,T1)` at `v_c`, free-flow `[T1,T2)` at `v_f`, evening peak `[T2,u0]` at `v_c`). The min-distance objective, dummy-vertex expansion, and distance-based fuel constraints (`Q` in metres, `r`) are **identical** to `milp`. Cargo/demand is not modelled. Speed is fixed to each period's limit (no per-arc speed optimisation).
 - **Formulation:** The constant-time propagation of `milp` (C7–C9) is replaced by per-arc departure-interval variables `z[i,j,m]` / `td[i,j,m]` and service-start times `w[j]`, with the paper's piecewise-linear travel time `T(t)=A_T+B_T·t` (Eq. 1) and constraints Eqs. 16/17/22/23. Helpers `_interval_bounds`, `_travel_coefs` give per-arc `(A_T, B_T)` and bounds.
 - **Traffic source:** reads the **same** `traffic.td.*` block the Simulator uses (`v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours`); horizon `u0 = Tmax`. Set `traffic.model: td` for end-to-end plan/sim consistency.
-- **Objective:** pure distance by default. Optional `evrp.td_milp.w_makespan` (default 0) adds `w_makespan · makespan_s` to trade distance for faster completion.
-- **Requires:** Gurobi license. The model is larger than `milp` (adds `z`/`td` per arc × valid departure intervals); solver params come from `evrp.td_milp.*`.
-- **Effect:** Because the objective is unchanged, congestion affects route **feasibility within the horizon** (a route that no longer fits `Tmax` under congestion is excluded / reported infeasible), not the distance cost.
+- **Objective — makespan first:** minimises `w_makespan · makespan_s + w_distance · distance_m` (defaults `1.0` / `0.001`). Makespan is the metric the congestion profile informs and where `td_milp` beats `milp`/`heuristic`; `milp` already owns distance, and `td_milp`'s stricter time constraints mean it can never undercut `milp` on distance. Minimising makespan drives a *depart-ASAP / no-waiting* schedule, which matches how the Simulator drives — so the planned makespan win carries into the simulated metric. Set `w_makespan: 0` for the pure min-distance, feasibility-only variant. A valid lower bound (farthest customer's free-flow round trip) tightens the otherwise-weak min-max relaxation.
+- **Requires:** Gurobi license. The model is larger than `milp` (adds `z`/`td` per arc × valid departure intervals) and the min-max makespan objective is harder — expect to hit `time_limit_s` with a non-trivial gap on bigger instances, though the incumbent is strong. Solver params come from `evrp.td_milp.*`.
+- **FIFO caveat:** the travel-time formula (paper Eq. 1) assumes an arc spans at most two adjacent periods. If the longest arc exceeds `min((T2−T1)·v_f, T1·v_c, (u0−T2)·v_c)` the planner prints a `[warn]` and the travel time is approximate for those arcs (the Simulator is always exact, integrating edge-by-edge). Widen the `T1`–`T2` gap or raise `v_freeflow_kmh` to remove it.
 
 ### `ctvtt_ga` — GA-based Planner ❌ Not ported
 
@@ -130,7 +130,7 @@ Special exceptions that keep seconds/ms in config: `sumo.step_length` (seconds),
 |---------|---------|
 | `network.net_path` | Path to `.sumocfg` or `.net.xml` |
 | `evrp.planner` | `milp` \| `td_milp` \| `heuristic` \| `mtsp` |
-| `evrp.td_milp.*` | solver params (`time_limit_s`, `mip_gap`, `output_flag`, dummy copies) + `w_makespan` |
+| `evrp.td_milp.*` | solver params (`time_limit_s`, `mip_gap`, `output_flag`, dummy copies) + objective weights `w_makespan` (default 1.0) / `w_distance` (default 0.001) |
 | `trsp.agent` | `dijkstra` \| `sarsa` \| `dqn` \| `ppo` |
 | `trsp.policy_id` | Policy ID under `runs/trsp/`; required for RL agents |
 | `simulation.ugv.battery_capacity_L` | Full-charge range capacity in litres |

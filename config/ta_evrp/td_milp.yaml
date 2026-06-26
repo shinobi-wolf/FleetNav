@@ -10,15 +10,19 @@
 
 base: config/ta_evrp/base.yaml
 
-evrp:
-  planner: td_milp
-  td_milp:
-    time_limit_s: 300        # seconds — Gurobi wall-clock limit
-    mip_gap: 0.01            # 0.0 = proven optimal
-    output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
-    afs_dummy_copies: 3
-    depot_dummy_copies: 3
-    w_makespan: 0.0          # >0 adds w_makespan * makespan_s to the distance objective
+# evrp:
+#   planner: td_milp
+#   td_milp:
+#     time_limit_s: 300        # seconds — Gurobi wall-clock limit
+#     mip_gap: 0.01            # 0.0 = proven optimal
+#     output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+#     afs_dummy_copies: 3
+#     depot_dummy_copies: 3
+#     # Objective = w_makespan * makespan_s + w_distance * distance_m.
+#     # Makespan is primary — it is the metric the congestion profile informs and
+#     # where td_milp beats milp/heuristic. Set w_makespan: 0 for pure min-distance.
+#     w_makespan: 1.0
+#     w_distance: 0.001        # light regulariser to keep equal-makespan routes tidy
 
 # evrp:
 #   planner: milp
@@ -34,6 +38,9 @@ evrp:
 #   heuristic:
 #     alns_iterations: 8000
 #     seed: 42
+
+evrp:
+  planner: mtsp
 
 # Time-dependent traffic — read by BOTH the planner and the Simulator.
 traffic:

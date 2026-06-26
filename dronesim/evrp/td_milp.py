@@ -8,20 +8,28 @@ following the three-period time-of-day congestion profile of Lu et al. (2020):
     free-flow     [T1, T2)  at free-flow speed  v_f  (> v_c)
     evening peak  [T2, u0]  at congestion speed v_c  (== morning)
 
-Everything else is identical to ``milp.py``:
-  * the min-distance objective ``Σ d_ij x_ij``,
+It reuses, unchanged from ``milp.py``:
   * the AFS/depot dummy-vertex expansion, and
   * the distance-based fuel constraints (range ``Q`` in metres, rate ``r``).
 Cargo / demand constraints are not modelled (relaxed), exactly as in the base
 G-VRP. The vehicle speed is fixed to each period's speed limit — there is **no**
-per-arc speed optimisation. The only new ingredient is the departure-time
-dependence of the travel time, linearised with per-arc departure-interval
-variables ``z_ij^m`` / ``t_ij^m`` (paper Eqs. 16, 17, 22, 23).
+per-arc speed optimisation. The departure-time dependence of the travel time is
+linearised with per-arc departure-interval variables ``z_ij^m`` / ``t_ij^m``
+(paper Eqs. 16, 17, 22, 23).
 
-Because the objective is unchanged, congestion affects the *feasibility* of a
-route within the time horizon ``u0 = Tmax`` rather than its distance cost. An
-optional ``evrp.td_milp.w_makespan`` term lets the planner trade distance for a
-faster completion time; it defaults to 0 (pure distance, identical to ``milp``).
+**Objective — makespan first.** Distance is what ``milp`` already optimises, and
+because ``td_milp``'s time-dependent constraints are *stricter* than ``milp``'s
+constant-speed ones, ``td_milp`` can never beat ``milp`` on distance. Its payoff
+is instead the metric the congestion profile actually informs: the **makespan**
+(time-dependent completion time). ``td_milp`` therefore minimises
+
+    w_makespan · makespan_s  +  w_distance · total_distance_m
+
+with ``w_makespan=1.0`` and a light ``w_distance=0.001`` regulariser by default.
+Minimising the makespan drives the optimal schedule to *depart ASAP / no
+waiting*, which is exactly how the Simulator drives the routes — so the planned
+makespan advantage carries over to the simulated metric. Set ``w_makespan=0`` to
+recover the pure min-distance, feasibility-only variant.
 
 Reference:
     Lu J., Chen Y., Hao J.-K., He R. (2020). "The Time-dependent Electric
@@ -131,6 +139,7 @@ def _build_td_model(
     params: dict[str, Any],
     traffic: dict[str, float],
     w_makespan: float,
+    w_distance: float,
 ):
     if gp is None:
         raise RuntimeError(f"gurobipy import failed: {_GUROBI_ERR}")
@@ -180,7 +189,8 @@ def _build_td_model(
     print(
         f"TD-MILP (Lu 2020): |V|={len(V)} |A|={len(arcs)} m={m}  "
         f"vc={vc:.2f} vf={vf:.2f} m/s  T1={T1/3600:.2f}h T2={T2/3600:.2f}h "
-        f"u0={u0/3600:.2f}h  z-vars={len(zkeys)}"
+        f"u0={u0/3600:.2f}h  z-vars={len(zkeys)}  "
+        f"obj={w_makespan:g}·makespan+{w_distance:g}·dist"
     )
     if max_d >= fifo_limit:
         print(
@@ -208,13 +218,13 @@ def _build_td_model(
     z  = model.addVars(zkeys, vtype=GRB.BINARY, name="z")                  # departure-interval pick
     td = model.addVars(zkeys, lb=0.0, vtype=GRB.CONTINUOUS, name="td")     # departure time from i (s)
 
-    # ── Objective: total distance (identical to milp.py) ──────────────────────
-    obj = gp.quicksum(d[i, j] * x[i, j] for i, j in arcs)
-    T_max = None
-    if w_makespan > 0.0:
-        T_max = model.addVar(lb=0.0, ub=u0, vtype=GRB.CONTINUOUS, name="T_max")
-        obj = obj + w_makespan * T_max
-    model.setObjective(obj, GRB.MINIMIZE)
+    # ── Objective: w_makespan·makespan + w_distance·distance ──────────────────
+    # Makespan (max return time) is the metric the time-dependent profile informs,
+    # so it is the primary term by default; distance is a light regulariser that
+    # keeps routes from wandering among equal-makespan solutions.
+    dist_expr = gp.quicksum(d[i, j] * x[i, j] for i, j in arcs)
+    T_max = model.addVar(lb=0.0, ub=u0, vtype=GRB.CONTINUOUS, name="T_max")
+    model.setObjective(w_makespan * T_max + w_distance * dist_expr, GRB.MINIMIZE)
 
     # ── Routing constraints (identical to milp.py) ────────────────────────────
     for i in customers:
@@ -277,7 +287,8 @@ def _build_td_model(
             name=f"c17_{i}",
         )
 
-    # Vehicles start at the depot at t = 0; returns must finish within the horizon.
+    # Vehicles start at the depot at t = 0; each return must finish within the
+    # horizon and defines the makespan T_max (max over all returning vehicles).
     model.addConstr(w[depot] == 0.0, name="c_depot_start")
     for i in in_nb[depot]:
         ret = gp.quicksum(
@@ -285,8 +296,14 @@ def _build_td_model(
             for mm in valid_m[(i, depot)]
         )
         model.addConstr(ret <= u0, name=f"c_return_{i}")
-        if T_max is not None:
-            model.addConstr(T_max >= ret, name=f"c_mksp_{i}")
+        model.addConstr(T_max >= ret, name=f"c_mksp_{i}")
+
+    # Valid lower bound: the vehicle serving the farthest customer cannot return
+    # faster than its free-flow round trip (vf is the fastest possible speed).
+    # This tightens the otherwise-weak min-max makespan LP relaxation a lot.
+    if customers:
+        lb_mksp = max(2.0 * float(d[depot, c]) / vf for c in customers)
+        model.addConstr(T_max >= lb_mksp, name="c_mksp_lb")
 
     # ── Stash for extraction ──────────────────────────────────────────────────
     model._x = x
@@ -421,9 +438,9 @@ class TDMILPPlanner(EVRPPlanner):
         p = instance.problem
         u0_s = float(p.params["Tmax"])
         traffic = _read_td_traffic(instance.ta_config, u0_s)
-        w_makespan = float(
-            (instance.ta_config.get("evrp", {}).get("td_milp", {}) or {}).get("w_makespan", 0.0)
-        )
+        td_cfg = instance.ta_config.get("evrp", {}).get("td_milp", {}) or {}
+        w_makespan = float(td_cfg.get("w_makespan", 1.0))   # primary: completion time
+        w_distance = float(td_cfg.get("w_distance", 0.001))  # light distance regulariser
         expanded = expand_with_dummy_vertices(p.physical_dist, p.physical_meta, p.params)
-        model = _build_td_model(expanded, p.params, traffic, w_makespan)
+        model = _build_td_model(expanded, p.params, traffic, w_makespan, w_distance)
         return _solve_and_extract(model, p.params)
