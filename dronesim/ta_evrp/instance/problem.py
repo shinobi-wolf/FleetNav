@@ -121,7 +121,11 @@ class Problem:
         net_cfg  = ta_config.get("network", {})
         ugv_cfg  = ta_config.get("simulation", {}).get("ugv", {})
         tasks    = ta_config.get("simulation", {}).get("tasks", {})
-        milp_cfg = ta_config.get("evrp", {}).get("milp", {})
+        # Solver / dummy-expansion params come from the ACTIVE planner's sub-section
+        # (e.g. evrp.milp.* or evrp.td_milp.*), so each MILP planner controls its own
+        # instance size and Gurobi settings.
+        evrp_cfg    = ta_config.get("evrp", {})
+        planner_cfg = evrp_cfg.get(str(evrp_cfg.get("planner", "milp")), {})
 
         seed = int(ta_config.get("generation_seed", 42))
         rng  = np.random.default_rng(seed)
@@ -178,13 +182,13 @@ class Problem:
             "speed":                speed_kmh / 3.6,                    # m/s
             "Tmax":                 max_dur_h * 3600.0,                 # s
             "m":                    fleet_size,
-            "afs_dummy_copies":     int(milp_cfg.get("afs_dummy_copies", 3)),
-            "depot_dummy_copies":   int(milp_cfg.get("depot_dummy_copies", 3)),
+            "afs_dummy_copies":     int(planner_cfg.get("afs_dummy_copies", 3)),
+            "depot_dummy_copies":   int(planner_cfg.get("depot_dummy_copies", 3)),
             "customer_service_time": svc_time_h * 3600.0,              # s
             "refuel_time":          recharge_h * 3600.0,               # s
-            "time_limit":           float(milp_cfg.get("time_limit_s", 300)),
-            "output_flag":          int(milp_cfg.get("output_flag", 1)),
-            "mip_gap":              float(milp_cfg.get("mip_gap", 0.01)),
+            "time_limit":           float(planner_cfg.get("time_limit_s", 300)),
+            "output_flag":          int(planner_cfg.get("output_flag", 1)),
+            "mip_gap":              float(planner_cfg.get("mip_gap", 0.01)),
         }
 
         self.physical_meta: dict[str, Any] = {

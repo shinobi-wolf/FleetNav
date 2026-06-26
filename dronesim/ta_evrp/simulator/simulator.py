@@ -93,6 +93,9 @@ class Simulator:
         self._v_max_ms              = float(sim_cfg["traffic"]["v_max"])
         self.traffic_model          = str(sim_cfg["traffic"].get("model", "psl"))
         self.svc_route_file         = sim_cfg["traffic"].get("route_file")
+        # psl and td are both per-edge speed-limit models applied via SUMO
+        # setMaxSpeed/setSpeed; svc instead spawns background vehicles.
+        self._psl_like = self.traffic_model in ("psl", "td")
 
         self._net            = instance.network.net    # sumolib Net
         self._routing_graph  = instance.network.graph  # nx.DiGraph (edge attrs: id, length)
@@ -153,7 +156,7 @@ class Simulator:
 
         try:
             # Apply initial edge speeds for slot 0 (PSL only)
-            if self.traffic_model == "psl" and traffic.enabled:
+            if self._psl_like and traffic.enabled:
                 for eid in all_edge_ids:
                     traci.edge.setMaxSpeed(eid, traffic.get_speed(eid, traffic_slot))
 
@@ -220,7 +223,7 @@ class Simulator:
                 traci_veh_id = f"ev_{route.vehicle_id}_leg0"
                 route_id     = f"route_{route.vehicle_id}_leg0"
                 traci.route.add(route_id, edge_route)
-                depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+                depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
                 traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
                 traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[route.vehicle_id % len(_SUMO_COLORS)])
                 vs.curr_traci_veh_id = traci_veh_id
@@ -251,7 +254,7 @@ class Simulator:
                         "t": sim_time, "type": "slot_change",
                         "old_slot": traffic_slot, "new_slot": next_slot,
                     })
-                    if self.traffic_model == "psl" and traffic.enabled:
+                    if self._psl_like and traffic.enabled:
                         for eid in all_edge_ids:
                             traci.edge.setMaxSpeed(eid, traffic.get_speed(eid, next_slot))
                 traffic_slot = next_slot
@@ -334,7 +337,7 @@ class Simulator:
                         vehicle_speeds[veh_id]    = traci.vehicle.getSpeed(traci_veh_id)
                         edge_changed = new_edge != vs.curr_net_edge
                         vs.curr_net_edge = new_edge
-                        if self.traffic_model == "psl" and (edge_changed or slot_changed) and not new_edge.startswith(":"):
+                        if self._psl_like and (edge_changed or slot_changed) and not new_edge.startswith(":"):
                             new_speed = traffic.get_speed(new_edge, traffic_slot)
                             traci.vehicle.setSpeed(traci_veh_id, new_speed)
                             trigger = (
@@ -547,7 +550,7 @@ class Simulator:
         traci_veh_id = f"ev_{veh_id}_leg{leg_idx}"
         route_id     = f"route_{veh_id}_leg{leg_idx}"
         traci.route.add(route_id, edge_route)
-        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
         traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
@@ -591,7 +594,7 @@ class Simulator:
         traci_veh_id = f"ev_{veh_id}_emg{vs._emg_serial}d"
         route_id     = f"route_{veh_id}_emg{vs._emg_serial}d"
         traci.route.add(route_id, edge_route)
-        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
         traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id
@@ -634,7 +637,7 @@ class Simulator:
         traci_veh_id = f"ev_{veh_id}_emg{vs._emg_serial}r"
         route_id     = f"route_{veh_id}_emg{vs._emg_serial}r"
         traci.route.add(route_id, edge_route)
-        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self.traffic_model == "psl" else 0
+        depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
         traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
         traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
         vs.curr_traci_veh_id = traci_veh_id

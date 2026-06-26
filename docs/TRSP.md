@@ -177,6 +177,25 @@ traffic:
 
 With `K=1` every edge has a single fixed speed for the entire simulation. With `K=2` and `speed_step=60.0`, exactly two speed levels exist: `{40, 100}` km/h.
 
+### TD — `TDTrafficModel` (3-period congestion)
+
+**File:** `dronesim/trsp/traffic.py` (subclass of `PSLTrafficModel`)
+
+Three-period time-of-day congestion model (Lu et al. 2020): `K=3` with a **global** congestion speed `v_c` in slots 0 & 2 and a free-flow speed `v_f` in slot 1 (every edge gets the identical profile `[v_c, v_f, v_c]`). Only `get_slot()` differs from PSL — the active slot is `0` for `t<T1`, `1` for `T1≤t<T2`, else `2`. `time_slot ∈ {0,1,2}` enters the observation exactly like PSL with `K=3`.
+
+```yaml
+traffic:
+  model: td
+  enabled: true
+  seed: 42
+  v_congestion: 30.0       # km/h — slots 0 & 2 (peak)
+  v_freeflow: 90.0         # km/h — slot 1 (free-flow); must exceed v_congestion
+  T1: 2400.0               # seconds — morning-peak end
+  T2: 4800.0               # seconds — evening-peak start
+```
+
+Single-horizon (non-cyclic): once `t ≥ T2` the slot stays `2`. Set `T1`/`T2` within the per-session `simulation.max_time` so each SUMO session traverses all three slots. Training config: `config/trsp/train_td.yaml`.
+
 ### SVC — Stochastic Vehicular Congestion
 
 **Mechanism:** Real SUMO background vehicles pre-generated with `randomTrips.py` + `duarouter`. Injected into the same simulation as the UGV via `--route-files`. Congestion is emergent — not scripted per-edge — so the traffic pattern varies with time in a naturalistic way.

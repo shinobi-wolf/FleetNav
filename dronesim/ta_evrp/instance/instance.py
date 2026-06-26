@@ -24,6 +24,7 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
     tasks       = ta.get("simulation", {}).get("tasks", {})
     traffic_cfg = ta.get("traffic", {})
     psl         = traffic_cfg.get("psl", {})
+    td          = traffic_cfg.get("td", {})
     svc         = traffic_cfg.get("svc", {})
     model       = str(traffic_cfg.get("model", "psl"))
     sumo        = ta.get("sumo", {})
@@ -34,6 +35,16 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
     speed_kmh    = float(ugv.get("free_flow_speed_kmh", 50.0))
     svc_time_h   = float(ugv.get("customer_service_time_h", 0.0))
     recharge_h   = float(ugv.get("recharge_time_h", 0.0))
+
+    # Speed-scale bounds for the renderer and the enabled flag depend on the model.
+    if model == "td":
+        traffic_enabled = bool(td.get("enabled", True))
+        v_min_ms = float(td.get("v_congestion_kmh", 15.0)) / 3.6
+        v_max_ms = float(td.get("v_freeflow_kmh", 50.0)) / 3.6
+    else:
+        traffic_enabled = False if model == "svc" else bool(psl.get("enabled", False))
+        v_min_ms = float(psl.get("v_min_kmh", 40.0))  / 3.6
+        v_max_ms = float(psl.get("v_max_kmh", 100.0)) / 3.6
 
     return {
         "model": {
@@ -54,11 +65,11 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
             "model":         model,
             "route_file":    svc.get("route_file") if model == "svc" else None,
             "traffic_scale": float(svc.get("traffic_scale", 1.0)) if model == "svc" else 1.0,
-            "enabled":       False if model == "svc" else bool(psl.get("enabled", False)),
+            "enabled":       traffic_enabled,
             "K":             int(psl.get("K", 1)),
             "slot_duration": psl.get("slot_duration"),
-            "v_min":         float(psl.get("v_min_kmh", 40.0))  / 3.6,   # m/s
-            "v_max":         float(psl.get("v_max_kmh", 100.0)) / 3.6,   # m/s
+            "v_min":         v_min_ms,   # m/s — renderer speed-color floor
+            "v_max":         v_max_ms,   # m/s — renderer speed-color ceiling
             "speed_step":    float(psl.get("speed_step_kmh", 60.0)) / 3.6,  # m/s
             "seed":          int(psl.get("seed", 42)),
         },
@@ -104,6 +115,7 @@ class Instance:
         sumo        = ta_config.get("sumo", {})
         traffic_cfg = ta_config.get("traffic", {})
         psl         = traffic_cfg.get("psl", {})
+        td          = traffic_cfg.get("td", {})
         traffic_model = str(traffic_cfg.get("model", "psl"))
 
         # ── Flat identifiers ─────────────────────────────────────────────────
@@ -112,9 +124,12 @@ class Instance:
         self.policy_id:       Optional[str] = trsp.get("policy_id") or None
         self.net_path:        str           = str(net.get("net_path", ""))
         self.traffic_model:   str           = traffic_model
-        self.traffic_enabled: bool          = (
-            True if traffic_model == "svc" else bool(psl.get("enabled", False))
-        )
+        if traffic_model == "svc":
+            self.traffic_enabled: bool = True
+        elif traffic_model == "td":
+            self.traffic_enabled = bool(td.get("enabled", True))
+        else:
+            self.traffic_enabled = bool(psl.get("enabled", False))
         self.sim_type:        str           = str(sumo.get("simulator", "concurrent"))
 
         # ── Three submodules ─────────────────────────────────────────────────

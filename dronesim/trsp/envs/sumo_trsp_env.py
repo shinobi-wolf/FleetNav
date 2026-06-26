@@ -10,7 +10,7 @@ import traci
 import sumolib
 
 from dronesim.trsp.fleet.UGVSumo import UGVSumo
-from dronesim.trsp.traffic import PSLTrafficModel
+from dronesim.trsp.traffic import PSLTrafficModel, TDTrafficModel
 
 INF = 100000
 
@@ -59,11 +59,15 @@ class SumoTRSPEnv(gym.Env):
         self.num_sg_pairs = len(self.sg_pairs)
 
         traffic_cfg = config.get('traffic', {'enabled': False})
-        self.traffic_model = traffic_cfg.get('model', 'psl')   # 'psl' | 'svc'
+        self.traffic_model = traffic_cfg.get('model', 'psl')   # 'psl' | 'td' | 'svc'
 
         if self.traffic_model == 'svc':
             self.svc_route_file = traffic_cfg.get('route_file', None)
             self.traffic = PSLTrafficModel({'enabled': False}, self.edge_ids)
+        elif self.traffic_model == 'td':
+            self.traffic = TDTrafficModel(
+                traffic_cfg, self.edge_ids, seed=traffic_cfg.get('seed')
+            )
         else:
             self.traffic = PSLTrafficModel(
                 traffic_cfg, self.edge_ids, seed=traffic_cfg.get('seed')

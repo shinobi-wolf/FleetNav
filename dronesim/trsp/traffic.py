@@ -118,3 +118,45 @@ class PSLTrafficModel:
     def get_speed(self, edge_id: str, slot: int) -> float:
         """Speed in m/s for edge_id at the given slot."""
         return self.profiles[edge_id][slot]
+
+
+class TDTrafficModel(PSLTrafficModel):
+    """Three-period time-of-day congestion model (Lu et al. 2020, Fig. 1).
+
+    Slot 0 = morning peak  [0,  T1)  at congestion speed v_c
+    Slot 1 = free-flow     [T1, T2)  at free-flow speed  v_f  (> v_c)
+    Slot 2 = evening peak  [T2, ...] at congestion speed v_c  (== slot 0)
+
+    Speeds are GLOBAL: every edge gets the identical profile [v_c, v_f, v_c].
+    Config keys (under `traffic`): v_congestion, v_freeflow (km/h); T1, T2 (seconds).
+    """
+
+    def __init__(self, config: dict, edge_ids: list, seed=None):
+        self.enabled = bool(config.get('enabled', False))
+        if not self.enabled:
+            self.K = 1
+            self.profiles = {}
+            return
+
+        self.K = 3
+        self.v_min = round(float(config['v_congestion']) / 3.6, 8)   # km/h → m/s
+        self.v_max = round(float(config['v_freeflow']) / 3.6, 8)
+        if not (0.0 < self.v_min < self.v_max):
+            raise ValueError("traffic: require 0 < v_congestion < v_freeflow")
+
+        self.T1 = float(config['T1'])   # seconds
+        self.T2 = float(config['T2'])   # seconds
+        if not (0.0 < self.T1 < self.T2):
+            raise ValueError("traffic: require 0 < T1 < T2")
+
+        self.profiles = {
+            eid: [self.v_min, self.v_max, self.v_min] for eid in sorted(edge_ids)
+        }
+
+    def get_slot(self, t: float) -> int:
+        """Active period index for simulation time t (seconds): 0|1|2 by T1/T2."""
+        if t < self.T1:
+            return 0
+        if t < self.T2:
+            return 1
+        return 2

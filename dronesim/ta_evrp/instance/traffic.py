@@ -5,6 +5,9 @@ Reads ta_config directly (human-friendly units) and converts km/h → m/s intern
 
 Supported models (traffic.model):
   psl  — Piecewise Speed Limit: per-edge independent speed profiles over K time slots.
+  td   — Time-Dependent congestion (Lu et al. 2020, Fig. 1): three periods with a
+          global congestion speed v_c in the first and last slot and a global
+          free-flow speed v_f in the middle slot. Slot boundaries at T1, T2.
   svc  — Stochastic Vehicular Congestion: SUMO background vehicles loaded via route file;
           PSL is disabled so the Simulator skips slot-based speed overrides.
 """
@@ -52,6 +55,49 @@ class PSLTrafficModel:
         return self.profiles[edge_id][slot]
 
 
+class TDTrafficModel(PSLTrafficModel):
+    """Three-period time-of-day congestion model (Lu et al. 2020, Fig. 1).
+
+    Slot 0 = morning peak  [0,  T1)  at congestion speed v_c
+    Slot 1 = free-flow     [T1, T2)  at free-flow speed  v_f  (> v_c)
+    Slot 2 = evening peak  [T2, u0]  at congestion speed v_c  (== slot 0)
+
+    Speeds are GLOBAL: every edge gets the identical profile [v_c, v_f, v_c], so
+    the td_milp planner and the Simulator use the same speeds end-to-end. Only
+    get_slot() differs from PSL — slot boundaries are at T1/T2 instead of the
+    PSL cyclic delta_t grid.
+    """
+
+    def __init__(
+        self,
+        enabled: bool,
+        free_flow_ms: float,
+        vc_ms: float,
+        vf_ms: float,
+        T1_s: float,
+        T2_s: float,
+        edge_ids: list[str],
+    ) -> None:
+        profiles = {eid: [vc_ms, vf_ms, vc_ms] for eid in sorted(edge_ids)}
+        super().__init__(
+            enabled=enabled,
+            free_flow_ms=free_flow_ms,
+            K=3,
+            v_min=vc_ms,
+            v_max=vf_ms,
+            profiles=profiles,
+        )
+        self.T1_s = float(T1_s)
+        self.T2_s = float(T2_s)
+
+    def get_slot(self, t: float) -> int:
+        if t < self.T1_s:
+            return 0
+        if t < self.T2_s:
+            return 1
+        return 2
+
+
 class Traffic:
     """Builds a traffic model from raw ta_config.
 
@@ -61,8 +107,8 @@ class Traffic:
 
     Attributes
     ----------
-    model       : PSLTrafficModel — PSL model (disabled when traffic.model == svc)
-    model_type  : str             — "psl" | "svc"
+    model       : PSLTrafficModel — speed-limit model (disabled when traffic.model == svc)
+    model_type  : str             — "psl" | "td" | "svc"
     route_file  : str | None      — path to SVC rvt_routes.xml, or None
     """
 
@@ -84,6 +130,35 @@ class Traffic:
             return
 
         self.traffic_scale = 1.0
+
+        if self.model_type == "td":
+            td = traffic_cfg.get("td", {})
+            if not bool(td.get("enabled", True)):
+                self.model = PSLTrafficModel(enabled=False, free_flow_ms=free_flow_ms)
+                return
+            vc_ms = float(td.get("v_congestion_kmh", 15.0)) / 3.6
+            vf_ms = float(td.get("v_freeflow_kmh", 50.0)) / 3.6
+            if not (0.0 < vc_ms < vf_ms):
+                raise ValueError(
+                    "traffic.td: require 0 < v_congestion_kmh < v_freeflow_kmh"
+                )
+            T1_s = float(td["T1_hours"]) * 3600.0 if "T1_hours" in td else max_time_s / 3.0
+            T2_s = float(td["T2_hours"]) * 3600.0 if "T2_hours" in td else 2.0 * max_time_s / 3.0
+            if not (0.0 < T1_s < T2_s < max_time_s):
+                raise ValueError(
+                    f"traffic.td: require 0 < T1 < T2 < max_duration "
+                    f"(T1={T1_s/3600:.2f}h, T2={T2_s/3600:.2f}h, horizon={max_time_s/3600:.2f}h)"
+                )
+            self.model = TDTrafficModel(
+                enabled=True,
+                free_flow_ms=free_flow_ms,
+                vc_ms=vc_ms,
+                vf_ms=vf_ms,
+                T1_s=T1_s,
+                T2_s=T2_s,
+                edge_ids=edge_ids,
+            )
+            return
 
         enabled = bool(psl.get("enabled", False))
 

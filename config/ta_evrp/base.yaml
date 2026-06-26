@@ -16,6 +16,7 @@ generation_seed: 42
 # ── Outer Routing Planner (EVRP layer) ───────────────────────────────────────
 evrp:
   planner: milp              # milp | heuristic | mtsp | td_milp
+                             # td_milp = milp + time-dependent travel time (needs traffic.model: td)
 
 # ── Inner Navigation Agent (TRSP layer) ──────────────────────────────────────
 trsp:
@@ -25,13 +26,13 @@ trsp:
 
 # ── Road Network ─────────────────────────────────────────────────────────────
 network:
-  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
+  net_path: data/grid_road/grid_road.sumocfg
   warehouse: center          # depot placement: center | random | <sumo node id>
   max_degree: 5              # max junction degree (used by TRSP obs space)
 
 # ── Traffic Modeling ─────────────────────────────────────────────────────────
 traffic:
-  model: psl                 # psl | svc
+  model: psl                 # psl | td | svc
   psl:                       # Piecewise Speed Limit model (per-edge random profile)
     enabled: true
     K: 2                     # number of time slots
@@ -41,6 +42,12 @@ traffic:
     speed_step_kmh: 60.0     # km/h — step between levels
     seed: 42
     profile_type: random     # random | function | file
+  td:                        # Time-Dependent congestion (Lu et al. 2020, Fig. 1)
+    enabled: true            # 3 periods, global speeds; read by both td_milp + Simulator
+    v_congestion_kmh: 30.0   # km/h — slots 0 & 2 (morning/evening peak)
+    v_freeflow_kmh: 90.0     # km/h — slot 1 (midday free-flow); must exceed v_congestion
+    T1_hours: 2.0            # morning-peak end   (0 < T1 < T2 < max_duration_h)
+    T2_hours: 4.0            # evening-peak start
   svc:                       # Stochastic Vehicular Congestion (background SUMO vehicles)
     route_file: data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml
     traffic_scale: 2
@@ -58,7 +65,7 @@ simulation:
     battery_capacity_L: 15       # litres of fuel/energy on a full charge
     consumption_rate_L_per_km: 1  # L/km  →  range = 50 / 5 = 10 km
     free_flow_speed_kmh: 110     # km/h  (= 120 mph)
-    max_duration_h: 6             # hours — hard route time limit
+    max_duration_h: 0.3             # hours — hard route time limit
     customer_service_time_h: 0      # hours — dwell time at each customer stop
     recharge_time_h: 0              # hours — dwell time at each AFS stop
     runtime_refuel: false           # trackback to depot when next stop is out of range
@@ -75,7 +82,7 @@ sumo:
   simulator: concurrent          # sequential | concurrent
   max_time_h: 6                 # hours — SUMO wall-clock budget
   render_mode: print             # quiet | print | human
-  delay: 15                       # ms GUI delay (human mode only)
+  delay: 5                       # ms GUI delay (human mode only)
 
 # ── Output ───────────────────────────────────────────────────────────────────
 output:

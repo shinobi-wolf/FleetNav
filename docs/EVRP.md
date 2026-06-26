@@ -45,10 +45,16 @@ Planners live in `dronesim/evrp_/` and are dispatched via `REGISTRY` in `dronesi
 - **Method:** KMeans clustering of customers, then nearest-neighbor TSP per cluster. Ignores fuel constraints entirely.
 - **Status:** Fully working. Useful as a lower-bound reference for route length; will strand if fuel runs out.
 
-### `td_milp` — Time-Dependent MILP ⚠️ No config yet
+### `td_milp` — Time-Dependent MILP ✅ Done
 
-- **File:** `dronesim/evrp_/td_milp.py` (Lu et al. 2020, inline)
-- **Status:** Implemented and in `REGISTRY`. No `config/ta_evrp/td_milp.yaml` exists yet. Requires `ta_config["traffic_lu"]` and `ta_config["cost_model"]` sections.
+- **File:** `dronesim/evrp/td_milp.py` (Lu et al. 2020, inline Gurobi)
+- **Config:** `config/ta_evrp/td_milp.yaml`
+- **Method:** The `milp` G-VRP formulation with **one** change — arc travel time depends on the **departure time** from the tail node, following the three-period time-of-day congestion profile (morning peak `[0,T1)` at `v_c`, free-flow `[T1,T2)` at `v_f`, evening peak `[T2,u0]` at `v_c`). The min-distance objective, dummy-vertex expansion, and distance-based fuel constraints (`Q` in metres, `r`) are **identical** to `milp`. Cargo/demand is not modelled. Speed is fixed to each period's limit (no per-arc speed optimisation).
+- **Formulation:** The constant-time propagation of `milp` (C7–C9) is replaced by per-arc departure-interval variables `z[i,j,m]` / `td[i,j,m]` and service-start times `w[j]`, with the paper's piecewise-linear travel time `T(t)=A_T+B_T·t` (Eq. 1) and constraints Eqs. 16/17/22/23. Helpers `_interval_bounds`, `_travel_coefs` give per-arc `(A_T, B_T)` and bounds.
+- **Traffic source:** reads the **same** `traffic.td.*` block the Simulator uses (`v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours`); horizon `u0 = Tmax`. Set `traffic.model: td` for end-to-end plan/sim consistency.
+- **Objective:** pure distance by default. Optional `evrp.td_milp.w_makespan` (default 0) adds `w_makespan · makespan_s` to trade distance for faster completion.
+- **Requires:** Gurobi license. The model is larger than `milp` (adds `z`/`td` per arc × valid departure intervals); solver params come from `evrp.td_milp.*`.
+- **Effect:** Because the objective is unchanged, congestion affects route **feasibility within the horizon** (a route that no longer fits `Tmax` under congestion is excluded / reported infeasible), not the distance cost.
 
 ### `ctvtt_ga` — GA-based Planner ❌ Not ported
 
@@ -99,6 +105,13 @@ The simulator uses a **PSL (Piecewise Speed Limit)** model: each edge gets its o
 - Interface: `get_slot(t) → int`, `get_speed(edge_id, slot) → float` (returns m/s)
 - At each slot transition, `traci.edge.setMaxSpeed(edge_id, speed)` is called for every edge — SUMO vehicles are constrained automatically.
 
+### `TDTrafficModel` ✅ Done
+
+- **File:** `dronesim/ta_evrp/instance/traffic.py` (subclass of `PSLTrafficModel`)
+- Three-period time-of-day congestion model (Lu et al. 2020, Fig. 1), selected via `traffic.model: td`. Global speeds — **every** edge gets the identical profile `[v_c, v_f, v_c]`: slot 0 (`[0,T1)`) and slot 2 (`[T2,…]`) at congestion speed `v_c`, slot 1 (`[T1,T2)`) at free-flow `v_f`. Only `get_slot()` differs from PSL — boundaries at `T1`/`T2` instead of the cyclic `delta_t` grid.
+- Config keys (under `traffic.td`): `enabled`, `v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours` (default `T1=u0/3`, `T2=2u0/3`).
+- Same `get_slot`/`get_speed` interface, so the Simulator applies it through the same `setMaxSpeed`/`setSpeed` code paths as PSL (both are gated by `Simulator._psl_like`). The `td_milp` planner reads the same `traffic.td` block, so plan and simulation use identical speeds.
+
 ---
 
 ## Configuration
@@ -116,7 +129,8 @@ Special exceptions that keep seconds/ms in config: `sumo.step_length` (seconds),
 | Section | Purpose |
 |---------|---------|
 | `network.net_path` | Path to `.sumocfg` or `.net.xml` |
-| `evrp.planner` | `milp` \| `heuristic` \| `mtsp` |
+| `evrp.planner` | `milp` \| `td_milp` \| `heuristic` \| `mtsp` |
+| `evrp.td_milp.*` | solver params (`time_limit_s`, `mip_gap`, `output_flag`, dummy copies) + `w_makespan` |
 | `trsp.agent` | `dijkstra` \| `sarsa` \| `dqn` \| `ppo` |
 | `trsp.policy_id` | Policy ID under `runs/trsp/`; required for RL agents |
 | `simulation.ugv.battery_capacity_L` | Full-charge range capacity in litres |
@@ -125,7 +139,9 @@ Special exceptions that keep seconds/ms in config: `sumo.step_length` (seconds),
 | `simulation.ugv.max_duration_h` | Hard route time limit in hours |
 | `simulation.ugv.runtime_refuel` | Enable emergency depot detours (bool) |
 | `simulation.tasks.*` | Customer count, AFS count |
+| `traffic.model` | `psl` \| `td` \| `svc` |
 | `traffic.psl.*` | `enabled`, `K`, `v_min_kmh`, `v_max_kmh`, `speed_step_kmh`, `seed`, `profile_type` |
+| `traffic.td.*` | `enabled`, `v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours` (3-period TD model) |
 | `traffic.simulated.*` | SUMO background vehicular/pedestrian traffic |
 | `sumo.render_mode` | `quiet` / `print` / `human` |
 
@@ -170,8 +186,7 @@ traffic:
 
 ## Known Issues / Future Work
 
-- `ctvtt_ga` planner not ported to `evrp_/`; not in `REGISTRY`
-- `td_milp` has no config file (`config/ta_evrp/td_milp.yaml`); can't be selected via CLI yet
+- `ctvtt_ga` planner not ported to `evrp/`; not in `REGISTRY`
 - Heuristic planner (ALNS) can return `feasible=False` routes on tight-range configs; the MILP correctly reports infeasibility in the same cases
 - `dronesim/evrp/` (old module) still present; can be removed now that `Simulator` in `dronesim/ta_evrp/simulator/` is complete
 - SUMO turn restrictions cause `No connection between edge X and Y` errors when the NX Dijkstra path crosses a physically disallowed turn; addressed by rebuilding the net without connection files or handling at planning time

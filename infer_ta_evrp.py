@@ -453,7 +453,7 @@ def main() -> None:
     print(f"\nTA-EVRP run: {run_id}")
     print(f"  planner : {instance.planner_name}")
     print(f"  agent   : {instance.agent_name}" + (f"  policy: {instance.policy_id}" if instance.policy_id else ""))
-    print(f"  traffic : {'PSL enabled' if instance.traffic_enabled else 'disabled'}")
+    print(f"  traffic : {instance.traffic_model + ' enabled' if instance.traffic_enabled else 'disabled'}")
     print(f"  output  : {run_dir}/")
 
     # ── Plan ─────────────────────────────────────────────────────────────────

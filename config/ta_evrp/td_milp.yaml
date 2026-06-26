@@ -1,0 +1,49 @@
+# =============================================================================
+# config/ta_evrp/td_milp.yaml — Time-Dependent MILP planner (Lu et al. 2020)
+# =============================================================================
+# TD-EVRP: the milp G-VRP exact planner with departure-time-dependent travel
+# time over a three-period congestion profile. Pairs the td_milp planner with
+# the matching `td` traffic model so the plan and the SUMO simulation use the
+# same v_c / v_f speeds and T1 / T2 boundaries.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/td_milp.yaml
+#        python infer_ta_evrp.py -c config/ta_evrp/td_milp.yaml --no-sim   # plan only
+
+base: config/ta_evrp/base.yaml
+
+evrp:
+  planner: td_milp
+  td_milp:
+    time_limit_s: 300        # seconds — Gurobi wall-clock limit
+    mip_gap: 0.01            # 0.0 = proven optimal
+    output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+    afs_dummy_copies: 3
+    depot_dummy_copies: 3
+    w_makespan: 0.0          # >0 adds w_makespan * makespan_s to the distance objective
+
+# evrp:
+#   planner: milp
+#   milp:
+#     time_limit_s: 300        # seconds — Gurobi wall-clock limit
+#     mip_gap: 0.01            # 0.0 = proven optimal
+#     output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+#     afs_dummy_copies: 3
+#     depot_dummy_copies: 3
+
+# evrp:
+#   planner: heuristic
+#   heuristic:
+#     alns_iterations: 8000
+#     seed: 42
+
+# Time-dependent traffic — read by BOTH the planner and the Simulator.
+traffic:
+  model: td
+  td:
+    enabled: true
+    v_congestion_kmh: 30.0   # slots 0 & 2 (morning / evening peak)
+    v_freeflow_kmh: 90.0     # slot 1 (midday free-flow)
+    T1_hours: 0.1            # 0 < T1 < T2 < simulation.ugv.max_duration_h (6 h)
+    T2_hours: 0.2
+
+trsp:
+  agent: dijkstra

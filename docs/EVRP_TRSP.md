@@ -179,7 +179,7 @@ The returned distance is what the simulator deducts from `current_fuel` and reco
 
 ## Traffic Model Unification
 
-Both TRSP and TA-EVRP support two traffic models, selected via `traffic.model`.
+Both TRSP and TA-EVRP support three traffic models, selected via `traffic.model`: `psl`, `td`, and `svc`.
 
 ### PSL (Piecewise Speed Limit)
 
@@ -197,6 +197,18 @@ Both TA-EVRP and TRSP share a **PSL model** — per-edge independent speed profi
 Both models generate a discrete speed level set spanning `[v_min, v_max]` in increments of `speed_step` and draw independently per edge. With identical seed and identical edge set they produce identical profiles — but the TRSP training config and TA-EVRP config can use different seeds and different K values.
 
 Note on config keys: TA-EVRP nests PSL settings under `traffic.psl.*` and uses `_kmh` suffixes (e.g., `v_min_kmh`), while TRSP uses `traffic.*` (e.g., `v_min`). Both store m/s internally. Align both if you want the same profiles end-to-end.
+
+### TD (Time-Dependent congestion — Lu et al. 2020)
+
+A three-period time-of-day model (`traffic.model: td`): a **global** congestion speed `v_c` in the first and last slot and a free-flow speed `v_f` in the middle slot, with boundaries at `T1`/`T2`. `TDTrafficModel` is a `PSLTrafficModel` subclass in both modules (`dronesim/ta_evrp/instance/traffic.py`, `dronesim/trsp/traffic.py`), so it flows through the same `get_slot`/`get_speed` interface, the same `time_slot ∈ {0,1,2}` observation (K=3), and the same Simulator speed-limit code (gated by `Simulator._psl_like`, which covers both `psl` and `td`).
+
+| | EVRP `TDTrafficModel` | TRSP `TDTrafficModel` |
+|---|---|---|
+| Config block | `traffic.td.*` (`v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours`) | flat `traffic.*` (`v_congestion`, `v_freeflow` km/h; `T1`, `T2` seconds) |
+| Speed scope | Global (all edges `[v_c, v_f, v_c]`) | Global (all edges `[v_c, v_f, v_c]`) |
+| Slot rule | `0` if `t<T1`, `1` if `t<T2`, else `2` | same |
+
+Unlike PSL/TD as a Simulator speed-limit, the **`td_milp` planner** also consumes `traffic.td.*` (EVRP block) to make its arc travel times departure-dependent — so with `traffic.model: td` the plan and the SUMO execution share the same `v_c`/`v_f` and `T1`/`T2`. See `docs/EVRP.md` → `td_milp`.
 
 ### SVC (Stochastic Vehicular Congestion)
 
