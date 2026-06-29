@@ -1,0 +1,28 @@
+Building graph from data/ames/ames_campus_final.sumocfg ...
+Selected 101 nodes (28 total) → 100 evaluation pairs
+Traffic model: TD  K=3  v_c=10km/h  v_f=40km/h  T1=100s  T2=200s
+Graph: 28 nodes, 40 edges
+Policy loaded from runs/trsp/8f6c4be4/policy.pkl
+
+[Policy: 8f6c4be4] → runs/trsp/8f6c4be4/test_1
+ Retrying in 1 seconds
+8f6c4be4:   0%|          | 0/100 [00:00<?, ?it/s]8f6c4be4:  21%|██        | 21/100 [00:00<00:00, 208.69it/s]8f6c4be4:  42%|████▏     | 42/100 [00:00<00:00, 203.14it/s]8f6c4be4:  71%|███████   | 71/100 [00:00<00:00, 241.51it/s]8f6c4be4:  96%|█████████▌| 96/100 [00:00<00:00, 203.80it/s]8f6c4be4: 100%|██████████| 100/100 [00:00<00:00, 207.23it/s]
+Policy eval done in 0:00:01 → runs/trsp/8f6c4be4/test_1/simulation_results.csv
+
+[Dijkstra] → runs/trsp/8f6c4be4/test_1/simulation_results_dijkstra.csv
+ Retrying in 1 seconds
+Dijkstra:   0%|          | 0/100 [00:00<?, ?it/s]Dijkstra:   2%|▏         | 2/100 [00:00<00:05, 16.50it/s]Dijkstra:   4%|▍         | 4/100 [00:00<00:05, 17.11it/s]Dijkstra:   8%|▊         | 8/100 [00:00<00:04, 19.34it/s]Dijkstra:  13%|█▎        | 13/100 [00:00<00:03, 27.14it/s]Dijkstra:  16%|█▌        | 16/100 [00:00<00:03, 27.26it/s]Dijkstra:  22%|██▏       | 22/100 [00:00<00:02, 31.79it/s] Retrying in 1 seconds
+Dijkstra:  26%|██▌       | 26/100 [00:02<00:08,  8.71it/s]Dijkstra:  29%|██▉       | 29/100 [00:02<00:07, 10.11it/s]Dijkstra:  32%|███▏      | 32/100 [00:02<00:05, 11.80it/s]Dijkstra:  36%|███▌      | 36/100 [00:02<00:04, 15.04it/s]Dijkstra:  39%|███▉      | 39/100 [00:02<00:03, 16.23it/s]Dijkstra:  42%|████▏     | 42/100 [00:02<00:03, 15.59it/s] Retrying in 1 seconds
+Dijkstra:  45%|████▌     | 45/100 [00:03<00:08,  6.41it/s]Dijkstra:  47%|████▋     | 47/100 [00:04<00:07,  7.23it/s]Dijkstra:  50%|█████     | 50/100 [00:04<00:05,  9.29it/s]Dijkstra:  52%|█████▏    | 52/100 [00:04<00:04, 10.37it/s]Dijkstra:  56%|█████▌    | 56/100 [00:04<00:03, 14.21it/s]Dijkstra:  59%|█████▉    | 59/100 [00:04<00:02, 16.65it/s] Retrying in 1 seconds
+Dijkstra:  62%|██████▏   | 62/100 [00:05<00:05,  6.46it/s]Dijkstra:  65%|██████▌   | 65/100 [00:05<00:04,  8.17it/s]Dijkstra:  67%|██████▋   | 67/100 [00:05<00:03,  9.19it/s]Dijkstra:  70%|███████   | 70/100 [00:06<00:02, 10.42it/s]Dijkstra:  73%|███████▎  | 73/100 [00:06<00:02, 12.72it/s]Dijkstra:  77%|███████▋  | 77/100 [00:06<00:01, 16.45it/s] Retrying in 1 seconds
+Dijkstra:  80%|████████  | 80/100 [00:07<00:03,  6.66it/s]Dijkstra:  83%|████████▎ | 83/100 [00:07<00:02,  7.98it/s]Dijkstra:  86%|████████▌ | 86/100 [00:07<00:01,  9.99it/s]Dijkstra:  89%|████████▉ | 89/100 [00:07<00:00, 12.24it/s]Dijkstra:  93%|█████████▎| 93/100 [00:08<00:00, 15.56it/s]Dijkstra:  97%|█████████▋| 97/100 [00:08<00:00, 19.01it/s]Dijkstra: 100%|██████████| 100/100 [00:08<00:00, 12.05it/s]
+Dijkstra eval done in 0:00:09 → runs/trsp/8f6c4be4/test_1/simulation_results_dijkstra.csv
+
+[DSP] → runs/trsp/8f6c4be4/test_1/simulation_results_dsp.csv
+ Retrying in 1 seconds
+DSP:   0%|          | 0/100 [00:00<?, ?it/s]DSP:   1%|          | 1/100 [00:00<00:11,  8.76it/s]DSP:   5%|▌         | 5/100 [00:00<00:03, 25.86it/s]DSP:   8%|▊         | 8/100 [00:00<00:04, 20.07it/s]DSP:  13%|█▎        | 13/100 [00:00<00:03, 25.20it/s]DSP:  16%|█▌        | 16/100 [00:00<00:03, 22.20it/s]DSP:  22%|██▏       | 22/100 [00:00<00:02, 28.51it/s] Retrying in 1 seconds
+DSP:  25%|██▌       | 25/100 [00:02<00:09,  7.99it/s]DSP:  28%|██▊       | 28/100 [00:02<00:08,  8.87it/s]DSP:  31%|███       | 31/100 [00:02<00:06, 10.40it/s]DSP:  35%|███▌      | 35/100 [00:02<00:04, 13.92it/s]DSP:  39%|███▉      | 39/100 [00:02<00:03, 17.16it/s]DSP:  42%|████▏     | 42/100 [00:02<00:03, 17.59it/s] Retrying in 1 seconds
+DSP:  45%|████▌     | 45/100 [00:03<00:08,  6.76it/s]DSP:  47%|████▋     | 47/100 [00:04<00:06,  7.74it/s]DSP:  50%|█████     | 50/100 [00:04<00:05,  9.71it/s]DSP:  52%|█████▏    | 52/100 [00:04<00:04, 10.70it/s]DSP:  55%|█████▌    | 55/100 [00:04<00:03, 13.46it/s]DSP:  59%|█████▉    | 59/100 [00:04<00:02, 17.22it/s] Retrying in 1 seconds
+DSP:  62%|██████▏   | 62/100 [00:05<00:05,  6.56it/s]DSP:  65%|██████▌   | 65/100 [00:05<00:04,  8.22it/s]DSP:  67%|██████▋   | 67/100 [00:06<00:03,  9.25it/s]DSP:  70%|███████   | 70/100 [00:06<00:02, 11.65it/s]DSP:  73%|███████▎  | 73/100 [00:06<00:01, 14.27it/s]DSP:  77%|███████▋  | 77/100 [00:06<00:01, 18.10it/s] Retrying in 1 seconds
+DSP:  80%|████████  | 80/100 [00:07<00:02,  6.94it/s]DSP:  83%|████████▎ | 83/100 [00:07<00:01,  8.57it/s]DSP:  86%|████████▌ | 86/100 [00:07<00:01, 10.69it/s]DSP:  89%|████████▉ | 89/100 [00:07<00:00, 12.88it/s]DSP:  93%|█████████▎| 93/100 [00:07<00:00, 16.44it/s]DSP:  97%|█████████▋| 97/100 [00:08<00:00, 19.80it/s]DSP: 100%|██████████| 100/100 [00:08<00:00, 12.29it/s]
+DSP eval done in 0:00:09 → runs/trsp/8f6c4be4/test_1/simulation_results_dsp.csv

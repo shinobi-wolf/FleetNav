@@ -146,6 +146,7 @@ class TDTrafficModel(PSLTrafficModel):
 
         self.T1 = float(config['T1'])   # seconds
         self.T2 = float(config['T2'])   # seconds
+        self.T = float(config['T'])
         if not (0.0 < self.T1 < self.T2):
             raise ValueError("traffic: require 0 < T1 < T2")
 
@@ -155,6 +156,7 @@ class TDTrafficModel(PSLTrafficModel):
 
     def get_slot(self, t: float) -> int:
         """Active period index for simulation time t (seconds): 0|1|2 by T1/T2."""
+        t = t % self.T  # wrap around T
         if t < self.T1:
             return 0
         if t < self.T2:

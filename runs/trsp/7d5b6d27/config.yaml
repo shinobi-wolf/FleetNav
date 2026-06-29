@@ -1,0 +1,28 @@
+agent:
+  action_mode: node_id
+  algo: a2c
+  policy: 7d5b6d27
+fleet:
+  max_speed: 110
+net:
+  max_degree: 5
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
+simulation:
+  max_steps: 50
+  max_time: 2
+  random_sg_pair: true
+  render_mode: human
+  warm_up_time: 0
+sumo:
+  delay: 0
+  step_length: 1.0
+  traffic_scale: 0
+traffic:
+  T: 300
+  T1: 100
+  T2: 200
+  enabled: true
+  model: td
+  seed: 42
+  v_congestion: 10.0
+  v_freeflow: 40.0

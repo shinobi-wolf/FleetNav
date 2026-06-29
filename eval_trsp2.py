@@ -25,21 +25,23 @@ from dronesim.trsp.agents.ppo_psl      import PPOAgent
 from dronesim.trsp.agents.ppo_svc      import PPOSVCAgent
 from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
 from dronesim.trsp.agents.sarsa_svc    import SARSASVCAgent
-from dronesim.trsp.traffic import PSLTrafficModel
+from dronesim.trsp.traffic import PSLTrafficModel, TDTrafficModel
 
 INF = 100000
 
 
 def get_traffic_model(config: dict) -> str:
-    """Return 'svc', 'psl', or 'none'."""
+    """Return 'td', 'svc', 'psl', or 'none'."""
     traffic_cfg = config.get('traffic')
     if traffic_cfg is None:
+        return 'none'
+    if not traffic_cfg.get('enabled', True):
         return 'none'
     model = traffic_cfg.get('model', 'psl')
     if model == 'svc':
         return 'svc'
-    if not traffic_cfg.get('enabled', True):
-        return 'none'
+    if model == 'td':
+        return 'td'
     return 'psl'
 
 
@@ -203,7 +205,7 @@ def plan_route(agent, action_mode, start_node, target_node, time_slot,
                 obs['neighbor_speeds'] = _neighbor_speeds_from_traci(
                     curr_node, nb_node_idxs, G_dir, idx2node, ugv_speed, num_actions
                 )
-            else:
+            else:  # 'psl' or 'td' — both expose time_slot ∈ {0..K-1}
                 obs['time_slot'] = time_slot
 
             action = int(agent.predict(obs, G=G, idx2node=idx2node, node2idx=node2idx))
@@ -286,7 +288,7 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
     warmup_time = float(config['simulation'].get('warm_up_time', 0))
 
     ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
-    psl_active = (traffic_model == 'psl')
+    psl_active = traffic_model in ('psl', 'td')  # both use psl_model.get_slot / get_speed
     n_pairs = len(selected_idxs) - 1
 
     def start_sumo():
@@ -417,6 +419,16 @@ def main():
             f"Traffic model: PSL  K={psl_model.K}  "
             f"v=[{psl_model.v_min*3.6:.0f},{psl_model.v_max*3.6:.0f}]km/h  "
             f"delta_t={psl_model.delta_t:.1f}s"
+        )
+    elif traffic_model == 'td':
+        psl_model = TDTrafficModel(
+            config['traffic'], edge_ids, seed=config['traffic'].get('seed')
+        )
+        tcfg = config['traffic']
+        print(
+            f"Traffic model: TD  K=3  "
+            f"v_c={tcfg['v_congestion']:.0f}km/h  v_f={tcfg['v_freeflow']:.0f}km/h  "
+            f"T1={tcfg['T1']}s  T2={tcfg['T2']}s"
         )
     elif traffic_model == 'svc':
         print(f"Traffic model: SVC  route_file={config['traffic']['route_file']}")

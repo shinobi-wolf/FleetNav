@@ -1,0 +1,39 @@
+# =============================================================================
+# config/ta_evrp/sweep_td.yaml — TD traffic policy sweep across all networks
+# =============================================================================
+# 15 combinations: 3 baselines × 3 nets + sarsa × 3 nets + dqn/a2c/ppo × 2 nets
+# (no dqn/a2c/ppo policy trained on grid_road under TD traffic)
+#
+# _zip_ group: network + agent + policy_id move together as paired rows.
+# Baselines (dijkstra, dsp) use policy_id: ~ (null).
+
+base: config/ta_evrp/td_milp.yaml
+
+trsp:
+  raps_enabled: true
+
+# ── Zip group: network + agent + trained TD policy (move together) ────────────
+_zip_:
+  - keys: [network.net_path, trsp.agent, trsp.policy_id]
+    values:
+      # --- Dijkstra baseline ---
+      - [data/grid_road/grid_road.sumocfg,                 dijkstra, ~]
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra, ~]
+      - [data/ames/ames_campus_final.sumocfg,              dijkstra, ~]
+      # --- DSP baseline ---
+      - [data/grid_road/grid_road.sumocfg,                 dsp,      ~]
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,      ~]
+      - [data/ames/ames_campus_final.sumocfg,              dsp,      ~]
+      # --- SARSA (TD-trained) ---
+      - [data/grid_road/grid_road.sumocfg,                 sarsa, 53255479]
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa, fab1cbeb]
+      - [data/ames/ames_campus_final.sumocfg,              sarsa, 14cd2751]
+      # --- DQN (TD-trained) ---
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,   c365a5c3]
+      - [data/ames/ames_campus_final.sumocfg,              dqn,   22781c4a]
+      # --- A2C (TD-trained) ---
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,   7d5b6d27]
+      - [data/ames/ames_campus_final.sumocfg,              a2c,   8f6c4be4]
+      # --- PPO (TD-trained) ---
+      - [data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,   f1682c4c]
+      - [data/ames/ames_campus_final.sumocfg,              ppo,   0a2ff4c1]

@@ -46,8 +46,8 @@ traffic:
     enabled: true            # 3 periods, global speeds; read by both td_milp + Simulator
     v_congestion_kmh: 30.0   # km/h — slots 0 & 2 (morning/evening peak)
     v_freeflow_kmh: 90.0     # km/h — slot 1 (midday free-flow); must exceed v_congestion
-    T1_hours: 2.0            # morning-peak end   (0 < T1 < T2 < max_duration_h)
-    T2_hours: 4.0            # evening-peak start
+    T1_hours: 0.1            # morning-peak end   (0 < T1 < T2 < max_duration_h)
+    T2_hours: 0.2            # evening-peak start
   svc:                       # Stochastic Vehicular Congestion (background SUMO vehicles)
     route_file: data/rand_grid_road/traffic_routes/svc_42/rvt_routes.xml
     traffic_scale: 2

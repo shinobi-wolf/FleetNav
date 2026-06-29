@@ -19,13 +19,14 @@ sumo:
   delay: 0             # ms delay for sumo-gui (ignored in quiet/print mode)
 
 traffic:
-  model: td              # 3-period time-dependent congestion (slots 0/1/2 by T1/T2)
+  T1: 100
+  T2: 200
+  T: 300
   enabled: true
+  model: td
   seed: 42
-  v_congestion: 30.0     # km/h — slots 0 & 2 (peak)
-  v_freeflow: 90.0       # km/h — slot 1 (free-flow); must exceed v_congestion
-  T1: 2400.0             # seconds — morning-peak end (40 min)
-  T2: 4800.0             # seconds — evening-peak start (80 min)
+  v_congestion: 5.0
+  v_freeflow: 40.0
 
 simulation:
   max_time: 2            # hours — SUMO wall-clock budget before forced env.reset()
@@ -35,7 +36,7 @@ simulation:
   random_sg_pair: true   # randomise start/goal each episode
 
 agent:
-  algo: a2c             # sarsa | dqn | ppo | a2c
+  algo: dqn             # sarsa | dqn | ppo | a2c
   action_mode: node_id  # neighbor_index (sarsa/dijkstra) | node_id (dqn/ppo/a2c)
   policy: null            # set to a policy_id string to resume/load
 

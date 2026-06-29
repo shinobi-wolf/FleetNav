@@ -27,7 +27,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/trsp/svc/sarsa_grid_road.yaml"
+                "${workspaceFolder}/config/trsp/train_td.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -64,7 +64,7 @@
             ],
             "args": [
                 "-p",
-                "78d5748e"
+                "ba84fbd4"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

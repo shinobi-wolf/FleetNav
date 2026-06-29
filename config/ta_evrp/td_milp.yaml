@@ -10,19 +10,19 @@
 
 base: config/ta_evrp/base.yaml
 
-# evrp:
-#   planner: td_milp
-#   td_milp:
-#     time_limit_s: 300        # seconds — Gurobi wall-clock limit
-#     mip_gap: 0.01            # 0.0 = proven optimal
-#     output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
-#     afs_dummy_copies: 3
-#     depot_dummy_copies: 3
-#     # Objective = w_makespan * makespan_s + w_distance * distance_m.
-#     # Makespan is primary — it is the metric the congestion profile informs and
-#     # where td_milp beats milp/heuristic. Set w_makespan: 0 for pure min-distance.
-#     w_makespan: 1.0
-#     w_distance: 0.001        # light regulariser to keep equal-makespan routes tidy
+evrp:
+  planner: td_milp
+  td_milp:
+    time_limit_s: 300        # seconds — Gurobi wall-clock limit
+    mip_gap: 0.01            # 0.0 = proven optimal
+    output_flag: 1           # 0 = silent, 1 = verbose Gurobi log
+    afs_dummy_copies: 3
+    depot_dummy_copies: 3
+    # Objective = w_makespan * makespan_s + w_distance * distance_m.
+    # Makespan is primary — it is the metric the congestion profile informs and
+    # where td_milp beats milp/heuristic. Set w_makespan: 0 for pure min-distance.
+    w_makespan: 1.0
+    w_distance: 0.001        # light regulariser to keep equal-makespan routes tidy
 
 # evrp:
 #   planner: milp
@@ -39,18 +39,22 @@ base: config/ta_evrp/base.yaml
 #     alns_iterations: 8000
 #     seed: 42
 
-evrp:
-  planner: mtsp
+# evrp:
+#   planner: mtsp
 
 # Time-dependent traffic — read by BOTH the planner and the Simulator.
 traffic:
   model: td
   td:
     enabled: true
-    v_congestion_kmh: 30.0   # slots 0 & 2 (morning / evening peak)
-    v_freeflow_kmh: 90.0     # slot 1 (midday free-flow)
-    T1_hours: 0.1            # 0 < T1 < T2 < simulation.ugv.max_duration_h (6 h)
-    T2_hours: 0.2
+    v_congestion_kmh: 10.0   # slots 0 & 2 (morning / evening peak)
+    v_freeflow_kmh: 40.0     # slot 1 (midday free-flow)
+    T1_hours: 0.0277778            # 0 < T1 < T2 < simulation.ugv.max_duration_h (6 h)
+    T2_hours: 0.0555556
 
-trsp:
-  agent: dijkstra
+# trsp:
+#   agent: dijkstra
+
+# trsp:
+#   agent: dqn
+#   policy_id: c365a5c3

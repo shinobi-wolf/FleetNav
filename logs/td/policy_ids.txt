@@ -1,0 +1,9 @@
+sarsa_grid=53255479
+sarsa_rand_grid=fab1cbeb
+sarsa_ames=14cd2751
+dqn_rand_grid=c365a5c3
+dqn_ames=22781c4a
+a2c_rand_grid=7d5b6d27
+a2c_ames=8f6c4be4
+ppo_rand_grid=f1682c4c
+ppo_ames=0a2ff4c1

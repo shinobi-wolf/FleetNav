@@ -1,0 +1,47 @@
+net:
+  net_path: data/rand_grid_road/rand_grid_road_final.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 0
+  delay: 0
+
+simulation:
+  max_time: 2
+  max_steps: 50
+  render_mode: quiet
+  warm_up_time: 0
+  random_sg_pair: true
+
+traffic:
+  T1: 100
+  T2: 200
+  T: 300
+  enabled: true
+  model: td
+  seed: 42
+  v_congestion: 10.0
+  v_freeflow: 40.0
+
+agent:
+  algo: a2c
+  action_mode: node_id
+  policy: null
+
+training:
+  a2c:
+    num_iterations: 100
+    num_steps: 512
+    gamma: 0.99
+    gae_lambda: 0.95
+    ent_coef: 0.01
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    lr: 7.0e-4
+    anneal_lr: false
+    hidden_dim: 64
+    save_interval: 50

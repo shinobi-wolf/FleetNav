@@ -349,7 +349,7 @@ class SumoTRSPEnv(gym.Env):
 
             if self.ugv.veh_id in active_ids:
                 inserted = True
-                if self.traffic_model == 'psl':
+                if self.traffic_model == 'psl' or self.traffic_model == 'td':
                     new_slot = self.traffic.get_slot(self.time_elapsed)
                     if new_slot != self.current_slot:
                         old_slot = self.current_slot

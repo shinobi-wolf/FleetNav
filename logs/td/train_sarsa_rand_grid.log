@@ -1,0 +1,33 @@
+POLICY_ID=d10cbb6f
+Graph: 26 nodes, 39 edges
+ Retrying in 1 seconds
+Episode 1/2000  Total Reward: -1359.52  Epsilon: 0.9000
+Episode 2/2000  Total Reward: -1333.40  Epsilon: 0.8996
+Episode 3/2000  Total Reward: -45.00  Epsilon: 0.8991
+Episode 4/2000  Total Reward: -22.63  Epsilon: 0.8987
+Episode 5/2000  Total Reward: -1410.04  Epsilon: 0.8982
+Episode 6/2000  Total Reward: -353.96  Epsilon: 0.8978
+Episode 7/2000  Total Reward: -1581.20  Epsilon: 0.8973
+Episode 8/2000  Total Reward: -121.80  Epsilon: 0.8969
+Episode 9/2000  Total Reward: -405.87  Epsilon: 0.8964
+Episode 10/2000  Total Reward: -56.74  Epsilon: 0.8960
+Episode 11/2000  Total Reward: -150.76  Epsilon: 0.8955
+ Retrying in 1 seconds
+Episode 12/2000  Total Reward: -1381.00  Epsilon: 0.8951
+Episode 13/2000  Total Reward: -1399.14  Epsilon: 0.8946
+Episode 14/2000  Total Reward: -320.47  Epsilon: 0.8942
+Episode 15/2000  Total Reward: -1421.00  Epsilon: 0.8937
+Episode 16/2000  Total Reward: -1131.45  Epsilon: 0.8933
+Episode 17/2000  Total Reward: -363.37  Epsilon: 0.8928
+Episode 18/2000  Total Reward: -992.38  Epsilon: 0.8924
+ Retrying in 1 seconds
+Episode 19/2000  Total Reward: -148.85  Epsilon: 0.8919
+Episode 20/2000  Total Reward: -1154.10  Epsilon: 0.8915
+Episode 21/2000  Total Reward: -311.52  Epsilon: 0.8910
+Episode 22/2000  Total Reward: -1446.67  Epsilon: 0.8906
+Episode 23/2000  Total Reward: -1450.80  Epsilon: 0.8902
+Episode 24/2000  Total Reward: -37.95  Epsilon: 0.8897
+Episode 25/2000  Total Reward: -1541.90  Epsilon: 0.8893
+Episode 26/2000  Total Reward: -399.00  Epsilon: 0.8888
+Episode 27/2000  Total Reward: -387.29  Epsilon: 0.8884
+ Retrying in 1 seconds
