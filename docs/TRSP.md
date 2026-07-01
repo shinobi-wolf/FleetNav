@@ -51,17 +51,29 @@ config/trsp/
 ├── a2c_rand_grid_K2.yaml    # A2C — rand_grid_road, K=2
 ├── a2c_ames_K1.yaml         # A2C — ames, K=1
 ├── a2c_ames_K2.yaml         # A2C — ames, K=2
-└── svc/                     # SVC training configs — one per algo × network
+├── svc/                     # SVC training configs — one per algo × network
+│   ├── sarsa_grid_road.yaml
+│   ├── sarsa_rand_grid.yaml
+│   ├── sarsa_ames.yaml
+│   ├── dqn_grid_road.yaml   # (train_svc_dqn.yaml is the grid_road template)
+│   ├── a2c_grid_road.yaml
+│   ├── a2c_rand_grid.yaml
+│   ├── a2c_ames.yaml
+│   ├── ppo_grid_road.yaml
+│   ├── ppo_rand_grid.yaml
+│   └── ppo_ames.yaml
+└── td/                      # TD training configs — one per algo × network
     ├── sarsa_grid_road.yaml
     ├── sarsa_rand_grid.yaml
     ├── sarsa_ames.yaml
-    ├── dqn_grid_road.yaml   # (train_svc_dqn.yaml is the grid_road template)
+    ├── dqn_ames.yaml
+    ├── dqn_grid_road.yaml
+    ├── a2c_ames.yaml
     ├── a2c_grid_road.yaml
     ├── a2c_rand_grid.yaml
-    ├── a2c_ames.yaml
+    ├── ppo_ames.yaml
     ├── ppo_grid_road.yaml
-    ├── ppo_rand_grid.yaml
-    └── ppo_ames.yaml
+    └── ppo_rand_grid.yaml
 
 runs/trsp/<policy_id>/       # Saved policies and logs
 ```
@@ -465,6 +477,46 @@ PPO-SVC shows the largest mean-time improvement when successful (N3: 66.5s vs 15
 - **SARSA-SVC** is viable for N2 and N3 but degrades on N1 due to state-space aliasing.
 - **A2C-SVC / PPO-SVC** have strong per-route speed gains but low success rates (~6–19%); suitable for research comparison, not for end-to-end TA-EVRP deployment without improvement.
 
+### TD Traffic — All Agents (N1–N3, v_c=10 km/h, v_f=40 km/h)
+
+Three-period congestion model: `K=3`, `T1=100s`, `T2=200s`, `v_congestion=10.0 km/h`, `v_freeflow=40.0 km/h`. Training config: `config/trsp/train_td.yaml`. Policy IDs in `logs/td/policy_ids.txt`.
+
+#### SARSA-TD
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N1 (grid_road)      | `53255479` | 673.2s | 562.5s | 562.5s | +19.7% ✗ | 74% |
+| N2 (rand_grid_road) | `fab1cbeb` | 102.6s | 108.8s | 106.0s | −5.7% ✓ | 43% |
+| N3 (ames)           | `14cd2751` | 288.5s | 360.8s | 355.7s | −20.1% ✓ | 47% |
+
+#### DQN-TD
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N2 (rand_grid_road) | `c365a5c3` | 128.4s | 130.7s | 127.7s | −1.8% | 99% |
+| N3 (ames)           | `22781c4a` | 354.6s | 360.8s | 355.7s | −1.7% | 94% |
+
+DQN achieves the highest success rates under TD traffic (94–99%), closely matching Dijkstra on traversal time. No N1 policy trained.
+
+#### A2C-TD
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N2 (rand_grid_road) | `7d5b6d27` |  50.0s | 108.8s | 106.0s | −54.0% ✓ | 10% |
+| N3 (ames)           | `8f6c4be4` | 205.8s | 360.8s | 355.7s | −43.0% ✓ | 12% |
+
+#### PPO-TD
+
+| Network | Policy | Mean time | Dijkstra | DSP | vs Dijkstra | Success |
+|---------|--------|-----------|----------|-----|-------------|---------|
+| N2 (rand_grid_road) | `f1682c4c` |  73.4s | 108.8s | 106.0s | −32.6% ✓ | 14% |
+| N3 (ames)           | `0a2ff4c1` | 173.2s | 360.8s | 355.7s | −52.0% ✓ | 12% |
+
+**Summary across TD agents:**
+- **DQN-TD** is the recommended TD agent: near-100% success rate on N2 and N3, marginally faster than Dijkstra.
+- **SARSA-TD** is viable on N2 and N3 but degrades on N1 (same regular-grid aliasing issue as PSL); lower success rate than DQN (43–74%).
+- **A2C-TD / PPO-TD** mirror the PSL/SVC pattern: fast on successful routes (up to −54% makespan) but very low success rates (10–14%). Not suitable for end-to-end TA-EVRP use without further training.
+
 ---
 
 ## Analysis Notebook
@@ -475,7 +527,7 @@ PPO-SVC shows the largest mean-time improvement when successful (N3: 66.5s vs 15
 |---------|-------------|
 | **Policy Evaluation** | Set `policy_id`; loads the latest `test_N/` directory; compares policy vs Dijkstra vs DSP on common successful OD pairs (box, mean bar, histogram, route-index plots, route map highlights). |
 | **Policy vs Policy** | Set `algo1`/`algo2` (policy IDs or `"dsp"`/`"dijkstra"`); compares any two runs head-to-head using the same analysis. |
-| **Aggregated Results** | Loads `results/trsp_results_psl.csv` (pre-computed PSL sweep), then scans `runs/trsp/` for policies whose latest `test_N/` has all three co-located CSVs. Combines into `results/trsp_results.csv` and plots mean makespan and success rate with networks as rows and traffic conditions as columns. Saves `notebooks/aggregate_makespan.png` and `notebooks/aggregate_success_rate.png`. |
+| **Aggregated Results** | Loads `results/trsp_results_psl.csv` (pre-computed PSL sweep), then scans `runs/trsp/` for SVC and TD policies whose latest `test_N/` has all three co-located CSVs. Combines PSL + SVC + TD into `results/trsp_results.csv` and plots mean makespan and success rate. Saves `notebooks/aggregate_makespan.png` and `notebooks/aggregate_success_rate.png`. |
 
 ---
 

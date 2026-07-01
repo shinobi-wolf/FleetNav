@@ -20,11 +20,17 @@ trsp:
   policy_id: null     # config dir under runs/trsp/; required for RL agents and dsp
 
 traffic:
-  model: psl          # psl | svc
+  model: psl          # psl | td | svc
   psl:
     enabled: true
     K: 2
     ...
+  td:
+    enabled: true
+    v_congestion_kmh: 10.0
+    v_freeflow_kmh: 40.0
+    T1_hours: 0.0277778
+    T2_hours: 0.0555556
   svc:
     route_file: null  # path to rvt_routes.xml; required when model: svc
 ```
@@ -278,9 +284,12 @@ End-to-end runs of TA-EVRP with different planners (MILP, mTSP, Heuristic) and T
 | `results/ta_evrp_results.csv` | PSL (K=1–4) | dijkstra, sarsa, dqn, a2c, ppo | off | `config/ta_evrp/sweep_ta_evrp.yaml` |
 | `results/ta_evrp_results_svc.csv` | SVC | dijkstra, dsp, sarsa_svc, dqn_svc, a2c_svc, ppo_svc | off | `sweep_dqn_svc.yaml` + `sweep_sarsa_a2c_ppo_svc.yaml` |
 | `results/ta_evrp_results_raps.csv` | PSL (K=1–4) + SVC | all PSL + all SVC agents | **on** | `config/ta_evrp/sweep_raps.yaml` |
+| `results/ta_evrp_results_td.csv` | TD (3-period) | dijkstra, dsp, sarsa, dqn, a2c, ppo | **on** | `config/ta_evrp/sweep_td.yaml` |
+
+TD sweep: 15 rows (3 baselines × 3 nets + SARSA × 3 nets + DQN/A2C/PPO × 2 nets — no DQN/A2C/PPO policy trained on N1 under TD). Uses `td_milp` planner and `raps_enabled: true`.
 
 Analysis and visualisations:
-- `notebooks/ta_evrp_sweep_analysis.ipynb` — PSL and SVC results, RAPS off
+- `notebooks/ta_evrp_sweep_analysis.ipynb` — PSL, SVC, and **TD** results (RAPS on for TD; off for PSL/SVC sections)
 - `notebooks/ta_evrp_sweep_raps_analysis.ipynb` — full RAPS sweep (PSL K=1–4 + SVC, 270 runs)
 
 ---
@@ -311,3 +320,7 @@ Analysis and visualisations:
 | Range-Aware Path Switching (RAPS) — `trsp.raps_enabled` toggle + per-leg surplus check | ✅ Done |
 | RAPS sweep (PSL K=1–4 + SVC, all agents × 3 planners × 3 networks = 270 runs) | ✅ Done |
 | `ta_evrp_sweep_raps_analysis.ipynb` — analysis notebook for RAPS results | ✅ Done |
+| TD (SARSA/DQN/A2C/PPO) policies trained on N1–N3 under 3-period congestion (TRSP standalone) | ✅ Done |
+| TD sweep (15 rows: td_milp planner + RAPS, all agents × available nets) → `ta_evrp_results_td.csv` | ✅ Done |
+| `ta_evrp_sweep_analysis.ipynb` TD section added (agent bars, % vs Dijkstra, heatmaps) | ✅ Done |
+| `trsp_testing_analysis.ipynb` Aggregated Results extended to cover TD traffic condition | ✅ Done |
