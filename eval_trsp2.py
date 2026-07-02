@@ -19,19 +19,44 @@ from dronesim.trsp.agents.a2c_psl      import A2CAgent
 from dronesim.trsp.agents.a2c_svc      import A2CSVCAgent
 from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
 from dronesim.trsp.agents.dsp          import DSPAgent
+from dronesim.trsp.agents.dsp_ped      import DSPPEDAgent
 from dronesim.trsp.agents.dqn_psl      import DQNAgent
 from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
 from dronesim.trsp.agents.ppo_psl      import PPOAgent
 from dronesim.trsp.agents.ppo_svc      import PPOSVCAgent
 from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
 from dronesim.trsp.agents.sarsa_svc    import SARSASVCAgent
+from dronesim.trsp.agents.sarsa_ped    import SARSAPEDAgent
+from dronesim.trsp.agents.dqn_ped      import DQNPEDAgent
 from dronesim.trsp.traffic import PSLTrafficModel, TDTrafficModel
+from dronesim.trsp.ped_speed import weidmann_speed
 
 INF = 100000
 
+# Cache of sidewalk lane footprints (m²) for the Weidmann ped-speed override; lane
+# length/width are static within a SUMO session.
+_LANE_AREA_CACHE: dict[str, float] = {}
+
+
+def _ped_sidewalk_speed(lane_id, ugv_speed, ped_params, exclude_self=False):
+    """Robot Weidmann speed (m/s) on a sidewalk lane from live TraCI person counts.
+
+    `ped_params` = (gamma, density_jam, v_min). Mirrors SumoTRSPEnv._weidmann_speed so
+    eval simulates the same density-coupled dynamics the agents were trained under.
+    """
+    gamma, density_jam, v_min = ped_params
+    n = len(traci.edge.getLastStepPersonIDs(traci.lane.getEdgeID(lane_id)))
+    if exclude_self:
+        n = max(n - 1, 0)
+    area = _LANE_AREA_CACHE.get(lane_id)
+    if area is None:
+        area = traci.lane.getLength(lane_id) * traci.lane.getWidth(lane_id)
+        _LANE_AREA_CACHE[lane_id] = area
+    return weidmann_speed(n, area, ugv_speed, gamma, density_jam, v_min)
+
 
 def get_traffic_model(config: dict) -> str:
-    """Return 'td', 'svc', 'psl', or 'none'."""
+    """Return 'td', 'svc', 'ped', 'psl', or 'none'."""
     traffic_cfg = config.get('traffic')
     if traffic_cfg is None:
         return 'none'
@@ -40,19 +65,34 @@ def get_traffic_model(config: dict) -> str:
     model = traffic_cfg.get('model', 'psl')
     if model == 'svc':
         return 'svc'
+    if model == 'ped':
+        return 'ped'
     if model == 'td':
         return 'td'
     return 'psl'
 
 
 def _neighbor_speeds_from_traci(curr_node, nb_node_idxs, G_dir, idx2node,
-                                 ugv_speed: float, num_actions: int) -> np.ndarray:
-    """Query TraCI for mean speed on each outgoing edge; normalize by ugv_speed."""
+                                 ugv_speed: float, num_actions: int,
+                                 ped_mode: bool = False, ped_params=None) -> np.ndarray:
+    """Query TraCI for each outgoing edge's speed; normalize by ugv_speed.
+
+    For ped mode with the override active (`ped_params` given) this matches the training
+    env: the neighbour sidewalk speed is the robot's Weidmann density-based speed, not the
+    pedestrian mean speed — so the agent observes the speed it will actually get.
+    """
     speeds = []
     for nb_idx in nb_node_idxs:
         nb_node = idx2node[nb_idx]
-        eid = G_dir.edges[curr_node, nb_node]['id']
-        raw = traci.edge.getLastStepMeanSpeed(eid)
+        edge_data = G_dir.edges[curr_node, nb_node]
+        if ped_mode:
+            lane_id = edge_data.get('sidewalk_lane')
+            if ped_params is not None:
+                raw = _ped_sidewalk_speed(lane_id, ugv_speed, ped_params) if lane_id else ugv_speed
+            else:
+                raw = traci.lane.getLastStepMeanSpeed(lane_id) if lane_id else ugv_speed
+        else:
+            raw = traci.edge.getLastStepMeanSpeed(edge_data['id'])
         raw = ugv_speed if raw < 0 else raw
         speeds.append(min(raw / ugv_speed, 2.0))
     speeds += [1.0] * (num_actions - len(speeds))
@@ -67,9 +107,9 @@ def get_centroid(shape):
     return np.mean(x_coords), np.mean(y_coords)
 
 
-def build_graph(net_path):
+def build_graph(net_path, ped_mode=False):
     net_path = net_path.replace('.sumocfg', '.net.xml')
-    net = sumolib.net.readNet(net_path, withPedestrianConnections=False)
+    net = sumolib.net.readNet(net_path, withPedestrianConnections=ped_mode)
 
     G = nx.DiGraph()
     junc2nodes_map = defaultdict(list)
@@ -77,6 +117,8 @@ def build_graph(net_path):
     for edge in net.getEdges():
         edge_id = edge.getID()
         if edge_id.startswith(':'):
+            continue
+        if ped_mode and not any(lane.allows('pedestrian') for lane in edge.getLanes()):
             continue
 
         from_node = edge.getFromNode()
@@ -98,7 +140,17 @@ def build_graph(net_path):
         if to_node.getID() not in junc2nodes_map[to_node.getID()]:
             junc2nodes_map[to_node.getID()].append(to_node.getID())
 
-        G.add_edge(from_node.getID(), to_node.getID(), id=edge_id, length=edge.getLength(), type='road')
+        if ped_mode:
+            sidewalk_lane = next(
+                (lane.getID() for lane in edge.getLanes() if lane.allows('pedestrian')),
+                None,
+            )
+            G.add_edge(from_node.getID(), to_node.getID(),
+                       id=edge_id, length=edge.getLength(), type='road',
+                       sidewalk_lane=sidewalk_lane)
+        else:
+            G.add_edge(from_node.getID(), to_node.getID(),
+                       id=edge_id, length=edge.getLength(), type='road')
 
     edge_ids = [data['id'] for _, _, data in G.edges(data=True)]
     G_und = G.to_undirected()
@@ -161,7 +213,7 @@ def select_nodes(num_nodes, seed=42, n_pairs=100):
 def plan_route(agent, action_mode, start_node, target_node, time_slot,
                G, G_dir, idx2node, node2idx, junc2idx, sg_pairs,
                all_shortest_path_lengths_dir, max_steps, num_actions,
-               traffic_model='psl', ugv_speed=None):
+               traffic_model='psl', ugv_speed=None, ped_mode=False, ped_params=None):
     """Plan a graph-level route using the agent. Returns (route_edges, error_str_or_None)."""
     curr_step = 0
     curr_pos = node2idx[start_node]
@@ -201,9 +253,10 @@ def plan_route(agent, action_mode, start_node, target_node, time_slot,
                 'steps2dest': np.array(steps2dest, dtype=np.float32),
                 'sg_pair_idx': sg_idx,
             }
-            if traffic_model == 'svc':
+            if traffic_model in ('svc', 'ped'):
                 obs['neighbor_speeds'] = _neighbor_speeds_from_traci(
-                    curr_node, nb_node_idxs, G_dir, idx2node, ugv_speed, num_actions
+                    curr_node, nb_node_idxs, G_dir, idx2node, ugv_speed, num_actions,
+                    ped_mode=ped_mode, ped_params=ped_params,
                 )
             else:  # 'psl' or 'td' — both expose time_slot ∈ {0..K-1}
                 obs['time_slot'] = time_slot
@@ -269,7 +322,8 @@ def init_baseline_csv(test_dir, suffix):
 
 
 def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, config,
-                   sumo_config_cmd, psl_model, traffic_model, results_path, desc='Eval'):
+                   sumo_config_cmd, psl_model, traffic_model, results_path, desc='Eval',
+                   fleet_type='ev', dr_cfg=None):
     """
     Run all 100 OG pairs sequentially within a single continuous SUMO session.
     SUMO is only restarted when the simulation clock hits max_time before all pairs finish.
@@ -289,10 +343,27 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
 
     ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
     psl_active = traffic_model in ('psl', 'td')  # both use psl_model.get_slot / get_speed
+    ped_mode = fleet_type == 'delivery_robot'
+    adr_vtype_id = 'adr_vtype'
     n_pairs = len(selected_idxs) - 1
+
+    # Weidmann ped-speed override (matches the training env). When enabled, ped_params
+    # feeds both the observation (neighbor speeds) and the robot's per-step speed.
+    pso = config.get('traffic', {}).get('ped_speed_override', {})
+    ped_override = ped_mode and bool(pso.get('enabled', False))
+    ped_params = ((pso.get('gamma', 1.913), pso.get('density_jam', 5.4),
+                   pso.get('v_min', 0.1)) if ped_override else None)
 
     def start_sumo():
         traci.start(sumo_config_cmd)
+        if ped_mode and dr_cfg is not None:
+            traci.vehicletype.copy('DEFAULT_PEDTYPE', adr_vtype_id)
+            traci.vehicletype.setWidth(adr_vtype_id, dr_cfg.get('width', 1.0))
+            traci.vehicletype.setLength(adr_vtype_id, dr_cfg.get('length', 0.8))
+            traci.vehicletype.setSpeedFactor(adr_vtype_id, dr_cfg.get('max_speed_factor', 1.0))
+            # Cap the ADR at the configured robot speed (DEFAULT_PEDTYPE's inherited
+            # maxSpeed is a large SUMO default ~10 m/s) — same as SumoTRSPEnv.
+            traci.vehicletype.setMaxSpeed(adr_vtype_id, ugv_speed)
         t = 0.0
         while t < warmup_time:
             traci.simulationStep()
@@ -312,7 +383,8 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
             agent, action_mode, start_node, target_node, current_slot,
             G, G_dir, idx2node, node2idx, junc2idx, sg_pairs,
             all_shortest_path_lengths_dir, max_steps, num_actions,
-            traffic_model=traffic_model, ugv_speed=ugv_speed,
+            traffic_model=traffic_model, ugv_speed=ugv_speed, ped_mode=ped_mode,
+            ped_params=ped_params,
         )
 
         if err:
@@ -332,16 +404,21 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
             traffic_segment_start = -1
             traffic_speed_start = -1.0
 
-        veh_id = f"ugv_{pair_idx}"
-        route_id = f"route_{pair_idx}"
+        entity_id = f"ugv_{pair_idx}"
         failed_error = 'NA'
 
         try:
-            traci.route.add(route_id, route_edges)
-            depart_spd = traffic_speed_start if (psl_active and traffic_speed_start > 0) else 'max'
-            traci.vehicle.add(veh_id, route_id, departSpeed=depart_spd)
-            if psl_active and traffic_speed_start > 0:
-                traci.vehicle.setSpeed(veh_id, traffic_speed_start)
+            if ped_mode:
+                traci.person.add(entity_id, route_edges[0], pos=0.0,
+                                 depart=-1, typeID=adr_vtype_id)
+                traci.person.appendWalkingStage(entity_id, route_edges, arrivalPos=-1)
+            else:
+                route_id = f"route_{pair_idx}"
+                depart_spd = traffic_speed_start if (psl_active and traffic_speed_start > 0) else 'max'
+                traci.route.add(route_id, route_edges)
+                traci.vehicle.add(entity_id, route_id, departSpeed=depart_spd)
+                if psl_active and traffic_speed_start > 0:
+                    traci.vehicle.setSpeed(entity_id, traffic_speed_start)
             traci.simulationStep()
             sim_time = traci.simulation.getTime()
         except traci.TraCIException:
@@ -349,17 +426,28 @@ def run_evaluation(agent, action_mode, selected_idxs, idx2node, graph_info, conf
                               warmup_time, -1, -1, -1, -1, -1, -1, -1, -1, "Route can't be added")
             continue
 
-        while veh_id in traci.vehicle.getIDList() and sim_time < max_time:
-            if psl_active:
-                slot = psl_model.get_slot(sim_time)
-                road_id = traci.vehicle.getRoadID(veh_id)
-                if not road_id.startswith(':') and road_id in psl_model.profiles:
-                    traci.vehicle.setSpeed(veh_id, psl_model.get_speed(road_id, slot))
-            traci.simulationStep()
-            sim_time = traci.simulation.getTime()
-
-        if veh_id in traci.vehicle.getIDList():
-            failed_error = 'Timeout'
+        if ped_mode:
+            while entity_id in traci.person.getIDList() and sim_time < max_time:
+                if ped_params is not None:
+                    lane_id = traci.person.getLaneID(entity_id)
+                    if lane_id and not lane_id.startswith(':'):  # skip internal/junction lanes
+                        traci.person.setSpeed(entity_id, _ped_sidewalk_speed(
+                            lane_id, ugv_speed, ped_params, exclude_self=True))
+                traci.simulationStep()
+                sim_time = traci.simulation.getTime()
+            if entity_id in traci.person.getIDList():
+                failed_error = 'Timeout'
+        else:
+            while entity_id in traci.vehicle.getIDList() and sim_time < max_time:
+                if psl_active:
+                    slot = psl_model.get_slot(sim_time)
+                    road_id = traci.vehicle.getRoadID(entity_id)
+                    if not road_id.startswith(':') and road_id in psl_model.profiles:
+                        traci.vehicle.setSpeed(entity_id, psl_model.get_speed(road_id, slot))
+                traci.simulationStep()
+                sim_time = traci.simulation.getTime()
+            if entity_id in traci.vehicle.getIDList():
+                failed_error = 'Timeout'
 
         total_time_taken = sim_time - tour_start_time
 
@@ -398,9 +486,13 @@ def main():
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
 
+    fleet_type = config['fleet'].get('type', 'ev')
+    ped_mode = fleet_type == 'delivery_robot'
+    dr_cfg = config['fleet'].get('delivery_robot', {}) if ped_mode else None
+
     net_path = config['net']['net_path']
     print(f"Building graph from {net_path} ...")
-    graph_info = build_graph(net_path)
+    graph_info = build_graph(net_path, ped_mode=ped_mode)
     idx2node = graph_info['idx2node']
     num_nodes = len(idx2node)
 
@@ -409,6 +501,8 @@ def main():
     print(f"Selected 101 nodes ({num_nodes} total) → 100 evaluation pairs")
 
     traffic_model = get_traffic_model(config)
+    if ped_mode:
+        traffic_model = 'ped'
     edge_ids = graph_info['edge_ids']
     psl_model = None
     if traffic_model == 'psl':
@@ -431,7 +525,10 @@ def main():
             f"T1={tcfg['T1']}s  T2={tcfg['T2']}s"
         )
     elif traffic_model == 'svc':
-        print(f"Traffic model: SVC  route_file={config['traffic']['route_file']}")
+        route_file = config.get('traffic', {}).get('route_file', 'from sumocfg')
+        print(f"Traffic model: SVC  route_file={route_file}")
+    elif traffic_model == 'ped':
+        print("Traffic model: PED  (live sidewalk pedestrian speeds)")
     else:
         print("Traffic model: DISABLED")
 
@@ -447,8 +544,8 @@ def main():
         '--no-step-log',
         '--no-duration-log',
     ]
-    if traffic_model == 'svc':
-        sumo_config_cmd += ['--route-files', config['traffic']['route_file']]
+    # if traffic_model == 'svc':
+    #     sumo_config_cmd += ['--route-files', config['traffic']['route_file']]
 
     ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
 
@@ -458,10 +555,14 @@ def main():
         policy_agent = DQNAgent(config)
     elif algo == 'dqn_svc':
         policy_agent = DQNSVCAgent(config)
+    elif algo == 'dqn_ped':
+        policy_agent = DQNPEDAgent(config)
     elif algo == 'sarsa':
         policy_agent = SARSAAgent(config)
     elif algo == 'sarsa_svc':
         policy_agent = SARSASVCAgent(config)
+    elif algo == 'sarsa_ped':
+        policy_agent = SARSAPEDAgent(config)
     elif algo == 'ppo':
         policy_agent = PPOAgent(config)
     elif algo == 'ppo_svc':
@@ -473,10 +574,17 @@ def main():
     elif algo == 'dsp':
         policy_agent = DSPAgent(0, graph_info['G_dir'], graph_info['node2idx'],
                                 graph_info['idx2node'], ugv_speed)
+    elif algo == 'dsp_ped':
+        pso = config.get('traffic', {}).get('ped_speed_override', {})
+        policy_agent = DSPPEDAgent(0, graph_info['G_dir'], graph_info['node2idx'],
+                                   graph_info['idx2node'], ugv_speed,
+                                   gamma=pso.get('gamma', 1.913),
+                                   density_jam=pso.get('density_jam', 5.4),
+                                   v_min=pso.get('v_min', 0.1))
     else:
         policy_agent = get_agent(config['agent'], 0)
     action_mode = config['agent'].get('action_mode', 'neighbor_index')
-    if algo == 'dsp':
+    if algo in ('dsp', 'dsp_ped'):
         action_mode = 'node_id'
 
     policy_dir = f"runs/trsp/{args.policy}"
@@ -485,12 +593,16 @@ def main():
     test_config['test'] = {'mode': 'sequential_eval'}
     results_path = init_results(test_dir, test_config)
 
+    run_kwargs = dict(
+        selected_idxs=selected_idxs, idx2node=idx2node, graph_info=graph_info,
+        config=config, sumo_config_cmd=sumo_config_cmd, psl_model=psl_model,
+        traffic_model=traffic_model, fleet_type=fleet_type, dr_cfg=dr_cfg,
+    )
+
     print(f"\n[Policy: {args.policy}] → {test_dir}")
     t0 = time.time()
-    run_evaluation(
-        policy_agent, action_mode, selected_idxs, idx2node, graph_info, config,
-        sumo_config_cmd, psl_model, traffic_model, results_path, desc=args.policy
-    )
+    run_evaluation(policy_agent, action_mode, results_path=results_path,
+                   desc=args.policy, **run_kwargs)
     print(f"Policy eval done in {timedelta(seconds=int(time.time() - t0))} → {results_path}")
 
     # --- Dijkstra baseline evaluation ---
@@ -499,23 +611,28 @@ def main():
 
     print(f"\n[Dijkstra] → {dij_results_path}")
     t0 = time.time()
-    run_evaluation(
-        dij_agent, 'neighbor_index', selected_idxs, idx2node, graph_info, config,
-        sumo_config_cmd, psl_model, traffic_model, dij_results_path, desc='Dijkstra'
-    )
+    run_evaluation(dij_agent, 'neighbor_index', results_path=dij_results_path,
+                   desc='Dijkstra', **run_kwargs)
     print(f"Dijkstra eval done in {timedelta(seconds=int(time.time() - t0))} → {dij_results_path}")
 
     # --- DSP baseline evaluation ---
-    dsp_agent = DSPAgent(0, graph_info['G_dir'], graph_info['node2idx'],
-                         graph_info['idx2node'], ugv_speed)
+    # EV: vehicular DSP; ped: DSP-PED (edge weights use the robot's Weidmann sidewalk speed).
+    if not ped_mode:
+        dsp_agent = DSPAgent(0, graph_info['G_dir'], graph_info['node2idx'],
+                             graph_info['idx2node'], ugv_speed)
+    else:
+        pso = config.get('traffic', {}).get('ped_speed_override', {})
+        dsp_agent = DSPPEDAgent(0, graph_info['G_dir'], graph_info['node2idx'],
+                                graph_info['idx2node'], ugv_speed,
+                                gamma=pso.get('gamma', 1.913),
+                                density_jam=pso.get('density_jam', 5.4),
+                                v_min=pso.get('v_min', 0.1))
     dsp_results_path = init_baseline_csv(test_dir, 'dsp')
 
     print(f"\n[DSP] → {dsp_results_path}")
     t0 = time.time()
-    run_evaluation(
-        dsp_agent, 'node_id', selected_idxs, idx2node, graph_info, config,
-        sumo_config_cmd, psl_model, traffic_model, dsp_results_path, desc='DSP'
-    )
+    run_evaluation(dsp_agent, 'node_id', results_path=dsp_results_path,
+                   desc='DSP', **run_kwargs)
     print(f"DSP eval done in {timedelta(seconds=int(time.time() - t0))} → {dsp_results_path}")
 
 

@@ -2,26 +2,31 @@ agent:
   algo: dijkstra
   policy: dijkstra
 fleet:
-  max_speed: 110
+  type: delivery_robot # delivery_robot | ev
+  max_speed: 5          # km/h
+  delivery_robot:
+    width: 1.8            # metres
+    length: 0.8           # metres
+    max_speed_factor: 1        # multiplier of default pedestrian max_speed
 net:
   max_degree: 5
-  net_path: data/grid_road/grid_road.sumocfg
+  net_path: data/grid_road_ped/grid_road_ped.sumocfg
 simulation:
   max_steps: 50
   max_time: 2
   random_sg_pair: true
   render_mode: human
-  warm_up_time: 0
+  warm_up_time: 60
 sumo:
   delay: 0
   step_length: 1.0
-  traffic_scale: 0
+  traffic_scale: 1
 traffic:
-  T1: 360
-  T2: 720
-  T: 1080
-  enabled: true
-  model: td
-  seed: 42
-  v_congestion: 30.0
-  v_freeflow: 90.0
+  model: ped               # live sidewalk pedestrian speeds (delivery robot); svc = vehicular
+  ped_speed_override:      # couple sidewalk pedestrian crowding to robot speed (Weidmann)
+    enabled: true
+    gamma: 0.02            # sensitivity: tuned down from Weidmann's 1.913 because this
+                           #   network's sidewalks stay sparse (max ~0.05 ped/m²); at
+                           #   0.02 → busy sidewalks ~30-60% of free-flow, empty ~100%
+    density_jam: 5.4       # ped/m² jam density (v → v_min); ~irrelevant at these densities
+    v_min: 0.1             # m/s floor to avoid permanent stall

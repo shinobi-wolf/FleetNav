@@ -26,7 +26,9 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
     psl         = traffic_cfg.get("psl", {})
     td          = traffic_cfg.get("td", {})
     svc         = traffic_cfg.get("svc", {})
+    fleet       = ta.get("fleet", {})
     model       = str(traffic_cfg.get("model", "psl"))
+    ped_mode    = model == "ped" or fleet.get("type") == "delivery_robot"
     sumo        = ta.get("sumo", {})
     out         = ta.get("output", {})
 
@@ -36,8 +38,16 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
     svc_time_h   = float(ugv.get("customer_service_time_h", 0.0))
     recharge_h   = float(ugv.get("recharge_time_h", 0.0))
 
+    # Delivery robots walk at fleet.max_speed (km/h); other fleets drive at free_flow_speed.
+    ugv_speed_ms = float(fleet.get("max_speed", speed_kmh)) / 3.6 if ped_mode else speed_kmh / 3.6
+
     # Speed-scale bounds for the renderer and the enabled flag depend on the model.
-    if model == "td":
+    if ped_mode:
+        # ped speeds are set live (Weidmann); PSL model disabled like svc.
+        traffic_enabled = False
+        v_min_ms = float(traffic_cfg.get("ped_speed_override", {}).get("v_min", 0.1))
+        v_max_ms = ugv_speed_ms
+    elif model == "td":
         traffic_enabled = bool(td.get("enabled", True))
         v_min_ms = float(td.get("v_congestion_kmh", 15.0)) / 3.6
         v_max_ms = float(td.get("v_freeflow_kmh", 50.0)) / 3.6
@@ -52,11 +62,12 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
             "trsp": ta.get("trsp", {}),
         },
         "net": ta.get("network", {}),
+        "fleet": fleet,
         "instance": {
             "fleet_size":              int(ugv.get("fleet_size", 3)),
             "customer_count":          int(tasks.get("customer_count", 10)),
             "ugv_range":               battery_L * 1000.0 / consume_L_km,  # m
-            "ugv_speed":               speed_kmh / 3.6,                     # m/s
+            "ugv_speed":               ugv_speed_ms,                        # m/s
             "customer_service_time_s": svc_time_h * 3600.0,                # s
             "recharge_time_s":         recharge_h * 3600.0,                # s
             "runtime_refuel":          bool(ugv.get("runtime_refuel", False)),
@@ -72,6 +83,7 @@ def _build_sim_cfg(ta: dict[str, Any]) -> dict[str, Any]:
             "v_max":         v_max_ms,   # m/s — renderer speed-color ceiling
             "speed_step":    float(psl.get("speed_step_kmh", 60.0)) / 3.6,  # m/s
             "seed":          int(psl.get("seed", 42)),
+            "ped_speed_override": traffic_cfg.get("ped_speed_override", {}),
         },
         "hps": {
             "stop_time": float(sumo.get("max_time_h", 12.0)) * 3600.0,  # s — SUMO wall-clock budget
@@ -113,10 +125,14 @@ class Instance:
         trsp        = ta_config.get("trsp", {})
         net         = ta_config.get("network", {})
         sumo        = ta_config.get("sumo", {})
+        fleet       = ta_config.get("fleet", {})
         traffic_cfg = ta_config.get("traffic", {})
         psl         = traffic_cfg.get("psl", {})
         td          = traffic_cfg.get("td", {})
         traffic_model = str(traffic_cfg.get("model", "psl"))
+
+        # Delivery-robot (ADR) runs walk on sidewalks and use live pedestrian speeds.
+        self.ped_mode: bool = traffic_model == "ped" or fleet.get("type") == "delivery_robot"
 
         # ── Flat identifiers ─────────────────────────────────────────────────
         self.planner_name:    str           = str(evrp.get("planner", "milp"))
@@ -124,7 +140,8 @@ class Instance:
         self.policy_id:       Optional[str] = trsp.get("policy_id") or None
         self.net_path:        str           = str(net.get("net_path", ""))
         self.traffic_model:   str           = traffic_model
-        if traffic_model == "svc":
+        if self.ped_mode or traffic_model == "svc":
+            # live-speed models: report as enabled (speeds come from SUMO state, not PSL)
             self.traffic_enabled: bool = True
         elif traffic_model == "td":
             self.traffic_enabled = bool(td.get("enabled", True))
@@ -133,7 +150,7 @@ class Instance:
         self.sim_type:        str           = str(sumo.get("simulator", "concurrent"))
 
         # ── Three submodules ─────────────────────────────────────────────────
-        self._network  = Network(self.net_path)
+        self._network  = Network(self.net_path, ped_mode=self.ped_mode)
         self._traffic  = Traffic(ta_config, self._network.edge_ids)
         self._problem  = Problem(ta_config, self._network)
 

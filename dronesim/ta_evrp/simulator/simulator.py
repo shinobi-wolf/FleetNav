@@ -15,6 +15,8 @@ try:
 except ImportError as e:
     raise ImportError(f"traci required for simulation: {e}") from e
 
+from dronesim.trsp.ped_speed import weidmann_speed
+
 from .renderer import PygameRenderer
 
 if TYPE_CHECKING:
@@ -97,6 +99,23 @@ class Simulator:
         # setMaxSpeed/setSpeed; svc instead spawns background vehicles.
         self._psl_like = self.traffic_model in ("psl", "td")
 
+        # ── Pedestrian (delivery-robot) mode ─────────────────────────────────
+        # Robots walk on sidewalks as SUMO `person` entities; their speed is set live
+        # per step from local pedestrian crowding (Weidmann), never via PSL slots.
+        self._ped = bool(getattr(instance, "ped_mode", self.traffic_model == "ped"))
+        fleet     = sim_cfg.get("fleet", {})
+        dr_cfg    = fleet.get("delivery_robot", {})
+        self._adr_vtype_id     = "adr_vtype"
+        self._dr_width         = float(dr_cfg.get("width", 1.0))
+        self._dr_length        = float(dr_cfg.get("length", 0.8))
+        self._dr_speed_factor  = float(dr_cfg.get("max_speed_factor", 1.0))
+        pso                    = sim_cfg["traffic"].get("ped_speed_override", {})
+        self._ped_override     = self._ped and bool(pso.get("enabled", False))
+        self._ped_gamma        = float(pso.get("gamma", 1.913))
+        self._ped_density_jam  = float(pso.get("density_jam", 5.4))
+        self._ped_v_min        = float(pso.get("v_min", 0.1))
+        self._lane_area_cache: dict[str, float] = {}
+
         self._net            = instance.network.net    # sumolib Net
         self._routing_graph  = instance.network.graph  # nx.DiGraph (edge attrs: id, length)
         self._traffic: "PSLTrafficModel" = instance.traffic  # already built
@@ -143,9 +162,21 @@ class Simulator:
             sumo_cmd += ["--delay", str(self.gui_delay)]
         if self.traffic_model == "svc" and self.svc_route_file:
             sumo_cmd += ["--route-files", self.svc_route_file]
+        # ped mode: background pedestrians/vehicles come from the .sumocfg route-files.
 
         traci.start(sumo_cmd)
         sim_time     = 0.0
+
+        # Register the ADR vehicle type so delivery robots walk at the configured
+        # dimensions/speed (mirrors SumoTRSPEnv._register_adr_vtype). The vtype's
+        # capped max speed is read back as the robot free-flow speed used by Weidmann.
+        if self._ped:
+            traci.vehicletype.copy("DEFAULT_PEDTYPE", self._adr_vtype_id)
+            traci.vehicletype.setWidth(self._adr_vtype_id, self._dr_width)
+            traci.vehicletype.setLength(self._adr_vtype_id, self._dr_length)
+            traci.vehicletype.setSpeedFactor(self._adr_vtype_id, self._dr_speed_factor)
+            traci.vehicletype.setMaxSpeed(self._adr_vtype_id, self.ugv_max_speed)
+            self.ugv_max_speed = traci.vehicletype.getMaxSpeed(self._adr_vtype_id)
 
         # Warm up background traffic before spawning delivery vehicles
         while sim_time < self.warmup_time:
@@ -222,12 +253,14 @@ class Simulator:
 
                 traci_veh_id = f"ev_{route.vehicle_id}_leg0"
                 route_id     = f"route_{route.vehicle_id}_leg0"
-                traci.route.add(route_id, edge_route)
                 depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
-                traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
-                traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[route.vehicle_id % len(_SUMO_COLORS)])
+                self._add_entity(
+                    traci_veh_id, route_id, edge_route, depart_speed,
+                    _SUMO_COLORS[route.vehicle_id % len(_SUMO_COLORS)],
+                )
                 vs.curr_traci_veh_id = traci_veh_id
                 vs.spawn_time_s = sim_time
+                vs.inserted     = False
 
                 if self.render_mode != "quiet":
                     print(
@@ -259,8 +292,19 @@ class Simulator:
                             traci.edge.setMaxSpeed(eid, traffic.get_speed(eid, next_slot))
                 traffic_slot = next_slot
 
-                active_traci_ids  = set(traci.vehicle.getIDList())
-                arrived_this_step = set(traci.simulation.getArrivedIDList())
+                if self._ped:
+                    active_traci_ids = set(traci.person.getIDList())
+                    # Persons have no getArrivedIDList — a robot that has appeared
+                    # (inserted) and is no longer in the list has finished its walk.
+                    arrived_this_step = {
+                        vs.curr_traci_veh_id
+                        for vs in veh_states.values()
+                        if vs.status == "enroute" and vs.inserted
+                        and vs.curr_traci_veh_id not in active_traci_ids
+                    }
+                else:
+                    active_traci_ids  = set(traci.vehicle.getIDList())
+                    arrived_this_step = set(traci.simulation.getArrivedIDList())
 
                 # Detect SUMO vehicles that were spawned but never appeared or arrived.
                 # SUMO silently drops vehicles whose departure edge is invalid for the
@@ -332,9 +376,23 @@ class Simulator:
 
                     if traci_veh_id in active_traci_ids:
                         vs.inserted = True
-                        new_edge = traci.vehicle.getRoadID(traci_veh_id)
-                        vehicle_positions[veh_id] = traci.vehicle.getPosition(traci_veh_id)
-                        vehicle_speeds[veh_id]    = traci.vehicle.getSpeed(traci_veh_id)
+                        if self._ped:
+                            new_edge = traci.person.getRoadID(traci_veh_id)
+                            vehicle_positions[veh_id] = traci.person.getPosition(traci_veh_id)
+                            vehicle_speeds[veh_id]    = traci.person.getSpeed(traci_veh_id)
+                            # Couple the robot's speed to live sidewalk crowding (Weidmann),
+                            # matching the override the ped policy was trained/evaluated under.
+                            if self._ped_override:
+                                lane_id = traci.person.getLaneID(traci_veh_id)
+                                if lane_id and not lane_id.startswith(":"):
+                                    traci.person.setSpeed(
+                                        traci_veh_id,
+                                        self._weidmann_ped_speed(lane_id, exclude_self=True),
+                                    )
+                        else:
+                            new_edge = traci.vehicle.getRoadID(traci_veh_id)
+                            vehicle_positions[veh_id] = traci.vehicle.getPosition(traci_veh_id)
+                            vehicle_speeds[veh_id]    = traci.vehicle.getSpeed(traci_veh_id)
                         edge_changed = new_edge != vs.curr_net_edge
                         vs.curr_net_edge = new_edge
                         if self._psl_like and (edge_changed or slot_changed) and not new_edge.startswith(":"):
@@ -504,6 +562,48 @@ class Simulator:
     # Leg spawning
     # ------------------------------------------------------------------
 
+    def _add_entity(
+        self,
+        entity_id: str,
+        route_id: str,
+        edge_route: list[str],
+        depart_speed: float,
+        color: tuple,
+    ) -> None:
+        """Spawn one delivery entity on `edge_route`.
+
+        Vehicles drive a SUMO route; delivery robots walk the edges as a SUMO
+        `person` (ADR vtype) — mirroring the TRSP eval pipeline so the ped policy
+        drives the same entity it was trained on.
+        """
+        if self._ped:
+            traci.person.add(entity_id, edge_route[0], pos=0.0, depart=-1, typeID=self._adr_vtype_id)
+            traci.person.appendWalkingStage(entity_id, list(edge_route), arrivalPos=-1)
+            traci.person.setSpeed(entity_id, self.ugv_max_speed)
+            traci.person.setColor(entity_id, color)
+        else:
+            traci.route.add(route_id, edge_route)
+            traci.vehicle.add(entity_id, route_id, departSpeed=depart_speed)
+            traci.vehicle.setColor(entity_id, color)
+
+    def _weidmann_ped_speed(self, lane_id: str, exclude_self: bool = False) -> float:
+        """Robot walking speed (m/s) on a sidewalk from live pedestrian crowding.
+
+        Shares `dronesim.trsp.ped_speed.weidmann_speed` with the training env and
+        eval pipeline so plan, simulate, and train use one flow–speed relationship.
+        """
+        n = len(traci.edge.getLastStepPersonIDs(traci.lane.getEdgeID(lane_id)))
+        if exclude_self:
+            n = max(n - 1, 0)
+        area = self._lane_area_cache.get(lane_id)
+        if area is None:
+            area = traci.lane.getLength(lane_id) * traci.lane.getWidth(lane_id)
+            self._lane_area_cache[lane_id] = area
+        return weidmann_speed(
+            n, area, self.ugv_max_speed,
+            self._ped_gamma, self._ped_density_jam, self._ped_v_min,
+        )
+
     def _spawn_next_leg(
         self,
         veh_id: int,
@@ -549,12 +649,14 @@ class Simulator:
         leg_idx      = vs.curr_stop_idx
         traci_veh_id = f"ev_{veh_id}_leg{leg_idx}"
         route_id     = f"route_{veh_id}_leg{leg_idx}"
-        traci.route.add(route_id, edge_route)
         depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
-        traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
-        traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
+        self._add_entity(
+            traci_veh_id, route_id, edge_route, depart_speed,
+            _SUMO_COLORS[veh_id % len(_SUMO_COLORS)],
+        )
         vs.curr_traci_veh_id = traci_veh_id
         vs.spawn_time_s = sim_time
+        vs.inserted     = False
 
         if self.render_mode != "quiet":
             curr = route.stops[vs.curr_stop_idx]
@@ -593,12 +695,14 @@ class Simulator:
         vs._emg_serial  += 1
         traci_veh_id = f"ev_{veh_id}_emg{vs._emg_serial}d"
         route_id     = f"route_{veh_id}_emg{vs._emg_serial}d"
-        traci.route.add(route_id, edge_route)
         depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
-        traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
-        traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
+        self._add_entity(
+            traci_veh_id, route_id, edge_route, depart_speed,
+            _SUMO_COLORS[veh_id % len(_SUMO_COLORS)],
+        )
         vs.curr_traci_veh_id = traci_veh_id
         vs.spawn_time_s = sim_time
+        vs.inserted     = False
 
         if self.render_mode != "quiet":
             print(
@@ -636,12 +740,14 @@ class Simulator:
         vs._emg_serial  += 1
         traci_veh_id = f"ev_{veh_id}_emg{vs._emg_serial}r"
         route_id     = f"route_{veh_id}_emg{vs._emg_serial}r"
-        traci.route.add(route_id, edge_route)
         depart_speed = traffic.get_speed(edge_route[0], traffic_slot) if self._psl_like else 0
-        traci.vehicle.add(traci_veh_id, route_id, departSpeed=depart_speed)
-        traci.vehicle.setColor(traci_veh_id, _SUMO_COLORS[veh_id % len(_SUMO_COLORS)])
+        self._add_entity(
+            traci_veh_id, route_id, edge_route, depart_speed,
+            _SUMO_COLORS[veh_id % len(_SUMO_COLORS)],
+        )
         vs.curr_traci_veh_id = traci_veh_id
         vs.spawn_time_s = sim_time
+        vs.inserted     = False
 
         if self.render_mode != "quiet":
             print(

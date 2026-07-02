@@ -8,6 +8,8 @@ from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
 from dronesim.trsp.agents.sarsa_svc    import SARSASVCAgent
 from dronesim.trsp.agents.a2c_svc      import A2CSVCAgent
 from dronesim.trsp.agents.ppo_svc      import PPOSVCAgent
+from dronesim.trsp.agents.sarsa_ped    import SARSAPEDAgent
+from dronesim.trsp.agents.dqn_ped      import DQNPEDAgent
 
 
 def get_agent(config, agent_id, **kwargs):
@@ -21,10 +23,14 @@ def get_agent(config, agent_id, **kwargs):
         return SARSAAgent(config, **kwargs)
     if algo == 'sarsa_svc':
         return SARSASVCAgent(config, **kwargs)
+    if algo == 'sarsa_ped':
+        return SARSAPEDAgent(config, **kwargs)
     if algo == 'dqn':
         return DQNAgent(config, **kwargs)
     if algo == 'dqn_svc':
         return DQNSVCAgent(config, **kwargs)
+    if algo == 'dqn_ped':
+        return DQNPEDAgent(config, **kwargs)
     if algo == 'ppo':
         return PPOAgent(config, **kwargs)
     if algo == 'ppo_svc':

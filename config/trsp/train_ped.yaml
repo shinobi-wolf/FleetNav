@@ -1,0 +1,86 @@
+net:
+  net_path: data/grid_road_ped/grid_road_ped.sumocfg
+  max_degree: 5
+
+fleet:
+  type: delivery_robot # delivery_robot | ev
+  max_speed: 5          # km/h
+  delivery_robot:
+    width: 1.8            # metres
+    length: 0.8           # metres
+    max_speed_factor: 1        # multiplier of default pedestrian max_speed
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 1      # enable background vehicles from route file
+  delay: 0
+
+traffic:
+  model: ped               # live sidewalk pedestrian speeds (delivery robot); svc = vehicular
+  ped_speed_override:      # couple sidewalk pedestrian crowding to robot speed (Weidmann)
+    enabled: true
+    gamma: 0.02            # sensitivity: tuned down from Weidmann's 1.913 because this
+                           #   network's sidewalks stay sparse (max ~0.05 ped/m²); at
+                           #   0.02 → busy sidewalks ~30-60% of free-flow, empty ~100%
+    density_jam: 5.4       # ped/m² jam density (v → v_min); ~irrelevant at these densities
+    v_min: 0.1             # m/s floor to avoid permanent stall
+
+simulation:
+  max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
+  max_steps: 50           # env steps per episode before truncation
+  render_mode: quiet
+  warm_up_time: 60        # 1 min — enough for steady background traffic on a 25-node grid
+  random_sg_pair: true
+
+agent:
+  algo: sarsa_ped           # sarsa_svc | dqn_svc | ppo_svc | a2c_svc
+  action_mode: neighbor_index    # node_id for deep agents; use neighbor_index for sarsa_svc
+  policy: null
+
+training:
+  sarsa:
+    num_episodes: 5000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.9
+    epsilon_decay: 0.9995
+    num_speed_bins: 3     # discretise neighbor_speeds into 3 levels (congested/normal/fast)
+  dqn:
+    num_episodes: 5000
+    gamma: 0.99
+    lr: 0.001
+    epsilon: 1.0
+    epsilon_decay: 0.9995
+    epsilon_min: 0.05
+    batch_size: 64
+    buffer_capacity: 50000
+    target_update_freq: 500
+    learn_start: 1000
+    hidden_dim: 128
+  ppo:
+    num_iterations: 100
+    num_steps: 512
+    update_epochs: 4
+    num_minibatches: 4
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_coef: 0.2
+    ent_coef: 0.01
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    lr: 2.5e-4
+    anneal_lr: true
+    hidden_dim: 128
+    save_interval: 50
+  a2c:
+    num_iterations: 100
+    num_steps: 512
+    gamma: 0.99
+    gae_lambda: 0.95
+    ent_coef: 0.01
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    lr: 7.0e-4
+    anneal_lr: false
+    hidden_dim: 128
+    save_interval: 50

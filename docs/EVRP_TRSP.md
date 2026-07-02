@@ -16,11 +16,11 @@ Set in `config/ta_evrp/` configs under `trsp` and `traffic`:
 
 ```yaml
 trsp:
-  agent: dijkstra     # dijkstra | dsp | sarsa | sarsa_svc | dqn | dqn_svc | a2c | a2c_svc | ppo | ppo_svc
-  policy_id: null     # config dir under runs/trsp/; required for RL agents and dsp
+  agent: dijkstra     # dijkstra | dsp | dsp_ped | sarsa | sarsa_svc | sarsa_ped | dqn | dqn_svc | dqn_ped | a2c | a2c_svc | ppo | ppo_svc
+  policy_id: null     # config dir under runs/trsp/; required for RL agents and dsp/dsp_ped
 
 traffic:
-  model: psl          # psl | td | svc
+  model: psl          # psl | td | svc | ped
   psl:
     enabled: true
     K: 2
@@ -33,7 +33,24 @@ traffic:
     T2_hours: 0.0555556
   svc:
     route_file: null  # path to rvt_routes.xml; required when model: svc
+  ped_speed_override: # delivery-robot (ADR) sidewalk crowding → walking speed (Weidmann)
+    enabled: true     # only active with model: ped and a delivery_robot fleet
+    gamma: 0.02
+    density_jam: 5.4
+    v_min: 0.1
 ```
+
+Example — pedestrian (delivery-robot) navigation with DQN-PED on sidewalks:
+
+```yaml
+base: config/ta_evrp/ped_base.yaml   # sets fleet.type: delivery_robot, model: ped
+trsp:
+  agent: dqn_ped
+  policy_id: 962999ce   # loads runs/trsp/962999ce/config.yaml + policy.pkl
+```
+
+Ready-to-run: `python infer_ta_evrp.py -c config/ta_evrp/milp_dqn_ped.yaml`
+(also `milp_sarsa_ped.yaml`, `milp_dsp_ped.yaml`).
 
 Example — switch to DQN-SVC navigation with SVC background traffic:
 
@@ -229,6 +246,18 @@ When `trsp.agent: dqn_svc`, `LocalPlanner.plan()` queries `traci.edge.getLastSte
 The `dsp` agent is also SVC-oriented: it reads the same live edge speeds, but once per leg (in `start_leg`) rather than per hop, and re-plans the whole path via travel-time Dijkstra. It needs no trained policy — see the DSP subsection above.
 
 **SUMO warm-up.** `sumo.warm_up_time` (seconds, default `0`) steps the SUMO simulation forward before any delivery vehicle is spawned, letting SVC background traffic build to a steady state first — mirroring `simulation.warm_up_time` in the TRSP env. Time is absolute (like the TRSP env), so a non-zero warm-up offsets `finish_time`/makespan by a constant across all vehicles; relative planner/agent comparisons are unaffected.
+
+### PED (Pedestrian / Autonomous Delivery Robot)
+
+**PED is now fully integrated into TA-EVRP.** A delivery-robot fleet (`fleet.type: delivery_robot`, selected together with `traffic.model: ped`) navigates on **sidewalks** instead of roads. Every layer is switched to the pedestrian graph and the SUMO *person* API:
+
+1. **Instance / Network.** With ped mode active, `Network` reads the net with `withPedestrianConnections=True`, keeps only edges that have a pedestrian lane, and tags each edge with its `sidewalk_lane`. `Problem` samples the depot/customers/AFS from this sidewalk graph, so the distance matrix and fuel accounting use walkable edges. `Traffic` disables PSL (like SVC) and sets `free_flow_ms` to the robot's walking speed (`fleet.max_speed`).
+2. **Simulator.** After `traci.start`, an `adr_vtype` is registered (`copy DEFAULT_PEDTYPE` + width/length/speed-factor + capped `maxSpeed`), mirroring the TRSP env. Each leg spawns the robot with `traci.person.add` + `appendWalkingStage` (not `vehicle.add`); positions/speeds are read from `traci.person.*`. Because persons have no `getArrivedIDList`, arrival is detected as *"was inserted, now gone from the person list"*. Every step, the robot's speed is set from local sidewalk crowding via the shared `weidmann_speed` (the same override the ped policy trained under). Background pedestrians/vehicles come from the `.sumocfg` `route-files`, so no `--route-files` is appended.
+3. **LocalPlanner.** Dispatches `sarsa_ped` (neighbour-index), `dqn_ped` (node-index), and `dsp_ped` (non-learning). For `sarsa_ped`/`dqn_ped` the per-hop `neighbor_speeds` are the robot's **Weidmann sidewalk speed** on each outgoing edge (normalised by walking speed), not vehicular edge means. `dsp_ped` re-plans the whole leg once from live Weidmann sidewalk speeds via `start_leg`.
+
+The Weidmann flow–speed relationship lives in `dronesim.trsp.ped_speed.weidmann_speed`, imported by the TRSP env, the eval pipeline, the DSP-PED agent, **and** the TA-EVRP Simulator/LocalPlanner — one function, identical dynamics end-to-end. Config: `config/ta_evrp/ped_base.yaml` + `milp_{sarsa,dqn,dsp}_ped.yaml`; the DSP-PED baseline reads `runs/trsp/dsp_ped_grid/config.yaml`.
+
+> Note: post-simulation, `local_routes.json` labels ped/SVC legs `planner_kind: dijkstra` because the label reconciliation re-plans after SUMO (and TraCI) has closed and cannot rebuild the live `neighbor_speeds`. During the run the agent *is* driving — this is a cosmetic labelling limitation shared by all live-speed agents.
 
 ---
 

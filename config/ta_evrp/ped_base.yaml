@@ -1,0 +1,60 @@
+# =============================================================================
+# config/ta_evrp/ped_base.yaml — shared pedestrian (delivery-robot) TA-EVRP params
+# =============================================================================
+# Delivery robots (ADRs) walk on sidewalks as SUMO `person` entities; their speed
+# is coupled to live pedestrian crowding via the Weidmann override. This file only
+# sets the ped-specific overrides on top of base.yaml — the concrete run configs
+# (milp_sarsa_ped / milp_dqn_ped / milp_dsp_ped) pick the inner navigation agent.
+#
+# Do not run directly. Usage e.g.:
+#   python infer_ta_evrp.py -c config/ta_evrp/milp_dqn_ped.yaml
+
+base: config/ta_evrp/base.yaml
+
+# ── Delivery-robot fleet (ADR) ───────────────────────────────────────────────
+fleet:
+  type: delivery_robot
+  max_speed: 5                 # km/h — robot free-flow walking speed
+  delivery_robot:
+    width: 1.8                 # m
+    length: 0.8                # m
+    max_speed_factor: 1        # multiplier of the ADR vtype's max desired speed
+
+# ── Ped road network (sidewalk graph) ────────────────────────────────────────
+network:
+  net_path: data/grid_road_ped/grid_road_ped.sumocfg
+  warehouse: center
+  max_degree: 5
+
+# ── Traffic: live sidewalk pedestrian speeds (Weidmann) ──────────────────────
+traffic:
+  model: ped                   # robots walk sidewalks; speed set live per step (Weidmann)
+  ped_speed_override:
+    enabled: true
+    gamma: 0.02                # sensitivity (tuned for this network's sparse sidewalks)
+    density_jam: 5.4           # ped/m² jam density (v → v_min)
+    v_min: 0.1                 # m/s floor to avoid a permanent stall
+
+# ── Robot endurance & delivery tasks ─────────────────────────────────────────
+simulation:
+  ugv:
+    fleet_size: 2
+    battery_capacity_L: 50        # generous range so the robot never strands on a small grid
+    consumption_rate_L_per_km: 1  # range = 50 * 1000 / 1 = 50 km
+    free_flow_speed_kmh: 5        # matches fleet.max_speed (planner time feasibility)
+    max_duration_h: 2
+    customer_service_time_h: 0
+    recharge_time_h: 0
+    runtime_refuel: false
+  tasks:
+    customer_count: 5
+    afs_count: 2
+    customer_sampling: count
+
+# ── SUMO process ─────────────────────────────────────────────────────────────
+sumo:
+  step_length: 1.0
+  traffic_scale: 1
+  warm_up_time: 60               # let background pedestrians build up before robots depart
+  max_time_h: 2                  # aligns with the .sumocfg end time (7200 s)
+  render_mode: quiet

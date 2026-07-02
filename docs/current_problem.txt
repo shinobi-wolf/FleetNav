@@ -1,0 +1,37 @@
+Title: Pedestrian TA-EVRP
+
+Given: 3 (networks, traffic), 3 evrp models, 6 TRSP Models.
+
+Objectives:
+1. Get TRSP Results
+2. Get TA-EVRP Results
+
+Tasks:
+1. Create the 3 traffic files.
+    1.1. Grid. ✓
+    1.2. Rand-grid
+    1.3. Ames
+2. Add ADR support to TRSP env.
+    2.1. Add vehicle params to env config - done
+    2.2. Add veh-type params to env config - done
+    2.3. build Nx graph for ADRs. In each edge, add a proprty that is the name of the lane that is sidewalk, if the vehicle type is delivery robot. - done
+    2.4. Add ADRs to sidewalks in Traci - done
+    2.5. If the vehicle type is delivery robot, then the traffic model is by defalt svc. - done
+    2.6. In the get neighbor speed function, if the vehicle type is delivery robot, get the speed of the sidewalks instead of the roads. - done
+    2.7. TraCI speed override ✓
+3. Redesign agents
+    3.1. SARSA PED agent. It should be the exact same as dronesim/trsp/agents/sarsa_svc.py, but drop the speed bin. Just (graph_node, target_node). - done.
+    3.2. DQN PED agent. It should be the exact same as dronesim/trsp/agents/dqn_svc.py. - done.
+4. Train and evaluate TRSP
+    1. Infer pipeline for TRSP. - done
+    2. Check ped inference with dijkstra agent. - done
+    3. Train pipeline for TRSP. - done 
+    4. Eval trsp 2 pipeline. - done
+    5. Train and evaluate sarsa and dqn. - results not good.
+5. Add ADR support to TA-evrp
+    1. Instance builds the sidewalk (ped) graph; ped traffic model wired. - done
+    2. Simulator walks robots as SUMO persons with live Weidmann speed override. - done
+    3. LocalPlanner supports sarsa_ped / dqn_ped / dsp_ped. - done
+    4. Configs: ped_base + milp_{sarsa,dqn,dsp}_ped; dsp_ped_grid policy dir. - done
+6. Evaluate TA-EVRP.
+

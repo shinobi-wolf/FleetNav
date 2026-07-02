@@ -8,9 +8,11 @@ import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
 from dronesim.trsp.agents.sarsa_psl import SARSAAgent
 from dronesim.trsp.agents.dqn_psl   import DQNAgent
 from dronesim.trsp.agents.dqn_svc   import DQNSVCAgent
+from dronesim.trsp.agents.dqn_ped   import DQNPEDAgent
 from dronesim.trsp.agents.ppo_psl   import PPOAgent
 from dronesim.trsp.agents.a2c_psl   import A2CAgent
 from dronesim.trsp.agents.sarsa_svc import SARSASVCAgent
+from dronesim.trsp.agents.sarsa_ped import SARSAPEDAgent
 from dronesim.trsp.agents.a2c_svc   import A2CSVCAgent
 from dronesim.trsp.agents.ppo_svc   import PPOSVCAgent
 
@@ -21,6 +23,8 @@ def lmd_trainer(config, policy_dir, resume=False):
         agent = DQNAgent(config)
     elif algo == 'dqn_svc':
         agent = DQNSVCAgent(config)
+    elif algo == 'dqn_ped':
+        agent = DQNPEDAgent(config)
     elif algo == 'ppo':
         agent = PPOAgent(config)
     elif algo == 'ppo_svc':
@@ -31,6 +35,8 @@ def lmd_trainer(config, policy_dir, resume=False):
         agent = A2CSVCAgent(config)
     elif algo == 'sarsa_svc':
         agent = SARSASVCAgent(config)
+    elif algo == 'sarsa_ped':
+        agent = SARSAPEDAgent(config)
     else:
         agent = SARSAAgent(config)
     agent.learn(policy_dir)

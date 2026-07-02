@@ -14,11 +14,16 @@ INF = 100000
 _MAX_PLAN_STEPS = 500
 
 # SARSA-family: predict() returns index into sorted(nb_idxs[:num_actions])
-_NEIGHBOR_IDX_ALGOS = {"sarsa", "sarsa_lambda", "sarsa_svc"}
+_NEIGHBOR_IDX_ALGOS = {"sarsa", "sarsa_lambda", "sarsa_svc", "sarsa_ped"}
 # Deep RL + DSP: predict() returns global node index masked to valid neighbours
-_NODE_IDX_ALGOS = {"dqn", "a2c", "ppo", "dqn_svc", "a2c_svc", "ppo_svc", "dsp"}
-# SVC agents: obs includes neighbor_speeds instead of time_slot
+_NODE_IDX_ALGOS = {"dqn", "a2c", "ppo", "dqn_svc", "a2c_svc", "ppo_svc", "dsp",
+                   "dqn_ped", "dsp_ped"}
+# SVC agents: obs includes neighbor_speeds (live vehicular) instead of time_slot
 _SVC_ALGOS = {"dqn_svc", "sarsa_svc", "a2c_svc", "ppo_svc"}
+# PED agents: obs includes neighbor_speeds (live Weidmann sidewalk) instead of time_slot
+_PED_OBS_ALGOS = {"dqn_ped", "sarsa_ped"}
+# Any agent whose observation carries a live neighbor_speeds vector
+_LIVE_OBS_ALGOS = _SVC_ALGOS | _PED_OBS_ALGOS
 
 
 def _build_agent(algo: str, trsp_config: dict):
@@ -31,6 +36,10 @@ def _build_agent(algo: str, trsp_config: dict):
         from dronesim.trsp.agents import SARSASVCAgent
         return SARSASVCAgent(trsp_config), "neighbor"
 
+    if algo == "sarsa_ped":
+        from dronesim.trsp.agents import SARSAPEDAgent
+        return SARSAPEDAgent(trsp_config), "neighbor"
+
     if algo == "dqn":
         from dronesim.trsp.agents import DQNAgent
         return DQNAgent(trsp_config), "node"
@@ -38,6 +47,10 @@ def _build_agent(algo: str, trsp_config: dict):
     if algo == "dqn_svc":
         from dronesim.trsp.agents import DQNSVCAgent
         return DQNSVCAgent(trsp_config), "node"
+
+    if algo == "dqn_ped":
+        from dronesim.trsp.agents import DQNPEDAgent
+        return DQNPEDAgent(trsp_config), "node"
 
     if algo == "a2c":
         from dronesim.trsp.agents import A2CAgent
@@ -60,15 +73,18 @@ def _build_agent(algo: str, trsp_config: dict):
 
 class LocalPlanner:
     """
-    Routes node-to-node via a trained TRSP RL agent (graph-only for PSL; TraCI-backed for SVC).
-    Falls back to Dijkstra on cycles, dead-ends, invalid actions, or missing policy.
+    Routes node-to-node via a trained TRSP RL agent (graph-only for PSL; TraCI-backed
+    for SVC/PED). Falls back to Dijkstra on cycles, dead-ends, invalid actions, or
+    missing policy.
 
-    Supported algos: sarsa, sarsa_svc, dqn, dqn_svc, a2c, a2c_svc, ppo, ppo_svc, dsp.
+    Supported algos: sarsa, sarsa_svc, sarsa_ped, dqn, dqn_svc, dqn_ped, a2c, a2c_svc,
+    ppo, ppo_svc, dsp, dsp_ped.
 
-    `dsp` (Dynamic Shortest Path) is a non-learning, traffic-aware baseline: it
-    queries live TraCI edge speeds once per leg, re-weights the graph by travel
-    time, and follows the resulting Dijkstra path hop-by-hop. Like dqn_svc, it
-    must run inside the SUMO session (LocalPlanner is called from Simulator.run).
+    `dsp` / `dsp_ped` (Dynamic Shortest Path) are non-learning, traffic-aware baselines:
+    they query live TraCI speeds once per leg (vehicular edge speeds for `dsp`; the
+    robot's Weidmann sidewalk speed for `dsp_ped`), re-weight the graph by travel time,
+    and follow the resulting Dijkstra path hop-by-hop. Like the *_svc / *_ped agents,
+    they must run inside the SUMO session (LocalPlanner is called from Simulator.run).
     """
 
     def __init__(self, policy_id: str) -> None:
@@ -81,15 +97,26 @@ class LocalPlanner:
 
         self._agent = None
         self._action_mode: str = "neighbor"
+        self._lane_area_cache: dict[str, float] = {}
 
-        if algo == "dsp":
-            # DSP is non-learning: it needs the env's graph maps at construction
-            # time (it has no internal env) and queries live TraCI edge speeds
-            # once per leg. Build the env first, then hand its graph to the agent.
-            from dronesim.trsp.agents import DSPAgent
+        if algo in ("dsp", "dsp_ped"):
+            # DSP is non-learning: it needs the env's graph maps at construction time
+            # (it has no internal env) and queries live TraCI speeds once per leg.
+            # Build the env first, then hand its graph to the agent.
             wrapped = gym.make("SumoTRSPEnv-v0", config=trsp_config)
             env = wrapped.unwrapped
-            self._agent = DSPAgent(0, env.G_dir, env.node2idx, env.idx2node, env.ugv_speed)
+            if algo == "dsp_ped":
+                from dronesim.trsp.agents.dsp_ped import DSPPEDAgent
+                pso = (trsp_config.get("traffic", {}) or {}).get("ped_speed_override", {})
+                self._agent = DSPPEDAgent(
+                    0, env.G_dir, env.node2idx, env.idx2node, env.ugv_speed,
+                    gamma=pso.get("gamma", 1.913),
+                    density_jam=pso.get("density_jam", 5.4),
+                    v_min=pso.get("v_min", 0.1),
+                )
+            else:
+                from dronesim.trsp.agents import DSPAgent
+                self._agent = DSPAgent(0, env.G_dir, env.node2idx, env.idx2node, env.ugv_speed)
             self._action_mode = "node"
         else:
             try:
@@ -112,12 +139,24 @@ class LocalPlanner:
         self.num_actions: int         = env.num_actions
         self.traffic                  = env.traffic
 
-        # SVC agents need TraCI neighbor speeds; store max_degree and ugv_speed for obs building
-        if algo in _SVC_ALGOS and self._agent is not None:
+        # Live-speed agents (svc/ped) need per-hop neighbor speeds; store the graph
+        # fan-out and the free-flow speed used to normalize them. For ped agents,
+        # capture the Weidmann override params so obs speeds match the training env.
+        self._ped: bool = algo in _PED_OBS_ALGOS or algo == "dsp_ped"
+        self._ped_params: Optional[tuple] = None
+        if algo in _LIVE_OBS_ALGOS and self._agent is not None:
             self.max_degree: int  = int(trsp_config["net"]["max_degree"])
             self.ugv_speed: float = float(
                 trsp_config.get("fleet", {}).get("max_speed", 110.0)
             ) / 3.6   # m/s
+            if algo in _PED_OBS_ALGOS:
+                pso = (trsp_config.get("traffic", {}) or {}).get("ped_speed_override", {})
+                if bool(pso.get("enabled", False)):
+                    self._ped_params = (
+                        pso.get("gamma", 1.913),
+                        pso.get("density_jam", 5.4),
+                        pso.get("v_min", 0.1),
+                    )
 
         mode = "Dijkstra" if self._agent is None else f"{algo.upper()} ({self._action_mode}-index)"
         print(f"TRSPLocalPlanner: policy='{policy_id}'  algo={algo}  mode={mode}")
@@ -176,7 +215,7 @@ class LocalPlanner:
                     src_node, dst_node, slot=slot, reason="dead_end"
                 )
 
-            if self.algo in _SVC_ALGOS:
+            if self.algo in _LIVE_OBS_ALGOS:
                 ns  = self._neighbor_speeds(curr_node)
                 obs = {"graph_node": curr_pos, "target_node": target_idx, "neighbor_speeds": ns}
             else:
@@ -238,22 +277,46 @@ class LocalPlanner:
             return action if action in nb_idxs_set else best_nb
 
     def _neighbor_speeds(self, curr_node: str) -> np.ndarray:
-        """Query TraCI for outgoing-edge mean speeds from curr_node.
+        """Query TraCI for outgoing-edge speeds from curr_node.
 
-        Called for all SVC algos; SUMO must be running (called from
+        Called for all live-speed algos; SUMO must be running (called from
         inside Simulator.run()). Mirrors how SumoTRSPEnv builds neighbor_speeds:
         sorted by node2idx, normalized by ugv_speed, clamped to [0, 2], padded
-        with 1.0 (free-flow) for missing slots.
+        with 1.0 (free-flow) for missing slots. For ped agents the neighbour
+        speed is the robot's Weidmann sidewalk speed (the speed it will actually
+        get), not the vehicular edge mean speed.
         """
-        import traci  # noqa: PLC0415 — intentional late import; only used for SVC
+        import traci  # noqa: PLC0415 — intentional late import; only used for live models
         speeds    = np.ones(self.max_degree, dtype=np.float32)
         nb_sorted = sorted(self.G.neighbors(curr_node), key=lambda n: self.node2idx[n])
         for i, nb in enumerate(nb_sorted[: self.max_degree]):
             edge_data = self.G_dir.get_edge_data(curr_node, nb)
-            if edge_data:
+            if not edge_data:
+                continue
+            if self._ped:
+                lane_id = edge_data.get("sidewalk_lane")
+                if not lane_id:
+                    raw = self.ugv_speed
+                elif self._ped_params is not None:
+                    raw = self._ped_sidewalk_speed(lane_id)
+                else:
+                    raw = traci.lane.getLastStepMeanSpeed(lane_id)
+            else:
                 raw = traci.edge.getLastStepMeanSpeed(edge_data["id"])
-                speeds[i] = float(np.clip(raw / self.ugv_speed, 0.0, 2.0)) if raw >= 0.0 else 1.0
+            speeds[i] = float(np.clip(raw / self.ugv_speed, 0.0, 2.0)) if raw >= 0.0 else 1.0
         return speeds
+
+    def _ped_sidewalk_speed(self, lane_id: str) -> float:
+        """Robot Weidmann sidewalk speed (m/s) from live person counts on the edge."""
+        import traci  # noqa: PLC0415 — intentional late import; only used for ped models
+        from dronesim.trsp.ped_speed import weidmann_speed
+        gamma, density_jam, v_min = self._ped_params
+        n = len(traci.edge.getLastStepPersonIDs(traci.lane.getEdgeID(lane_id)))
+        area = self._lane_area_cache.get(lane_id)
+        if area is None:
+            area = traci.lane.getLength(lane_id) * traci.lane.getWidth(lane_id)
+            self._lane_area_cache[lane_id] = area
+        return weidmann_speed(n, area, self.ugv_speed, gamma, density_jam, v_min)
 
     def _dijkstra_edges_and_nodes(
         self, src_node: str, dst_node: str, *, slot: int, reason: Optional[str]

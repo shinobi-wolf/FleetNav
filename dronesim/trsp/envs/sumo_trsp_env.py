@@ -11,6 +11,7 @@ import sumolib
 
 from dronesim.trsp.fleet.UGVSumo import UGVSumo
 from dronesim.trsp.traffic import PSLTrafficModel, TDTrafficModel
+from dronesim.trsp.ped_speed import weidmann_speed
 
 INF = 100000
 
@@ -39,6 +40,16 @@ class SumoTRSPEnv(gym.Env):
         self.num_actions = config['net']['max_degree']
 
         self.ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
+        # NOTE: for ped mode this is provisional (only feeds the unused edge_tt); it is
+        # overwritten from the ADR vtype's max desired speed in _register_adr_vtype().
+        self.fleet_type = config['fleet'].get('type', 'ev')
+
+        if self.fleet_type == 'delivery_robot':
+            dr_cfg = config['fleet'].get('delivery_robot', {})
+            self.dr_width = dr_cfg.get('width', 1.0)
+            self.dr_length = dr_cfg.get('length', 0.8)
+            self.dr_max_speed_factor = dr_cfg.get('max_speed_factor', 1.0)
+            self.adr_vtype_id = 'adr_vtype'
 
         self.step_length = config['sumo']['step_length']
         self.traffic_scale = config['sumo'].get('traffic_scale', 1)
@@ -59,10 +70,16 @@ class SumoTRSPEnv(gym.Env):
         self.num_sg_pairs = len(self.sg_pairs)
 
         traffic_cfg = config.get('traffic', {'enabled': False})
-        self.traffic_model = traffic_cfg.get('model', 'psl')   # 'psl' | 'td' | 'svc'
+        self.traffic_model = traffic_cfg.get('model', 'psl')   # 'psl' | 'td' | 'svc' | 'ped'
+        if self.fleet_type == 'delivery_robot':
+            self.traffic_model = 'ped'
 
-        if self.traffic_model == 'svc':
-            self.svc_route_file = traffic_cfg.get('route_file', None)
+        # svc (live vehicular speeds from a route file) and ped (live pedestrian speeds on
+        # sidewalks) both derive edge speeds from live SUMO state, not a PSL/TD profile.
+        self.live_speed_model = self.traffic_model in ('svc', 'ped')
+
+        if self.live_speed_model:
+            self.route_file = traffic_cfg.get('route_file', None)
             self.traffic = PSLTrafficModel({'enabled': False}, self.edge_ids)
         elif self.traffic_model == 'td':
             self.traffic = TDTrafficModel(
@@ -75,6 +92,16 @@ class SumoTRSPEnv(gym.Env):
         self.current_slot = 0
         self.traffic_log: list[dict] = []
 
+        # Pedestrian-density speed override (Weidmann): couples sidewalk crowding to the
+        # robot's walking speed. Delivery-robot only; defaults off so other fleets/runs
+        # are unaffected.
+        pso = traffic_cfg.get('ped_speed_override', {})
+        self.ped_speed_override = bool(pso.get('enabled', False)) and self.fleet_type == 'delivery_robot'
+        self.ped_gamma = pso.get('gamma', 1.913)          # Weidmann shape parameter
+        self.ped_density_jam = pso.get('density_jam', 5.4)  # ped/m² jam density (v → v_min)
+        self.ped_v_min = pso.get('v_min', 0.1)            # m/s floor, avoids permanent stall
+        self._lane_area_cache: dict[str, float] = {}
+
         num_nodes = len(self.node2idx)
         psl_K = self.traffic.K if self.traffic.enabled else 1
 
@@ -85,7 +112,7 @@ class SumoTRSPEnv(gym.Env):
 
         if self.action_mode == 'node_id':
             self.action_space = spaces.Discrete(num_nodes)
-            if self.traffic_model == 'svc':
+            if self.live_speed_model:
                 self.observation_space = spaces.Dict({
                     'graph_node':      spaces.Discrete(num_nodes),
                     'target_node':     spaces.Discrete(num_nodes),
@@ -99,7 +126,7 @@ class SumoTRSPEnv(gym.Env):
                 })
         else:
             self.action_space = spaces.Discrete(self.num_actions)
-            if self.traffic_model == 'svc':
+            if self.live_speed_model:
                 self.observation_space = spaces.Dict({
                     'graph_node':      spaces.Discrete(num_nodes),
                     'target_node':     spaces.Discrete(num_nodes),
@@ -134,13 +161,16 @@ class SumoTRSPEnv(gym.Env):
 
     def build_graph(self):
         net_path = self.net_path.replace('.sumocfg', '.net.xml')
-        net = sumolib.net.readNet(net_path, withPedestrianConnections=False)
+        ped_mode = self.fleet_type == 'delivery_robot'
+        net = sumolib.net.readNet(net_path, withPedestrianConnections=ped_mode)
 
         G = nx.DiGraph()
         junc2nodes_map = {}
         for edge in net.getEdges():
             eid = edge.getID()
             if eid.startswith(':'):
+                continue
+            if ped_mode and not any(lane.allows('pedestrian') for lane in edge.getLanes()):
                 continue
             n1 = edge.getToNode()
             shape1 = n1.getShape()
@@ -160,7 +190,16 @@ class SumoTRSPEnv(gym.Env):
 
             edge_length = edge.getLength()
             edge_tt = edge_length / self.ugv_speed
-            G.add_edge(n2.getID(), n1.getID(), length=edge_length, id=eid, edge_tt=edge_tt)
+            if ped_mode:
+                sidewalk_lane = next(
+                    (lane.getID() for lane in edge.getLanes() if lane.allows('pedestrian')),
+                    None,
+                )
+                G.add_edge(n2.getID(), n1.getID(),
+                           length=edge_length, id=eid, edge_tt=edge_tt,
+                           sidewalk_lane=sidewalk_lane)
+            else:
+                G.add_edge(n2.getID(), n1.getID(), length=edge_length, id=eid, edge_tt=edge_tt)
 
         self.edge_ids = [data['id'] for _, _, data in G.edges(data=True)]
         G_und = G.to_undirected()
@@ -220,9 +259,12 @@ class SumoTRSPEnv(gym.Env):
             '--no-step-log',
             '--no-duration-log',
         ]
-        if self.traffic_model == 'svc' and self.svc_route_file:
-            sumo_cmd += ['--route-files', self.svc_route_file]
+        if self.live_speed_model and self.route_file:
+            sumo_cmd += ['--route-files', self.route_file]
         traci.start(sumo_cmd)
+
+        if self.fleet_type == 'delivery_robot':
+            self._register_adr_vtype()
 
         while self.time_elapsed < self.warmup_time:
             traci.simulationStep()
@@ -289,6 +331,18 @@ class SumoTRSPEnv(gym.Env):
 
     # ------------------------------------------------------------------ internals
 
+    def _register_adr_vtype(self):
+        traci.vehicletype.copy('DEFAULT_PEDTYPE', self.adr_vtype_id)
+        traci.vehicletype.setWidth(self.adr_vtype_id, self.dr_width)
+        traci.vehicletype.setLength(self.adr_vtype_id, self.dr_length)
+        traci.vehicletype.setSpeedFactor(self.adr_vtype_id, self.dr_max_speed_factor)
+        # Cap the ADR vtype at the configured robot speed (DEFAULT_PEDTYPE's inherited
+        # maxSpeed is a large SUMO default, ~10 m/s). SUMO then enforces the real speed,
+        # and we source the env's free-flow speed back from the vtype so v_free (Weidmann)
+        # and the neighbor-speed normalization match what SUMO actually caps the robot at.
+        traci.vehicletype.setMaxSpeed(self.adr_vtype_id, self.ugv_speed)
+        self.ugv_speed = traci.vehicletype.getMaxSpeed(self.adr_vtype_id)
+
     def get_valid_action_mask(self) -> np.ndarray:
         """Boolean mask of shape (num_nodes,) — True for valid next-hop node indices.
 
@@ -303,8 +357,10 @@ class SumoTRSPEnv(gym.Env):
     def ugv_handler(self, action):
         if self.ugv.status == 2:
             return
-        # vehicle still traversing previous edge
-        if self.ugv.veh_id and self.ugv.veh_id in traci.vehicle.getIDList():
+        # entity still traversing previous edge
+        active_check = (traci.person.getIDList() if self.fleet_type == 'delivery_robot'
+                        else traci.vehicle.getIDList())
+        if self.ugv.veh_id and self.ugv.veh_id in active_check:
             self.ugv.status = 0
             return
         self.ugv.status = 1
@@ -332,40 +388,61 @@ class SumoTRSPEnv(gym.Env):
             return
 
         depart_speed = self._edge_speed(edge_id, self.current_slot)
-        route_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}_route"
-        self.ugv.veh_id = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}"
-        traci.route.add(route_id, [edge_id])
-        traci.vehicle.add(self.ugv.veh_id, route_id, departSpeed=depart_speed)
-        traci.vehicle.setSpeed(self.ugv.veh_id, depart_speed)
-        traci.vehicle.setColor(self.ugv.veh_id, (255, 0, 0, 255))
+        eid = f"ugv_{self.ugv.agent_id}_{int(self.time_elapsed)}"
+        self.ugv.veh_id = eid
+        if self.fleet_type == 'delivery_robot':
+            traci.person.add(eid, edge_id, pos=0.0, depart=-1, typeID=self.adr_vtype_id)
+            traci.person.appendWalkingStage(eid, [edge_id], arrivalPos=-1)
+            traci.person.setSpeed(eid, depart_speed)
+            traci.person.setColor(eid, (255, 0, 0, 255))
+        else:
+            route_id = f"{eid}_route"
+            traci.route.add(route_id, [edge_id])
+            traci.vehicle.add(eid, route_id, departSpeed=depart_speed)
+            traci.vehicle.setSpeed(eid, depart_speed)
+            traci.vehicle.setColor(eid, (255, 0, 0, 255))
 
         traci.simulationStep()
         self.time_elapsed = traci.simulation.getTime()
 
         inserted = False
         while self.time_elapsed < self.max_time:
-            active_ids  = set(traci.vehicle.getIDList())
-            arrived_ids = set(traci.simulation.getArrivedIDList())
-
-            if self.ugv.veh_id in active_ids:
-                inserted = True
-                if self.traffic_model == 'psl' or self.traffic_model == 'td':
-                    new_slot = self.traffic.get_slot(self.time_elapsed)
-                    if new_slot != self.current_slot:
-                        old_slot = self.current_slot
-                        self.current_slot = new_slot
-                        new_speed = self._edge_speed(edge_id, new_slot)
-                        traci.vehicle.setSpeed(self.ugv.veh_id, new_speed)
-                        if self.render_mode != "quiet":
-                            print(f"[{self.time_elapsed:.1f}s] SLOT CHANGE: {old_slot} → {new_slot}"
-                                  f"  edge={edge_id}  speed={new_speed:.2f} m/s")
-                        self.traffic_log.append({"t": self.time_elapsed, "type": "slot_change",
-                                                 "old_slot": old_slot, "new_slot": new_slot,
-                                                 "edge": edge_id, "speed_ms": round(new_speed, 4)})
-            elif self.ugv.veh_id in arrived_ids or inserted:
-                # Arrived this step, or was confirmed in-network and has since left
-                self.ugv.status = 1
-                break
+            if self.fleet_type == 'delivery_robot':
+                active_ids = set(traci.person.getIDList())
+                if self.ugv.veh_id in active_ids:
+                    inserted = True
+                    if self.ped_speed_override:
+                        lane_id = traci.person.getLaneID(self.ugv.veh_id)
+                        if lane_id and not lane_id.startswith(':'):  # skip internal/junction lanes
+                            traci.person.setSpeed(
+                                self.ugv.veh_id,
+                                self._weidmann_speed(lane_id, exclude_self=True),
+                            )
+                elif inserted:
+                    self.ugv.status = 1
+                    break
+            else:
+                active_ids  = set(traci.vehicle.getIDList())
+                arrived_ids = set(traci.simulation.getArrivedIDList())
+                if self.ugv.veh_id in active_ids:
+                    inserted = True
+                    if self.traffic_model == 'psl' or self.traffic_model == 'td':
+                        new_slot = self.traffic.get_slot(self.time_elapsed)
+                        if new_slot != self.current_slot:
+                            old_slot = self.current_slot
+                            self.current_slot = new_slot
+                            new_speed = self._edge_speed(edge_id, new_slot)
+                            traci.vehicle.setSpeed(self.ugv.veh_id, new_speed)
+                            if self.render_mode != "quiet":
+                                print(f"[{self.time_elapsed:.1f}s] SLOT CHANGE: {old_slot} → {new_slot}"
+                                      f"  edge={edge_id}  speed={new_speed:.2f} m/s")
+                            self.traffic_log.append({"t": self.time_elapsed, "type": "slot_change",
+                                                     "old_slot": old_slot, "new_slot": new_slot,
+                                                     "edge": edge_id, "speed_ms": round(new_speed, 4)})
+                elif self.ugv.veh_id in arrived_ids or inserted:
+                    # Arrived this step, or was confirmed in-network and has since left
+                    self.ugv.status = 1
+                    break
             # else: not yet inserted into SUMO — keep stepping
 
             traci.simulationStep()
@@ -415,6 +492,27 @@ class SumoTRSPEnv(gym.Env):
             return self.traffic.get_speed(edge_id, slot)
         return self.ugv_speed
 
+    def _lane_area(self, lane_id: str) -> float:
+        """Cached sidewalk-lane footprint (m²); lane length/width are static."""
+        a = self._lane_area_cache.get(lane_id)
+        if a is None:
+            a = traci.lane.getLength(lane_id) * traci.lane.getWidth(lane_id)
+            self._lane_area_cache[lane_id] = a
+        return a
+
+    def _weidmann_speed(self, lane_id: str, exclude_self: bool = False) -> float:
+        """Robot walking speed (m/s) on a sidewalk given its pedestrian density (Weidmann).
+
+        Person count comes from the edge (this TraCI build has no per-lane person counter);
+        on a pedestrian edge that count is exactly the sidewalk lane's pedestrians. Shared
+        formula in `dronesim.trsp.ped_speed` so the DSP-PED baseline and eval match exactly.
+        """
+        n = len(traci.edge.getLastStepPersonIDs(traci.lane.getEdgeID(lane_id)))
+        if exclude_self:
+            n = max(n - 1, 0)                 # discount the robot itself
+        return weidmann_speed(n, self._lane_area(lane_id), self.ugv_speed,
+                              self.ped_gamma, self.ped_density_jam, self.ped_v_min)
+
     def _get_reward(self):
         if self.ugv.invalid_action_this_step:
             self.ugv.invalid_action_this_step = False
@@ -442,9 +540,18 @@ class SumoTRSPEnv(gym.Env):
         nb_sorted = sorted(self.G.neighbors(current_node), key=lambda n: self.node2idx[n])
         speeds = []
         for nb in nb_sorted:
-            eid = self.G_dir[current_node][nb]['id']
-            raw = traci.edge.getLastStepMeanSpeed(eid)
-            raw = self.ugv_speed if raw < 0 else raw        # -1 → no vehicles → free-flow
+            edge_data = self.G_dir[current_node][nb]
+            if self.fleet_type == 'delivery_robot':
+                lane_id = edge_data.get('sidewalk_lane')
+                if self.ped_speed_override:
+                    # Effective robot speed via the same Weidmann f(density) it will be
+                    # subject to; exclude_self=False since the robot is not on neighbor lanes.
+                    raw = self._weidmann_speed(lane_id) if lane_id else self.ugv_speed
+                else:
+                    raw = traci.lane.getLastStepMeanSpeed(lane_id) if lane_id else self.ugv_speed
+            else:
+                raw = traci.edge.getLastStepMeanSpeed(edge_data['id'])
+            raw = self.ugv_speed if raw < 0 else raw        # -1 → no entities → free-flow
             speeds.append(min(raw / self.ugv_speed, 2.0))   # normalize, cap at 2×
         speeds += [1.0] * (self.num_actions - len(speeds))  # pad to max_degree
         return np.array(speeds, dtype=np.float32)
@@ -455,7 +562,7 @@ class SumoTRSPEnv(gym.Env):
         target_node_idx = self.node2idx[task_node] if task_node else 0
 
         if self.action_mode == 'node_id':
-            if self.traffic_model == 'svc':
+            if self.live_speed_model:
                 return {
                     'graph_node':      self.ugv.position,
                     'target_node':     target_node_idx,
@@ -478,7 +585,7 @@ class SumoTRSPEnv(gym.Env):
             steps += [INF] * (self.num_actions - len(steps))
             best_dir = int(np.argmin(steps[:self.num_actions]))
 
-        if self.traffic_model == 'svc':
+        if self.live_speed_model:
             return {
                 'graph_node':      self.ugv.position,
                 'target_node':     target_node_idx,

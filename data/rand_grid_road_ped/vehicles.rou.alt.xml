@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-07-02T15:24:31.963774-06:00 by Eclipse SUMO duarouter v1_27_1+0096-d202f07f261
+<duarouterConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="/home/shinobi-owl/PhD/battery/DroneSim/data/rand_grid_road_ped/rand_grid_road_ped.net.xml"/>
+        <route-files value="/home/shinobi-owl/PhD/battery/DroneSim/data/rand_grid_road_ped/vehicles.trips.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/shinobi-owl/PhD/battery/DroneSim/data/rand_grid_road_ped/vehicles.rou.xml"/>
+    </output>
+
+    <report>
+        <ignore-errors value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</duarouterConfiguration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+</routes>

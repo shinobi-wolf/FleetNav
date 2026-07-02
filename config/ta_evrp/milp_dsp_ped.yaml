@@ -1,0 +1,23 @@
+# =============================================================================
+# config/ta_evrp/milp_dsp_ped.yaml — MILP outer plan + DSP-PED navigation
+# =============================================================================
+# Delivery robot walks each leg on sidewalks; DSP-PED is a non-learning,
+# traffic-aware baseline that re-plans the leg once from the robot's live
+# Weidmann sidewalk speeds and follows that path hop-by-hop. No trained policy
+# is required — policy_id points at the DSP-PED config dir.
+# Usage: python infer_ta_evrp.py -c config/ta_evrp/milp_dsp_ped.yaml
+
+base: config/ta_evrp/ped_base.yaml
+
+evrp:
+  planner: milp
+  milp:
+    time_limit_s: 300
+    mip_gap: 0.01
+    output_flag: 1
+    afs_dummy_copies: 3
+    depot_dummy_copies: 3
+
+trsp:
+  agent: dsp_ped
+  policy_id: dsp_ped_grid

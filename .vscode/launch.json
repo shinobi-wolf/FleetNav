@@ -27,7 +27,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/trsp/train_td.yaml"
+                "${workspaceFolder}/config/trsp/train_ped.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -64,7 +64,7 @@
             ],
             "args": [
                 "-p",
-                "ba84fbd4"
+                "962999ce"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
@@ -82,7 +82,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/ta_evrp/td_milp.yaml"
+                "${workspaceFolder}/config/ta_evrp/milp.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"

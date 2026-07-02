@@ -10,6 +10,9 @@ Supported models (traffic.model):
           free-flow speed v_f in the middle slot. Slot boundaries at T1, T2.
   svc  — Stochastic Vehicular Congestion: SUMO background vehicles loaded via route file;
           PSL is disabled so the Simulator skips slot-based speed overrides.
+  ped  — Pedestrian (delivery-robot) mode: the robot walks on sidewalks and its speed
+          is set live per step from local pedestrian crowding (Weidmann). Like svc, PSL
+          is disabled; free_flow_ms is the robot's walking speed, not the vehicle speed.
 """
 from __future__ import annotations
 
@@ -116,11 +119,20 @@ class Traffic:
         traffic_cfg  = ta_config.get("traffic", {})
         psl          = traffic_cfg.get("psl", {})
         ugv          = ta_config.get("simulation", {}).get("ugv", {})
+        fleet        = ta_config.get("fleet", {})
 
         free_flow_ms    = float(ugv.get("free_flow_speed_kmh", 50.0)) / 3.6
         max_time_s      = float(ugv.get("max_duration_h", 6.0)) * 3600.0
         self.model_type = str(traffic_cfg.get("model", "psl"))
         self.route_file: str | None = None
+
+        if self.model_type == "ped":
+            # Delivery robot: speeds are set live per step from sidewalk crowding, so the
+            # PSL model is disabled. free_flow_ms is the robot's walking speed (fleet.max_speed).
+            robot_ms            = float(fleet.get("max_speed", 5.0)) / 3.6
+            self.traffic_scale  = 1.0
+            self.model          = PSLTrafficModel(enabled=False, free_flow_ms=robot_ms)
+            return
 
         if self.model_type == "svc":
             svc_cfg             = traffic_cfg.get("svc", {})

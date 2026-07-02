@@ -63,20 +63,36 @@ class Network:
 
     Built once from a .sumocfg or .net.xml path and injected into Traffic
     (for edge IDs) and Problem (for graph topology and node positions).
+
+    ``ped_mode`` builds the *pedestrian* graph for delivery-robot (ADR) runs:
+    the net is read with pedestrian connections, edges without a pedestrian
+    lane are dropped, and each remaining edge carries a ``sidewalk_lane``
+    attribute (the lane the robot walks on). This mirrors the TRSP training
+    env / eval graph so the ped policy sees the same topology end-to-end.
     """
 
-    def __init__(self, net_path: str) -> None:
+    def __init__(self, net_path: str, ped_mode: bool = False) -> None:
         if sumolib is None:
             raise RuntimeError(f"sumolib import failed: {_SUMOLIB_IMPORT_ERROR}")
 
+        self.ped_mode: bool = bool(ped_mode)
         net_xml = _resolve_net_xml_path(net_path)
         self.net_xml_path: str = str(net_xml)
-        self.net: Any = sumolib.net.readNet(str(net_xml), withInternal=False)
+        # sumolib requires withInternal when pedestrian connections are requested;
+        # internal (':'-prefixed) edges are filtered out of the graph below either way.
+        self.net: Any = sumolib.net.readNet(
+            str(net_xml), withInternal=self.ped_mode, withPedestrianConnections=self.ped_mode
+        )
 
         g = nx.DiGraph()
         for edge in self.net.getEdges():
             edge_id = edge.getID()
             if edge_id.startswith(":"):
+                continue
+
+            if self.ped_mode and not any(
+                lane.allows("pedestrian") for lane in edge.getLanes()
+            ):
                 continue
 
             from_node = edge.getFromNode()
@@ -94,7 +110,14 @@ class Network:
             if length <= 0.0:
                 length = float(math.hypot(tx - fx, ty - fy))
 
-            g.add_edge(from_id, to_id, id=edge_id, length=length)
+            if self.ped_mode:
+                sidewalk_lane = next(
+                    (lane.getID() for lane in edge.getLanes() if lane.allows("pedestrian")),
+                    None,
+                )
+                g.add_edge(from_id, to_id, id=edge_id, length=length, sidewalk_lane=sidewalk_lane)
+            else:
+                g.add_edge(from_id, to_id, id=edge_id, length=length)
 
         if len(g.nodes) == 0:
             raise ValueError(f"No non-internal nodes found in {net_xml}")

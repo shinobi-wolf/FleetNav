@@ -17,9 +17,13 @@ import dronesim.trsp  # noqa: F401 — registers SumoTRSPEnv-v0
 import gymnasium as gym
 from dronesim.trsp.agents.sarsa_psl    import SARSAAgent
 from dronesim.trsp.agents.sarsa_svc    import SARSASVCAgent
+from dronesim.trsp.agents.sarsa_ped    import SARSAPEDAgent
 from dronesim.trsp.agents.dijkstra_psl import DijkstraAgent
 from dronesim.trsp.agents.dqn_psl      import DQNAgent
 from dronesim.trsp.agents.dqn_svc      import DQNSVCAgent
+from dronesim.trsp.agents.dqn_ped      import DQNPEDAgent
+from dronesim.trsp.agents.dsp          import DSPAgent
+from dronesim.trsp.agents.dsp_ped      import DSPPEDAgent
 from dronesim.trsp.agents.a2c_psl      import A2CAgent
 from dronesim.trsp.agents.a2c_svc      import A2CSVCAgent
 from dronesim.trsp.agents.ppo_psl      import PPOAgent
@@ -35,11 +39,17 @@ def run(config, num_episodes, policy_id=None):
     elif algo == 'sarsa_svc':
         agent = SARSASVCAgent(config)
         env = agent.env
+    elif algo == 'sarsa_ped':
+        agent = SARSAPEDAgent(config)
+        env = agent.env
     elif algo == 'dqn':
         agent = DQNAgent(config)
         env = agent.env
     elif algo == 'dqn_svc':
         agent = DQNSVCAgent(config)
+        env = agent.env
+    elif algo == 'dqn_ped':
+        agent = DQNPEDAgent(config)
         env = agent.env
     elif algo == 'a2c':
         agent = A2CAgent(config)
@@ -56,8 +66,27 @@ def run(config, num_episodes, policy_id=None):
     elif algo == 'dijkstra':
         env = gym.make('SumoTRSPEnv-v0', config=config)
         agent = DijkstraAgent(agent_id=0)
+    elif algo in ('dsp', 'dsp_ped'):
+        env = gym.make('SumoTRSPEnv-v0', config=config)
+        u = env.unwrapped
+        if algo == 'dsp_ped':
+            pso = config.get('traffic', {}).get('ped_speed_override', {})
+            agent = DSPPEDAgent(0, u.G_dir, u.node2idx, u.idx2node, u.ugv_speed,
+                                gamma=pso.get('gamma', 1.913),
+                                density_jam=pso.get('density_jam', 5.4),
+                                v_min=pso.get('v_min', 0.1))
+        else:
+            agent = DSPAgent(0, u.G_dir, u.node2idx, u.idx2node, u.ugv_speed)
     else:
         raise ValueError(f"Unsupported algo for sim runner: {algo!r}")
+
+    def maybe_start_leg():
+        """Leg-based planners (DSP) replan per OD leg; feed them the current src/dst."""
+        if hasattr(agent, 'start_leg'):
+            u = env.unwrapped
+            src = u.idx2node[u.ugv.position]
+            dst = u.idx2node[u.ugv.task_list[0]] if u.ugv.task_list else src
+            agent.start_leg(src, dst)
 
     rewards = []
     steps_list = []
@@ -65,6 +94,7 @@ def run(config, num_episodes, policy_id=None):
 
     for ep in range(num_episodes):
         obs, info = env.reset()
+        maybe_start_leg()
         total_reward = 0.0
         ep_steps = 0
         ep_success = False
@@ -80,6 +110,8 @@ def run(config, num_episodes, policy_id=None):
             total_reward += reward
             ep_steps += 1
             done = terminated# or truncated
+            if truncated and not done:   # env resampled a new OD leg — replan
+                maybe_start_leg()
 
             # task_handler resets the episode internally on truncation, so a
             # single env.reset() covers the whole training run. But for the
@@ -130,23 +162,30 @@ def run(config, num_episodes, policy_id=None):
 
 def main():
     parser = argparse.ArgumentParser(description='Run a TRSP policy')
-    parser.add_argument('-p', '--policy', required=True,
+    parser.add_argument('-p', '--policy',
                         help="Policy ID (sub-directory name under runs/trsp/)")
+    parser.add_argument('-c', '--config',
+                        help="Config YAML path — use instead of -p for agents that need no saved policy (e.g. dijkstra)")
     parser.add_argument('-n', '--num-episodes', type=int, default=1,
-                        help='Number of episodes to run (default: 10)')
+                        help='Number of episodes to run (default: 1)')
     parser.add_argument('-r', '--render', choices=['quiet', 'print', 'human'],
                         help='Override render mode from config')
     args = parser.parse_args()
 
-    config_path = os.path.join('runs', 'trsp', args.policy, 'config.yaml')
-    if not os.path.exists(config_path):
-        raise FileNotFoundError(
-            f"No config found at {config_path}. "
-            "Run train_trsp.py first to create a policy."
-        )
-
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
+    if args.policy:
+        config_path = os.path.join('runs', 'trsp', args.policy, 'config.yaml')
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(
+                f"No config found at {config_path}. "
+                "Run train_trsp.py first to create a policy."
+            )
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+    elif args.config:
+        with open(args.config) as f:
+            config = yaml.safe_load(f)
+    else:
+        parser.error("Provide either -p <policy_id> or -c <config_path>")
 
     if args.render:
         config['simulation']['render_mode'] = args.render
