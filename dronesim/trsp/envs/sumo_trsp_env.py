@@ -1,4 +1,5 @@
 import math
+import os
 import random
 import numpy as np
 import networkx as nx
@@ -159,8 +160,24 @@ class SumoTRSPEnv(gym.Env):
 
     # ------------------------------------------------------------------ graph
 
+    def _resolve_net_path(self):
+        """Path to the .net.xml. When net_path is a .sumocfg, read its
+        <net-file> entry so a config whose basename differs from the net
+        (e.g. a *_train variant that shares one net) still resolves; fall
+        back to swapping the suffix."""
+        if not self.net_path.endswith('.sumocfg'):
+            return self.net_path
+        try:
+            import xml.etree.ElementTree as ET
+            nf = ET.parse(self.net_path).getroot().find('.//net-file')
+            if nf is not None and nf.get('value'):
+                return os.path.join(os.path.dirname(self.net_path), nf.get('value'))
+        except Exception:
+            pass
+        return self.net_path.replace('.sumocfg', '.net.xml')
+
     def build_graph(self):
-        net_path = self.net_path.replace('.sumocfg', '.net.xml')
+        net_path = self._resolve_net_path()
         ped_mode = self.fleet_type == 'delivery_robot'
         net = sumolib.net.readNet(net_path, withPedestrianConnections=ped_mode)
 

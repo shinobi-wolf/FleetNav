@@ -1,0 +1,1525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-07-02T20:10:20.506911-06:00 by Eclipse SUMO duarouter v1_27_1+0096-d202f07f261
+<duarouterConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="/home/shinobi-owl/PhD/battery/DroneSim/data/ames_ped/ames_campus_ped.net.xml"/>
+        <route-files value="/home/shinobi-owl/PhD/battery/DroneSim/data/ames_ped/vehicles.trips.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/shinobi-owl/PhD/battery/DroneSim/data/ames_ped/vehicles.rou.xml"/>
+    </output>
+
+    <report>
+        <ignore-errors value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</duarouterConfiguration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vType id="car" vClass="passenger"/>
+    <vehicle id="car_121" type="car" depart="12.18">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_226" type="car" depart="19.27">
+        <route edges="-E4 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_339" type="car" depart="20.42">
+        <route edges="-E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_95" type="car" depart="25.53">
+        <route edges="161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_374" type="car" depart="43.96">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_174" type="car" depart="146.74">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_335" type="car" depart="153.77">
+        <route edges="E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_179" type="car" depart="184.88">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_165" type="car" depart="194.16">
+        <route edges="-E3 E3 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_166" type="car" depart="195.13">
+        <route edges="161155660_to_161119012 161119012_to_1756935507 1756935507_to_2449733006 2449733006_to_161140902"/>
+    </vehicle>
+    <vehicle id="car_376" type="car" depart="220.73">
+        <route edges="-E4 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_329" type="car" depart="235.56">
+        <route edges="161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_480" type="car" depart="301.72">
+        <route edges="-E1 E4 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_391" type="car" depart="304.58">
+        <route edges="-E2 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_492" type="car" depart="304.96">
+        <route edges="E3 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_475" type="car" depart="319.22">
+        <route edges="E4 -E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_13" type="car" depart="329.94">
+        <route edges="E0 cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_29" type="car" depart="339.24">
+        <route edges="161161506_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_463" type="car" depart="343.80">
+        <route edges="161118998_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_143" type="car" depart="361.57">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_161132174"/>
+    </vehicle>
+    <vehicle id="car_65" type="car" depart="364.24">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161140902 161140902_to_2449733006 2449733006_to_1756935507 1756935507_to_2449733006"/>
+    </vehicle>
+    <vehicle id="car_215" type="car" depart="369.91">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_343" type="car" depart="377.27">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_454" type="car" depart="383.45">
+        <route edges="161119012_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 -E0"/>
+    </vehicle>
+    <vehicle id="car_74" type="car" depart="411.59">
+        <route edges="1756935469_to_1936922197 1936922197_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4"/>
+    </vehicle>
+    <vehicle id="car_43" type="car" depart="417.06">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_478" type="car" depart="454.32">
+        <route edges="E2 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_321" type="car" depart="455.16">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_351" type="car" depart="472.91">
+        <route edges="-E2 E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_360" type="car" depart="483.36">
+        <route edges="-E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_469" type="car" depart="487.29">
+        <route edges="-E2 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_408" type="car" depart="491.66">
+        <route edges="E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_83" type="car" depart="522.31">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4"/>
+    </vehicle>
+    <vehicle id="car_181" type="car" depart="547.17">
+        <route edges="161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_488" type="car" depart="568.27">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_460" type="car" depart="570.43">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_14" type="car" depart="574.50">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_76" type="car" depart="576.80">
+        <route edges="-E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_379" type="car" depart="611.69">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_2449733006 2449733006_to_1756935469"/>
+    </vehicle>
+    <vehicle id="car_198" type="car" depart="616.41">
+        <route edges="-E0 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_44" type="car" depart="616.70">
+        <route edges="cluster_161156577_161156691_to_161156565 161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_238" type="car" depart="657.55">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_94" type="car" depart="664.55">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_8" type="car" depart="667.77">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_423" type="car" depart="680.44">
+        <route edges="E2 -E2"/>
+    </vehicle>
+    <vehicle id="car_358" type="car" depart="684.62">
+        <route edges="161161497_to_161161506 161161506_to_161156565 161156565_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_361" type="car" depart="695.26">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_58" type="car" depart="697.90">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_324" type="car" depart="699.78">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_161161506 161161506_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_354" type="car" depart="714.08">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_209" type="car" depart="723.79">
+        <route edges="161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_182" type="car" depart="733.69">
+        <route edges="E3 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_462" type="car" depart="800.55">
+        <route edges="E4 -E2 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_116" type="car" depart="830.46">
+        <route edges="161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_219" type="car" depart="852.85">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_205" type="car" depart="868.72">
+        <route edges="161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_254" type="car" depart="874.27">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_333" type="car" depart="879.55">
+        <route edges="161155660_to_161119012 161119012_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_484" type="car" depart="896.22">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_336" type="car" depart="906.65">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_100" type="car" depart="917.61">
+        <route edges="E0 -E0 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_340" type="car" depart="935.94">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_153" type="car" depart="996.29">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_426" type="car" depart="1018.28">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E0"/>
+    </vehicle>
+    <vehicle id="car_287" type="car" depart="1048.10">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_161132162 161132162_to_161132174 161132174_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_402" type="car" depart="1054.40">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_416" type="car" depart="1086.20">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_39" type="car" depart="1100.44">
+        <route edges="E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_277" type="car" depart="1111.40">
+        <route edges="161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_327" type="car" depart="1112.56">
+        <route edges="161156565_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_72" type="car" depart="1114.54">
+        <route edges="1936922197_to_161140902 161140902_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4"/>
+    </vehicle>
+    <vehicle id="car_7" type="car" depart="1119.45">
+        <route edges="E3 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_225" type="car" depart="1130.81">
+        <route edges="161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_293" type="car" depart="1137.42">
+        <route edges="cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_420" type="car" depart="1142.97">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161167680 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_67" type="car" depart="1197.44">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_133" type="car" depart="1221.78">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_18" type="car" depart="1232.20">
+        <route edges="E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_476" type="car" depart="1260.64">
+        <route edges="1756935507_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_142" type="car" depart="1266.38">
+        <route edges="-E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161160292 161160292_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_37" type="car" depart="1286.29">
+        <route edges="161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_210" type="car" depart="1291.98">
+        <route edges="161035628_to_161118998 161118998_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_195" type="car" depart="1309.25">
+        <route edges="-E0 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_62" type="car" depart="1369.50">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_136" type="car" depart="1433.74">
+        <route edges="E3 -E3 161118998_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_92" type="car" depart="1465.90">
+        <route edges="E0 -E0 E4"/>
+    </vehicle>
+    <vehicle id="car_224" type="car" depart="1496.07">
+        <route edges="E4 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_102" type="car" depart="1512.55">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_168" type="car" depart="1523.95">
+        <route edges="-E1 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_161132162 161132162_to_161132174 161132174_to_161132183 161132183_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_433" type="car" depart="1542.19">
+        <route edges="161132162_to_161132174 161132174_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_356" type="car" depart="1548.17">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E4"/>
+    </vehicle>
+    <vehicle id="car_207" type="car" depart="1557.97">
+        <route edges="cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_201" type="car" depart="1595.49">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_51" type="car" depart="1617.82">
+        <route edges="161167680_to_161132174 161132174_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_434" type="car" depart="1631.11">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161160292"/>
+    </vehicle>
+    <vehicle id="car_112" type="car" depart="1638.69">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_52" type="car" depart="1656.83">
+        <route edges="161119012_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_319" type="car" depart="1683.52">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_441" type="car" depart="1710.22">
+        <route edges="161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_342" type="car" depart="1713.11">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_255" type="car" depart="1722.94">
+        <route edges="cluster_1936930172_5129428396_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E0"/>
+    </vehicle>
+    <vehicle id="car_466" type="car" depart="1741.95">
+        <route edges="-E0 E4 -E2 161167680_to_161132174"/>
+    </vehicle>
+    <vehicle id="car_193" type="car" depart="1755.82">
+        <route edges="-E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_448" type="car" depart="1800.02">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_295" type="car" depart="1800.71">
+        <route edges="E2 -E2 161167680_to_161161506 161161506_to_161160292 161160292_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_170" type="car" depart="1816.36">
+        <route edges="E4 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_472" type="car" depart="1826.28">
+        <route edges="E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_1936922197"/>
+    </vehicle>
+    <vehicle id="car_291" type="car" depart="1828.64">
+        <route edges="-E4 E4 -E2 161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_387" type="car" depart="1839.74">
+        <route edges="161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_149" type="car" depart="1866.18">
+        <route edges="E4 -E2 161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_96" type="car" depart="1886.08">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2"/>
+    </vehicle>
+    <vehicle id="car_85" type="car" depart="1909.44">
+        <route edges="-E2 E2 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_34" type="car" depart="1921.14">
+        <route edges="E3 -E2 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_152" type="car" depart="1956.35">
+        <route edges="-E2 E2 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_91" type="car" depart="1960.91">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_cluster_161136333_161136435"/>
+    </vehicle>
+    <vehicle id="car_451" type="car" depart="1964.10">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_161132162"/>
+    </vehicle>
+    <vehicle id="car_382" type="car" depart="1966.80">
+        <route edges="161161506_to_161160292 161160292_to_161161497 161161497_to_161160292"/>
+    </vehicle>
+    <vehicle id="car_211" type="car" depart="1975.04">
+        <route edges="-E0 E4 -E2 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_299" type="car" depart="1976.26">
+        <route edges="cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_151" type="car" depart="1977.10">
+        <route edges="161167680_to_161161506 161161506_to_161167680 E2 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_409" type="car" depart="1977.65">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_0" type="car" depart="1980.21">
+        <route edges="E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_197" type="car" depart="1989.13">
+        <route edges="cluster_161156577_161156691_to_161156565 161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 E3"/>
+    </vehicle>
+    <vehicle id="car_15" type="car" depart="2001.41">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_63" type="car" depart="2005.53">
+        <route edges="161161497_to_161161506 161161506_to_161156565 161156565_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_114" type="car" depart="2009.70">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_246" type="car" depart="2075.17">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_234" type="car" depart="2078.00">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_2449733006 2449733006_to_1756935469"/>
+    </vehicle>
+    <vehicle id="car_227" type="car" depart="2097.07">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_479" type="car" depart="2112.79">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_298" type="car" depart="2125.66">
+        <route edges="E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_38" type="car" depart="2148.80">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_265" type="car" depart="2149.60">
+        <route edges="cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_161119012 161119012_to_161035628 161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_386" type="car" depart="2170.22">
+        <route edges="E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_322" type="car" depart="2175.77">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_233" type="car" depart="2214.81">
+        <route edges="-E2 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_306" type="car" depart="2224.32">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_443" type="car" depart="2228.17">
+        <route edges="161161497_to_161161506 161161506_to_161167680 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_410" type="car" depart="2234.94">
+        <route edges="-E1 E4 -E2 161167680_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_49" type="car" depart="2244.36">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_22" type="car" depart="2271.26">
+        <route edges="161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0"/>
+    </vehicle>
+    <vehicle id="car_280" type="car" depart="2279.96">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_161132162 161132162_to_161132174 161132174_to_161132183 161132183_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_248" type="car" depart="2327.57">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_41" type="car" depart="2333.92">
+        <route edges="161167680_to_161161506 161161506_to_161167680 E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_394" type="car" depart="2338.33">
+        <route edges="-E3 161118998_to_cluster_161163235_161167933 -E0"/>
+    </vehicle>
+    <vehicle id="car_113" type="car" depart="2363.49">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_338" type="car" depart="2365.63">
+        <route edges="161035628_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_363" type="car" depart="2373.45">
+        <route edges="E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_1936922197 1936922197_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_124" type="car" depart="2377.44">
+        <route edges="-E2 E2 -E3 E3"/>
+    </vehicle>
+    <vehicle id="car_107" type="car" depart="2391.74">
+        <route edges="-E0 E4"/>
+    </vehicle>
+    <vehicle id="car_437" type="car" depart="2424.70">
+        <route edges="cluster_161156577_161156691_to_161167680 E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_278" type="car" depart="2437.64">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_357" type="car" depart="2440.31">
+        <route edges="161161497_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_61" type="car" depart="2442.98">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_161140902"/>
+    </vehicle>
+    <vehicle id="car_398" type="car" depart="2444.50">
+        <route edges="161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_196" type="car" depart="2450.44">
+        <route edges="161035628_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_473" type="car" depart="2482.58">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_267" type="car" depart="2484.89">
+        <route edges="-E4 E4 -E2 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_244" type="car" depart="2505.32">
+        <route edges="161161506_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_366" type="car" depart="2531.85">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E0"/>
+    </vehicle>
+    <vehicle id="car_332" type="car" depart="2582.45">
+        <route edges="1756935469_to_2449733006 2449733006_to_161140902 161140902_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_251" type="car" depart="2604.81">
+        <route edges="161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_432" type="car" depart="2605.16">
+        <route edges="E2 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161156565 161156565_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_495" type="car" depart="2615.84">
+        <route edges="-E2 E2"/>
+    </vehicle>
+    <vehicle id="car_123" type="car" depart="2622.39">
+        <route edges="E4 -E3 E3"/>
+    </vehicle>
+    <vehicle id="car_16" type="car" depart="2665.30">
+        <route edges="E2 -E2 161167680_to_161132174 161132174_to_161132162 161132162_to_161163571"/>
+    </vehicle>
+    <vehicle id="car_185" type="car" depart="2668.11">
+        <route edges="161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161160292 161160292_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_359" type="car" depart="2694.97">
+        <route edges="161160292_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_438" type="car" depart="2712.38">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_10781666516_381264753 cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_194" type="car" depart="2728.72">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_169" type="car" depart="2729.71">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_10781666516_381264753 cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933"/>
+    </vehicle>
+    <vehicle id="car_19" type="car" depart="2732.08">
+        <route edges="E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_158" type="car" depart="2738.74">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_161132162"/>
+    </vehicle>
+    <vehicle id="car_31" type="car" depart="2747.66">
+        <route edges="161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E2"/>
+    </vehicle>
+    <vehicle id="car_446" type="car" depart="2749.48">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_261" type="car" depart="2761.82">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006"/>
+    </vehicle>
+    <vehicle id="car_296" type="car" depart="2769.79">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_385" type="car" depart="2845.90">
+        <route edges="E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1"/>
+    </vehicle>
+    <vehicle id="car_375" type="car" depart="2885.65">
+        <route edges="cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006 2449733006_to_161140902"/>
+    </vehicle>
+    <vehicle id="car_68" type="car" depart="2887.49">
+        <route edges="161161506_to_161160292 161160292_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_349" type="car" depart="2891.64">
+        <route edges="-E2 161167680_to_161161506 161161506_to_161156565"/>
+    </vehicle>
+    <vehicle id="car_126" type="car" depart="2897.28">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_421" type="car" depart="2943.14">
+        <route edges="161132174_to_161167680 E2 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_138" type="car" depart="2983.98">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_393" type="car" depart="3007.40">
+        <route edges="E0 cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_160" type="car" depart="3016.95">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_377" type="car" depart="3022.79">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_156" type="car" depart="3025.03">
+        <route edges="161156565_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_127" type="car" depart="3027.21">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_2" type="car" depart="3037.84">
+        <route edges="cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_203" type="car" depart="3063.63">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E2 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_491" type="car" depart="3068.04">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E0"/>
+    </vehicle>
+    <vehicle id="car_97" type="car" depart="3079.35">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_cluster_161136333_161136435"/>
+    </vehicle>
+    <vehicle id="car_130" type="car" depart="3095.19">
+        <route edges="-E0 E4 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_383" type="car" depart="3095.38">
+        <route edges="E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_237" type="car" depart="3110.61">
+        <route edges="-E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1"/>
+    </vehicle>
+    <vehicle id="car_118" type="car" depart="3128.86">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_35" type="car" depart="3130.31">
+        <route edges="E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_162" type="car" depart="3138.02">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_452" type="car" depart="3149.80">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E4"/>
+    </vehicle>
+    <vehicle id="car_440" type="car" depart="3151.25">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_419" type="car" depart="3151.86">
+        <route edges="-E4 E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_50" type="car" depart="3154.32">
+        <route edges="cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_275" type="car" depart="3170.20">
+        <route edges="cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161132183"/>
+    </vehicle>
+    <vehicle id="car_64" type="car" depart="3190.54">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_221" type="car" depart="3243.70">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E2 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_453" type="car" depart="3248.12">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_325" type="car" depart="3266.24">
+        <route edges="cluster_161156577_161156691_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_317" type="car" depart="3274.46">
+        <route edges="-E0 E4 -E2 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_70" type="car" depart="3276.06">
+        <route edges="161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_268" type="car" depart="3278.48">
+        <route edges="1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006 2449733006_to_1756935469 1756935469_to_2449733006"/>
+    </vehicle>
+    <vehicle id="car_144" type="car" depart="3286.53">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_464" type="car" depart="3291.22">
+        <route edges="161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_25" type="car" depart="3303.73">
+        <route edges="161155660_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_111" type="car" depart="3314.18">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435"/>
+    </vehicle>
+    <vehicle id="car_167" type="car" depart="3324.23">
+        <route edges="E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_413" type="car" depart="3331.52">
+        <route edges="E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 161167680_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_131" type="car" depart="3347.91">
+        <route edges="E0 -E0 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_59" type="car" depart="3362.58">
+        <route edges="161160292_to_161161506 161161506_to_161156565 161156565_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_164" type="car" depart="3365.21">
+        <route edges="161155660_to_161140902 161140902_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E4"/>
+    </vehicle>
+    <vehicle id="car_214" type="car" depart="3379.66">
+        <route edges="cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_471" type="car" depart="3384.97">
+        <route edges="1936922197_to_161140902 161140902_to_2449733006"/>
+    </vehicle>
+    <vehicle id="car_132" type="car" depart="3406.94">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_137" type="car" depart="3420.98">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_46" type="car" depart="3422.03">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_10781666516_381264753 cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_384" type="car" depart="3503.76">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_93" type="car" depart="3517.43">
+        <route edges="E2 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_328" type="car" depart="3523.30">
+        <route edges="161156565_to_161161506 161161506_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_266" type="car" depart="3525.41">
+        <route edges="E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_200" type="car" depart="3533.91">
+        <route edges="E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_213" type="car" depart="3534.33">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_236" type="car" depart="3555.33">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_273" type="car" depart="3566.37">
+        <route edges="cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006 2449733006_to_161140902 161140902_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_1936922197"/>
+    </vehicle>
+    <vehicle id="car_301" type="car" depart="3576.44">
+        <route edges="-E1 E0"/>
+    </vehicle>
+    <vehicle id="car_418" type="car" depart="3632.75">
+        <route edges="161119012_to_161035628 161035628_to_161118998 E3 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_147" type="car" depart="3634.40">
+        <route edges="E1 -E1 E4"/>
+    </vehicle>
+    <vehicle id="car_3" type="car" depart="3638.56">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_264" type="car" depart="3655.71">
+        <route edges="161156565_to_161161506 161161506_to_161167680 E2 -E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_259" type="car" depart="3663.88">
+        <route edges="161161506_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_399" type="car" depart="3675.48">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_345" type="car" depart="3695.31">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_249" type="car" depart="3705.09">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161140902"/>
+    </vehicle>
+    <vehicle id="car_487" type="car" depart="3738.79">
+        <route edges="161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_80" type="car" depart="3764.04">
+        <route edges="161156565_to_161161506 161161506_to_161167680 E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_397" type="car" depart="3772.53">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_431" type="car" depart="3790.03">
+        <route edges="E4 -E3 E3"/>
+    </vehicle>
+    <vehicle id="car_353" type="car" depart="3820.01">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_206" type="car" depart="3858.22">
+        <route edges="161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_10" type="car" depart="3860.84">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_190" type="car" depart="3874.84">
+        <route edges="161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_48" type="car" depart="3882.93">
+        <route edges="161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_309" type="car" depart="3883.74">
+        <route edges="-E4 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_171" type="car" depart="3883.82">
+        <route edges="-E2 E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_250" type="car" depart="3906.67">
+        <route edges="cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_155" type="car" depart="3906.80">
+        <route edges="-E2 E2 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_231" type="car" depart="3920.85">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161160292 161160292_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_489" type="car" depart="3927.42">
+        <route edges="E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_129" type="car" depart="3945.15">
+        <route edges="E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_352" type="car" depart="3948.17">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_461" type="car" depart="3951.39">
+        <route edges="161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_247" type="car" depart="3960.70">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_11" type="car" depart="3974.69">
+        <route edges="cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161132183 161132183_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_256" type="car" depart="3976.21">
+        <route edges="-E4 E4 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_2449733006"/>
+    </vehicle>
+    <vehicle id="car_449" type="car" depart="3992.69">
+        <route edges="E2 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161132183"/>
+    </vehicle>
+    <vehicle id="car_362" type="car" depart="4005.87">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_20" type="car" depart="4010.04">
+        <route edges="cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_26" type="car" depart="4041.85">
+        <route edges="161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_320" type="car" depart="4042.13">
+        <route edges="-E0 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_218" type="car" depart="4052.45">
+        <route edges="-E1 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_406" type="car" depart="4064.34">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_499" type="car" depart="4084.16">
+        <route edges="161132162_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161140902 161140902_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_297" type="car" depart="4117.84">
+        <route edges="161161506_to_161160292 161160292_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_369" type="car" depart="4133.52">
+        <route edges="161132162_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_10781666516_381264753 cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933"/>
+    </vehicle>
+    <vehicle id="car_239" type="car" depart="4141.43">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_120" type="car" depart="4151.43">
+        <route edges="161161506_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_161140902 161140902_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_73" type="car" depart="4170.10">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_202" type="car" depart="4187.20">
+        <route edges="E3 -E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_294" type="car" depart="4230.52">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_5" type="car" depart="4242.71">
+        <route edges="1756935469_to_2449733006 2449733006_to_1756935507 1756935507_to_161119012 161119012_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_274" type="car" depart="4249.30">
+        <route edges="-E0 E4 -E2 161167680_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_465" type="car" depart="4296.52">
+        <route edges="-E3 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_183" type="car" depart="4322.96">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_161" type="car" depart="4343.42">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_9" type="car" depart="4346.83">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_119" type="car" depart="4364.70">
+        <route edges="E4 -E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_177" type="car" depart="4372.18">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_10781666516_381264753 cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_223" type="car" depart="4389.34">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E1"/>
+    </vehicle>
+    <vehicle id="car_467" type="car" depart="4426.63">
+        <route edges="-E4 E4 -E2 161167680_to_161161506 161161506_to_161160292 161160292_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_380" type="car" depart="4448.43">
+        <route edges="-E1 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_79" type="car" depart="4459.55">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_104" type="car" depart="4468.76">
+        <route edges="cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_305" type="car" depart="4523.39">
+        <route edges="E3 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_217" type="car" depart="4532.01">
+        <route edges="161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E2"/>
+    </vehicle>
+    <vehicle id="car_53" type="car" depart="4543.94">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E2"/>
+    </vehicle>
+    <vehicle id="car_282" type="car" depart="4544.36">
+        <route edges="-E0 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_134" type="car" depart="4557.17">
+        <route edges="-E2 161167680_to_161132174"/>
+    </vehicle>
+    <vehicle id="car_284" type="car" depart="4562.98">
+        <route edges="161160292_to_161161506 161161506_to_161167680 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_243" type="car" depart="4570.45">
+        <route edges="-E4 E0"/>
+    </vehicle>
+    <vehicle id="car_303" type="car" depart="4583.65">
+        <route edges="E0 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_371" type="car" depart="4627.43">
+        <route edges="cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006 2449733006_to_161140902 161140902_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E1"/>
+    </vehicle>
+    <vehicle id="car_4" type="car" depart="4679.17">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_172" type="car" depart="4681.04">
+        <route edges="cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_355" type="car" depart="4686.60">
+        <route edges="E3 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_415" type="car" depart="4693.23">
+        <route edges="161161497_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_24" type="car" depart="4719.16">
+        <route edges="cluster_161156577_161156691_to_161132183 161132183_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_140" type="car" depart="4723.62">
+        <route edges="161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_367" type="car" depart="4728.50">
+        <route edges="E0 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_490" type="car" depart="4758.62">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_341" type="car" depart="4759.62">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E4"/>
+    </vehicle>
+    <vehicle id="car_230" type="car" depart="4760.52">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_381" type="car" depart="4765.96">
+        <route edges="E3 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_334" type="car" depart="4771.93">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_272" type="car" depart="4778.56">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006 2449733006_to_161140902 161140902_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_468" type="car" depart="4783.47">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161156565 161156565_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_364" type="car" depart="4790.45">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_55" type="car" depart="4816.64">
+        <route edges="-E2 E2 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_175" type="car" depart="4820.10">
+        <route edges="-E4 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_82" type="car" depart="4836.17">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_240" type="car" depart="4840.43">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_77" type="car" depart="4861.53">
+        <route edges="-E4 E0"/>
+    </vehicle>
+    <vehicle id="car_1" type="car" depart="4872.24">
+        <route edges="161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4"/>
+    </vehicle>
+    <vehicle id="car_163" type="car" depart="4889.82">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_331" type="car" depart="4936.90">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_285" type="car" depart="4996.81">
+        <route edges="cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_477" type="car" depart="5006.80">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_157" type="car" depart="5007.77">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_139" type="car" depart="5013.75">
+        <route edges="E2 -E3 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_212" type="car" depart="5021.41">
+        <route edges="cluster_1936930172_5129428396_to_161155660 161155660_to_161140902 161140902_to_2449733006 2449733006_to_1756935507 1756935507_to_cluster_161136333_161136435"/>
+    </vehicle>
+    <vehicle id="car_269" type="car" depart="5021.99">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_427" type="car" depart="5029.06">
+        <route edges="161119012_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_176" type="car" depart="5036.15">
+        <route edges="2449733006_to_161140902 161140902_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_235" type="car" depart="5038.08">
+        <route edges="-E3 E3"/>
+    </vehicle>
+    <vehicle id="car_373" type="car" depart="5059.43">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3 -E4"/>
+    </vehicle>
+    <vehicle id="car_204" type="car" depart="5060.56">
+        <route edges="E4 -E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_228" type="car" depart="5061.51">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_389" type="car" depart="5066.43">
+        <route edges="-E4 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_161132162 161132162_to_161132174 161132174_to_161132183 161132183_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_271" type="car" depart="5077.64">
+        <route edges="-E1 E4"/>
+    </vehicle>
+    <vehicle id="car_459" type="car" depart="5079.86">
+        <route edges="E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_154" type="car" depart="5086.22">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_188" type="car" depart="5092.62">
+        <route edges="E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_81" type="car" depart="5156.58">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_122" type="car" depart="5179.90">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E2 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_125" type="car" depart="5182.23">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_33" type="car" depart="5189.20">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0"/>
+    </vehicle>
+    <vehicle id="car_304" type="car" depart="5190.68">
+        <route edges="E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 E3"/>
+    </vehicle>
+    <vehicle id="car_365" type="car" depart="5191.64">
+        <route edges="E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507"/>
+    </vehicle>
+    <vehicle id="car_378" type="car" depart="5195.49">
+        <route edges="161119012_to_161035628 161035628_to_161118998 E3 -E2 161167680_to_161132174 161132174_to_161132183"/>
+    </vehicle>
+    <vehicle id="car_276" type="car" depart="5201.60">
+        <route edges="161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_424" type="car" depart="5210.88">
+        <route edges="E3 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_191" type="car" depart="5263.39">
+        <route edges="161161506_to_161160292 161160292_to_161161497 161161497_to_161160292 161160292_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_307" type="car" depart="5272.99">
+        <route edges="161161497_to_161160292 161160292_to_161161506 161161506_to_161167680 E2 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_485" type="car" depart="5351.82">
+        <route edges="161132174_to_161132162 161132162_to_161132174 161132174_to_161132183 161132183_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933"/>
+    </vehicle>
+    <vehicle id="car_300" type="car" depart="5361.62">
+        <route edges="2449733006_to_161140902 161140902_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_344" type="car" depart="5368.79">
+        <route edges="E4 -E2 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_312" type="car" depart="5375.23">
+        <route edges="161161506_to_161156565 161156565_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_283" type="car" depart="5376.72">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_388" type="car" depart="5378.50">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0"/>
+    </vehicle>
+    <vehicle id="car_308" type="car" depart="5381.86">
+        <route edges="-E3 161118998_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_442" type="car" depart="5389.46">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_135" type="car" depart="5408.19">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435"/>
+    </vehicle>
+    <vehicle id="car_482" type="car" depart="5423.69">
+        <route edges="1756935469_to_2449733006 2449733006_to_1756935507 1756935507_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_159" type="car" depart="5425.02">
+        <route edges="-E0 E4 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_173" type="car" depart="5430.48">
+        <route edges="cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_241" type="car" depart="5445.14">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1"/>
+    </vehicle>
+    <vehicle id="car_199" type="car" depart="5458.79">
+        <route edges="E4 -E2 161167680_to_161161506 161161506_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_405" type="car" depart="5471.12">
+        <route edges="161161506_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_252" type="car" depart="5471.93">
+        <route edges="E4 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_403" type="car" depart="5473.55">
+        <route edges="161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_45" type="car" depart="5476.34">
+        <route edges="161161506_to_161160292 161160292_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E2"/>
+    </vehicle>
+    <vehicle id="car_337" type="car" depart="5509.13">
+        <route edges="2449733006_to_161140902 161140902_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E2"/>
+    </vehicle>
+    <vehicle id="car_150" type="car" depart="5513.86">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2"/>
+    </vehicle>
+    <vehicle id="car_141" type="car" depart="5544.33">
+        <route edges="-E0 E4"/>
+    </vehicle>
+    <vehicle id="car_439" type="car" depart="5551.90">
+        <route edges="-E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_474" type="car" depart="5554.81">
+        <route edges="E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_404" type="car" depart="5564.51">
+        <route edges="E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_270" type="car" depart="5583.92">
+        <route edges="E0 cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_21" type="car" depart="5587.20">
+        <route edges="E3 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_498" type="car" depart="5605.31">
+        <route edges="-E0 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_40" type="car" depart="5606.11">
+        <route edges="cluster_10781666516_381264753_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 161167680_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_103" type="car" depart="5616.84">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_483" type="car" depart="5622.06">
+        <route edges="161035628_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_497" type="car" depart="5625.45">
+        <route edges="-E4 E0"/>
+    </vehicle>
+    <vehicle id="car_184" type="car" depart="5634.97">
+        <route edges="-E3 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_1936922197"/>
+    </vehicle>
+    <vehicle id="car_57" type="car" depart="5649.26">
+        <route edges="2449733006_to_1756935507 1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_109" type="car" depart="5669.10">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_422" type="car" depart="5682.43">
+        <route edges="161119012_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_263" type="car" depart="5688.04">
+        <route edges="cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_316" type="car" depart="5692.91">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 161167680_to_161132174 161132174_to_161132162 161132162_to_cluster_10781666531_10781666539_1454602029_2010155933"/>
+    </vehicle>
+    <vehicle id="car_220" type="car" depart="5693.33">
+        <route edges="cluster_10781666531_10781666539_1454602029_2010155933_to_161132162 161132162_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0"/>
+    </vehicle>
+    <vehicle id="car_457" type="car" depart="5697.94">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_429" type="car" depart="5699.97">
+        <route edges="161118998_to_cluster_161163235_161167933 -E0 E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161132183 161132183_to_161132174"/>
+    </vehicle>
+    <vehicle id="car_30" type="car" depart="5702.97">
+        <route edges="-E3 E3 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_288" type="car" depart="5706.14">
+        <route edges="161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_cluster_161136333_161136435 cluster_161136333_161136435_to_1756935507 1756935507_to_2449733006 2449733006_to_161140902"/>
+    </vehicle>
+    <vehicle id="car_101" type="car" depart="5732.08">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_286" type="car" depart="5732.23">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1"/>
+    </vehicle>
+    <vehicle id="car_302" type="car" depart="5751.79">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_292" type="car" depart="5793.36">
+        <route edges="161118998_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 -E0"/>
+    </vehicle>
+    <vehicle id="car_6" type="car" depart="5801.90">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_390" type="car" depart="5804.64">
+        <route edges="161161506_to_161167680 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_447" type="car" depart="5881.62">
+        <route edges="161167680_to_161161506 161161506_to_161167680 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_89" type="car" depart="5883.15">
+        <route edges="E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_401" type="car" depart="5896.43">
+        <route edges="161119012_to_161035628 161035628_to_161118998 E3 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_178" type="car" depart="5898.97">
+        <route edges="E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_216" type="car" depart="5919.23">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161156565"/>
+    </vehicle>
+    <vehicle id="car_318" type="car" depart="5921.40">
+        <route edges="E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_311" type="car" depart="5937.77">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_232" type="car" depart="5951.74">
+        <route edges="E2 -E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_430" type="car" depart="5968.50">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_372" type="car" depart="5972.12">
+        <route edges="-E0 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_458" type="car" depart="5974.28">
+        <route edges="-E3 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_192" type="car" depart="5981.26">
+        <route edges="161118998_to_161035628 161035628_to_161118998 161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_411" type="car" depart="5988.22">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E2"/>
+    </vehicle>
+    <vehicle id="car_395" type="car" depart="5990.59">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_258" type="car" depart="5991.43">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_87" type="car" depart="6002.96">
+        <route edges="161132174_to_161132162 161132162_to_161132174 161132174_to_161167680 E2 -E4"/>
+    </vehicle>
+    <vehicle id="car_99" type="car" depart="6009.08">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_444" type="car" depart="6012.82">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_436" type="car" depart="6012.86">
+        <route edges="-E3 E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_435" type="car" depart="6079.88">
+        <route edges="-E3 E3 -E2"/>
+    </vehicle>
+    <vehicle id="car_396" type="car" depart="6080.29">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_368" type="car" depart="6086.69">
+        <route edges="161035628_to_161119012 161119012_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_186" type="car" depart="6116.94">
+        <route edges="161161506_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_450" type="car" depart="6128.40">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_279" type="car" depart="6132.71">
+        <route edges="E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_75" type="car" depart="6139.58">
+        <route edges="E0 -E0 E4 -E2 161167680_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_412" type="car" depart="6158.11">
+        <route edges="-E2 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_245" type="car" depart="6175.68">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_110" type="car" depart="6181.87">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_54" type="car" depart="6189.37">
+        <route edges="161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_314" type="car" depart="6193.01">
+        <route edges="-E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_12" type="car" depart="6204.29">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E1"/>
+    </vehicle>
+    <vehicle id="car_392" type="car" depart="6207.19">
+        <route edges="-E0 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_108" type="car" depart="6221.26">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_407" type="car" depart="6222.58">
+        <route edges="E2 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_105" type="car" depart="6225.16">
+        <route edges="-E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_347" type="car" depart="6242.26">
+        <route edges="-E1 E4 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_289" type="car" depart="6270.05">
+        <route edges="-E4 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_281" type="car" depart="6281.16">
+        <route edges="E4 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_10781666516_381264753 cluster_10781666516_381264753_to_161163571"/>
+    </vehicle>
+    <vehicle id="car_47" type="car" depart="6281.52">
+        <route edges="1756935507_to_2449733006 2449733006_to_1756935507 1756935507_to_161119012 161119012_to_161035628 161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_425" type="car" depart="6287.61">
+        <route edges="E2 -E4 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_36" type="car" depart="6306.14">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_42" type="car" depart="6326.80">
+        <route edges="-E0 E0 cluster_161163235_161167933_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_86" type="car" depart="6330.75">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161156565"/>
+    </vehicle>
+    <vehicle id="car_262" type="car" depart="6331.15">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_106" type="car" depart="6346.20">
+        <route edges="cluster_1936930172_5129428396_to_161155660 161155660_to_161119012 161119012_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_98" type="car" depart="6358.37">
+        <route edges="-E0 E4 -E2"/>
+    </vehicle>
+    <vehicle id="car_78" type="car" depart="6410.07">
+        <route edges="161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_146" type="car" depart="6418.27">
+        <route edges="E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_414" type="car" depart="6450.31">
+        <route edges="1936922197_to_161140902 161140902_to_2449733006 2449733006_to_1756935507 1756935507_to_cluster_161136333_161136435 cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_148" type="car" depart="6459.90">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660 161155660_to_161140902 161140902_to_2449733006 2449733006_to_1756935507 1756935507_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_27" type="car" depart="6464.32">
+        <route edges="161118998_to_161035628 161035628_to_161118998 E3 -E4 E0"/>
+    </vehicle>
+    <vehicle id="car_417" type="car" depart="6473.71">
+        <route edges="-E2 E2 -E3"/>
+    </vehicle>
+    <vehicle id="car_128" type="car" depart="6500.20">
+        <route edges="cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_400" type="car" depart="6522.64">
+        <route edges="-E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_350" type="car" depart="6549.85">
+        <route edges="E3 -E2 161167680_to_161161506 161161506_to_161161497"/>
+    </vehicle>
+    <vehicle id="car_290" type="car" depart="6572.37">
+        <route edges="E1 cluster_10781666531_10781666539_1454602029_2010155933_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_257" type="car" depart="6573.10">
+        <route edges="-E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_310" type="car" depart="6577.11">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_242" type="car" depart="6595.72">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3 -E2 E2"/>
+    </vehicle>
+    <vehicle id="car_229" type="car" depart="6652.16">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_253" type="car" depart="6679.24">
+        <route edges="161035628_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_1756935507 1756935507_to_2449733006"/>
+    </vehicle>
+    <vehicle id="car_456" type="car" depart="6701.95">
+        <route edges="161132174_to_161167680 E2 -E4 E0 -E0"/>
+    </vehicle>
+    <vehicle id="car_56" type="car" depart="6735.70">
+        <route edges="161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_17" type="car" depart="6743.91">
+        <route edges="161035628_to_161118998 161118998_to_161035628"/>
+    </vehicle>
+    <vehicle id="car_428" type="car" depart="6753.62">
+        <route edges="161140902_to_2449733006 2449733006_to_161140902 161140902_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E0"/>
+    </vehicle>
+    <vehicle id="car_90" type="car" depart="6760.30">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_23" type="car" depart="6788.95">
+        <route edges="161118998_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_346" type="car" depart="6806.99">
+        <route edges="-E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161161497 161161497_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_326" type="car" depart="6811.01">
+        <route edges="E3 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_323" type="car" depart="6813.08">
+        <route edges="161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_494" type="car" depart="6824.91">
+        <route edges="161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_330" type="car" depart="6844.00">
+        <route edges="161132174_to_161132183 161132183_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161167680 161167680_to_161161506 161161506_to_161161497 161161497_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_496" type="car" depart="6860.08">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_180" type="car" depart="6898.84">
+        <route edges="161118998_to_cluster_161163235_161167933 cluster_161163235_161167933_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_187" type="car" depart="6917.67">
+        <route edges="cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E3"/>
+    </vehicle>
+    <vehicle id="car_117" type="car" depart="6930.25">
+        <route edges="cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E4"/>
+    </vehicle>
+    <vehicle id="car_313" type="car" depart="6932.83">
+        <route edges="161119012_to_161035628 161035628_to_161118998 E3 -E3"/>
+    </vehicle>
+    <vehicle id="car_348" type="car" depart="6940.99">
+        <route edges="161167680_to_161161506 161161506_to_161161497 161161497_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_189" type="car" depart="6951.41">
+        <route edges="161160292_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_315" type="car" depart="6964.34">
+        <route edges="E4 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_66" type="car" depart="6976.77">
+        <route edges="cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_32" type="car" depart="6991.76">
+        <route edges="cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933 -E0 E4 -E2 161167680_to_161161506"/>
+    </vehicle>
+    <vehicle id="car_486" type="car" depart="7010.81">
+        <route edges="cluster_161163235_161167933_to_161118998 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_161140902 161140902_to_161155660"/>
+    </vehicle>
+    <vehicle id="car_370" type="car" depart="7016.74">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_208" type="car" depart="7031.57">
+        <route edges="161161506_to_161160292 161160292_to_161161497 161161497_to_161161506 161161506_to_161167680 E2 -E4 E4"/>
+    </vehicle>
+    <vehicle id="car_260" type="car" depart="7057.76">
+        <route edges="161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_161163235_161167933"/>
+    </vehicle>
+    <vehicle id="car_115" type="car" depart="7064.28">
+        <route edges="E2 -E3 161118998_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_161119012"/>
+    </vehicle>
+    <vehicle id="car_60" type="car" depart="7085.99">
+        <route edges="E4 -E3 E3"/>
+    </vehicle>
+    <vehicle id="car_445" type="car" depart="7087.97">
+        <route edges="161132162_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_69" type="car" depart="7094.22">
+        <route edges="-E2 161167680_to_cluster_161156577_161156691 cluster_161156577_161156691_to_161132183 161132183_to_cluster_161156577_161156691"/>
+    </vehicle>
+    <vehicle id="car_88" type="car" depart="7108.08">
+        <route edges="E3 -E4 E1"/>
+    </vehicle>
+    <vehicle id="car_145" type="car" depart="7112.83">
+        <route edges="cluster_161035662_161035665_to_161161497 161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161118998 E3"/>
+    </vehicle>
+    <vehicle id="car_470" type="car" depart="7115.99">
+        <route edges="161167680_to_161161506 161161506_to_161167680"/>
+    </vehicle>
+    <vehicle id="car_481" type="car" depart="7121.68">
+        <route edges="cluster_161163235_161167933_to_161118998 E3 -E2 161167680_to_161132174"/>
+    </vehicle>
+    <vehicle id="car_222" type="car" depart="7128.23">
+        <route edges="161161497_to_161161506 161161506_to_161167680 E2 -E4 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631 cluster_161125851_1756110631_to_cluster_1936930172_5129428396"/>
+    </vehicle>
+    <vehicle id="car_455" type="car" depart="7160.58">
+        <route edges="161161506_to_161167680 E2 -E3 161118998_to_161035628 161035628_to_cluster_161035662_161035665"/>
+    </vehicle>
+    <vehicle id="car_71" type="car" depart="7167.04">
+        <route edges="161156565_to_cluster_161156577_161156691 cluster_161156577_161156691_to_cluster_10781666531_10781666539_1454602029_2010155933 -E1 E0 cluster_161163235_161167933_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_84" type="car" depart="7171.89">
+        <route edges="161161497_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_161155660 161155660_to_cluster_1936930172_5129428396 cluster_1936930172_5129428396_to_cluster_161125851_1756110631"/>
+    </vehicle>
+    <vehicle id="car_28" type="car" depart="7182.27">
+        <route edges="161155660_to_161119012 161119012_to_161035628 161035628_to_161118998"/>
+    </vehicle>
+    <vehicle id="car_493" type="car" depart="7186.68">
+        <route edges="cluster_161136333_161136435_to_cluster_161035662_161035665 cluster_161035662_161035665_to_161035628 161035628_to_161119012 161119012_to_161155660"/>
+    </vehicle>
+</routes>

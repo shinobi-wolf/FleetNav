@@ -1,0 +1,51 @@
+# TRSP ped training — rand_grid network, SARSA-PED (tabular, on-policy TD).
+# Trains on the reduced 2000-ped TRAIN scenario for speed. For eval/inference,
+# edit the saved runs/trsp/<id>/config.yaml: point net.net_path at the FULL
+# sumocfg (data/rand_grid_road_ped/rand_grid_road_ped.sumocfg) and restore
+# traffic.ped_speed_override.gamma to gamma_eval (0.02).
+net:
+  net_path: data/rand_grid_road_ped/rand_grid_road_ped_train.sumocfg
+  max_degree: 5
+
+fleet:
+  type: delivery_robot   # delivery_robot | ev
+  max_speed: 5           # km/h
+  delivery_robot:
+    width: 1.8           # metres
+    length: 0.8          # metres
+    max_speed_factor: 1  # multiplier of default pedestrian max_speed
+
+sumo:
+  step_length: 5
+  traffic_scale: 1
+  delay: 0
+
+traffic:
+  model: ped
+  ped_speed_override:
+    enabled: true
+    gamma: 0.0067         # TRAIN sensitivity = gamma_eval(0.02) * (N_train/N_eval = 1/3);
+                          #   restore 0.02 for eval on the full 6000-ped set.
+    density_jam: 5.4      # ped/m² jam density (v -> v_min); ~irrelevant at these densities
+    v_min: 0.1            # m/s floor to avoid permanent stall
+
+simulation:
+  max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
+  max_steps: 50           # env steps per episode before truncation
+  render_mode: quiet
+  warm_up_time: 60
+  random_sg_pair: true
+
+agent:
+  algo: sarsa_ped
+  action_mode: neighbor_index   # tabular SARSA selects among sorted neighbors
+  policy: null
+
+training:
+  sarsa:
+    num_episodes: 5000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.9
+    epsilon_decay: 0.9995
+    num_speed_bins: 3     # discretise neighbor_speeds into 3 levels (congested/normal/fast)

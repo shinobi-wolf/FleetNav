@@ -5,14 +5,34 @@ rand_grid_road_ped.net.xml.  Trips are sampled so that OD pairs whose
 midpoints are closest to the network centroid are far more frequent than
 those near the perimeter (Gaussian weight centred on the network centre).
 
+Two pedestrian scenarios are emitted from the SAME spatial demand
+distribution so they share the congestion *pattern* and differ only in
+volume:
+
+  * FULL  (N_PED_EVAL)  — normal traffic, used for evaluation & inference.
+  * TRAIN (N_PED_TRAIN) — an i.i.d. subsample of the full set, used for
+    fast training (fewer persons ⇒ far cheaper SUMO steps).
+
+Because the training persons are a random subset of the eval persons, the
+*expected* per-edge density field — and hence which edges congest — is
+identical; only the magnitude (and sampling noise) differs. Compensate the
+lower volume at train time by scaling the robot's Weidmann sensitivity:
+
+    gamma_train = (N_PED_TRAIN / N_PED_EVAL) * gamma_eval
+
+so the robot experiences the same density-coupled slowdown field it will
+see under full traffic at eval/inference.
+
 The edge topology is parsed directly from the .net.xml file, so this
 script works for any SUMO network derived from rand_grid_road_ped.
 
 Outputs (all in the same directory as this script):
-  vehicles.trips.xml   — raw car OD trips fed to duarouter
-  vehicles.rou.xml     — duarouter-routed car routes
-  pedestrians.rou.xml  — person+walk elements (SUMO routes at runtime)
-  rand_grid_road_ped.sumocfg
+  vehicles.trips.xml               — raw car OD trips fed to duarouter
+  vehicles.rou.xml                 — duarouter-routed car routes (shared)
+  pedestrians.rou.xml              — FULL person set   (eval / inference)
+  pedestrians_train.rou.xml        — TRAIN person subset (training)
+  rand_grid_road_ped.sumocfg       — FULL  cfg (net + vehicles + full peds)
+  rand_grid_road_ped_train.sumocfg — TRAIN cfg (net + vehicles + train peds)
 """
 
 import math
@@ -24,7 +44,8 @@ from pathlib import Path
 # ── Parameters ──────────────────────────────────────────────────────────────
 SEED          = 42
 N_VEHICLES    = 500
-N_PEDESTRIANS = 6000
+N_PED_EVAL    = 6000   # full / "normal" pedestrian volume (eval & inference)
+N_PED_TRAIN   = 2000   # reduced i.i.d. subsample for fast training
 SIM_DURATION  = 7200   # seconds
 SIGMA         = 250.0  # Gaussian falloff in metres (network spans ~900 m)
 
@@ -128,8 +149,53 @@ def write_xml(root, path):
     tree.write(str(path), encoding="unicode", xml_declaration=True)
 
 
+def write_pedestrian_routes(peds, path):
+    """Write a person+walk route file for the given list of
+    (depart, id, from_edge, to_edge) tuples."""
+    ped_root = ET.Element("routes")
+    ped_root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+    # Base type — inherits all SUMO pedestrian defaults
+    base_pvtype = ET.SubElement(ped_root, "vType")
+    base_pvtype.set("id",     "pedestrian")
+    base_pvtype.set("vClass", "pedestrian")
+    # Custom type — same as base but wider and longer
+    pvtype = ET.SubElement(ped_root, "vType")
+    pvtype.set("id",     "custom_pedestrian")
+    pvtype.set("vClass", "pedestrian")
+    pvtype.set("width",  str(PED_WIDTH))
+    pvtype.set("length", str(PED_LENGTH))
+    for depart, i, from_e, to_e in peds:
+        person = ET.SubElement(ped_root, "person")
+        person.set("id",     f"ped_{i}")
+        person.set("type",   "custom_pedestrian")
+        person.set("depart", str(depart))
+        walk = ET.SubElement(person, "walk")
+        walk.set("from", from_e)
+        walk.set("to",   to_e)
+    write_xml(ped_root, path)
+
+
+def write_sumocfg(cfg_path, ped_route_file):
+    """Write a sumocfg referencing the shared net + vehicles and the given
+    pedestrian route file."""
+    cfg = ET.Element("configuration")
+    inp = ET.SubElement(cfg, "input")
+    ET.SubElement(inp, "net-file").set("value",    NET_FILE)
+    ET.SubElement(inp, "route-files").set("value", f"vehicles.rou.xml,{ped_route_file}")
+    time_elem = ET.SubElement(cfg, "time")
+    ET.SubElement(time_elem, "begin").set("value", "0")
+    ET.SubElement(time_elem, "end").set("value",   str(SIM_DURATION))
+    rep = ET.SubElement(cfg, "report")
+    ET.SubElement(rep, "verbose").set("value",     "true")
+    ET.SubElement(rep, "no-step-log").set("value", "true")
+    write_xml(cfg, cfg_path)
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 def main():
+    if N_PED_TRAIN > N_PED_EVAL:
+        raise ValueError("N_PED_TRAIN must be <= N_PED_EVAL (train is a subsample of eval)")
+
     net_path = HERE / NET_FILE
     junction_xy, normal_edges = load_network(net_path)
 
@@ -152,7 +218,7 @@ def main():
 
     rng = random.Random(SEED)
 
-    # ── Vehicle trips ────────────────────────────────────────────────────────
+    # ── Vehicle trips (shared by both scenarios) ─────────────────────────────
     trips = []
     for i in range(N_VEHICLES):
         fe, te = sample_od_pair(normal_edges, weights, rng)
@@ -177,38 +243,28 @@ def main():
     write_xml(veh_root, trips_path)
     print(f"\nWrote {N_VEHICLES} vehicle trips → {trips_path.name}")
 
-    # ── Pedestrian routes ────────────────────────────────────────────────────
-    peds = []
-    for i in range(N_PEDESTRIANS):
+    # ── Pedestrian routes: FULL set (eval / inference) ───────────────────────
+    peds_eval = []
+    for i in range(N_PED_EVAL):
         fe, te = sample_od_pair(normal_edges, weights, rng)
         depart = round(rng.uniform(0, SIM_DURATION), 2)
-        peds.append((depart, i, fe[0], te[0]))
-    peds.sort()
-
-    ped_root = ET.Element("routes")
-    ped_root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-    # Base type — inherits all SUMO pedestrian defaults
-    base_pvtype = ET.SubElement(ped_root, "vType")
-    base_pvtype.set("id",     "pedestrian")
-    base_pvtype.set("vClass", "pedestrian")
-    # Custom type — same as base but wider and longer
-    pvtype = ET.SubElement(ped_root, "vType")
-    pvtype.set("id",     "custom_pedestrian")
-    pvtype.set("vClass", "pedestrian")
-    pvtype.set("width",  str(PED_WIDTH))
-    pvtype.set("length", str(PED_LENGTH))
-    for depart, i, from_e, to_e in peds:
-        person = ET.SubElement(ped_root, "person")
-        person.set("id",     f"ped_{i}")
-        person.set("type",   "custom_pedestrian")
-        person.set("depart", str(depart))
-        walk = ET.SubElement(person, "walk")
-        walk.set("from", from_e)
-        walk.set("to",   to_e)
+        peds_eval.append((depart, i, fe[0], te[0]))
+    peds_eval.sort()
 
     ped_path = HERE / "pedestrians.rou.xml"
-    write_xml(ped_root, ped_path)
-    print(f"Wrote {N_PEDESTRIANS} pedestrian persons → {ped_path.name}")
+    write_pedestrian_routes(peds_eval, ped_path)
+    print(f"Wrote {N_PED_EVAL} pedestrian persons → {ped_path.name} (FULL / eval)")
+
+    # ── Pedestrian routes: TRAIN subset (i.i.d. subsample of the FULL set) ───
+    peds_train = rng.sample(peds_eval, N_PED_TRAIN)
+    peds_train.sort()
+
+    ped_train_path = HERE / "pedestrians_train.rou.xml"
+    write_pedestrian_routes(peds_train, ped_train_path)
+    s = N_PED_TRAIN / N_PED_EVAL
+    print(f"Wrote {N_PED_TRAIN} pedestrian persons → {ped_train_path.name} "
+          f"(TRAIN, subsample s={s:.3f})")
+    print(f"  → set gamma_train = {s:.3f} * gamma_eval to match the eval slowdown field")
 
     # ── duarouter: trips → routes ────────────────────────────────────────────
     rou_path = HERE / "vehicles.rou.xml"
@@ -227,21 +283,15 @@ def main():
         raise RuntimeError("duarouter failed")
     print(f"Wrote routed vehicle routes → {rou_path.name}")
 
-    # ── sumocfg ──────────────────────────────────────────────────────────────
-    cfg = ET.Element("configuration")
-    inp = ET.SubElement(cfg, "input")
-    ET.SubElement(inp, "net-file").set("value",    NET_FILE)
-    ET.SubElement(inp, "route-files").set("value", "vehicles.rou.xml,pedestrians.rou.xml")
-    time_elem = ET.SubElement(cfg, "time")
-    ET.SubElement(time_elem, "begin").set("value", "0")
-    ET.SubElement(time_elem, "end").set("value",   str(SIM_DURATION))
-    rep = ET.SubElement(cfg, "report")
-    ET.SubElement(rep, "verbose").set("value",     "true")
-    ET.SubElement(rep, "no-step-log").set("value", "true")
+    # ── sumocfg files ────────────────────────────────────────────────────────
+    eval_cfg = HERE / "rand_grid_road_ped.sumocfg"
+    write_sumocfg(eval_cfg, "pedestrians.rou.xml")
+    print(f"Wrote SUMO config → {eval_cfg.name} (FULL / eval + inference)")
 
-    cfg_path = HERE / "rand_grid_road_ped.sumocfg"
-    write_xml(cfg, cfg_path)
-    print(f"Wrote SUMO config → {cfg_path.name}")
+    train_cfg = HERE / "rand_grid_road_ped_train.sumocfg"
+    write_sumocfg(train_cfg, "pedestrians_train.rou.xml")
+    print(f"Wrote SUMO config → {train_cfg.name} (TRAIN)")
+
     print("\nDone.")
 
 

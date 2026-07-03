@@ -1,5 +1,8 @@
 net:
-  net_path: data/rand_grid_road_ped/rand_grid_road_ped.sumocfg
+  # TRAIN scenario: 2000 peds (i.i.d. subsample of the 6000-ped eval set) for
+  # fast training. For eval/inference, point the saved policy config at
+  # data/rand_grid_road_ped/rand_grid_road_ped.sumocfg (full 6000-ped set).
+  net_path: data/rand_grid_road_ped/rand_grid_road_ped_train.sumocfg
   max_degree: 5
 
 fleet:
@@ -19,9 +22,11 @@ traffic:
   model: ped               # live sidewalk pedestrian speeds (delivery robot); svc = vehicular
   ped_speed_override:      # couple sidewalk pedestrian crowding to robot speed (Weidmann)
     enabled: true
-    gamma: 0.02            # sensitivity: tuned down from Weidmann's 1.913 because this
-                           #   network's sidewalks stay sparse (max ~0.05 ped/m²); at
-                           #   0.02 → busy sidewalks ~30-60% of free-flow, empty ~100%
+    gamma: 0.0067          # TRAIN sensitivity = gamma_eval * (N_train/N_eval) = 0.02 * 1/3.
+                           #   Compensates the 3x-lower ped volume so the robot sees the same
+                           #   density-coupled slowdown field it will meet at eval (gamma_eval
+                           #   = 0.02, full 6000-ped set). Retune both together if eval gamma
+                           #   changes: gamma_train stays gamma_eval / 3.
     density_jam: 5.4       # ped/m² jam density (v → v_min); ~irrelevant at these densities
     v_min: 0.1             # m/s floor to avoid permanent stall
 
@@ -33,8 +38,8 @@ simulation:
   random_sg_pair: true
 
 agent:
-  algo: sarsa_ped           # sarsa_svc | dqn_svc | ppo_svc | a2c_svc
-  action_mode: neighbor_index    # node_id for deep agents; use neighbor_index for sarsa_svc
+  algo: dqn_ped           # sarsa_svc | dqn_svc | ppo_svc | a2c_svc
+  action_mode: node_id    # node_id for deep agents; use neighbor_index for sarsa_svc
   policy: null
 
 training:
