@@ -1,0 +1,6 @@
+# Optional: only needed to open/run the analysis notebooks under notebooks/.
+# Not required for training or inference on a headless training box.
+-r requirements.txt
+jupyterlab
+ipykernel
+pandas
