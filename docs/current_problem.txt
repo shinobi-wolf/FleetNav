@@ -27,7 +27,7 @@ Tasks:
     2. Check ped inference with dijkstra agent. - done
     3. Train pipeline for TRSP. - done 
     4. Eval trsp 2 pipeline. - done
-    5. Train and evaluate sarsa and dqn. - results not good.
+    5. Train and evaluate sarsa and dqn. - done
 5. Add ADR support to TA-evrp
     1. Instance builds the sidewalk (ped) graph; ped traffic model wired. - done
     2. Simulator walks robots as SUMO persons with live Weidmann speed override. - done

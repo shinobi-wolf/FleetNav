@@ -1,0 +1,42 @@
+# =============================================================================
+# config/ta_evrp/sweep_ped.yaml — pedestrian/ADR TA-EVRP evaluation sweep
+# =============================================================================
+# 36 combinations: 3 networks (grid_road_ped, rand_grid_road_ped, ames_ped)
+# × 3 EVRP planners (milp, heuristic, mtsp) × 4 TRSP agents
+# (dijkstra, dsp_ped, sarsa_ped, dqn_ped). Base config: ped_base.yaml.
+#
+# _zip_ group: network + agent + policy_id move together as paired rows.
+# dijkstra uses policy_id: ~ (null); dsp_ped uses a per-network config stub
+# (dsp_ped_<net>); sarsa_ped/dqn_ped use their trained per-network policy IDs.
+
+base: config/ta_evrp/ped_base.yaml
+
+evrp:
+  planner: [milp, heuristic, mtsp]
+
+trsp:
+  raps_enabled: true
+
+# ── Zip group: network + agent + trained TD policy (move together) ────────────
+_zip_:
+  - keys: [network.net_path, trsp.agent, trsp.policy_id]
+    values:
+      # --- Dijkstra baseline ---
+      - [data/grid_road_ped/grid_road_ped.sumocfg,                 dijkstra, ~]
+      - [data/rand_grid_road_ped/rand_grid_road_ped.sumocfg, dijkstra, ~]
+      - [data/ames_ped/ames_campus_ped.sumocfg,              dijkstra, ~]
+
+      # --- DSP-PED baseline ---
+      - [data/grid_road_ped/grid_road_ped.sumocfg,                 dsp_ped,  dsp_ped_grid]
+      - [data/rand_grid_road_ped/rand_grid_road_ped.sumocfg, dsp_ped,  dsp_ped_rand_grid]
+      - [data/ames_ped/ames_campus_ped.sumocfg,              dsp_ped,  dsp_ped_ames]
+
+      # --- SARSA baseline ---
+      - [data/grid_road_ped/grid_road_ped.sumocfg,                 sarsa_ped, 2f5cd9d0]
+      - [data/rand_grid_road_ped/rand_grid_road_ped.sumocfg, sarsa_ped, 9781873f]
+      - [data/ames_ped/ames_campus_ped.sumocfg,              sarsa_ped, 243d05d1]
+
+      # --- DQN baseline ---
+      - [data/grid_road_ped/grid_road_ped.sumocfg,                 dqn_ped, 962999ce]
+      - [data/rand_grid_road_ped/rand_grid_road_ped.sumocfg, dqn_ped, 032c3ac1]
+      - [data/ames_ped/ames_campus_ped.sumocfg,              dqn_ped, 25d8a01c]

@@ -1,0 +1,48 @@
+# =============================================================================
+# runs/trsp/dsp_ped_ames/config.yaml
+# =============================================================================
+# DSP-PED (Dynamic Shortest Path on sidewalks) "policy" config for the
+# ames_ped network. DSP-PED is non-learning — there is no policy.pkl; this
+# config only supplies the sidewalk graph, robot speed, and Weidmann override
+# params that the TA-EVRP LocalPlanner needs to build a DSPPEDAgent.
+#
+# Select it in a TA-EVRP config with:
+#   trsp:
+#     agent: dsp_ped
+#     policy_id: dsp_ped_ames
+agent:
+  algo: dsp_ped
+  action_mode: node_id
+  policy: null
+
+fleet:
+  type: delivery_robot
+  max_speed: 5               # km/h — must match ped_base.yaml fleet.max_speed
+  delivery_robot:
+    width: 1.8
+    length: 0.8
+    max_speed_factor: 1
+
+net:
+  net_path: data/ames_ped/ames_campus_ped.sumocfg
+  max_degree: 5
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 1
+  delay: 0
+
+simulation:
+  max_steps: 100
+  max_time: 2
+  random_sg_pair: true
+  render_mode: quiet
+  warm_up_time: 0
+
+traffic:
+  model: ped
+  ped_speed_override:
+    enabled: true
+    gamma: 0.02
+    density_jam: 5.4
+    v_min: 0.1

@@ -38,16 +38,16 @@ traffic:
 # ── Robot endurance & delivery tasks ─────────────────────────────────────────
 simulation:
   ugv:
-    fleet_size: 2
-    battery_capacity_L: 50        # generous range so the robot never strands on a small grid
-    consumption_rate_L_per_km: 1  # range = 50 * 1000 / 1 = 50 km
-    free_flow_speed_kmh: 5        # matches fleet.max_speed (planner time feasibility)
-    max_duration_h: 2
-    customer_service_time_h: 0
-    recharge_time_h: 0
-    runtime_refuel: false
+    fleet_size: 3
+    battery_capacity_L: 15       # litres of fuel/energy on a full charge
+    consumption_rate_L_per_km: 1  # L/km  →  range = 50 / 5 = 10 km
+    free_flow_speed_kmh: 110     # km/h  (= 120 mph)
+    max_duration_h: 10             # hours — hard route time limit
+    customer_service_time_h: 0      # hours — dwell time at each customer stop
+    recharge_time_h: 0              # hours — dwell time at each AFS stop
+    runtime_refuel: false           # trackback to depot when next stop is out of range
   tasks:
-    customer_count: 5
+    customer_count: 10
     afs_count: 2
     customer_sampling: count
 
@@ -56,5 +56,5 @@ sumo:
   step_length: 1.0
   traffic_scale: 1
   warm_up_time: 60               # let background pedestrians build up before robots depart
-  max_time_h: 2                  # aligns with the .sumocfg end time (7200 s)
+  max_time_h: 10                  # aligns with the .sumocfg end time (7200 s)
   render_mode: quiet
