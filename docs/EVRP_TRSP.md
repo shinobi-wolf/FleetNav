@@ -298,7 +298,8 @@ infer_ta_evrp.py
 ## Constraints and Assumptions
 
 - **Same network:** The TRSP policy must be trained on the same SUMO network as the TA-EVRP simulation. `LocalPlanner` builds its graph from the TRSP config's `net.net_path` — mismatched networks cause `KeyError` on node lookup.
-- **All RL agents + DSP supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA and SARSA-SVC use neighbour-index actions; DQN/DQN-SVC/A2C/A2C-SVC/PPO/PPO-SVC and DSP use global node-index actions. SVC agents (all `*_svc` and `dsp`) query live TraCI `neighbor_speeds` at each hop and must run inside the SUMO session. DSP is non-learning (no `policy.pkl`). Unknown algos fall back to Dijkstra.
+- **All RL agents + DSP supported:** `LocalPlanner` dispatches to the correct agent class based on `algo` in the TRSP config. SARSA / SARSA-SVC / SARSA-PED use neighbour-index actions; DQN/DQN-SVC/DQN-PED/A2C/A2C-SVC/PPO/PPO-SVC and DSP/DSP-PED use global node-index actions. Live-speed agents (all `*_svc`, `*_ped`, `dsp`, `dsp_ped`) query live TraCI speeds at each hop (or once per leg for the DSP variants) and must run inside the SUMO session; `*_ped` agents read the robot's Weidmann sidewalk speed rather than vehicular edge means. DSP / DSP-PED are non-learning (no `policy.pkl`). Unknown algos fall back to Dijkstra.
+- **PED fleet vs. road fleet:** `traffic.model: ped` (with `fleet.type: delivery_robot`) switches the whole stack to the sidewalk graph and the SUMO person API. A ped policy must be trained on the same pedestrian net as the TA-EVRP run; mixing a road-trained policy with a ped run (or vice versa) mismatches the graph.
 - **No SUMO during plan:** `plan()` is pure Python — no TraCI calls. It runs inside the EVRP SUMO session without conflict.
 - **Time slot approximation:** `plan()` receives `sim_time_s` and maps it to a slot via the TRSP PSL model. For `K=1` this is always slot 0 (exact). For `K>1`, the slot reflects the TA-EVRP simulation clock — consistency depends on matching `T` (derived from `max_time_s`) and `K` values between the two configs.
 
@@ -353,3 +354,8 @@ Analysis and visualisations:
 | TD sweep (15 rows: td_milp planner + RAPS, all agents × available nets) → `ta_evrp_results_td.csv` | ✅ Done |
 | `ta_evrp_sweep_analysis.ipynb` TD section added (agent bars, % vs Dijkstra, heatmaps) | ✅ Done |
 | `trsp_testing_analysis.ipynb` Aggregated Results extended to cover TD traffic condition | ✅ Done |
+| PED (delivery-robot) traffic model wired into TA-EVRP: sidewalk graph + person spawn + Weidmann speed override | ✅ Done |
+| `LocalPlanner` support for `sarsa_ped`, `dqn_ped`, `dsp_ped` (Weidmann `neighbor_speeds` + correct action mode) | ✅ Done |
+| PED configs: `ped_base.yaml` + `milp_{sarsa,dqn,dsp}_ped.yaml`; `runs/trsp/dsp_ped_grid/` DSP-PED baseline | ✅ Done |
+| End-to-end PED runs on grid_road_ped (MILP plan + robot walks sidewalks + serves all customers) | ✅ Done |
+| PED sweep across networks / evaluate TA-EVRP (task 6) | ⬜ Pending |

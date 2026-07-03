@@ -1,5 +1,5 @@
 net:
-  net_path: data/grid_road_ped/grid_road_ped.sumocfg
+  net_path: data/rand_grid_road_ped/rand_grid_road_ped.sumocfg
   max_degree: 5
 
 fleet:

@@ -91,6 +91,8 @@ When TRSP is active, the simulator dispatches to:
 
 When TRSP is active, the **edges driven in SUMO come from the TRSP agent**, but the **distance charged for fuel accounting is always the Dijkstra shortest-path distance** — keeping fuel consumption consistent with the EVRP planner's distance matrix.
 
+**Delivery-robot (PED) mode.** With `traffic.model: ped` + `fleet.type: delivery_robot`, the Simulator drives each leg as a SUMO **person** walking on sidewalks (`traci.person.add` + `appendWalkingStage`) instead of a road vehicle, registers an `adr_vtype`, and sets the robot's speed every step from live sidewalk crowding (Weidmann). The routing graph is the pedestrian graph built by `Network(ped_mode=True)`. See `docs/EVRP_TRSP.md` → *Traffic Model Unification → PED* for the full flow.
+
 ---
 
 ## Traffic Model
@@ -111,6 +113,10 @@ The simulator uses a **PSL (Piecewise Speed Limit)** model: each edge gets its o
 - Three-period time-of-day congestion model (Lu et al. 2020, Fig. 1), selected via `traffic.model: td`. Global speeds — **every** edge gets the identical profile `[v_c, v_f, v_c]`: slot 0 (`[0,T1)`) and slot 2 (`[T2,…]`) at congestion speed `v_c`, slot 1 (`[T1,T2)`) at free-flow `v_f`. Only `get_slot()` differs from PSL — boundaries at `T1`/`T2` instead of the cyclic `delta_t` grid.
 - Config keys (under `traffic.td`): `enabled`, `v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours` (default `T1=u0/3`, `T2=2u0/3`).
 - Same `get_slot`/`get_speed` interface, so the Simulator applies it through the same `setMaxSpeed`/`setSpeed` code paths as PSL (both are gated by `Simulator._psl_like`). The `td_milp` planner reads the same `traffic.td` block, so plan and simulation use identical speeds.
+
+### PED — live sidewalk speed (delivery robot) ✅ Done
+
+- Selected by `traffic.model: ped` (with `fleet.type: delivery_robot`). Like SVC, the PSL model is **disabled** — `Traffic` returns `PSLTrafficModel(enabled=False, free_flow_ms=<robot walking speed>)`. The Simulator never calls `setMaxSpeed`/`setSpeed` for slots; instead it sets each robot's speed per step from local pedestrian crowding via `dronesim.trsp.ped_speed.weidmann_speed` (params from `traffic.ped_speed_override`). `Network(ped_mode=True)` builds the sidewalk graph (pedestrian-lane edges only, each tagged with `sidewalk_lane`).
 
 ---
 
@@ -139,7 +145,9 @@ Special exceptions that keep seconds/ms in config: `sumo.step_length` (seconds),
 | `simulation.ugv.max_duration_h` | Hard route time limit in hours |
 | `simulation.ugv.runtime_refuel` | Enable emergency depot detours (bool) |
 | `simulation.tasks.*` | Customer count, AFS count |
-| `traffic.model` | `psl` \| `td` \| `svc` |
+| `traffic.model` | `psl` \| `td` \| `svc` \| `ped` |
+| `fleet.type` | `ev` (default) \| `delivery_robot` (ADR; walks sidewalks, requires `traffic.model: ped`) |
+| `traffic.ped_speed_override.*` | `enabled`, `gamma`, `density_jam`, `v_min` — Weidmann sidewalk crowding → robot speed |
 | `traffic.psl.*` | `enabled`, `K`, `v_min_kmh`, `v_max_kmh`, `speed_step_kmh`, `seed`, `profile_type` |
 | `traffic.td.*` | `enabled`, `v_congestion_kmh`, `v_freeflow_kmh`, `T1_hours`, `T2_hours` (3-period TD model) |
 | `traffic.simulated.*` | SUMO background vehicular/pedestrian traffic |

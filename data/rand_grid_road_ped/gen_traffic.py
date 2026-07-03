@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
 gen_traffic.py — Generate weighted random car and pedestrian traffic for
-grid_road_ped.net.xml.  Trips are sampled so that OD pairs on center edges
-are far more frequent than perimeter edges (Gaussian weight centered at C2).
+rand_grid_road_ped.net.xml.  Trips are sampled so that OD pairs whose
+midpoints are closest to the network centroid are far more frequent than
+those near the perimeter (Gaussian weight centred on the network centre).
+
+The edge topology is parsed directly from the .net.xml file, so this
+script works for any SUMO network derived from rand_grid_road_ped.
 
 Outputs (all in the same directory as this script):
   vehicles.trips.xml   — raw car OD trips fed to duarouter
   vehicles.rou.xml     — duarouter-routed car routes
   pedestrians.rou.xml  — person+walk elements (SUMO routes at runtime)
-  grid_road_ped.sumocfg
+  rand_grid_road_ped.sumocfg
 """
 
 import math
@@ -20,9 +24,9 @@ from pathlib import Path
 # ── Parameters ──────────────────────────────────────────────────────────────
 SEED          = 42
 N_VEHICLES    = 500
-N_PEDESTRIANS = 4000
+N_PEDESTRIANS = 6000
 SIM_DURATION  = 7200   # seconds
-SIGMA         = 1.5    # Gaussian falloff in grid-distance units
+SIGMA         = 250.0  # Gaussian falloff in metres (network spans ~900 m)
 
 # ── Custom pedestrian vType dimensions ───────────────────────────────────────
 PED_WIDTH  = 1.5   # metres  (default SUMO pedestrian: ~0.48)
@@ -31,38 +35,62 @@ PED_LENGTH = 0.8   # metres  (default SUMO pedestrian: ~0.20)
 HERE     = Path(__file__).parent
 NET_FILE = "rand_grid_road_ped.net.xml"
 
-# ── Grid topology ────────────────────────────────────────────────────────────
-COLS    = list("ABCDE")
-COL_IDX = {c: i for i, c in enumerate(COLS)}
-ROWS    = list(range(5))
-CENTER  = (2, 2)   # grid-unit coords of junction C2
+
+# ── Topology helpers ─────────────────────────────────────────────────────────
+
+def load_network(net_path: Path):
+    """
+    Parse *net_path* and return:
+      junction_xy  : {junction_id: (x, y)}  — non-internal junctions only
+      normal_edges : list of edge_id strings — non-internal, non-walkingarea,
+                     non-crossing edges that vehicles can use as from/to edges
+    """
+    tree = ET.parse(str(net_path))
+    root = tree.getroot()
+
+    junction_xy = {}
+    for junc in root.findall("junction"):
+        jtype = junc.get("type", "")
+        if jtype == "internal":
+            continue
+        jid = junc.get("id")
+        x   = float(junc.get("x", 0))
+        y   = float(junc.get("y", 0))
+        junction_xy[jid] = (x, y)
+
+    normal_edges = []
+    for edge in root.findall("edge"):
+        func = edge.get("function", "")
+        if func in ("internal", "crossing", "walkingarea"):
+            continue
+        eid  = edge.get("id")
+        from_j = edge.get("from")
+        to_j   = edge.get("to")
+        # Only keep edges whose endpoints we know (guards against dead fringe)
+        if from_j in junction_xy and to_j in junction_xy:
+            normal_edges.append((eid, from_j, to_j))
+
+    return junction_xy, normal_edges
 
 
-def build_edges():
-    """Return list of (edge_id, col_f, row_f, col_t, row_t) for all 80 directed edges."""
-    edges = []
-    # Horizontal (east / west)
-    for row in ROWS:
-        for ci in range(len(COLS) - 1):
-            cf, ct = COLS[ci], COLS[ci + 1]
-            fj, tj = cf + str(row), ct + str(row)
-            edges.append((fj + tj, COL_IDX[cf], row, COL_IDX[ct], row))
-            edges.append((tj + fj, COL_IDX[ct], row, COL_IDX[cf], row))
-    # Vertical (north / south)
-    for col in COLS:
-        ci = COL_IDX[col]
-        for row in range(len(ROWS) - 1):
-            fj, tj = col + str(row), col + str(row + 1)
-            edges.append((fj + tj, ci, row, ci, row + 1))
-            edges.append((tj + fj, ci, row + 1, ci, row))
-    return edges
+def network_centroid(junction_xy: dict) -> tuple:
+    """Return the arithmetic centre of all junction coordinates."""
+    xs = [v[0] for v in junction_xy.values()]
+    ys = [v[1] for v in junction_xy.values()]
+    return sum(xs) / len(xs), sum(ys) / len(ys)
 
 
-def centrality_weight(cf, rf, ct, rt):
-    mid_c = (cf + ct) / 2
-    mid_r = (rf + rt) / 2
-    d2 = (mid_c - CENTER[0]) ** 2 + (mid_r - CENTER[1]) ** 2
-    return math.exp(-d2 / SIGMA ** 2)
+def centrality_weight(from_j, to_j, junction_xy, centroid, sigma):
+    """
+    Gaussian weight based on the Euclidean distance from the edge midpoint
+    to the network centroid.
+    """
+    x0, y0 = junction_xy[from_j]
+    x1, y1 = junction_xy[to_j]
+    mx, my  = (x0 + x1) / 2, (y0 + y1) / 2
+    cx, cy  = centroid
+    d2 = (mx - cx) ** 2 + (my - cy) ** 2
+    return math.exp(-d2 / sigma ** 2)
 
 
 def sample_od_pair(edges, weights, rng):
@@ -73,6 +101,8 @@ def sample_od_pair(edges, weights, rng):
         to_edge = rng.choices(edges, weights=weights, k=1)[0]
     return from_edge, to_edge
 
+
+# ── XML helpers ──────────────────────────────────────────────────────────────
 
 def indent(elem, level=0):
     """Add pretty-print indentation in-place."""
@@ -100,24 +130,32 @@ def write_xml(root, path):
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 def main():
-    rng   = random.Random(SEED)
-    edges = build_edges()
-    assert len(edges) == 80, f"Expected 80 edges, got {len(edges)}"
+    net_path = HERE / NET_FILE
+    junction_xy, normal_edges = load_network(net_path)
 
-    weights = [centrality_weight(cf, rf, ct, rt) for _, cf, rf, ct, rt in edges]
+    print(f"Loaded {len(junction_xy)} junctions and {len(normal_edges)} routable edges "
+          f"from {NET_FILE}")
 
-    # Print weight summary for sanity check
-    print("Edge centrality weight sample (edge_id → weight):")
-    for eid, *_ in [("C2D2", 2, 2, 3, 2), ("B1C1", 1, 1, 2, 1),
-                    ("A0A1", 0, 0, 0, 1), ("E3E4", 4, 3, 4, 4)]:
-        cf, rf, ct, rt = (int(v) for v in [_[0], _[1], _[2], _[3]])
-        w = centrality_weight(cf, rf, ct, rt)
-        print(f"  {eid:8s}  w={w:.4f}")
+    centroid = network_centroid(junction_xy)
+    print(f"Network centroid: ({centroid[0]:.1f}, {centroid[1]:.1f}) m")
+
+    weights = [
+        centrality_weight(fj, tj, junction_xy, centroid, SIGMA)
+        for _, fj, tj in normal_edges
+    ]
+
+    # Sanity-check a handful of representative edges
+    print("\nEdge centrality weight sample (edge_id → weight):")
+    for eid, fj, tj in normal_edges[:6]:
+        w = centrality_weight(fj, tj, junction_xy, centroid, SIGMA)
+        print(f"  {eid:8s}  ({fj}→{tj})  w={w:.4f}")
+
+    rng = random.Random(SEED)
 
     # ── Vehicle trips ────────────────────────────────────────────────────────
     trips = []
     for i in range(N_VEHICLES):
-        fe, te = sample_od_pair(edges, weights, rng)
+        fe, te = sample_od_pair(normal_edges, weights, rng)
         depart = round(rng.uniform(0, SIM_DURATION), 2)
         trips.append((depart, i, fe[0], te[0]))
     trips.sort()
@@ -125,7 +163,7 @@ def main():
     veh_root = ET.Element("routes")
     veh_root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     vtype = ET.SubElement(veh_root, "vType")
-    vtype.set("id", "car")
+    vtype.set("id",     "car")
     vtype.set("vClass", "passenger")
     for depart, i, from_e, to_e in trips:
         t = ET.SubElement(veh_root, "trip")
@@ -142,7 +180,7 @@ def main():
     # ── Pedestrian routes ────────────────────────────────────────────────────
     peds = []
     for i in range(N_PEDESTRIANS):
-        fe, te = sample_od_pair(edges, weights, rng)
+        fe, te = sample_od_pair(normal_edges, weights, rng)
         depart = round(rng.uniform(0, SIM_DURATION), 2)
         peds.append((depart, i, fe[0], te[0]))
     peds.sort()
@@ -176,7 +214,7 @@ def main():
     rou_path = HERE / "vehicles.rou.xml"
     cmd = [
         "duarouter",
-        "--net",          str(HERE / NET_FILE),
+        "--net",          str(net_path),
         "--route-files",  str(trips_path),
         "--output-file",  str(rou_path),
         "--ignore-errors",
@@ -192,14 +230,14 @@ def main():
     # ── sumocfg ──────────────────────────────────────────────────────────────
     cfg = ET.Element("configuration")
     inp = ET.SubElement(cfg, "input")
-    ET.SubElement(inp, "net-file").set("value", NET_FILE)
+    ET.SubElement(inp, "net-file").set("value",    NET_FILE)
     ET.SubElement(inp, "route-files").set("value", "vehicles.rou.xml,pedestrians.rou.xml")
     time_elem = ET.SubElement(cfg, "time")
     ET.SubElement(time_elem, "begin").set("value", "0")
     ET.SubElement(time_elem, "end").set("value",   str(SIM_DURATION))
     rep = ET.SubElement(cfg, "report")
-    ET.SubElement(rep, "verbose").set("value",      "true")
-    ET.SubElement(rep, "no-step-log").set("value",  "true")
+    ET.SubElement(rep, "verbose").set("value",     "true")
+    ET.SubElement(rep, "no-step-log").set("value", "true")
 
     cfg_path = HERE / "rand_grid_road_ped.sumocfg"
     write_xml(cfg, cfg_path)
