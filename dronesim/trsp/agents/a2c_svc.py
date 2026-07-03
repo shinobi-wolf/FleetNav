@@ -9,8 +9,9 @@ import gymnasium as gym
 from torch.distributions.categorical import Categorical
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
+from dronesim.trsp.agents.device import get_device
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = get_device()
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):

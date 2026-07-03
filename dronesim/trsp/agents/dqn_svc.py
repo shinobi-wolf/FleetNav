@@ -10,8 +10,9 @@ import torch.optim as optim
 import gymnasium as gym
 
 import dronesim.trsp  # noqa: F401 — triggers SumoTRSPEnv-v0 registration
+from dronesim.trsp.agents.device import get_device
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = get_device()
 
 
 class QNetwork(nn.Module):
