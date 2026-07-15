@@ -255,7 +255,7 @@ The `dsp` agent is also SVC-oriented: it reads the same live edge speeds, but on
 2. **Simulator.** After `traci.start`, an `adr_vtype` is registered (`copy DEFAULT_PEDTYPE` + width/length/speed-factor + capped `maxSpeed`), mirroring the TRSP env. Each leg spawns the robot with `traci.person.add` + `appendWalkingStage` (not `vehicle.add`); positions/speeds are read from `traci.person.*`. Because persons have no `getArrivedIDList`, arrival is detected as *"was inserted, now gone from the person list"*. Every step, the robot's speed is set from local sidewalk crowding via the shared `weidmann_speed` (the same override the ped policy trained under). Background pedestrians/vehicles come from the `.sumocfg` `route-files`, so no `--route-files` is appended.
 3. **LocalPlanner.** Dispatches `sarsa_ped` (neighbour-index), `dqn_ped` (node-index), and `dsp_ped` (non-learning). For `sarsa_ped`/`dqn_ped` the per-hop `neighbor_speeds` are the robot's **Weidmann sidewalk speed** on each outgoing edge (normalised by walking speed), not vehicular edge means. `dsp_ped` re-plans the whole leg once from live Weidmann sidewalk speeds via `start_leg`.
 
-The Weidmann flow–speed relationship lives in `dronesim.trsp.ped_speed.weidmann_speed`, imported by the TRSP env, the eval pipeline, the DSP-PED agent, **and** the TA-EVRP Simulator/LocalPlanner — one function, identical dynamics end-to-end. Config: `config/ta_evrp/ped_base.yaml` + `milp_{sarsa,dqn,dsp}_ped.yaml`; the DSP-PED baseline reads `runs/trsp/dsp_ped_grid/config.yaml`.
+The Weidmann flow–speed relationship lives in `dronesim.trsp.ped_speed.weidmann_speed`, imported by the TRSP env, the eval pipeline, the DSP-PED agent, **and** the TA-EVRP Simulator/LocalPlanner — one function, identical dynamics end-to-end. Config: `config/ta_evrp/ped_base.yaml` + `milp_{sarsa,dqn,dsp}_ped.yaml`; the DSP-PED baseline reads a per-network config stub — `runs/trsp/dsp_ped_{grid,rand_grid,ames}/config.yaml` (non-learning, no `policy.pkl` — the stub only supplies the sidewalk graph, robot speed, and Weidmann params `LocalPlanner` needs). Each stub's `net.net_path` must point at that network's own pedestrian graph; reusing `dsp_ped_grid` for rand_grid/ames breaks node lookups (different topology).
 
 > Note: post-simulation, `local_routes.json` labels ped/SVC legs `planner_kind: dijkstra` because the label reconciliation re-plans after SUMO (and TraCI) has closed and cannot rebuild the live `neighbor_speeds`. During the run the agent *is* driving — this is a cosmetic labelling limitation shared by all live-speed agents.
 
@@ -315,11 +315,14 @@ End-to-end runs of TA-EVRP with different planners (MILP, mTSP, Heuristic) and T
 | `results/ta_evrp_results_svc.csv` | SVC | dijkstra, dsp, sarsa_svc, dqn_svc, a2c_svc, ppo_svc | off | `sweep_dqn_svc.yaml` + `sweep_sarsa_a2c_ppo_svc.yaml` |
 | `results/ta_evrp_results_raps.csv` | PSL (K=1–4) + SVC | all PSL + all SVC agents | **on** | `config/ta_evrp/sweep_raps.yaml` |
 | `results/ta_evrp_results_td.csv` | TD (3-period) | dijkstra, dsp, sarsa, dqn, a2c, ppo | **on** | `config/ta_evrp/sweep_td.yaml` |
+| `results/ta_evrp_results_ped.csv` | PED (Weidmann sidewalk) | dijkstra, dsp_ped, sarsa_ped, dqn_ped | **on** | `config/ta_evrp/sweep_ped.yaml` |
 
 TD sweep: 15 rows (3 baselines × 3 nets + SARSA × 3 nets + DQN/A2C/PPO × 2 nets — no DQN/A2C/PPO policy trained on N1 under TD). Uses `td_milp` planner and `raps_enabled: true`.
 
+PED sweep: 36 rows (3 planners `milp`/`heuristic`/`mtsp` × 3 nets × 4 agents `dijkstra`/`dsp_ped`/`sarsa_ped`/`dqn_ped`). Base config `ped_base.yaml`; `raps_enabled: true`. Unlike TD, the planner varies (not fixed to one planner), matching the PSL/SVC pattern.
+
 Analysis and visualisations:
-- `notebooks/ta_evrp_sweep_analysis.ipynb` — PSL, SVC, and **TD** results (RAPS on for TD; off for PSL/SVC sections)
+- `notebooks/ta_evrp_sweep_analysis.ipynb` — PSL, SVC, TD, and **PED** results (RAPS on for TD/PED; off for PSL/SVC sections)
 - `notebooks/ta_evrp_sweep_raps_analysis.ipynb` — full RAPS sweep (PSL K=1–4 + SVC, 270 runs)
 
 ---
@@ -356,6 +359,7 @@ Analysis and visualisations:
 | `trsp_testing_analysis.ipynb` Aggregated Results extended to cover TD traffic condition | ✅ Done |
 | PED (delivery-robot) traffic model wired into TA-EVRP: sidewalk graph + person spawn + Weidmann speed override | ✅ Done |
 | `LocalPlanner` support for `sarsa_ped`, `dqn_ped`, `dsp_ped` (Weidmann `neighbor_speeds` + correct action mode) | ✅ Done |
-| PED configs: `ped_base.yaml` + `milp_{sarsa,dqn,dsp}_ped.yaml`; `runs/trsp/dsp_ped_grid/` DSP-PED baseline | ✅ Done |
+| PED configs: `ped_base.yaml` + `milp_{sarsa,dqn,dsp}_ped.yaml`; `runs/trsp/dsp_ped_{grid,rand_grid,ames}/` DSP-PED baselines | ✅ Done |
 | End-to-end PED runs on grid_road_ped (MILP plan + robot walks sidewalks + serves all customers) | ✅ Done |
-| PED sweep across networks / evaluate TA-EVRP (task 6) | ⬜ Pending |
+| PED sweep (36 rows: 3 planners × 3 nets × 4 agents) → `ta_evrp_results_ped.csv` | ✅ Done |
+| `ta_evrp_sweep_analysis.ipynb` PED section added (agent bars, % vs Dijkstra, heatmaps) | ✅ Done |

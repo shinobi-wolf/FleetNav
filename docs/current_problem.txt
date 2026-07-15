@@ -33,5 +33,9 @@ Tasks:
     2. Simulator walks robots as SUMO persons with live Weidmann speed override. - done
     3. LocalPlanner supports sarsa_ped / dqn_ped / dsp_ped. - done
     4. Configs: ped_base + milp_{sarsa,dqn,dsp}_ped; dsp_ped_grid policy dir. - done
-6. Evaluate TA-EVRP.
+6. Evaluate TA-EVRP. - done
+    1. sweep_ped.yaml: 3 planners x 3 nets x 4 agents (dijkstra, dsp_ped, sarsa_ped, dqn_ped) = 36 runs. - done
+    2. dsp_ped_rand_grid / dsp_ped_ames policy-config stubs added (dsp_ped_grid was grid-only). - done
+    3. results/ta_evrp_results_ped.csv (36/36 ok). - done
+    4. ta_evrp_sweep_analysis.ipynb PED section (agent bars, % vs dijkstra, heatmaps). - done
 
