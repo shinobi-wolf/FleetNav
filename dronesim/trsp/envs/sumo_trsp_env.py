@@ -19,7 +19,7 @@ INF = 100000
 COMPLETION_REWARD = 50.0
 TRUNCATION_PENALTY = -10.0      # was 0.0 in reference — zero gave no urgency signal
 INVALID_ACTION_PENALTY = -10.0
-MOVE_TIME_PENALTY_FAC = -1.0    # per second; encourages shorter traversal paths
+MOVE_TIME_PENALTY_FAC = -0.3    # per second; encourages shorter traversal paths
 PROGRESS_REWARD_FAC = 0.05      # per metre of progress towards target
 
 

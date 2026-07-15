@@ -1,18 +1,19 @@
 net:
-  net_path: data/grid_road/grid_road.sumocfg
+  net_path: data/rand_grid_road_2/rand_grid_road_2.sumocfg
   max_degree: 5
 
 fleet:
-  max_speed: 110          # km/h
+  type: ev # delivery_robot | ev
+  max_speed: 60          # km/h
 
 sumo:
   step_length: 1.0
-  traffic_scale: 1.5      # enable background vehicles from route file
+  traffic_scale: 1      # enable background vehicles from route file
   delay: 0
 
 traffic:
   model: svc
-  route_file: data/grid_road/traffic_routes/svc_42/rvt_routes.xml
+  # route_file: data/grid_road/traffic_routes/svc_42/rvt_routes.xml
 
 simulation:
   max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
@@ -22,7 +23,7 @@ simulation:
   random_sg_pair: true
 
 agent:
-  algo: a2c_svc           # sarsa_svc | dqn_svc | ppo_svc | a2c_svc
+  algo: dqn_svc           # sarsa_svc | dqn_svc | ppo_svc | a2c_svc
   action_mode: node_id    # node_id for deep agents; use neighbor_index for sarsa_svc
   policy: null
 

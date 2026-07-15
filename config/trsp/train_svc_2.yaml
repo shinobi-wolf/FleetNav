@@ -1,0 +1,56 @@
+net:
+  net_path: data/rand_grid_road_2/rand_grid_road_2.sumocfg
+  max_degree: 5
+
+fleet:
+  type: ev # delivery_robot | ev
+  max_speed: 60          # km/h
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 1      # enable background vehicles from route file
+  delay: 0
+
+traffic:
+  model: svc
+  # route_file: (traffic comes from the sumocfg's built-in vehicles.rou.xml)
+
+simulation:
+  max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
+  max_steps: 50           # env steps per episode before truncation
+  render_mode: quiet
+  warm_up_time: 60        # 1 min — enough for steady background traffic on a 25-node grid
+  random_sg_pair: true
+
+agent:
+  algo: dqn_svc           # sarsa_svc | dqn_svc | ppo_svc | a2c_svc
+  action_mode: node_id    # node_id for deep agents; use neighbor_index for sarsa_svc
+  policy: null
+
+# NOTE on why this differs from train_svc.yaml:
+# rand_grid_road_2 has a deliberately congested centre, so central edges are slow and
+# each env step advances SUMO by many sim-seconds -> episodes are far costlier than on
+# uniform traffic. The previous 5000-episode run was interrupted before completing
+# (no train_log.csv), leaving an under-converged policy (~72% per-hop accuracy, which
+# compounds over ~4-hop routes to ~15% route success). This config trains longer with a
+# more stable optimiser and faster reward propagation so the Q-values sharpen enough to
+# beat the ~75% a completed 5000-episode run reached on this exact topology.
+training:
+  dqn:
+    num_episodes: 6000        # was 5000; a completed 5000-ep run already reaches ~75% on
+                              # this exact topology (run 2553013e) — the prior run just
+                              # never finished. 6000 + the tuning below adds margin.
+                              # NOTE: ~22 eps/min on the congested-centre traffic -> plan
+                              # for ~4-5 h wall-clock; do NOT interrupt (a partial run
+                              # leaves an under-converged policy and writes no train_log.csv).
+    gamma: 0.99
+    lr: 0.0005                # was 0.001 — steadier convergence
+    epsilon: 1.0
+    epsilon_decay: 0.9996     # ~eps_min near ep 7.5k: explores across the whole run
+    epsilon_min: 0.05
+    batch_size: 128           # was 64 — lower-variance gradient on the sparse goal signal
+    buffer_capacity: 100000   # was 50000 — more diverse (state,traffic) coverage
+    target_update_freq: 250   # was 500 — propagate the +50 completion reward faster
+                              #           through the ~4-hop bootstrap chain
+    learn_start: 2000
+    hidden_dim: 128
