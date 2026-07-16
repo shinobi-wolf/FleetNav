@@ -27,7 +27,7 @@
             ],
             "args": [
                 "-c",
-                "${workspaceFolder}/config/trsp/train_svc.yaml"
+                "${workspaceFolder}/config/trsp/train_svc_2.yaml"
             ],
             "env": {
                 "PYTHONWARNINGS": "ignore"
