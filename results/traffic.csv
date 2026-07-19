@@ -1,3 +1,8 @@
 traffic_id,K,slot_duration,v_min_kmh,v_max_kmh,step_kmh,type
 T1,1,300.0,40.0,100.0,60.0,PSL
 T2,2,300.0,40.0,100.0,60.0,PSL
+T3,3,60.0,40.0,100.0,60.0,PSL
+T4,4,60.0,40.0,100.0,60.0,PSL
+TD,3,NA,10.0,40.0,NA,TD
+SVC,NA,NA,NA,NA,NA,SVC
+PED,NA,NA,NA,NA,NA,PED
