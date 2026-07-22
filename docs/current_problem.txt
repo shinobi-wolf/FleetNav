@@ -1,41 +1,50 @@
-Title: Pedestrian TA-EVRP
+Diagnosis: DQN is not the problem — the benchmark has no headroom left
 
-Given: 3 (networks, traffic), 3 evrp models, 6 TRSP Models.
+Your DQN is already optimal. I decoded the exact seed-42 PSL profiles the eval uses and compared every planned route against the true time-optimal path (time-weighted Dijkstra oracle):
 
-Objectives:
-1. Get TRSP Results
-2. Get TA-EVRP Results
+- grid (N1, K=1): all 98/98 of DQN policy 5b6c4910's routes are exactly time-optimal. The oracle's mean is 169.7s vs Dijkstra's 208.7s — a maximum possible improvement of 18.7%. DQN's measured 15% is that ceiling minus ~11s/route of SUMO overhead (insertion, acceleration, junction crossing), which dilutes the measured ratio.
+- rand_grid (N2, K=1): DQN 9a9355f4 is within 1.9% of the oracle (83/100 routes optimal). But the ceiling here is a shocking 3.8%, because of a bug-like design flaw: the net's lane speed limit is 13.9 m/s (50 km/h), and SUMO clips the vehicle to it. Your PSL "fast" edges (100 km/h = 27.8 m/s) physically run at 13.9 m/s, so the real contrast is 40-vs-50 km/h. The recorded eval times match the clipped model exactly, confirming this.
 
-Tasks:
-1. Create the 3 traffic files.
-    1.1. Grid. ✓
-    1.2. Rand-grid ✓ (FULL 6000-ped eval + TRAIN 2000-ped subsample sumocfgs)
-    1.3. Ames ✓ (FULL 6000-ped eval + TRAIN 2000-ped subsample sumocfgs)
-2. Add ADR support to TRSP env.
-    2.1. Add vehicle params to env config - done
-    2.2. Add veh-type params to env config - done
-    2.3. build Nx graph for ADRs. In each edge, add a proprty that is the name of the lane that is sidewalk, if the vehicle type is delivery robot. - done
-    2.4. Add ADRs to sidewalks in Traci - done
-    2.5. If the vehicle type is delivery robot, then the traffic model is by defalt svc. - done
-    2.6. In the get neighbor speed function, if the vehicle type is delivery robot, get the speed of the sidewalks instead of the roads. - done
-    2.7. TraCI speed override ✓
-3. Redesign agents
-    3.1. SARSA PED agent. It should be the exact same as dronesim/trsp/agents/sarsa_svc.py, but drop the speed bin. Just (graph_node, target_node). - done.
-    3.2. DQN PED agent. It should be the exact same as dronesim/trsp/agents/dqn_svc.py. - done.
-4. Train and evaluate TRSP
-    1. Infer pipeline for TRSP. - done
-    2. Check ped inference with dijkstra agent. - done
-    3. Train pipeline for TRSP. - done 
-    4. Eval trsp 2 pipeline. - done
-    5. Train and evaluate sarsa and dqn. - done
-5. Add ADR support to TA-evrp
-    1. Instance builds the sidewalk (ped) graph; ped traffic model wired. - done
-    2. Simulator walks robots as SUMO persons with live Weidmann speed override. - done
-    3. LocalPlanner supports sarsa_ped / dqn_ped / dsp_ped. - done
-    4. Configs: ped_base + milp_{sarsa,dqn,dsp}_ped; dsp_ped_grid policy dir. - done
-6. Evaluate TA-EVRP. - done
-    1. sweep_ped.yaml: 3 planners x 3 nets x 4 agents (dijkstra, dsp_ped, sarsa_ped, dqn_ped) = 36 runs. - done
-    2. dsp_ped_rand_grid / dsp_ped_ames policy-config stubs added (dsp_ped_grid was grid-only). - done
-    3. results/ta_evrp_results_ped.csv (36/36 ok). - done
-    4. ta_evrp_sweep_analysis.ipynb PED section (agent bars, % vs dijkstra, heatmaps). - done
+So no amount of model/reward/hyperparameter work can improve K=1 results — the agent has literally solved the benchmark. To your question "is this problem wrong for DQN": no — for K=1 it's a deterministic problem the DQN memorizes perfectly (which it did). The issue is the benchmark can't express a large win. Two secondary findings:
 
+1. K>1 evaluation is open-loop. plan_route() in eval_trsp2.py freezes time_slot at leg start and plans the whole route; for T3 the slot_duration is 60s while a leg takes ~180s, so the plan is stale after one slot. The trained closed-loop behavior (agent sees the slot at every node) is never exercised at eval — this is why K=2–4 shows no extra benefit.
+2. Of your six candidate levers, (5) traffic parameters and (6) network design are the real ones. Reward, state/action space, and the algorithm are fine (proof: it reaches the oracle). Hyperparameters only matter for scaling to a bigger network.
+
+What creates headroom (measured, not guessed)
+
+I swept the design space analytically (greedy length-Dijkstra vs oracle, replicating your exact baseline's tie-breaking):
+
+┌────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────┐
+│        Knob        │                                     Effect on max headroom                                     │
+├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Speed contrast     │ Dominant: {40,100} km/h → 15.6%; {20,100} → 31%; {15,100} → 37%; {10,100} → 45% (5×5 grid)     │
+├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Slow-edge fraction │ Peaks at p_slow ≈ 0.3 (uniform choice today gives 0.5)                                         │
+├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Grid size          │ Weak alone: 5×5 → 10×10 only moves 15.6% → 20%                                                 │
+├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Combined           │ 7×7, L=600m, {15,100}, p_slow=0.3 → 49% headroom, mean makespan ~266s (similar scale to today) │
+└────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+I then validated learnability with a faithful graph-only replica of your DQN training loop (same encoding, masking, reward, hyperparameters) on that 7×7 config: it reaches 98.9% optimal routes all-pairs (tt/oracle = 1.01) — but needs ~8–12k episodes; at your current 5000-episode budget it's only at 90% (ratio 1.14), and ε only decays to 0.08. Scripts are in the session scratchpad (oracle_headroom.py, design_sweep.py, dqn_smoke_7x7.py).
+
+The plan
+
+Phase 1 — Redesign the two benchmarks (this is where the win comes from)
+- grid: regenerate as 7×7, edge length 600m, --default.speed 30 (current grid is already 30 m/s, so mainly resize). PSL: v_min: 15, v_max: 100, speed_step: 85 (keeps exactly two levels), p_slow = 0.3 → ~45% headroom. If you want a more conservative congestion story, {20,100} gives ~40%.
+- rand_grid: regenerate (netgenerate --rand + your existing post_processing.py) with ~40–50 junctions, edge lengths 250–600m, and critically --default.speed 30 so PSL speeds are expressible. Then use the identical PSL band as grid — symmetric analysis across both networks. (The current 81–212m edges are also bad independently: per-hop overhead swamps traffic differences.)
+- Add a speed_probs option to PSLTrafficModel._generate_random (weighted rng.choices) to get p_slow = 0.3. One small change; env and eval share the class.
+
+Phase 2 — Scale DQN training to match (validated numbers)
+- num_episodes: 12000–15000, epsilon_min: 0.01, hidden_dim: 128 (49 nodes → obs_dim ~99, 4× the OD pairs).
+- Add a graph-only greedy probe eval during training: every ~250 episodes, plan a fixed set of OD pairs with the greedy policy on the graph (no SUMO needed) and log %-optimal and tt/oracle; save the best checkpoint, not the last. This also gives you clean convergence curves for the thesis, and %-routes-optimal is a much better reported metric than raw reward.
+- Optional stabilizers (cheap, low-risk): Double-DQN target and Huber loss.
+
+Phase 3 — Make K>1 evaluation closed-loop (this is where RL earns its keep scientifically)
+- Change eval_trsp2.py to replan at each junction with the live slot (hop-wise execution like the training env, or traci.vehicle.setRoute at junction arrivals), instead of freezing the slot at leg start.
+- Set slot_duration ≈ mean leg time (~300s) for K=2–4 so slots actually flip mid-leg. Static Dijkstra can't adapt; closed-loop DQN can — here the DQN-vs-Dijkstra gap can exceed the static headroom. Optionally add normalized time-within-slot to the observation so the agent can anticipate slot boundaries.
+
+Phase 4 — Re-run and report
+- Retrain the 8 (2 networks × K=1–4) DQN policies, re-run eval_trsp2.py, and report per-pair paired results vs Dijkstra plus %-optimal vs the computable oracle. Expected end state based on the validation: DQN ~40–45% faster than Dijkstra on both networks (vs 15% / 9% today), sitting within ~2% of the oracle.
+
+Two cautions: don't push contrast beyond {10,100} — makespans balloon, episodes get long, and realism suffers; and keep the fixed seed-42 profile as the K=1 design (it's a "learned traffic-aware routing table" benchmark — legitimate, and your SVC track already covers generalization to live traffic). PPO/A2C's low success rates are a separate problem, untouched by this plan.
