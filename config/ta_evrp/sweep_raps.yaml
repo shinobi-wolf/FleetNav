@@ -25,7 +25,7 @@ trsp:
 
 # ── Independent sweep axis ────────────────────────────────────────────────────
 evrp:
-  planner: [milp, heuristic, mtsp]
+  planner: [milp, heuristic]
 
 # ── Single zip group: PSL rows (K=1–4) then SVC rows ─────────────────────────
 # Keys: traffic.model | traffic.psl.K | traffic.psl.slot_duration
@@ -37,94 +37,94 @@ evrp:
 _zip_:
   - keys: [traffic.model, traffic.psl.K, traffic.psl.slot_duration, traffic.svc.route_file, traffic.svc.traffic_scale, network.net_path, trsp.agent, trsp.policy_id]
     values:
-      # ── PSL / K=1 / T1 (slot_duration=60s) ──────────────────────────────────
-      # N1 — grid_road
-      - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
-      - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
-      - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     ff58b1a9 ]
-      - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       5b6c4910 ]
-      - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       6ca77d6d ]
-      - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       5dd13f39 ]
-      # N2 — rand_grid_road
-      - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
-      - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
-      - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     c028b992 ]
-      - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       9a9355f4 ]
-      - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       6612942d ]
-      - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       10b2e74c ]
-      # N3 — ames
-      - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
-      - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
-      - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     6323f08f ]
-      - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       a4f68fc2 ]
-      - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       85cd4c78 ]
-      - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       342d1614 ]
-      # ── PSL / K=2 / T2 (slot_duration=300s) ─────────────────────────────────
-      # N1 — grid_road
-      - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
-      - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
-      - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     21937982 ]
-      - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       506a3be8 ]
-      - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       ea0768c9 ]
-      - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       4c95f436 ]
-      # N2 — rand_grid_road
-      - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
-      - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
-      - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     e66ed86b ]
-      - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       4a2adb07 ]
-      - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       a508b9de ]
-      - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       f7f95041 ]
-      # N3 — ames
-      - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
-      - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
-      - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     5570cded ]
-      - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       cf474f44 ]
-      - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       c25b0251 ]
-      - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       310837de ]
-      # ── PSL / K=3 / T3 (slot_duration=60s) ──────────────────────────────────
-      # N1 — grid_road
-      - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
-      - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
-      - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     c4e54e71 ]
-      - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       e07d1340 ]
-      - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       966f0d96 ]
-      - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       3b166d32 ]
-      # N2 — rand_grid_road
-      - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
-      - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
-      - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     3a80aa37 ]
-      - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       e7ead959 ]
-      - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       99a9dc2c ]
-      - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       d8dfa029 ]
-      # N3 — ames
-      - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
-      - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
-      - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     7bbe531d ]
-      - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       87d6b298 ]
-      - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       a43e35cc ]
-      - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       a416fbb7 ]
-      # ── PSL / K=4 / T4 (slot_duration=60s) ──────────────────────────────────
-      # N1 — grid_road
-      - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
-      - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
-      - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     5fcb9965 ]
-      - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       75c5a644 ]
-      - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       3b1e6927 ]
-      - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       50811f79 ]
-      # N2 — rand_grid_road
-      - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
-      - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
-      - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     aec34a6d ]
-      - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       63627279 ]
-      - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       43857174 ]
-      - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       23264737 ]
-      # N3 — ames
-      - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
-      - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
-      - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     be5dbb1c ]
-      - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       aa120033 ]
-      - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       41cc3199 ]
-      - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       b302b5d4 ]
+      # # ── PSL / K=1 / T1 (slot_duration=60s) ──────────────────────────────────
+      # # N1 — grid_road
+      # - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
+      # - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
+      # - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     ff58b1a9 ]
+      # - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       5b6c4910 ]
+      # - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       6ca77d6d ]
+      # - [psl, 1, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       5dd13f39 ]
+      # # N2 — rand_grid_road
+      # - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
+      # - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
+      # - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     c028b992 ]
+      # - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       9a9355f4 ]
+      # - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       6612942d ]
+      # - [psl, 1, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       10b2e74c ]
+      # # N3 — ames
+      # - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
+      # - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
+      # - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     6323f08f ]
+      # - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       a4f68fc2 ]
+      # - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       85cd4c78 ]
+      # - [psl, 1, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       342d1614 ]
+      # # ── PSL / K=2 / T2 (slot_duration=300s) ─────────────────────────────────
+      # # N1 — grid_road
+      # - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
+      # - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
+      # - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     21937982 ]
+      # - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       506a3be8 ]
+      # - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       ea0768c9 ]
+      # - [psl, 2, 300, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       4c95f436 ]
+      # # N2 — rand_grid_road
+      # - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
+      # - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
+      # - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     e66ed86b ]
+      # - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       4a2adb07 ]
+      # - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       a508b9de ]
+      # - [psl, 2, 300, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       f7f95041 ]
+      # # N3 — ames
+      # - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
+      # - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
+      # - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     5570cded ]
+      # - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       cf474f44 ]
+      # - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       c25b0251 ]
+      # - [psl, 2, 300, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       310837de ]
+      # # ── PSL / K=3 / T3 (slot_duration=60s) ──────────────────────────────────
+      # # N1 — grid_road
+      # - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
+      # - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
+      # - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     c4e54e71 ]
+      # - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       e07d1340 ]
+      # - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       966f0d96 ]
+      # - [psl, 3, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       3b166d32 ]
+      # # N2 — rand_grid_road
+      # - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
+      # - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
+      # - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     3a80aa37 ]
+      # - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       e7ead959 ]
+      # - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       99a9dc2c ]
+      # - [psl, 3, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       d8dfa029 ]
+      # # N3 — ames
+      # - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
+      # - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
+      # - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     7bbe531d ]
+      # - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       87d6b298 ]
+      # - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       a43e35cc ]
+      # - [psl, 3, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       a416fbb7 ]
+      # # ── PSL / K=4 / T4 (slot_duration=60s) ──────────────────────────────────
+      # # N1 — grid_road
+      # - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]
+      # - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dsp,       ~        ]
+      # - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 sarsa,     5fcb9965 ]
+      # - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 dqn,       75c5a644 ]
+      # - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 a2c,       3b1e6927 ]
+      # - [psl, 4, 60, ~, ~, data/grid_road/grid_road.sumocfg,                 ppo,       50811f79 ]
+      # # N2 — rand_grid_road
+      # - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
+      # - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dsp,       ~        ]
+      # - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     aec34a6d ]
+      # - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       63627279 ]
+      # - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       43857174 ]
+      # - [psl, 4, 60, ~, ~, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       23264737 ]
+      # # N3 — ames
+      # - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
+      # - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dsp,       ~        ]
+      # - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              sarsa,     be5dbb1c ]
+      # - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              dqn,       aa120033 ]
+      # - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              a2c,       41cc3199 ]
+      # - [psl, 4, 60, ~, ~, data/ames/ames_campus_final.sumocfg,              ppo,       b302b5d4 ]
       # ── SVC ──────────────────────────────────────────────────────────────────
       # N1 — grid_road (traffic_scale=1.5)
       - [svc, 1, 60, data/grid_road/traffic_routes/svc_42/rvt_routes.xml, 1.5, data/grid_road/grid_road.sumocfg,                 dijkstra,  ~        ]

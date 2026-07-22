@@ -1,0 +1,33 @@
+agent:
+  action_mode: node_id
+  algo: dqn_ped
+  policy: 032c3ac1
+fleet:
+  delivery_robot:
+    length: 0.8
+    max_speed_factor: 1
+    width: 1.8
+  max_speed: 5
+  type: delivery_robot
+net:
+  max_degree: 5
+  net_path: data/rand_grid_road_ped/rand_grid_road_ped.sumocfg
+simulation:
+  max_steps: 50
+  max_time: 2
+  random_sg_pair: true
+  render_mode: human
+  warm_up_time: 60
+sumo:
+  delay: 0
+  step_length: 1
+  traffic_scale: 1
+test:
+  mode: sequential_eval
+traffic:
+  model: ped
+  ped_speed_override:
+    density_jam: 5.4
+    enabled: true
+    gamma: 0.02
+    v_min: 0.1

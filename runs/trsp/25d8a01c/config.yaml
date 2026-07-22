@@ -11,7 +11,7 @@ fleet:
   type: delivery_robot
 net:
   max_degree: 5
-  net_path: data/ames_ped/ames_campus_ped_train.sumocfg
+  net_path: data/ames_ped/ames_campus_ped.sumocfg
 simulation:
   max_steps: 50
   max_time: 2
@@ -20,12 +20,12 @@ simulation:
   warm_up_time: 60
 sumo:
   delay: 0
-  step_length: 5
+  step_length: 1
   traffic_scale: 1
 traffic:
   model: ped
   ped_speed_override:
     density_jam: 5.4
     enabled: true
-    gamma: 0.0067
+    gamma: 0.02
     v_min: 0.1
