@@ -1,0 +1,44 @@
+# PSL sarsa — ames, K=3 (lane-speed bug fixed: 30 m/s lanes). Two levels {10,100} km/h.
+net:
+  net_path: data/ames/ames_campus_final.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110            # km/h
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 0
+  delay: 0
+
+traffic:
+  model: psl
+  K: 3
+  slot_duration: 60.0
+  T: 7200.0
+  enabled: true
+  seed: 42
+  speed_profile_type: random
+  v_min: 10.0               # km/h
+  v_max: 100.0              # km/h
+  speed_step: 90.0          # km/h -> exactly two levels {10, 100}
+
+simulation:
+  max_time: 2
+  max_steps: 50
+  render_mode: quiet
+  warm_up_time: 0
+  random_sg_pair: true
+
+agent:
+  algo: sarsa
+  action_mode: neighbor_index
+  policy: null
+
+training:
+  sarsa:
+    num_episodes: 5000
+    gamma: 0.99
+    alpha: 0.1
+    epsilon: 0.9
+    epsilon_decay: 0.9995

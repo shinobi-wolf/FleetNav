@@ -24,6 +24,6 @@ traffic:
   seed: 42
   slot_duration: 300.0
   speed_profile_type: random
-  speed_step: 60.0
+  speed_step: 90.0
   v_max: 100.0
-  v_min: 40.0
+  v_min: 10.0

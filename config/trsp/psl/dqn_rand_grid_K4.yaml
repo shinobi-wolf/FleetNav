@@ -1,0 +1,52 @@
+# DQN-PSL — redesigned benchmark (psl_trsp_correction), rand_grid network, K=4.
+# Two speed levels {15,100} km/h with p_slow=0.3; 30 m/s lanes make 100 km/h expressible.
+net:
+  net_path: data/rand_grid_road_psl/rand_grid_road_psl.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110            # km/h
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 0
+  delay: 0
+
+traffic:
+  model: psl
+  K: 4
+  slot_duration: 300.0      # s per slot (only used when K>1)
+  T: 7200.0
+  enabled: true
+  seed: 42
+  speed_profile_type: random
+  v_min: 15.0               # km/h
+  v_max: 100.0              # km/h
+  speed_step: 85.0          # km/h -> exactly two levels {15, 100}
+  speed_probs: [0.3, 0.7]   # p_slow = 0.3
+
+simulation:
+  max_time: 2               # hours — SUMO wall-clock budget before forced reset
+  max_steps: 80             # env steps/episode (net diameter ~12-13 hops)
+  render_mode: quiet
+  warm_up_time: 0
+  random_sg_pair: true
+
+agent:
+  algo: dqn
+  action_mode: node_id
+  policy: null
+
+training:
+  dqn:
+    num_episodes: 12000
+    gamma: 0.99
+    lr: 0.001
+    epsilon: 1.0
+    epsilon_decay: 0.9996   # reaches epsilon_min ~ep 11.5k (near full-budget exploration)
+    epsilon_min: 0.01
+    batch_size: 64
+    buffer_capacity: 50000
+    target_update_freq: 500
+    learn_start: 1000
+    hidden_dim: 128

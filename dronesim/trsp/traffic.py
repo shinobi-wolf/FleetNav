@@ -44,6 +44,12 @@ class PSLTrafficModel:
         if self.speed_step <= 0:
             raise ValueError("traffic.speed_step must be > 0")
 
+        # Optional per-level sampling weights for random profiles. When set, each
+        # slot draws a speed level via weighted rng.choices instead of uniform
+        # rng.choice; length must match the number of speed levels. Example: two
+        # levels (v_min, v_max) with speed_probs [0.3, 0.7] gives p_slow = 0.3.
+        self.speed_probs = config.get('speed_probs', None)
+
         rng = _random.Random(seed)
         profile_type = config.get('speed_profile_type', 'random')
 
@@ -69,8 +75,18 @@ class PSLTrafficModel:
 
     def _generate_random(self, edge_ids, rng):
         levels = self._speed_levels()
+        probs = self.speed_probs
+        if probs is not None:
+            if len(probs) != len(levels):
+                raise ValueError(
+                    f"traffic.speed_probs has {len(probs)} weights; expected "
+                    f"{len(levels)} (one per speed level {[round(v, 2) for v in levels]})"
+                )
+            draw = lambda: rng.choices(levels, weights=probs, k=1)[0]
+        else:
+            draw = lambda: rng.choice(levels)
         self.profiles = {
-            eid: [rng.choice(levels) for _ in range(self.K)]
+            eid: [draw() for _ in range(self.K)]
             for eid in sorted(edge_ids)
         }
 

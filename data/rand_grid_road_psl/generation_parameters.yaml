@@ -1,0 +1,22 @@
+# Redesigned PSL random-grid benchmark (psl_trsp_correction).
+# Irregular network, 250-600 m edges, 30 m/s lanes so PSL v_max=100 km/h is expressible.
+# Raw netgenerate output is pruned of degree-1 leaf/dead-end nodes by post_processing.py.
+# Result: 49 nodes, 63 undirected edges, max degree 4, edge length ~241-593 m (mean 409).
+seed: 42
+rand.iterations: 80
+rand.min-distance: 250
+rand.max-distance: 600
+rand.min-angle: 60
+rand.num-tries: 50
+rand.connectivity: 0.55
+rand.neighbor-dist6: 0          # cap node degree <= 5 (max_degree in TRSP configs)
+default.speed: 30              # m/s (=108 km/h)
+generate_command: >
+  netgenerate --rand --rand.iterations 80 --rand.min-distance 250 --rand.max-distance 600
+  --rand.min-angle 60 --rand.num-tries 50 --rand.connectivity 0.55 --rand.neighbor-dist6 0
+  --default.speed 30 --no-turnarounds true --seed 42
+  --output-file data/rand_grid_road_psl/rand_grid_road_psl_raw.net.xml
+prune_command: >
+  python data/rand_grid_road_psl/post_processing.py
+  --input-net  data/rand_grid_road_psl/rand_grid_road_psl_raw.net.xml
+  --output-net data/rand_grid_road_psl/rand_grid_road_psl.net.xml

@@ -1,0 +1,11 @@
+# Redesigned PSL grid benchmark (psl_trsp_correction).
+# 7x7 grid, ~600 m edges, 30 m/s lanes so PSL v_max=100 km/h (27.8 m/s) is expressible.
+# Result: 49 nodes, 84 undirected edges, max degree 4, edge length ~586 m.
+seed: 42
+grid.number: 7
+grid.length: 600
+default.speed: 30            # m/s (=108 km/h)
+command: >
+  netgenerate --grid --grid.number 7 --grid.length 600 --default.speed 30
+  --no-turnarounds true --seed 42
+  --output-file data/grid_road_psl/grid_road_psl.net.xml
