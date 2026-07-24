@@ -54,6 +54,8 @@ class _VehicleState:
     curr_traci_veh_id: str = ""
     emg_refuel_active: bool = False
     emg_resume_dest: str = ""
+    leg_dest: str = ""          # sumo node id of the current leg's destination
+    raps_min_after: float = 0.0  # planned fuel needed after this leg (RAPS replan guard)
     _emg_serial: int = field(default=0, repr=False)
 
 
@@ -198,6 +200,7 @@ class Simulator:
                     "num_recharges":       0,
                     "cust_times":          [],
                     "num_customers_served": 0,
+                    "num_replans":         0,
                     "finish_time":         0.0,
                 }
                 if len(route.stops) < 2:
@@ -216,6 +219,7 @@ class Simulator:
                 src_node  = route.stops[0].sumo_node_id
                 dest_node = route.stops[1].sumo_node_id
                 raps_kwargs: dict = {}
+                min_after = 0.0
                 if self.raps_enabled and self.local_planner is not None:
                     nsi = 1
                     ridx = self._find_next_refuel_idx(route.stops, nsi)
@@ -230,6 +234,8 @@ class Simulator:
                         raps_leg_idx=0,
                     )
                 edge_route, path_dist = self._resolve_route(src_node, dest_node, sim_time, **raps_kwargs)
+                veh_states[route.vehicle_id].leg_dest = dest_node
+                veh_states[route.vehicle_id].raps_min_after = min_after
 
                 if edge_route is None:
                     raise ValueError(
@@ -414,6 +420,16 @@ class Simulator:
                                 "speed_ms": round(new_speed, 4),
                                 "trigger": trigger,
                             })
+                        # Closed-loop TRSP: on a slot change, re-run the local planner
+                        # for the remainder of the leg under the NEW slot and swap the
+                        # SUMO route if the detour is fuel-feasible. Within a slot the
+                        # original plan already equals the policy rollout, so replanning
+                        # only at slot boundaries is exact for PSL/TD.
+                        if (
+                            self._psl_like and slot_changed and not self._ped
+                            and self.local_planner is not None
+                        ):
+                            self._replan_leg(veh_id, vs, sim_time, sim_stats, traffic_log)
                         if self.render_mode != "quiet" and edge_changed and not new_edge.startswith(":"):
                             try:
                                 from_node = self._net.getEdge(new_edge).getFromNode().getID()
@@ -617,6 +633,7 @@ class Simulator:
         src_node  = route.stops[vs.curr_stop_idx].sumo_node_id
         dest_node = route.stops[vs.curr_stop_idx + 1].sumo_node_id
         raps_kwargs: dict = {}
+        min_after = 0.0
         if self.raps_enabled and self.local_planner is not None:
             nsi = vs.curr_stop_idx + 1
             ridx = self._find_next_refuel_idx(route.stops, nsi)
@@ -631,6 +648,8 @@ class Simulator:
                 raps_leg_idx=vs.curr_stop_idx,
             )
         edge_route, path_dist = self._resolve_route(src_node, dest_node, sim_time, **raps_kwargs)
+        vs.leg_dest = dest_node
+        vs.raps_min_after = min_after
 
         if edge_route is None or vs.current_fuel < path_dist:
             vs.status = "stranded"
@@ -678,6 +697,8 @@ class Simulator:
         sim_stats: dict,
     ) -> None:
         edge_route, path_dist = self._resolve_route(vs.curr_net_node, depot_node, sim_time)
+        vs.leg_dest = depot_node
+        vs.raps_min_after = 0.0
         if edge_route is None or vs.current_fuel < path_dist:
             vs.status = "stranded"
             sim_stats[veh_id]["finish_time"] = sim_time
@@ -723,6 +744,8 @@ class Simulator:
         vs.emg_resume_dest = ""
 
         edge_route, path_dist = self._resolve_route(vs.curr_net_node, dest_node, sim_time)
+        vs.leg_dest = dest_node
+        vs.raps_min_after = 0.0
         if edge_route is None or vs.current_fuel < path_dist:
             vs.status = "stranded"
             sim_stats[veh_id]["finish_time"] = sim_time
@@ -753,6 +776,81 @@ class Simulator:
             print(
                 f"[{sim_time:.0f}s] V{veh_id}: resuming route after emergency refuel"
                 f"  (range: {vs.current_fuel:.0f}m, leg dist: {path_dist:.0f}m)"
+            )
+
+    # ------------------------------------------------------------------
+    # Closed-loop replanning (PSL/TD slot changes)
+    # ------------------------------------------------------------------
+
+    def _replan_leg(
+        self,
+        veh_id: int,
+        vs: _VehicleState,
+        sim_time: float,
+        sim_stats: dict,
+        traffic_log: list,
+    ) -> None:
+        """Re-run the local planner for the remainder of the current leg under the
+        current traffic slot and swap the vehicle's SUMO route in place.
+
+        The plan is recomputed from the junction the vehicle is heading to (the
+        to-node of its current edge). The swap is skipped when the vehicle is mid
+        junction crossing (setRoute rejects it), when the new path equals the old
+        remainder, or when the detour is not fuel-feasible (RAPS guard: keep at
+        least `raps_min_after` metres of range for the rest of the planned route).
+        """
+        if not vs.leg_dest:
+            return
+        tv = vs.curr_traci_veh_id
+        try:
+            route = traci.vehicle.getRoute(tv)
+            ridx  = traci.vehicle.getRouteIndex(tv)
+        except traci.TraCIException:
+            return
+        if ridx < 0 or ridx >= len(route):
+            return
+        curr_edge     = route[ridx]
+        old_rem_edges = list(route[ridx + 1:])
+        if not old_rem_edges:
+            return  # already on the final edge of the leg
+
+        next_node = self._net.getEdge(curr_edge).getToNode().getID()
+        new_edges = self.local_planner.plan(next_node, vs.leg_dest, sim_time)
+        if not new_edges or list(new_edges) == old_rem_edges:
+            return
+
+        def _dist(edge_ids) -> float:
+            return sum(
+                self._net.getEdge(e).getLength()
+                for e in edge_ids if not e.startswith(":")
+            )
+
+        old_rem    = _dist(old_rem_edges)
+        new_rem    = _dist(new_edges)
+        fuel_after = vs.current_fuel + old_rem - new_rem
+        min_after  = vs.raps_min_after if self.raps_enabled else 0.0
+        if fuel_after < min_after:
+            return  # detour not fuel-feasible — keep the old route
+
+        try:
+            traci.vehicle.setRoute(tv, [curr_edge] + list(new_edges))
+        except traci.TraCIException:
+            return  # e.g. mid junction crossing — next slot change will retry
+
+        vs.current_fuel = fuel_after
+        delta = new_rem - old_rem
+        vs.distance_m += delta
+        sim_stats[veh_id]["distance_covered"] += delta
+        sim_stats[veh_id]["num_replans"] += 1
+        traffic_log.append({
+            "t": sim_time, "type": "replan",
+            "vehicle": veh_id, "from_node": next_node, "dest_node": vs.leg_dest,
+            "old_rem_m": round(old_rem, 2), "new_rem_m": round(new_rem, 2),
+        })
+        if self.render_mode != "quiet":
+            print(
+                f"[{sim_time:.0f}s] V{veh_id}: REPLAN {next_node} → {vs.leg_dest}"
+                f"  (remaining {old_rem:.0f}m → {new_rem:.0f}m, range: {vs.current_fuel:.0f}m)"
             )
 
     # ------------------------------------------------------------------
@@ -872,6 +970,7 @@ class Simulator:
                 "distance_m":       v["distance_covered"],
                 "num_recharges":    v["num_recharges"],
                 "customers_served": v["num_customers_served"],
+                "num_replans":      v.get("num_replans", 0),
                 "finish_time_s":    v["finish_time"],
             }
             for vid, v in sim_stats.items()
@@ -882,6 +981,7 @@ class Simulator:
             "total_distance_m":             total_dist,
             "total_distance_km":            total_dist / 1000.0,
             "total_recharges":              sum(v["num_recharges"] for v in sim_stats.values()),
+            "total_replans":                sum(v.get("num_replans", 0) for v in sim_stats.values()),
             "customers_served":             sum(v["num_customers_served"] for v in sim_stats.values()),
             "customer_completion_times_s":  all_cust_times,
             "avg_inter_customer_gap_s":     (sum(gaps) / len(gaps) if gaps else None),

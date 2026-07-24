@@ -1,0 +1,134 @@
+# =============================================================================
+# config/ta_evrp/sweep_psl_v2.yaml — PSL sweep with closed-loop TRSP + RAPS
+# =============================================================================
+# Post lane-speed-limit fix. Old networks throughout; per-network traffic and
+# policy sets:
+#   grid_road      — K=1–4, ORIGINAL policies, original traffic {40,100} km/h (step 60)
+#   rand_grid_road — K=2–4, RETRAINED policies (2026-07-23), traffic {10,100} km/h (step 90)
+#   ames           — K=2–4, RETRAINED policies (2026-07-23), traffic {10,100} km/h (step 90)
+# (rand_grid/ames K=1 omitted: no retrained K=1 policies for the new traffic.)
+#
+# Traffic v_min/v_max/step ride in the zip so each network's simulator profile
+# matches EXACTLY what its policies were trained on (same PSLTrafficModel seed
+# 42 ⇒ identical per-edge profiles). slot_duration matches each policy's
+# config: K=2 → 300 s; K=1,3,4 → 60 s.
+#
+# customer_count is a sweep axis (6 and 8, down from 10): with 10 customers on
+# these 25–28 node networks, consecutive MILP stops average 1.5 hops apart and
+# the TRSP layer has ~4–6% max headroom; at 6–8 customers legs lengthen and the
+# seed-42 instances give ~10–22% single-vehicle-tour headroom.
+#
+# generation_seed is a sweep axis: a single instance has only ~7–11 legs, so
+# per-instance headroom varies wildly with the customer draw (0–22% observed).
+# Three seeds per combo; report means per (network, K, agent) across seeds.
+# NOTE: traffic.psl.seed stays 42 — it must match what the policies memorized.
+#
+# The simulator is now closed-loop for PSL/TD: on every traffic slot change,
+# enroute vehicles replan the remainder of their leg under the new slot
+# (fuel-guarded when RAPS is on), so K>1 policies can adapt mid-leg.
+#
+# Count:
+#   zip rows : (4 + 3 + 3) K-values × 5 agents (dijkstra, sarsa, dqn, a2c, ppo) = 50
+#   planners : 2 (milp, heuristic)   customer_count : 2 (6, 8)   seeds : 3
+#   total    : 50 × 2 × 2 × 3 = 600 runs
+
+generation_seed: [42, 123, 2025]
+#
+# Usage:
+#   python sweep_ta_evrp.py -c config/ta_evrp/sweep_psl_v2.yaml \
+#       --output results/ta_evrp_results_psl_v2.csv
+
+base: config/ta_evrp/base.yaml
+
+# ── Fixed scalars ─────────────────────────────────────────────────────────────
+trsp:
+  raps_enabled: true
+
+# ── Independent sweep axes ────────────────────────────────────────────────────
+evrp:
+  planner: [milp, heuristic]
+
+simulation:
+  tasks:
+    customer_count: [6, 8]
+
+# ── Single zip group ──────────────────────────────────────────────────────────
+# Keys: traffic.model | traffic.psl.K | traffic.psl.slot_duration
+#       | traffic.psl.v_min_kmh | traffic.psl.v_max_kmh | traffic.psl.speed_step_kmh
+#       | network.net_path | trsp.agent | trsp.policy_id
+_zip_:
+  - keys: [traffic.model, traffic.psl.K, traffic.psl.slot_duration, traffic.psl.v_min_kmh, traffic.psl.v_max_kmh, traffic.psl.speed_step_kmh, network.net_path, trsp.agent, trsp.policy_id]
+    values:
+      # ═══ N1 — grid_road · original policies · traffic {40,100} step 60 ═══
+      # ── K=1 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 1, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dijkstra, ~        ]
+      - [psl, 1, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, sarsa,    ff58b1a9 ]
+      - [psl, 1, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dqn,      5b6c4910 ]
+      - [psl, 1, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, a2c,      6ca77d6d ]
+      - [psl, 1, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, ppo,      5dd13f39 ]
+      # ── K=2 (slot_duration=300s) ─────────────────────────────────────────
+      - [psl, 2, 300, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dijkstra, ~        ]
+      - [psl, 2, 300, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, sarsa,    21937982 ]
+      - [psl, 2, 300, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dqn,      506a3be8 ]
+      - [psl, 2, 300, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, a2c,      ea0768c9 ]
+      - [psl, 2, 300, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, ppo,      4c95f436 ]
+      # ── K=3 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 3, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dijkstra, ~        ]
+      - [psl, 3, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, sarsa,    c4e54e71 ]
+      - [psl, 3, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dqn,      e07d1340 ]
+      - [psl, 3, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, a2c,      966f0d96 ]
+      - [psl, 3, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, ppo,      3b166d32 ]
+      # ── K=4 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 4, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dijkstra, ~        ]
+      - [psl, 4, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, sarsa,    5fcb9965 ]
+      - [psl, 4, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, dqn,      75c5a644 ]
+      - [psl, 4, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, a2c,      3b1e6927 ]
+      - [psl, 4, 60, 40.0, 100.0, 60.0, data/grid_road/grid_road.sumocfg, ppo,      50811f79 ]
+      # ═══ N2 — rand_grid_road · retrained policies · traffic {10,100} step 90 ═══
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra,  ~        ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,     c028b992 ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,       9a9355f4 ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,       6612942d ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,       10b2e74c ]
+      # ── K=2 (slot_duration=300s) ─────────────────────────────────────────
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra, ~        ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,    3cedcc88 ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,      99d33dac ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,      a46c4161 ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,      ab0622b1 ]
+      # ── K=3 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra, ~        ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,    a45468a4 ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,      89dadf48 ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,      e676903a ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,      60b66ef1 ]
+      # ── K=4 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dijkstra, ~        ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, sarsa,    bd8f2df8 ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, dqn,      bf1cd688 ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, a2c,      920dce81 ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/rand_grid_road/rand_grid_road_final.sumocfg, ppo,      0de028c3 ]
+      # ═══ N3 — ames · retrained policies · traffic {10,100} step 90 ═══
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg,              dijkstra,  ~        ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg,              sarsa,     6323f08f ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg,              dqn,       a4f68fc2 ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg,              a2c,       85cd4c78 ]
+      - [psl, 1, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg,              ppo,       342d1614 ]
+      # ── K=2 (slot_duration=300s) ─────────────────────────────────────────
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, dijkstra, ~        ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, sarsa,    919e1d8c ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, dqn,      1c6df23d ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, a2c,      34a7e61e ]
+      - [psl, 2, 300, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, ppo,      880385dc ]
+      # ── K=3 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, dijkstra, ~        ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, sarsa,    aaca3cdb ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, dqn,      a545c5f7 ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, a2c,      0924d06a ]
+      - [psl, 3, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, ppo,      c2f17d25 ]
+      # ── K=4 (slot_duration=60s) ──────────────────────────────────────────
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, dijkstra, ~        ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, sarsa,    6b1a1821 ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, dqn,      2ae9727e ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, a2c,      6438fff6 ]
+      - [psl, 4, 60, 10.0, 100.0, 90.0, data/ames/ames_campus_final.sumocfg, ppo,      4b3db7cc ]
