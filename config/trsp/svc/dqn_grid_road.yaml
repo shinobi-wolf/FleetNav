@@ -1,0 +1,44 @@
+# DQN-SVC — grid_road, svc_hot_42 traffic (DQN-favoring hot corridors)
+# Traffic design + validated headroom: data/grid_road/traffic_routes/svc_hot_42/params.yaml
+
+net:
+  net_path: data/grid_road/grid_road.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110          # km/h
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 1.0      # svc_hot_42 rates are pre-tuned — do NOT scale
+  delay: 0
+
+traffic:
+  model: svc
+  route_file: data/grid_road/traffic_routes/svc_hot_42/rvt_routes.xml
+
+simulation:
+  max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
+  max_steps: 50           # env steps per episode before truncation
+  render_mode: quiet
+  warm_up_time: 300       # hot corridors fully occupied by ~200 s
+  random_sg_pair: true
+
+agent:
+  algo: dqn_svc
+  action_mode: node_id
+  policy: null
+
+training:
+  dqn:
+    num_episodes: 12000   # 5000 leaves DQN ~10% short of converged (PSL probe study)
+    gamma: 0.99
+    lr: 0.001
+    epsilon: 1.0
+    epsilon_decay: 0.9995
+    epsilon_min: 0.01
+    batch_size: 64
+    buffer_capacity: 50000
+    target_update_freq: 500
+    learn_start: 1000
+    hidden_dim: 128

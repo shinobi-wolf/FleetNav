@@ -1,0 +1,38 @@
+# SVC-HOT — ames DQN-favoring background traffic
+# Reproduce:  python scripts/gen_svc_hot_traffic.py ames   (from repo root)
+# Validate:   python scripts/validate_svc_traffic.py ames
+#
+# Design: 8 directed hot edges (the long campus arterials, incl. E1/-E1/-E0)
+# selected by greedy search to maximize mean(t_dijkstra) - mean(t_time_optimal)
+# on the exact 100 seed-42 eval OD pairs. Only 1-lane edges are eligible so the
+# slow-vehicle moving bottlenecks (maxSpeed 5 m/s) cannot be overtaken.
+
+generation:
+  tool: scripts/gen_svc_hot_traffic.py
+  seed: 42
+  net_file: ames_campus_final.net.xml
+
+hot_edges:            # see hot_edges.txt (8 directed edges, 46/100 eval
+  count: 8            # Dijkstra paths cross >= 1 of them)
+  v_hot_ms: 5.0
+  occupancy: 2.0
+  flow_period_s: [88.3, 49.5, 141.2, 141.1, 90.0]
+
+ambient:
+  period_s: 5.0       # same density as old svc_42
+  min_distance_m: 500.0
+  fringe_factor: 2
+
+validation:           # SUMO 7200 s, edgeData 600 s windows, warm-up 300 s
+  teleports: 1
+  hot_edge_speed_ms: 4.84     # min 4.36, max 5.17
+  other_edge_speed_ms: 21.28  # min 5.62
+  t_dijkstra_mean_s: 215.2
+  t_optimal_mean_s: 117.6
+  headroom: 0.454             # ceiling for any traffic-aware router vs Dijkstra
+
+recommended_config:   # for both training and eval (keep them identical!)
+  traffic.model: svc
+  traffic.route_file: data/ames/traffic_routes/svc_hot_42/rvt_routes.xml
+  sumo.traffic_scale: 1.0     # rates are pre-tuned; do NOT scale up
+  simulation.warm_up_time: 600  # longest hot chain (~2.6 km) fills by ~530 s

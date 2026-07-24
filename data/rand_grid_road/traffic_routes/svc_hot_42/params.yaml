@@ -1,0 +1,41 @@
+# SVC-HOT — rand_grid_road DQN-favoring background traffic
+# Reproduce:  python scripts/gen_svc_hot_traffic.py rand_grid_road   (from repo root)
+# Validate:   python scripts/validate_svc_traffic.py rand_grid_road
+#
+# Design: 16 directed hot edges selected by greedy search to maximize
+# mean(t_dijkstra) - mean(t_time_optimal) on the exact 100 seed-42 eval OD pairs
+# (the greedy-Dijkstra baseline path is traffic-independent, so its edge set is
+# fixed). Congestion = continuous flows of slow vehicles (maxSpeed 5 m/s) forming
+# moving bottlenecks on the 1-lane hot edges. Occupancy is kept at 1.0 and ambient
+# light: this net's 81-212 m edges store very few queued cars — occupancy 2.0 with
+# ambient period 3 s gridlocked the whole network (349 teleports).
+
+generation:
+  tool: scripts/gen_svc_hot_traffic.py
+  seed: 42
+  net_file: rand_grid_road_final.net.xml
+
+hot_edges:            # see hot_edges.txt (16 directed edges, 57/100 eval
+  count: 16           # Dijkstra paths cross >= 1 of them)
+  v_hot_ms: 5.0
+  occupancy: 1.0
+  flow_period_s: [37.1, 40.8, 16.2, 16.2, 37.9, 37.1]
+
+ambient:
+  period_s: 8.0
+  min_distance_m: 300.0
+  fringe_factor: 2
+
+validation:           # SUMO 7200 s, edgeData 600 s windows, warm-up 300 s
+  teleports: 0
+  hot_edge_speed_ms: 4.58     # min 4.36, max 4.99
+  other_edge_speed_ms: 15.80  # min 10.41 — short edges: junction wait dominates
+  t_dijkstra_mean_s: 73.8
+  t_optimal_mean_s: 50.2
+  headroom: 0.320             # ceiling vs Dijkstra; short-edge hop overhead caps it
+
+recommended_config:   # for both training and eval (keep them identical!)
+  traffic.model: svc
+  traffic.route_file: data/rand_grid_road/traffic_routes/svc_hot_42/rvt_routes.xml
+  sumo.traffic_scale: 1.0     # rates are pre-tuned; scaling up WILL gridlock
+  simulation.warm_up_time: 300

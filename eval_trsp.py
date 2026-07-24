@@ -887,6 +887,12 @@ def main():
         '--no-step-log',
         '--no-duration-log',
     ]
+    # SVC background vehicles live in traffic.route_file, not in the sumocfg (the
+    # <route-files> line there is commented out) — attach it exactly like the training
+    # env does (SumoTRSPEnv, sumo_trsp_env.py), or the eval runs with an empty network.
+    svc_route_file = config.get('traffic', {}).get('route_file')
+    if traffic_model == 'svc' and svc_route_file:
+        sumo_config_cmd += ['--route-files', svc_route_file]
 
     ugv_speed = config['fleet']['max_speed'] * 1000.0 / 3600.0  # km/h → m/s
 

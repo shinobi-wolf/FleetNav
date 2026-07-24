@@ -98,7 +98,9 @@ if [ "$SKIP_EVAL" = false ]; then
         echo ""
         echo "── Evaluating: $POLICY_ID ──"
         eval_log="$LOGDIR/eval_${POLICY_ID}.log"
-        "$PYTHON" -u eval_trsp2.py -p "$POLICY_ID" 2>&1 | tee "$eval_log"
+        # eval_trsp.py (NOT eval_trsp2.py — that one is PSL/TD-only) drives SVC
+        # agents reactively per hop and attaches traffic.route_file to SUMO.
+        "$PYTHON" -u eval_trsp.py -p "$POLICY_ID" --fix-oscillations 2>&1 | tee "$eval_log"
         echo "  → log: $eval_log"
     done
 

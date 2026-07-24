@@ -1,0 +1,42 @@
+# SVC-HOT — grid_road DQN-favoring background traffic
+# Reproduce:  python scripts/gen_svc_hot_traffic.py grid_road   (from repo root)
+# Validate:   python scripts/validate_svc_traffic.py grid_road
+#
+# Design: the static greedy-Dijkstra eval baseline follows a traffic-independent
+# path per OD pair, so the 10 directed "hot" edges below were selected by greedy
+# search to maximize mean(t_dijkstra) - mean(t_time_optimal) on the exact 100
+# seed-42 eval OD pairs of eval_trsp.py, while leaving equal-length grid detours
+# free. Congestion = continuous flows of slow vehicles (maxSpeed 5 m/s) on the hot
+# edges: un-overtakable moving bottlenecks on these 1-lane roads — persistent
+# ~5 m/s edge speeds, no queue spillback, no gridlock. Light ambient randomTrips
+# traffic keeps neighbor_speeds informative elsewhere.
+
+generation:
+  tool: scripts/gen_svc_hot_traffic.py
+  seed: 42
+  net_file: grid_road.net.xml
+
+hot_edges:            # see hot_edges.txt (10 directed edges, 53/100 eval
+  count: 10           # Dijkstra paths cross >= 1 of them)
+  v_hot_ms: 5.0       # slow vType maxSpeed
+  occupancy: 2.0      # slow vehicles per hot edge (spacing ~493 m on 990 m edges)
+  flow_period_s: 98.6
+
+ambient:
+  period_s: 4.0       # light — ~25 concurrent vehicles on 80 edges
+  min_distance_m: 1500.0
+  fringe_factor: 2
+
+validation:           # SUMO 7200 s, edgeData 600 s windows, warm-up 300 s
+  teleports: 0
+  hot_edge_speed_ms: 5.00     # min 4.79, max 5.22
+  other_edge_speed_ms: 25.55  # min 23.37
+  t_dijkstra_mean_s: 283.2
+  t_optimal_mean_s: 150.5
+  headroom: 0.468             # ceiling for any traffic-aware router vs Dijkstra
+
+recommended_config:   # for both training and eval (keep them identical!)
+  traffic.model: svc
+  traffic.route_file: data/grid_road/traffic_routes/svc_hot_42/rvt_routes.xml
+  sumo.traffic_scale: 1.0     # rates are pre-tuned; do NOT scale up
+  simulation.warm_up_time: 300
