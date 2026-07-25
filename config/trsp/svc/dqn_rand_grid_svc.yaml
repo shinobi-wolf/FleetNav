@@ -1,0 +1,53 @@
+# DQN-SVC — rand_grid_road_svc, svc_hot_42 traffic (DQN-favoring hot corridors)
+#
+# Replacement benchmark for rand_grid_road under SVC: the original's 81-212 m edges
+# put per-hop overhead on the same scale as the congestion signal (measured headroom
+# capped at 32%, DQN vs Dijkstra ~= 0%). This net is the same randomized-grid family
+# (jittered 6x6 lattice, random link deletion) but with 386-806 m edges (median 604 m):
+# measured Dijkstra-vs-optimal headroom 49.5%, 0 teleports.
+#
+# Network:  scripts/gen_rand_grid_svc_net.py       (seed 8, delete 10 links)
+# Traffic:  scripts/gen_svc_hot_traffic.py rand_grid_road_svc
+# Details:  data/rand_grid_road_svc/traffic_routes/svc_hot_42/params.yaml
+
+net:
+  net_path: data/rand_grid_road_svc/rand_grid_road_svc.sumocfg
+  max_degree: 5
+
+fleet:
+  max_speed: 110          # km/h
+
+sumo:
+  step_length: 1.0
+  traffic_scale: 1.0      # svc_hot_42 rates are pre-tuned — do NOT scale
+  delay: 0
+
+traffic:
+  model: svc
+  route_file: data/rand_grid_road_svc/traffic_routes/svc_hot_42/rvt_routes.xml
+
+simulation:
+  max_time: 2             # hours — SUMO wall-clock budget before forced env.reset()
+  max_steps: 50           # env steps per episode before truncation
+  render_mode: quiet
+  warm_up_time: 300       # longest hot chain (~1.3 km at 5 m/s) fills by ~260 s
+  random_sg_pair: true
+
+agent:
+  algo: dqn_svc
+  action_mode: node_id
+  policy: null
+
+training:
+  dqn:
+    num_episodes: 12000
+    gamma: 0.99
+    lr: 0.001
+    epsilon: 1.0
+    epsilon_decay: 0.9995
+    epsilon_min: 0.01
+    batch_size: 64
+    buffer_capacity: 50000
+    target_update_freq: 500
+    learn_start: 1000
+    hidden_dim: 128

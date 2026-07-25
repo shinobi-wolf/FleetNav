@@ -1,0 +1,26 @@
+# rand_grid_road_svc — randomized-grid network for the SVC (EV) TRSP benchmark
+# Reproduce:  python scripts/gen_rand_grid_svc_net.py     (from repo root)
+# Screened:   python scripts/gen_rand_grid_svc_net.py --screen
+#
+# Why this net replaces rand_grid_road for SVC: the original's 81-212 m edges
+# (median 184 m) put per-hop overhead (insertion, junction crossing) on the same
+# scale as the congestion penalty itself, capping the measured Dijkstra-vs-optimal
+# headroom at ~32% and leaving a 1-hop-observing DQN unable to beat Dijkstra
+# (policy b26ce5f1: +1.2% paired) even though DSP (whole-graph live snapshot)
+# gained -26% on the same traffic. Longer edges fix the signal-to-noise ratio.
+
+recipe:
+  base: 6x6 lattice, 600 m spacing
+  jitter_m: 120            # uniform position jitter -> irregular 386-806 m edges
+  deleted_links: 10        # of 60; resampled until connected & <= 2 bridges
+  leaf_pruning: iterative degree-1 removal (same as rand_grid_road)
+  seed: 8                  # screened over seeds 0-19 x deletions {10,14,18}
+  netconvert: --no-turnarounds true
+  lanes: 1
+  speed_ms: 30.0
+
+result:
+  nodes: 31
+  directed_edges: 90
+  edge_length_m: {min: 386, median: 604, max: 806}
+  design_headroom_12_hot_edges: 0.562   # analytic, scripts/gen_svc_hot_traffic.py

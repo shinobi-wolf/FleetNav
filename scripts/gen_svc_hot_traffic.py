@@ -67,6 +67,13 @@ NETWORKS = {
         ambient_period=5.0, # matches old svc_42 density
         ambient_min_dist=500.0,
     ),
+    'rand_grid_road_svc': dict(
+        net='data/rand_grid_road_svc/rand_grid_road_svc.net.xml',
+        n_hot=12,           # jittered 6x6 lattice, 386-806m edges; design ~56%
+        occupancy=2.0,      # long edges again — tight bottleneck spacing is safe
+        ambient_period=5.0,
+        ambient_min_dist=1200.0,
+    ),
 }
 
 
@@ -174,6 +181,10 @@ def build_chains(G_dir, hot):
             if len(nxts) != 1:
                 break
             w = nxts[0]
+            if w == chain[-1][0]:
+                # U-turn continuation (…->X->v then v->X): nets built with
+                # --no-turnarounds have no such connection — keep as separate flows
+                break
             chain.append((v, w))
             remaining.discard((v, w))
             v = w

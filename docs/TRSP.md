@@ -240,8 +240,11 @@ All route files generated with `seed=42`, `--fringe-factor 5`, `--validate`; see
 | Network | Hot edges | Measured headroom (t_opt vs t_dij) | Teleports | Config |
 |---------|-----------|------------------------------------|-----------|--------|
 | `grid_road` | 10 | **46.8%** (150.5s vs 283.2s) | 0 | `config/trsp/svc/dqn_grid_road.yaml` |
-| `rand_grid_road` | 16 | **32.0%** (50.2s vs 73.8s) | 0 | `config/trsp/svc/dqn_rand_grid.yaml` |
+| `rand_grid_road` | 16 | **32.0%** (50.2s vs 73.8s) | 0 | `config/trsp/svc/dqn_rand_grid.yaml` — deprecated for SVC, see below |
+| `rand_grid_road_svc` | 12 | **49.5%** (139.1s vs 275.3s) | 0 | `config/trsp/svc/dqn_rand_grid_svc.yaml` |
 | `ames` | 8 | **45.4%** (117.6s vs 215.2s) | 1 | `config/trsp/svc/dqn_ames.yaml` |
+
+**`rand_grid_road_svc` (N2-SVC replacement, 2026-07):** DQN-SVC on the original `rand_grid_road` converged but only tied Dijkstra (policy `b26ce5f1`: +1.2% paired, 85% success) while DSP gained −26% on the same traffic — the 81–212 m edges put per-hop overhead on the same scale as the congestion penalty, capping measured headroom at 32% and drowning the 1-hop DQN signal in noise. `rand_grid_road_svc` is the same randomized-grid family (jittered 6×6 lattice, 10 random links deleted, leaf-pruned; `scripts/gen_rand_grid_svc_net.py`, seed 8) but with 386–806 m edges (median 604 m): 31 nodes, 90 directed edges, all 1-lane 30 m/s, ≤2 bridges so detours exist everywhere.
 
 Use `traffic_scale: 1.0` (rates are pre-tuned; scaling up gridlocks rand_grid_road) and `warm_up_time` 300s (grid/rand_grid) / 600s (ames). SVC evaluation must use `eval_trsp.py` (reactive per-hop drive; attaches `traffic.route_file` via `--route-files`) — `eval_trsp2.py` is PSL/TD-only.
 
@@ -425,7 +428,8 @@ runs/trsp/<policy_id>/
 | ID | Directory | Nodes | Edges | Notes |
 |----|-----------|-------|-------|-------|
 | N1 | `data/grid_road/` | ~25 | ~40 | Regular grid |
-| N2 | `data/rand_grid_road/` | 26 | 39 | Randomized grid |
+| N2 | `data/rand_grid_road/` | 26 | 39 | Randomized grid (81–212 m edges — too short for SVC contrast) |
+| N2-SVC | `data/rand_grid_road_svc/` | 31 | 45 | Randomized grid, 386–806 m edges (SVC benchmark; `scripts/gen_rand_grid_svc_net.py`) |
 | N3 | `data/ames/` | ~45 | ~80 | Ames campus road network |
 
 All networks: `max_degree: 5`.
